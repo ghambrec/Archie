@@ -11,3 +11,4 @@ __pycache__/
 backend/dist/
 backend/node_modules/
 backend/generated/prisma
+backend/.pnpm-store
