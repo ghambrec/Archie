@@ -1,6 +1,13 @@
+# --- general ---
 .env
 *.note.*
+dist/
+*.log
+__pycache__/
+.venv/
+.DS_Store
 
 # --- backend ---
 backend/dist/
 backend/node_modules/
+backend/generated/prisma
