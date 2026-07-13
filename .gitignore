@@ -1,2 +1,6 @@
 .env
 *.note.*
+
+# --- backend ---
+backend/dist/
+backend/node_modules/
