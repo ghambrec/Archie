@@ -18,11 +18,11 @@ datasource db {
 
 
 
-model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
-  last_name    String?
-  first_name   String?
-  createdAt    DateTime @default(now())
+model users {
+  id           	String   @id @default(uuid())
+  email       	String   @unique
+  password_hash String
+  last_name    	String?
+  first_name   	String?
+  createdate   	DateTime @default(now())
 }
