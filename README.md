@@ -4,7 +4,9 @@ Description missing.
 
 
 
-
+## Ports
+- **Angular Frontend:** 4200
+- **NestJS Backend:** 3000
 
 
 ## Technical Stack
