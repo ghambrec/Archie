@@ -16,5 +16,5 @@ interface user
   styleUrl: './app.css'
 })
 export class App {
-	users = httpResource<user[]>(() => 'http://localhost:3000/users');
+	users = httpResource<user[]>(() => '/api/users');
 }
