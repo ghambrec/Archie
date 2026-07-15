@@ -22,9 +22,15 @@ async function bootstrap() {
 	.setDescription('API documentation for the archie project')
 	.setVersion('0.1')
 	.addBearerAuth()
+	.addServer('/api')
 	.build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, documentFactory);
+  SwaggerModule.setup('docs', app, documentFactory, {
+	swaggerOptions: {
+		persistAuthorization: true,
+		    // defaultModelsExpandDepth: -1, // hides Schemas section
+	}
+  });
 
   await app.listen(process.env.PORT ?? 3000);
 }
