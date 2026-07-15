@@ -5,8 +5,10 @@ Description missing.
 
 
 ## Ports
+- **Caddy:** 8080 (ditribute to other containers (/api -> backend, everything else -> frontend))
 - **Angular Frontend:** 4200
-- **NestJS Backend:** 3000
+- **NestJS Backend:** 3000 (:8080/api) -> documentation available at /docs
+- **Postgres:** 5432
 
 
 ## Technical Stack
