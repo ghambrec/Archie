@@ -14,4 +14,4 @@ RUN npx prisma generate
 EXPOSE 3000
 
 # TODO: laeft im test modus (start:dev) fuer entwicklungsphase
-CMD ["sh", "-c", "npx prisma migrate deploy && pnpm run start:dev"]
+CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && pnpm run start:dev""]
