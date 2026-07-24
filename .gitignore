@@ -1,0 +1,14 @@
+# --- general ---
+.env
+*.note.*
+dist/
+*.log
+__pycache__/
+.venv/
+.DS_Store
+
+# --- backend ---
+backend/nest-server/dist/
+backend/nest-server/node_modules/
+backend/nest-server/generated/prisma
+backend/nest-server/.pnpm-store
