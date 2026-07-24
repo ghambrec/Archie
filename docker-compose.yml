@@ -1,0 +1,39 @@
+services:
+  backend:
+    image: node:22-alpine
+    container_name: archie-backend
+    working_dir: /app
+    command: >
+      sh -c "corepack enable && pnpm install && pnpm run start:dev"
+    volumes:
+      - ./backend/nest-server:/app
+      - backend_node_modules:/app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+    restart: unless-stopped
+
+  frontend:
+    image: node:22-alpine
+    container_name: archie-frontend
+    working_dir: /app
+    command: >
+      sh -c "corepack enable &&
+           pnpm install &&
+           pnpm start --host 0.0.0.0 --port 4200"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: development
+    restart: unless-stopped
+
+volumes:
+  backend_node_modules:
+  frontend_node_modules:
