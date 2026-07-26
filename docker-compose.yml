@@ -39,9 +39,9 @@ services:
     image: pgsty/minio:RELEASE.2026-06-18T00-00-00Z
     container_name: minio
     restart: unless-stopped
-    #ports:
-    #- "9000:9000" # s3-api
-    #- "9001:9001" # web console
+    ports:
+    - "9000:9000" # s3-api
+    - "9001:9001" # web console
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
