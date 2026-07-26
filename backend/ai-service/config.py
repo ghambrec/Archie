@@ -10,6 +10,6 @@ class Settings(BaseSettings):
 	ollama_generation_model: str
 	ollama_embedding_model: str
 	# ollama_vision_model: str
-	postgres: str
+	postgres_dsn: str
 
 settings = Settings()
