@@ -13,4 +13,5 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["pnpm", "run", "start:dev"]
+# It is not the bust solution, but for me it enough for now.
+CMD ["sh", "-c", "pnpm run migration:run && exec pnpm run start:dev"]
