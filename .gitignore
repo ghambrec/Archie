@@ -1,6 +1,6 @@
 # --- general ---
 .env
-.env.mimo
+.env.minio
 *.note.*
 dist/
 *.log
