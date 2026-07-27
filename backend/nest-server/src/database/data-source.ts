@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { DataSource } from 'typeorm';
+import { User } from '../modules/users/entities/user.entity';
 
 const AppDataSource = new DataSource({
   type: 'postgres',
@@ -8,7 +9,7 @@ const AppDataSource = new DataSource({
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
-  entities: [],
+  entities: [User],
   migrations: ['src/database/migrations/*.ts'],
 });
 
