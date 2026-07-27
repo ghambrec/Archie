@@ -69,7 +69,7 @@ export class InitSchema1785163997067 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      CREATE TYPE IF NOT EXISTS "documents_status_enum" AS ENUM ('UPLOADED', 'PROCESSING', 'READY', 'FAILED')
+      CREATE TYPE "documents_status_enum" AS ENUM ('UPLOADED', 'PROCESSING', 'READY', 'FAILED')
     `);
 
     await queryRunner.query(`
