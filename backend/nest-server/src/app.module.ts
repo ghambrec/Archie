@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
@@ -10,7 +11,25 @@ import { DocumentsModule } from './modules/documents/documents.module';
 import { DocumentGroupsModule } from './modules/document-groups/document-groups.module';
 
 @Module({
-  imports: [UsersModule, GroupsModule, PermissionsModule, UserGroupsModule, GroupPermissionsModule, DocumentsModule, DocumentGroupsModule],
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DATABASE_HOST,
+      port: Number(process.env.DATABASE_PORT) || 5432,
+      username: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
+      autoLoadEntities: true,
+      synchronize: false,
+    }),
+    UsersModule,
+    GroupsModule,
+    PermissionsModule,
+    UserGroupsModule,
+    GroupPermissionsModule,
+    DocumentsModule,
+    DocumentGroupsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
