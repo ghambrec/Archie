@@ -1,12 +1,19 @@
-.PHONY: all up fclean down
-
-all: up
+COMPOSE = docker compose -f ./docker-compose.yml 
 
 up:
-	docker compose up -d
+	${COMPOSE} up
 
 down:
-	docker compose down
+	${COMPOSE} down
+
+clean:
+	${COMPOSE} down --rmi all
 
 fclean:
-	docker compose down --volumes
+	${COMPOSE} down -v --rmi all
+
+re:
+	make clean
+	make up
+
+.PHONY: re clean fclean down up setup
