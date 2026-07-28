@@ -10,6 +10,7 @@ import { GroupPermissionsModule } from './modules/group-permissions/group-permis
 import { DocumentsModule } from './modules/documents/documents.module';
 import { DocumentGroupsModule } from './modules/document-groups/document-groups.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { RedisModule } from './modules/redis/redis.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AuthModule } from './modules/auth/auth.module';
     GroupPermissionsModule,
     DocumentsModule,
     DocumentGroupsModule,
+    RedisModule,
     AuthModule,
   ],
   controllers: [AppController],
