@@ -1,16 +1,35 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
-import { GroupsModule } from './groups/groups.module';
-import { PermissionsModule } from './permissions/permissions.module';
-import { UserGroupsModule } from './user-groups/user-groups.module';
-import { GroupPermissionsModule } from './group-permissions/group-permissions.module';
-import { DocumentsModule } from './documents/documents.module';
-import { DocumentGroupsModule } from './document-groups/document-groups.module';
+import { UsersModule } from './modules/users/users.module';
+import { GroupsModule } from './modules/groups/groups.module';
+import { PermissionsModule } from './modules/permissions/permissions.module';
+import { UserGroupsModule } from './modules/user-groups/user-groups.module';
+import { GroupPermissionsModule } from './modules/group-permissions/group-permissions.module';
+import { DocumentsModule } from './modules/documents/documents.module';
+import { DocumentGroupsModule } from './modules/document-groups/document-groups.module';
 
 @Module({
-  imports: [UsersModule, GroupsModule, PermissionsModule, UserGroupsModule, GroupPermissionsModule, DocumentsModule, DocumentGroupsModule],
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DATABASE_HOST,
+      port: Number(process.env.DATABASE_PORT) || 5432,
+      username: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
+      autoLoadEntities: true,
+      synchronize: false,
+    }),
+    UsersModule,
+    GroupsModule,
+    PermissionsModule,
+    UserGroupsModule,
+    GroupPermissionsModule,
+    DocumentsModule,
+    DocumentGroupsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
