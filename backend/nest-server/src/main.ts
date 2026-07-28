@@ -6,8 +6,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('Cats Example')
-    .setDescription('The cats API description')
+    .setTitle('Archie')
+    .setDescription('Transcendence project')
     .setVersion('1.0')
     .addTag('cats')
     .build();

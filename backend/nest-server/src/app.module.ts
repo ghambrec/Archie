@@ -5,7 +5,7 @@ import { AppService } from './app.service';
 // import { DocumentsModule } from './documents/documents.module';
 
 @Module({
-  // imports: [PrismaModule, DocumentsModule],
+  imports: [],
   controllers: [AppController],
   providers: [AppService],
 })
