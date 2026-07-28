@@ -18,7 +18,7 @@ async function bootstrap() {
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 
-  const port = process.env.PORT;
+  const port = process.env.NEST_SERVER_PORT;
   if (!port) {
     throw new Error('PORT environment variable is not set');
   }
