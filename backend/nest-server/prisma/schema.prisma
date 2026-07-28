@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum DocumentVisibility {
+  PRIVATE
+  ORGANIZATION
+  CUSTOM
+}
+
+model Document {
+  id             String             @id @default(uuid()) @db.Uuid
+  organizationId String             @map("organization_id") @db.Uuid
+  uploadedBy     String             @map("uploaded_by") @db.Uuid
+  title          String             @db.VarChar(255)
+  aiSummary      String?            @map("ai_summary")
+  status         DocumentStatus     @default(UPLOADED)
+  visibility     DocumentVisibility @default(ORGANIZATION)
+  language       String?            @db.VarChar(8)
+  documentDate   DateTime?          @map("document_date") @db.Date
+  bucket         String             @db.VarChar(63)
+  objectKey      String             @map("object_key") @db.VarChar(512)
+  mimeType       String             @map("mime_type") @db.VarChar(255)
+  sizeBytes      BigInt             @map("size_bytes")
+  checksumSha256 String?            @map("checksum_sha256") @db.Char(64)
+  createdAt      DateTime           @map("created_at") @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime           @map("updated_at") @updatedAt @db.Timestamptz(6)
+  deletedAt      DateTime?          @map("deleted_at") @db.Timestamptz(6)
+
+  @@map("documents")
+  @@unique([bucket, objectKey], map: "uq_documents_bucket_object")
+  @@index([organizationId, createdAt(sort: Desc)], map: "idx_documents_org")
+  @@index([uploadedBy, createdAt(sort: Desc)], map: "idx_documents_uploaded_by")
+  @@index([status], map: "idx_documents_status")
+  @@index([visibility], map: "idx_documents_visibility")
+}

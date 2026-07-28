@@ -6,6 +6,7 @@ dist/
 __pycache__/
 .venv/
 .DS_Store
+node_modules/
 
 # --- backend ---
 backend/nest-server/dist/
@@ -14,3 +15,4 @@ backend/nest-server/generated/prisma
 backend/nest-server/.pnpm-store
 
 /docs
+/.pnpm-store
