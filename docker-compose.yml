@@ -34,7 +34,6 @@ services:
     networks:
       - archie
 
-
   minio:
     image: pgsty/minio:RELEASE.2026-06-18T00-00-00Z
     container_name: minio
@@ -57,7 +56,6 @@ services:
     networks:
       - archie
 
-
   minio-init:
     image: pgsty/mc:latest
     container_name: minio-init
@@ -78,6 +76,48 @@ services:
       (mc admin user add local \"$$MINIO_APP_ACCESS_KEY\" \"$$MINIO_APP_SECRET_KEY\" || true) &&
       (mc admin policy attach local readwrite --user=\"$$MINIO_APP_ACCESS_KEY\" || true) &&
       echo 'MinIO init done.'
+      "
+    networks:
+      - archie
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    environment:
+      OLLAMA_MAX_LOADED_MODELS: ${OLLAMA_MAX_LOADED_MODELS}
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE}
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - archie
+      
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_GENERATION_MODEL: ${OLLAMA_GENERATION_MODEL}
+      OLLAMA_VISION_MODEL: ${OLLAMA_VISION_MODEL}
+      OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL}
+    entrypoint: >
+      /bin/sh -c "
+      ollama pull \"$$OLLAMA_GENERATION_MODEL\" &&
+      ollama pull \"$$OLLAMA_VISION_MODEL\" &&
+      ollama pull \"$$OLLAMA_EMBEDDING_MODEL\" &&
+      echo 'ollama modules pulled'
       "
     networks:
       - archie
@@ -105,3 +145,4 @@ volumes:
   postgres_data:
   minio_data:
   nest-server-node-modules:
+  ollama_data:
