@@ -45,5 +45,9 @@ export class UsersService {
       id: updatedUser.id}
 
   };
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOneBy({email: email});
+  }
 }
 

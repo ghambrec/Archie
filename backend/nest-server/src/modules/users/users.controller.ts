@@ -1,9 +1,12 @@
-import { Req, Body, Controller, Param, Patch, Post } from '@nestjs/common';
+import { Req, Body, Controller, Param, Patch, Post , UseGuards } from '@nestjs/common';
+
 import { ApiTags } from '@nestjs/swagger';
+import type { Request } from 'express';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateUserResponseDto } from './dto/create-user-response.dto';
 import { UpdateUserResponseDto } from './dto/update-user-response.dto';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -20,4 +23,10 @@ export class UsersController {
   }
 
   //@GetEndpoints
+
+  @UseGuards(SessionAuthGuard)
+  @Post('whoami')
+  whoami(@Req() req: Request): { userId: string } {
+    return { userId: req.userId! };
+  }
 }
