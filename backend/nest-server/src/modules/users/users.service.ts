@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateUserResponseDto } from './dto/create-user-response.dto';
+import { UpdateUserResponseDto } from './dto/update-user-response.dto';
 
 const PASSWORD_SALT_ROUNDS = 10;
 
@@ -27,5 +28,22 @@ export class UsersService {
     await this.usersRepository.save(userEntity);
 
     return { id: userEntity.id };
-  }
+  };
+
+  async updateProfile(userID: string, dto: UpdateUserResponseDto): Promise<UpdateUserResponseDto> {
+
+    const user = await this.usersRepository.findOneBy({id: userID,});
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    
+    Object.assign(user,dto);
+    const updatedUser = await this.usersRepository.save(user)
+    ///return { id: updatedUser.id };
+    return {
+      id: updatedUser.id}
+
+  };
 }
+
