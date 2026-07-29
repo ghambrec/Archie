@@ -44,11 +44,8 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
-    const sessionId = await this.sessionCookieService.extract(req);
-    if (!sessionId) {
-      throw new UnauthorizedException();
-    }
-    
-    return this.authService.logout(sessionId);
+    const sessionId = this.sessionCookieService.extract(req)!;
+    await this.authService.logout(sessionId);
+    this.sessionCookieService.clear(res);
   }
 }
