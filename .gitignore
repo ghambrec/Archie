@@ -1,5 +1,5 @@
 # --- general ---
-.env
+/env/.env
 .env.minio
 *.note.*
 dist/
