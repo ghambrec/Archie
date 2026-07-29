@@ -18,6 +18,9 @@ export class UsersController {
     const MailExisting = await this.usersService.findByEmail(dto.email)
     if(MailExisting)
       throw new ConflictException('Email already registered');
+    const DisplayNameExisting = await this.usersService.findByName(dto.displayName)
+    if(DisplayNameExisting)
+      throw new ConflictException('Display name already registered')
     return this.usersService.create(dto);
   }
   @Patch(':id')
