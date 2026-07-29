@@ -1,10 +1,12 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import type { Response } from 'express';
+import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { SessionCookieService } from './session/session-cookie.service';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { RegisterRequestDto } from './dto/register-request.dto';
+import { SessionAuthGuard } from './guards/session-auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -24,5 +26,29 @@ export class AuthController {
     this.sessionCookieService.set(res, sessionId);
 
     return { id: user.id, email: user.email, displayName: user.displayName };
+  }
+
+  @Post('register')
+  async register(
+    @Body() registerRequest: RegisterRequestDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
+    const sessionId  = await this.authService.register(registerRequest);
+
+    this.sessionCookieService.set(res, sessionId);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('logout')
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
+    const sessionId = await this.sessionCookieService.extract(req);
+    if (!sessionId) {
+      throw new UnauthorizedException();
+    }
+    
+    return this.authService.logout(sessionId);
   }
 }
