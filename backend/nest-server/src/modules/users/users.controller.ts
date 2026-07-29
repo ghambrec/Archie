@@ -1,4 +1,4 @@
-import { Req, Body, Controller, Param, Patch, Post , UseGuards } from '@nestjs/common';
+import { Req, Body, Controller, Param, Patch, Post , UseGuards, ConflictException } from '@nestjs/common';
 
 import { ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
@@ -15,6 +15,9 @@ export class UsersController {
 
   @Post('create')
   async create(@Body() dto: CreateUserDto): Promise<CreateUserResponseDto> {
+    const MailExisting = await this.usersService.findByEmail(dto.email)
+    if(MailExisting)
+      throw new ConflictException('Email already registered');
     return this.usersService.create(dto);
   }
   @Patch(':id')
@@ -29,4 +32,6 @@ export class UsersController {
   whoami(@Req() req: Request): { userId: string } {
     return { userId: req.userId! };
   }
+
+  
 }
