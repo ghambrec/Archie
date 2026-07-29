@@ -6,6 +6,8 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateUserResponseDto } from './dto/create-user-response.dto';
 import { UpdateUserResponseDto } from './dto/update-user-response.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UserSummaryDto } from './dto/user-summary.dto';
 
 const PASSWORD_SALT_ROUNDS = 10;
 
@@ -30,7 +32,7 @@ export class UsersService {
     return { id: userEntity.id };
   };
 
-  async updateProfile(userID: string, dto: UpdateUserResponseDto): Promise<UpdateUserResponseDto> {
+  async updateProfile(userID: string, dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
 
     const user = await this.usersRepository.findOneBy({id: userID,});
     if (!user) {
@@ -52,6 +54,23 @@ export class UsersService {
 
   async findByName(name: string): Promise<User | null> {
     return this.usersRepository.findOneBy({displayName: name})
+  }
+
+  async findProfilebyId(userId: string): Promise <UserSummaryDto> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId},
+      select: {
+        id: true,
+        email: true,
+        displayName : true,
+        preferredLanguage: true,
+        isActive: true, 
+      }
+    })
+    if(!user)
+      throw new NotFoundException('User not found');
+
+    return user;
   }
 }
 
