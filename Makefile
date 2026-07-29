@@ -1,7 +1,7 @@
 COMPOSE = docker compose -f ./docker-compose.yml 
 
 up:
-	${COMPOSE} up
+	${COMPOSE} up -d
 
 down:
 	${COMPOSE} down
