@@ -12,6 +12,7 @@ import { DocumentGroupsModule } from './modules/document-groups/document-groups.
 import { AuthModule } from './modules/auth/auth.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { GroupsController } from './groups/groups.controller';
+import { AppLoggerModule } from './logger/app-logger.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { GroupsController } from './groups/groups.controller';
     DocumentGroupsModule,
     RedisModule,
     AuthModule,
+    AppLoggerModule,
   ],
   controllers: [AppController, GroupsController],
   providers: [AppService],

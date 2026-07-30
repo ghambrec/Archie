@@ -16,5 +16,6 @@ export class GroupsService {
     const groupEntity = this.groupsRepository.create({
       id: dto.id,
     })
+
   }
 }
