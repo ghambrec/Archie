@@ -1,6 +1,37 @@
-<p>sidebar works!</p>
-
-<nav>
-	<a routerLink="/home" routerLinkActive="active">Home</a>
-	<a routerLink="/settings" routerLinkActive="active">Settings</a>
-</nav>
+<div class="d-flex flex-column flex-shrink-0 p-3 bg-light h-100" style="width: 280px;">
+	<a routerLink="/home" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+		<span class="fs-4">Archie</span>
+	</a>
+	<hr>
+	<ul class="nav nav-pills flex-column mb-auto">
+		<li class="nav-item">
+			<a routerLink="/home" class="nav-link active" aria-current="page">
+				<i class="bi bi-house-door-fill me-2"></i>
+				Home
+			</a>
+		</li>
+		<li>
+			<a routerLink="/settings" class="nav-link link-dark">
+				<i class="bi bi-gear-fill me-2"></i>
+				Settings
+			</a>
+		</li>
+	</ul>
+	<hr>
+	<div class="dropdown">
+		<a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2"
+			data-bs-toggle="dropdown" aria-expanded="false">
+			<img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+			<strong>mdo</strong>
+		</a>
+		<ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
+			<li><a class="dropdown-item" href="#">New project...</a></li>
+			<li><a class="dropdown-item" href="#">Settings</a></li>
+			<li><a class="dropdown-item" href="#">Profile</a></li>
+			<li>
+				<hr class="dropdown-divider">
+			</li>
+			<li><a class="dropdown-item" href="#">Sign out</a></li>
+		</ul>
+	</div>
+</div>
