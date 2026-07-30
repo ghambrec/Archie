@@ -47,5 +47,6 @@ export class UsersController {
     return { userId: req.userId! };
   }
 
-  
 }
+
+

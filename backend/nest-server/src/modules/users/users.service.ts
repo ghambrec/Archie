@@ -47,7 +47,28 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+    if(dto.email !== undefined)
+    {
+      const newEmail = dto.email?.trim().toLowerCase();
+      const duplicate = await this.usersRepository.findOneBy({email: newEmail});
+      if (duplicate)
+        throw new ConflictException('Email already registered')
+      user.email = newEmail; 
+    };
 
+    if(dto.displayName !== undefined)
+    {
+      const newName = dto.displayName.trim();
+      const duplicate = await this.usersRepository.findOneBy({displayName: newName});
+      if(duplicate)
+        throw new ConflictException('User Name already given');
+    }
+    //if(dto.preferredLanguage !==undefined)
+    //{
+    //  const newLang = dto.displayName?.trim();
+    //  const langExists = await this
+    //}
+  
     
     Object.assign(user,dto);
     const updatedUser = await this.usersRepository.save(user)
