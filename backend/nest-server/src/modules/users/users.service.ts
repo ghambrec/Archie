@@ -69,6 +69,7 @@ export class UsersService {
     //  const langExists = await this
     //}
   
+  
     
     Object.assign(user,dto);
     const updatedUser = await this.usersRepository.save(user)
@@ -77,6 +78,8 @@ export class UsersService {
       id: updatedUser.id}
 
   };
+
+  //async updatePasswd(userID: stringify, dto )
 
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOneBy({email: email});

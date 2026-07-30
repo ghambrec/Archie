@@ -31,8 +31,11 @@ export class UsersController {
   }
 
   //@UseGuards(SessionAuthGuard)
-  //@Patch ('me')
-  //async updateMyself (@Req () ))
+  //@Patch('passwd')
+  //async updateCurrentUserPasswd {
+
+  //}
+ 
 
   
   @UseGuards(SessionAuthGuard)
