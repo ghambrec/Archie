@@ -9,6 +9,9 @@ import { UserGroupsModule } from './modules/user-groups/user-groups.module';
 import { GroupPermissionsModule } from './modules/group-permissions/group-permissions.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { DocumentGroupsModule } from './modules/document-groups/document-groups.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { RedisModule } from './modules/redis/redis.module';
+import { AppLoggerModule } from './logger/app-logger.module';
 
 @Module({
   imports: [
@@ -29,6 +32,9 @@ import { DocumentGroupsModule } from './modules/document-groups/document-groups.
     GroupPermissionsModule,
     DocumentsModule,
     DocumentGroupsModule,
+    RedisModule,
+    AuthModule,
+    AppLoggerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
