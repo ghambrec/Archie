@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException , ConflictException} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { SessionService } from './session/session.service';
 import { LoginRequestDto } from './dto/login-request.dto';
@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { LoginResult } from './interfaces/login-result.interface';
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { DuplicateDataSourceException } from '@nestjs/typeorm';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +26,11 @@ export class AuthService {
   }
   
   async register(request: RegisterRequestDto) : Promise<string> {
+    
+    const userExists = await this.userService.findByEmail(request.email)
+    if(userExists)
+      throw new ConflictException(`Email ${request.email} already exists`);
+    
     const createUserDto: CreateUserDto = {
       email: request.email,
       password: request.password,

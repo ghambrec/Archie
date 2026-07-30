@@ -22,7 +22,7 @@ export class UsersService {
     const passwordHash = await bcrypt.hash(dto.password, PASSWORD_SALT_ROUNDS);
 
     const userEntity = this.usersRepository.create({
-      email: dto.email,
+      email: dto.email.trim().toLowerCase(),
       passwordHash,
       displayName: dto.displayName,
     });
