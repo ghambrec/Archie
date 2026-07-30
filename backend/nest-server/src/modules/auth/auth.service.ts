@@ -3,8 +3,9 @@ import { UsersService } from '../users/users.service';
 import { SessionService } from './session/session.service';
 import { LoginRequestDto } from './dto/login-request.dto';
 import * as bcrypt from 'bcrypt';
-import { User } from '../users/entities/user.entity';
 import { LoginResult } from './interfaces/login-result.interface';
+import { RegisterRequestDto } from './dto/register-request.dto';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,7 @@ export class AuthService {
   ) {}
   
   async login(request: LoginRequestDto) : Promise<LoginResult> {
-    const user = await this.userService.findByEmail(request.email); // you'll need to add this
+    const user = await this.userService.findByEmail(request.email);
     if (!user || !(await bcrypt.compare(request.password, user.passwordHash))) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -23,4 +24,21 @@ export class AuthService {
     return { user, sessionId };
   }
   
+  async register(request: RegisterRequestDto) : Promise<string> {
+    const createUserDto: CreateUserDto = {
+      email: request.email,
+      password: request.password,
+      displayName: request.displayName,
+    }
+
+    const user = await this.userService.create(createUserDto);
+
+    const sessionId = await this.sessionService.create(user.id);
+    return sessionId;
+  }
+  
+  async logout(sessionId: string) : Promise<void> {
+
+    return this.sessionService.destroy(sessionId);
+  }
 }
