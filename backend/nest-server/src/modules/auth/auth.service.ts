@@ -6,7 +6,6 @@ import * as bcrypt from 'bcrypt';
 import { LoginResult } from './interfaces/login-result.interface';
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { DuplicateDataSourceException } from '@nestjs/typeorm';
 
 @Injectable()
 export class AuthService {
