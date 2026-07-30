@@ -9,6 +9,7 @@ import { UpdateUserResponseDto } from './dto/update-user-response.dto';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserSummaryDto } from './dto/user-summary.dto';
+import { User } from './entities/user.entity';
 
 @ApiTags('users')
 @Controller('users')
@@ -17,13 +18,8 @@ export class UsersController {
 
   @Post('create')
   async create(@Body() dto: CreateUserDto): Promise<CreateUserResponseDto> {
-    const MailExisting = await this.usersService.findByEmail(dto.email)
-    if(MailExisting)
-      throw new ConflictException('Email already registered');
-    const DisplayNameExisting = await this.usersService.findByName(dto.displayName)
-    if(DisplayNameExisting)
-      throw new ConflictException('Display name already registered')
-    return this.usersService.create(dto);
+    const userEntity = await this.usersService.create(dto);
+    return {id: userEntity.id};
   }
 
   @UseGuards(SessionAuthGuard)
@@ -42,7 +38,7 @@ export class UsersController {
   @UseGuards(SessionAuthGuard)
   @Get(':me')
   async getCurrentUser( @Req() req: Request): Promise <UserSummaryDto> {
-    return this.usersService.findProfilebyId(req.userId!);
+    return this.usersService.findProfileById(req.userId!);
   }
 
   @UseGuards(SessionAuthGuard)

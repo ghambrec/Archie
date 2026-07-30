@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -18,7 +18,16 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async create(dto: CreateUserDto): Promise<CreateUserResponseDto> {
+  
+
+  async create(dto: CreateUserDto): Promise<User> {
+    const MailExisting = await this.findByEmail(dto.email)
+    if(MailExisting)
+      throw new ConflictException('Email already registered');
+    const DisplayNameExisting = await this.findByName(dto.displayName)
+    if(DisplayNameExisting)
+      throw new ConflictException('Display name already registered')
+
     const passwordHash = await bcrypt.hash(dto.password, PASSWORD_SALT_ROUNDS);
 
     const userEntity = this.usersRepository.create({
@@ -29,7 +38,7 @@ export class UsersService {
 
     await this.usersRepository.save(userEntity);
 
-    return { id: userEntity.id };
+    return userEntity;
   };
 
   async updateProfile(userID: string, dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
@@ -56,7 +65,7 @@ export class UsersService {
     return this.usersRepository.findOneBy({displayName: name})
   }
 
-  async findProfilebyId(userId: string): Promise <UserSummaryDto> {
+  async findProfileById(userId: string): Promise <UserSummaryDto> {
     const user = await this.usersRepository.findOne({
       where: { id: userId},
       select: {
