@@ -12,6 +12,8 @@
 		"title": "Archie - Login",
 		"email": "E-Mail",
 		"password": "Password",
-		"submit": "Log in"
+		"submit": "Log in",
+		"errorGeneral": "Error on log in",
+		"errorInvalidCred": "Invalid email or password"
 	}
 }
