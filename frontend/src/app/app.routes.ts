@@ -4,6 +4,7 @@ import { Settings } from './settings/settings';
 import { Shell } from './shell/shell';
 import { Login } from './auth/login/login';
 import { authGuard, guestGuard } from './auth/auth-guard';
+import { Profile } from './profile/profile';
 
 export const routes: Routes = [
 	{
@@ -31,6 +32,11 @@ export const routes: Routes = [
 				path: 'settings',
 				component: Settings,
 				title: 'Settings',
+			},
+			{
+				path: 'profile',
+				component: Profile,
+				title: 'Profile',
 			},
 		],
 	},

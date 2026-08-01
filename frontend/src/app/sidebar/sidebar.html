@@ -24,7 +24,7 @@
 			<strong>{{ authService.currentUser()?.displayName }}</strong>
 		</a>
 		<ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2" ngbDropdownMenu>
-			<li><a class="dropdown-item" ngbDropdownItem href="#">{{ "sidebar.dropdown.profile" | transloco }}</a></li>
+			<li><a class="dropdown-item" ngbDropdownItem routerLink="/profile">{{ "sidebar.dropdown.profile" | transloco }}</a></li>
 			<li>
 				<hr class="dropdown-divider">
 			</li>
