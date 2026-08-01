@@ -28,7 +28,7 @@
 			<li>
 				<hr class="dropdown-divider">
 			</li>
-			<li><a class="dropdown-item" ngbDropdownItem href="#">{{ "sidebar.dropdown.logOut" | transloco }}</a></li>
+			<li><a class="dropdown-item" ngbDropdownItem href="#" (click)="$event.preventDefault(); logout()">{{ "sidebar.dropdown.logOut" | transloco }}</a></li>
 		</ul>
 	</div>
 </div>
