@@ -1,0 +1,61 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import type Redis from 'ioredis';
+import { Repository } from 'typeorm';
+import { REDIS_CLIENT } from '../redis/redis.module';
+import { Permission } from './entities/permission.entity';
+
+const USER_PERMISSIONS_TTL_SECONDS = 300;
+
+const userPermissionsKey = (userId: string) => `user:${userId}:permissions`;
+
+@Injectable()
+export class PermissionsService {
+  constructor(
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
+    @InjectRepository(Permission)
+    private readonly permissionsRepository: Repository<Permission>,
+  ) {}
+
+  async findAll(): Promise<Permission[]> {
+    return this.permissionsRepository.find();
+  }
+
+  async getUserPermissionKeys(userId: string): Promise<Set<string>> {
+    const cached = await this.redis.get(userPermissionsKey(userId));
+    if (cached) {
+      return new Set(JSON.parse(cached) as string[]);
+    }
+
+    const rows = await this.permissionsRepository
+      .createQueryBuilder('permission')
+      .innerJoin('group_permission', 'gp', 'gp.permission_id = permission.id')
+      .innerJoin('user_groups', 'ug', 'ug.group_id = gp.group_id')
+      .where('ug.user_id = :userId', { userId })
+      .select('DISTINCT permission.perm_key', 'permKey')
+      .getRawMany<{ permKey: string }>();
+
+    const permKeys = rows.map((row) => row.permKey);
+
+    await this.redis.set(
+      userPermissionsKey(userId),
+      JSON.stringify(permKeys),
+      'EX',
+      USER_PERMISSIONS_TTL_SECONDS,
+    );
+
+    return new Set(permKeys);
+  }
+
+  async invalidateUserPermissions(userId: string): Promise<void> {
+    await this.redis.del(userPermissionsKey(userId));
+  }
+
+  async invalidateUsersPermissions(userIds: string[]): Promise<void> {
+    if (userIds.length === 0) {
+      return;
+    }
+
+    await this.redis.del(userIds.map(userPermissionsKey));
+  }
+}
