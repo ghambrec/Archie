@@ -1,21 +1,34 @@
 import { Routes } from '@angular/router';
 import { Home } from './home/home';
 import { Settings } from './settings/settings';
+import { Shell } from './shell/shell';
+import { Login } from './login/login';
 
 export const routes: Routes = [
 	{
+		path: 'login',
+		component: Login,
+		title: 'Login',
+	},
+	{
 		path: '',
-		redirectTo: 'home',
-		pathMatch: 'full',
-	},
-	{
-		path: 'home',
-		component: Home,
-		title: 'Home',
-	},
-	{
-		path: 'settings',
-		component: Settings,
-		title: 'Settings',
+		component: Shell,
+		children: [
+			{
+				path: '',
+				redirectTo: 'home',
+				pathMatch: 'full',
+			},
+			{
+				path: 'home',
+				component: Home,
+				title: 'Home',
+			},
+			{
+				path: 'settings',
+				component: Settings,
+				title: 'Settings',
+			},
+		],
 	},
 ];
