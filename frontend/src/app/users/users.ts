@@ -17,9 +17,10 @@ export interface CreateUserResponse {
 @Service()
 export class Users {
 	private readonly http = inject(HttpClient);
+	private readonly baseUrl = `${environment.apiUrl}/users`;
 
 	create(body: CreateUserRequest) {
-		const url = `${environment.apiUrl}/users/create`;
+		const url = `${this.baseUrl}/create`;
 
 		return this.http.post<CreateUserResponse>(url, body);
 	}
