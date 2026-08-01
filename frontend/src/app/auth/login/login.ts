@@ -32,7 +32,8 @@ export class Login {
 			submission: {
 				action: async (field) => {
 					try {
-						await firstValueFrom(this.authService.login(field().value()));
+						const user = await firstValueFrom(this.authService.login(field().value()));
+						this.authService.currentUser.set(user);
 						this.router.navigateByUrl('/home');
 						return;
 					} catch (error : any) {
