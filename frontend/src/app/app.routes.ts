@@ -3,16 +3,19 @@ import { Home } from './home/home';
 import { Settings } from './settings/settings';
 import { Shell } from './shell/shell';
 import { Login } from './auth/login/login';
+import { authGuard, guestGuard } from './auth/auth-guard';
 
 export const routes: Routes = [
 	{
 		path: 'login',
 		component: Login,
+		canActivate: [guestGuard],
 		title: 'Login',
 	},
 	{
 		path: '',
 		component: Shell,
+		canActivate: [authGuard],
 		children: [
 			{
 				path: '',
