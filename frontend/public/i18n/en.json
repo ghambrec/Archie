@@ -1,0 +1,11 @@
+{
+	"programName": "Archie",
+	"sidebar": {
+		"home": "Home",
+		"settings": "Settings",
+		"dropdown": {
+			"profile": "Profile",
+			"logOut": "Log out"
+		}
+	}
+}

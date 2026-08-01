@@ -1,19 +1,19 @@
 <div class="d-flex flex-column flex-shrink-0 p-3 bg-light h-100" style="width: 280px;">
 	<a routerLink="/home" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
-		<span class="fs-4">Archie</span>
+		<span class="fs-4">{{ "programName" | transloco }}</span>
 	</a>
 	<hr>
 	<ul class="nav nav-pills flex-column mb-auto">
 		<li class="nav-item">
 			<a routerLink="/home" class="nav-link" routerLinkActive="active">
 				<i class="bi bi-house-door-fill me-2"></i>
-				Home
+				{{ "sidebar.home" | transloco }}
 			</a>
 		</li>
 		<li>
 			<a routerLink="/settings" class="nav-link" routerLinkActive="active">
 				<i class="bi bi-gear-fill me-2"></i>
-				Settings
+				{{ "sidebar.settings" | transloco }}
 			</a>
 		</li>
 	</ul>
@@ -24,13 +24,11 @@
 			<strong>mdo</strong>
 		</a>
 		<ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2" ngbDropdownMenu>
-			<li><a class="dropdown-item" ngbDropdownItem href="#">New project...</a></li>
-			<li><a class="dropdown-item" ngbDropdownItem href="#">Settings</a></li>
-			<li><a class="dropdown-item" ngbDropdownItem href="#">Profile</a></li>
+			<li><a class="dropdown-item" ngbDropdownItem href="#">{{ "sidebar.dropdown.profile" | transloco }}</a></li>
 			<li>
 				<hr class="dropdown-divider">
 			</li>
-			<li><a class="dropdown-item" ngbDropdownItem href="#">Sign out</a></li>
+			<li><a class="dropdown-item" ngbDropdownItem href="#">{{ "sidebar.dropdown.logOut" | transloco }}</a></li>
 		</ul>
 	</div>
 </div>
