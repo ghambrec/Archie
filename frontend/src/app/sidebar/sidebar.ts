@@ -12,7 +12,7 @@ import { firstValueFrom } from 'rxjs';
   styleUrl: './sidebar.scss',
 })
 export class Sidebar {
-	private readonly authService = inject(Auth);
+	protected readonly authService = inject(Auth);
 	private readonly router = inject(Router);
 
 	async logout () {
