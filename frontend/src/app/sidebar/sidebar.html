@@ -5,33 +5,32 @@
 	<hr>
 	<ul class="nav nav-pills flex-column mb-auto">
 		<li class="nav-item">
-			<a routerLink="/home" class="nav-link active" aria-current="page">
+			<a routerLink="/home" class="nav-link" routerLinkActive="active">
 				<i class="bi bi-house-door-fill me-2"></i>
 				Home
 			</a>
 		</li>
 		<li>
-			<a routerLink="/settings" class="nav-link link-dark">
+			<a routerLink="/settings" class="nav-link" routerLinkActive="active">
 				<i class="bi bi-gear-fill me-2"></i>
 				Settings
 			</a>
 		</li>
 	</ul>
 	<hr>
-	<div class="dropdown">
-		<a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2"
-			data-bs-toggle="dropdown" aria-expanded="false">
+	<div class="dropdown" ngbDropdown>
+		<a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2" ngbDropdownToggle (click)="$event.preventDefault()">
 			<img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
 			<strong>mdo</strong>
 		</a>
-		<ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
-			<li><a class="dropdown-item" href="#">New project...</a></li>
-			<li><a class="dropdown-item" href="#">Settings</a></li>
-			<li><a class="dropdown-item" href="#">Profile</a></li>
+		<ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2" ngbDropdownMenu>
+			<li><a class="dropdown-item" ngbDropdownItem href="#">New project...</a></li>
+			<li><a class="dropdown-item" ngbDropdownItem href="#">Settings</a></li>
+			<li><a class="dropdown-item" ngbDropdownItem href="#">Profile</a></li>
 			<li>
 				<hr class="dropdown-divider">
 			</li>
-			<li><a class="dropdown-item" href="#">Sign out</a></li>
+			<li><a class="dropdown-item" ngbDropdownItem href="#">Sign out</a></li>
 		</ul>
 	</div>
 </div>
