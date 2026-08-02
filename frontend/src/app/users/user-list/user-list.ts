@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Users } from '../users';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -14,6 +14,16 @@ import { EditUserModal } from '../edit-user-modal/edit-user-modal';
 export class UserList implements OnInit {
 	protected readonly usersService = inject(Users);
 	private readonly modalService = inject(NgbModal);
+
+	protected readonly searchString = signal("");
+
+	protected readonly filteredUserList = computed(() => {
+		const searchStringLowercased = this.searchString().toLowerCase();
+		return this.usersService.userList().filter((user) => 
+			user.displayName.toLowerCase().includes(searchStringLowercased) ||
+			user.email.toLowerCase().includes(searchStringLowercased)
+		)
+	});
 
 	ngOnInit() {
 		this.usersService.getUserList();

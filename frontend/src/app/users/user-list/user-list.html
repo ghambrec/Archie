@@ -1,4 +1,5 @@
 <h1> {{ "users.userList.heading" | transloco }} </h1>
+<input type="text" class="form-control mb-1" [placeholder]="'users.userList.searchPlaceholder' | transloco" (input)="searchString.set($event.target.value)"/>
 <table class="table align-middle">
 	<thead>
 		<tr>
@@ -11,7 +12,7 @@
 		</tr>
 	</thead>
 	<tbody class="table-group-divider">
-		@for (user of usersService.userList(); track user.id) {
+		@for (user of filteredUserList(); track user.id) {
 			<tr>
 				<td class="pe-0"> <img [src]="user.avatar" alt="" width="32" height="32" class="rounded-circle"> </td>
 				<td class="ps-0">{{ user.email }}</td>
