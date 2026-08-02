@@ -60,7 +60,7 @@ export class Users {
 					"displayName": "dummy user 2",
 					"preferredLanguage": "en",
 					"lastLogin": "",
-					"isActive": true
+					"isActive": false
 				},
 				{
 					"id": "3d54bb82-5e0b-4066-500b-d496a7cd30ce",

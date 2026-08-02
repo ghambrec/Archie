@@ -1,5 +1,5 @@
 <h1> {{ "users.userList.heading" | transloco }} </h1>
-<table class="table">
+<table class="table align-middle">
 	<thead>
 		<tr>
 			<th scope="col">{{ "users.userList.email" | transloco }}</th>
@@ -15,8 +15,8 @@
 				<td>{{ user.email }}</td>
 				<td>{{ user.displayName }}</td>
 				<td>{{ user.lastLogin }}</td>
-				<td>{{ user.isActive }}</td>
-				<th> <button type="button" class="btn btn-secondary"><i class="bi bi-pencil-fill"></i></button> </th>
+				<td> @if (user.isActive) {<i class="bi bi-check-square"></i>} @else {<i class="bi bi-square"></i>} </td>
+				<td> <button type="button" class="btn btn-secondary"><i class="bi bi-pencil-fill"></i></button> </td>
 			</tr>
 		}
 	</tbody>
