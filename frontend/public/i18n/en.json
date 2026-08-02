@@ -3,6 +3,7 @@
 	"sidebar": {
 		"home": "Home",
 		"settings": "Settings",
+		"documents": "Documents",
 		"dropdown": {
 			"profile": "Profile",
 			"logOut": "Log out"

@@ -5,6 +5,7 @@ import { Shell } from './shell/shell';
 import { Login } from './auth/login/login';
 import { authGuard, guestGuard } from './auth/auth-guard';
 import { Profile } from './profile/profile';
+import { Documents } from './documents/documents';
 
 export const routes: Routes = [
 	{
@@ -27,6 +28,11 @@ export const routes: Routes = [
 				path: 'home',
 				component: Home,
 				title: 'Home',
+			},
+			{
+				path: 'documents',
+				component: Documents,
+				title: 'Documents',
 			},
 			{
 				path: 'settings',
