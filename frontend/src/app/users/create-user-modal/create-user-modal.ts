@@ -49,7 +49,7 @@ export class CreateUserModal {
 							preferredLanguage: "en",
 							lastLogin: "",
 							isActive: true,
-							avatar: "https://github.com/mao.png"
+							avatar: `https://api.dicebear.com/9.x/identicon/svg?seed=${formValues.displayName}`
 						}
 
 						this.feedbackMsg.set('users.createUser.feedbackMsg');

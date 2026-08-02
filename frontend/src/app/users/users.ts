@@ -54,7 +54,7 @@ export class Users {
 					"preferredLanguage": "en",
 					"lastLogin": "2026-08-01 14:04:17",
 					"isActive": true,
-					"avatar": "https://github.com/mdo.png"
+					"avatar": "https://api.dicebear.com/9.x/identicon/svg?seed=paul"
 				},
 				{
 					"id": "3d54bb82-5e0b-4066-840b-d496a7cd30ce",
@@ -63,7 +63,7 @@ export class Users {
 					"preferredLanguage": "en",
 					"lastLogin": "",
 					"isActive": false,
-					"avatar": "https://github.com/mco.png"
+					"avatar": "https://api.dicebear.com/9.x/identicon/svg?seed=nikita"
 				},
 				{
 					"id": "3d54bb82-5e0b-4066-500b-d496a7cd30ce",
@@ -72,7 +72,7 @@ export class Users {
 					"preferredLanguage": "en",
 					"lastLogin": "",
 					"isActive": true,
-					"avatar": "https://github.com/mbo.png"
+					"avatar": "https://api.dicebear.com/9.x/identicon/svg?seed=cedric"
 				}
 			]
 		)
