@@ -30,13 +30,13 @@ export class UserList implements OnInit {
 	}
 
 	openCreateUserModal() {
-		const ret = this.modalService.open(CreateUserModal);
+		const ret = this.modalService.open(CreateUserModal, { centered: true });
 		ret.closed.subscribe((createdUser) => {
 			this.usersService.addToUserList(createdUser);
 		});
 	}
 
 	openEditUserModal() {
-		this.modalService.open(EditUserModal);
+		this.modalService.open(EditUserModal, { centered: true });
 	}
 }
