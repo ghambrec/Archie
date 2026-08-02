@@ -5,8 +5,8 @@ import { CreateGroupsResponseDto } from './dto/create-groups-response.dto';
 
 @Controller('groups')
 export class GroupsController {
-  constructor( private readonly groupsService: GroupsService) {}
-  
+  constructor(private readonly groupsService: GroupsService) {}
+
   @Post('create_groups')
   async create(@Body() dto: CreateGroupsDto): Promise<CreateGroupsResponseDto> {
     return this.groupsService.create(dto);

@@ -13,9 +13,22 @@ export class GroupsService {
   ) {}
   async create(dto: CreateGroupsDto): Promise<CreateGroupsResponseDto> {
     
-    const groupEntity = this.groupsRepository.create({
-      id: dto.id,
-    })
+    const nameTaken = await this.findByName(dto.name)
+    if(nameTaken)
+        throw new ConflictException('Name is already taken');
 
+    const groupEntity = this.groupsRepository.create({
+      name: dto.name,
+      descpription: dto.description,
+    });
+
+    await this.groupsRepository.save(groupEntity);
+
+    return groupEntity;
   }
+
+  async findByName(name: string): Promise<User | null> {
+    return this.groupsRepository.findOneBy({name: name});
+  }
+
 }
