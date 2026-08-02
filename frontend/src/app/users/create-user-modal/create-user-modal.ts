@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
-import { Users } from '../users';
+import { UserList, Users } from '../users';
 import { email, form, minLength, required, FormRoot, FormField } from '@angular/forms/signals';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timer } from 'rxjs';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
@@ -38,8 +38,22 @@ export class CreateUserModal {
 				action: async (field) => {
 					this.feedbackMsg.set(null);
 					try {
-						await firstValueFrom(this.usersService.create(field().value()));
+						const formValues = field().value();
+						const reponse = await firstValueFrom(this.usersService.create(formValues));
+
+						const createdUser: UserList = {
+							id: reponse.id,
+							email: formValues.email,
+							displayName: formValues.displayName,
+							preferredLanguage: "en",
+							lastLogin: "",
+							isActive: true,
+							avatar: "https://github.com/mao.png"
+						}
+
 						this.feedbackMsg.set('user successfully created');
+						await firstValueFrom(timer(1000));
+						this.activeModal.close(createdUser);
 						return;
 					} catch (error : any) {
 						return { kind: 'serverError', message: error.error?.message ?? 'user could not get created' };

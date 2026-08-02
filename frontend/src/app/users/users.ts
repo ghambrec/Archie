@@ -77,4 +77,9 @@ export class Users {
 			]
 		)
 	}
+
+	addToUserList(user: UserList) {
+		this.userList.update((currentList) => [...currentList, user]);
+	}
+
 }
