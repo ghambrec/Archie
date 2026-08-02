@@ -21,6 +21,7 @@ export interface UserList {
 	preferredLanguage: string;
 	lastLogin: string;
 	isActive: boolean;
+	avatar: string;
 }
 
 @Service()
@@ -49,26 +50,29 @@ export class Users {
 				{
 					"id": "3d5cd382-5e0b-4066-840b-d496a7cd39as",
 					"email": "user1@mail.de",
-					"displayName": "dummy user 1",
+					"displayName": "Paul",
 					"preferredLanguage": "en",
 					"lastLogin": "2026-08-01 14:04:17",
-					"isActive": true
+					"isActive": true,
+					"avatar": "https://github.com/mdo.png"
 				},
 				{
 					"id": "3d54bb82-5e0b-4066-840b-d496a7cd30ce",
 					"email": "user2@mail.de",
-					"displayName": "dummy user 2",
+					"displayName": "Nikita",
 					"preferredLanguage": "en",
 					"lastLogin": "",
-					"isActive": false
+					"isActive": false,
+					"avatar": "https://github.com/mco.png"
 				},
 				{
 					"id": "3d54bb82-5e0b-4066-500b-d496a7cd30ce",
 					"email": "user3@mail.de",
-					"displayName": "dummy user 3",
+					"displayName": "Cedric",
 					"preferredLanguage": "en",
 					"lastLogin": "",
-					"isActive": true
+					"isActive": true,
+					"avatar": "https://github.com/mbo.png"
 				}
 			]
 		)

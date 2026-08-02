@@ -2,7 +2,8 @@
 <table class="table align-middle">
 	<thead>
 		<tr>
-			<th scope="col">{{ "users.userList.email" | transloco }}</th>
+			<th scope="col" class="pe-0"></th>
+			<th scope="col" class="ps-0">{{ "users.userList.email" | transloco }}</th>
 			<th scope="col">{{ "users.userList.displayName" | transloco }}</th>
 			<th scope="col">{{ "users.userList.lastLogin" | transloco }}</th>
 			<th scope="col">{{ "users.userList.active" | transloco }}</th>
@@ -12,7 +13,8 @@
 	<tbody class="table-group-divider">
 		@for (user of usersService.userList(); track user.id) {
 			<tr>
-				<td>{{ user.email }}</td>
+				<td class="pe-0"> <img [src]="user.avatar" alt="" width="32" height="32" class="rounded-circle"> </td>
+				<td class="ps-0">{{ user.email }}</td>
 				<td>{{ user.displayName }}</td>
 				<td>{{ user.lastLogin }}</td>
 				<td> @if (user.isActive) {<i class="bi bi-check-square"></i>} @else {<i class="bi bi-square"></i>} </td>
