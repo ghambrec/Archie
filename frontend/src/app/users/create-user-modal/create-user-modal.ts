@@ -1,15 +1,17 @@
 import { Component, inject, signal } from '@angular/core';
 import { Users } from '../users';
-import { email, form, minLength, required, standardSchemaError, FormRoot, FormField } from '@angular/forms/signals';
+import { email, form, minLength, required, FormRoot, FormField } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-	selector: 'app-create-user-form',
+	selector: 'app-create-user-modal',
 	imports: [FormRoot, FormField],
-	templateUrl: './create-user-form.html',
-	styleUrl: './create-user-form.scss',
+	templateUrl: './create-user-modal.html',
+	styleUrl: './create-user-modal.scss',
 })
-export class CreateUserForm {
+export class CreateUserModal {
+	protected readonly activeModal = inject(NgbActiveModal);
 	private readonly usersService = inject(Users);
 
 	readonly feedbackMsg = signal<string | null>(null);

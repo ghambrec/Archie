@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Users } from '../users';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { CreateUserForm } from '../create-user-form/create-user-form';
+import { CreateUserModal } from '../create-user-modal/create-user-modal';
 
 @Component({
 	selector: 'app-user-list',
@@ -19,6 +19,6 @@ export class UserList implements OnInit {
 	}
 
 	openCreateUserModal() {
-		this.modalService.open(CreateUserForm);
+		this.modalService.open(CreateUserModal);
 	}
 }
