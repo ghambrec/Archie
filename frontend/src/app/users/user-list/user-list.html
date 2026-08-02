@@ -6,6 +6,7 @@
 			<th scope="col">{{ "users.userList.displayName" | transloco }}</th>
 			<th scope="col">{{ "users.userList.lastLogin" | transloco }}</th>
 			<th scope="col">{{ "users.userList.active" | transloco }}</th>
+			<th> <button type="button" class="btn btn-primary" (click)="openCreateUserModal()">{{ "users.userList.addUser" | transloco }}</button> </th>
 		</tr>
 	</thead>
 	<tbody class="table-group-divider">
@@ -15,6 +16,7 @@
 				<td>{{ user.displayName }}</td>
 				<td>{{ user.lastLogin }}</td>
 				<td>{{ user.isActive }}</td>
+				<th> <button type="button" class="btn btn-secondary">{{ "users.userList.editUser" | transloco }}</button> </th>
 			</tr>
 		}
 	</tbody>

@@ -20,6 +20,8 @@
 	"users": {
 		"userList": {
 			"heading": "Users",
+			"addUser": "Add User",
+			"editUser": "Edit",
 			"email": "E-Mail",
 			"displayName": "Name",
 			"lastLogin": "Last login",
