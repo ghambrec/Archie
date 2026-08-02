@@ -1,4 +1,4 @@
-import { Service, inject } from '@angular/core';
+import { Service, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
@@ -14,14 +14,63 @@ export interface CreateUserResponse {
 	displayName: string;
 }
 
+export interface UserList {
+	id: string;
+	email: string;
+	displayName: string;
+	preferredLanguage: string;
+	lastLogin: string;
+	isActive: boolean;
+}
+
 @Service()
 export class Users {
 	private readonly http = inject(HttpClient);
 	private readonly baseUrl = `${environment.apiUrl}/users`;
 
+	readonly userList = signal<UserList[]>([]);
+
 	create(body: CreateUserRequest) {
 		const url = `${this.baseUrl}/create`;
 
 		return this.http.post<CreateUserResponse>(url, body);
+	}
+
+	getUserList() {
+		// const url = `${this.baseUrl}/xxx`;
+
+		// this.http.get<UserList[]>(url).subscribe((users) => {
+		// 	this.userList.set(users);
+		// });
+
+		// dummy data, no endpoint here
+		this.userList.set(
+			[
+				{
+					"id": "3d5cd382-5e0b-4066-840b-d496a7cd39as",
+					"email": "user1@mail.de",
+					"displayName": "dummy user 1",
+					"preferredLanguage": "en",
+					"lastLogin": "2026-08-01 14:04:17",
+					"isActive": true
+				},
+				{
+					"id": "3d54bb82-5e0b-4066-840b-d496a7cd30ce",
+					"email": "user2@mail.de",
+					"displayName": "dummy user 2",
+					"preferredLanguage": "en",
+					"lastLogin": "",
+					"isActive": true
+				},
+				{
+					"id": "3d54bb82-5e0b-4066-500b-d496a7cd30ce",
+					"email": "user3@mail.de",
+					"displayName": "dummy user 3",
+					"preferredLanguage": "en",
+					"lastLogin": "",
+					"isActive": true
+				}
+			]
+		)
 	}
 }

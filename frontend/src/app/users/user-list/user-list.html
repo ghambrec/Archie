@@ -1,1 +1,21 @@
-<p>user-list works!</p>
+<h1> {{ "users.userList.heading" | transloco }} </h1>
+<table class="table">
+	<thead>
+		<tr>
+			<th scope="col">{{ "users.userList.email" | transloco }}</th>
+			<th scope="col">{{ "users.userList.displayName" | transloco }}</th>
+			<th scope="col">{{ "users.userList.lastLogin" | transloco }}</th>
+			<th scope="col">{{ "users.userList.active" | transloco }}</th>
+		</tr>
+	</thead>
+	<tbody class="table-group-divider">
+		@for (user of usersService.userList(); track user.id) {
+			<tr>
+				<td>{{ user.email }}</td>
+				<td>{{ user.displayName }}</td>
+				<td>{{ user.lastLogin }}</td>
+				<td>{{ user.isActive }}</td>
+			</tr>
+		}
+	</tbody>
+</table>

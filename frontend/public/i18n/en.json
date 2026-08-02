@@ -16,5 +16,14 @@
 		"submit": "Log in",
 		"errorGeneral": "Error on log in",
 		"errorInvalidCred": "Invalid email or password"
+	},
+	"users": {
+		"userList": {
+			"heading": "Users",
+			"email": "E-Mail",
+			"displayName": "Name",
+			"lastLogin": "Last login",
+			"active": "Active"
+		}
 	}
 }
