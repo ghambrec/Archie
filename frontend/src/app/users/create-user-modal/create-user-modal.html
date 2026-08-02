@@ -1,5 +1,5 @@
 <div class="modal-header">
-	<h5 class="modal-title">Create User</h5>
+	<h5 class="modal-title">{{ "users.createUser.heading" | transloco }}</h5>
 	<button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
 </div>
 
@@ -7,7 +7,7 @@
 	<form [formRoot]="createUserForm">
 
 		<div class="mb-3">
-			<label class="form-label">Email</label>
+			<label class="form-label">{{ "users.createUser.email" | transloco }}</label>
 			<input type="email" class="form-control"
 				[class.is-invalid]="createUserForm.email().touched() && createUserForm.email().invalid()"
 				[formField]="createUserForm.email" />
@@ -17,7 +17,7 @@
 		</div>
 
 		<div class="mb-3">
-			<label class="form-label">Password</label>
+			<label class="form-label">{{ "users.createUser.password" | transloco }}</label>
 			<input type="password" class="form-control"
 				[class.is-invalid]="createUserForm.password().touched() && createUserForm.password().invalid()"
 				[formField]="createUserForm.password" />
@@ -27,7 +27,7 @@
 		</div>
 
 		<div class="mb-3">
-			<label class="form-label">Name</label>
+			<label class="form-label">{{ "users.createUser.name" | transloco }}</label>
 			<input type="text" class="form-control"
 				[class.is-invalid]="createUserForm.displayName().touched() && createUserForm.displayName().invalid()"
 				[formField]="createUserForm.displayName" />
@@ -36,18 +36,18 @@
 			}
 		</div>
 		@if (createUserForm().errors().length > 0) {
-		<div class="text-danger">{{ createUserForm().errors()[0].message }}</div>
+		<div class="text-danger">{{ createUserForm().errors()[0].message | transloco }}</div>
 		}
 		@if (feedbackMsg()) {
-		<div class="text-success">{{ feedbackMsg() }}</div>
+		<div class="text-success">{{ feedbackMsg() | transloco }}</div>
 		}
 
 		<div class="d-flex justify-content-between">
 			<button type="submit" class="btn btn-primary" [disabled]="createUserForm().submitting()">
-				@if (createUserForm().submitting()) { Sending... } @else { Create User }
+				@if (createUserForm().submitting()) { {{ "users.createUser.btnSubmitPending" | transloco }} } @else { {{ "users.createUser.btnSubmit" | transloco }} }
 			</button>
 
-			<button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">Cancel</button>
+			<button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">{{ "users.createUser.btnCancel" | transloco }}</button>
 		</div>
 
 	</form>

@@ -25,6 +25,19 @@
 			"displayName": "Name",
 			"lastLogin": "Last login",
 			"active": "Active"
+		},
+		"createUser": {
+			"heading": "Create User",
+			"email": "E-Mail",
+			"password": "Password",
+			"name": "Name",
+			"btnSubmit": "Create User",
+			"btnSubmitPending": "Sending...",
+			"btnCancel": "Cancel",
+			"feedbackMsg": "User successfully created",
+			"errorGeneral": "Unable to create user",
+			"errorConflictMail": "E-Mail already registered",
+			"errorConflictName": "Name already registered"
 		}
 	}
 }

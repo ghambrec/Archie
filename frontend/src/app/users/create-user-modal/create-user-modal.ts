@@ -3,10 +3,11 @@ import { UserList, Users } from '../users';
 import { email, form, minLength, required, FormRoot, FormField } from '@angular/forms/signals';
 import { firstValueFrom, timer } from 'rxjs';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
 	selector: 'app-create-user-modal',
-	imports: [FormRoot, FormField],
+	imports: [FormRoot, FormField, TranslocoPipe],
 	templateUrl: './create-user-modal.html',
 	styleUrl: './create-user-modal.scss',
 })
@@ -51,12 +52,20 @@ export class CreateUserModal {
 							avatar: "https://github.com/mao.png"
 						}
 
-						this.feedbackMsg.set('user successfully created');
-						await firstValueFrom(timer(1000));
+						this.feedbackMsg.set('users.createUser.feedbackMsg');
+						await firstValueFrom(timer(500));
 						this.activeModal.close(createdUser);
 						return;
 					} catch (error : any) {
-						return { kind: 'serverError', message: error.error?.message ?? 'user could not get created' };
+						let translocoKey = error.status == 409 ? "users.createUser.errorConflict" : "users.createUser.errorGeneral";
+						if (translocoKey == "users.createUser.errorConflict" && error.error?.message.toLowerCase().includes("mail")) {
+							translocoKey = "users.createUser.errorConflictMail"
+						} else if (translocoKey == "users.createUser.errorConflict" && error.error?.message.toLowerCase().includes("name")) {
+							translocoKey = "users.createUser.errorConflictName"
+						} else {
+							translocoKey = "users.createUser.errorGeneral";
+						}
+						return { kind: 'serverError', message: translocoKey };
 					}
 				}
 			}
