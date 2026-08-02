@@ -14,7 +14,7 @@ export interface CreateUserResponse {
 	displayName: string;
 }
 
-export interface UserList {
+export interface UsersList {
 	id: string;
 	email: string;
 	displayName: string;
@@ -29,7 +29,7 @@ export class Users {
 	private readonly http = inject(HttpClient);
 	private readonly baseUrl = `${environment.apiUrl}/users`;
 
-	readonly userList = signal<UserList[]>([]);
+	readonly usersList = signal<UsersList[]>([]);
 
 	create(body: CreateUserRequest) {
 		const url = `${this.baseUrl}/create`;
@@ -37,7 +37,7 @@ export class Users {
 		return this.http.post<CreateUserResponse>(url, body);
 	}
 
-	getUserList() {
+	getUsersList() {
 		// const url = `${this.baseUrl}/xxx`;
 
 		// this.http.get<UserList[]>(url).subscribe((users) => {
@@ -45,7 +45,7 @@ export class Users {
 		// });
 
 		// dummy data, no endpoint here
-		this.userList.set(
+		this.usersList.set(
 			[
 				{
 					"id": "3d5cd382-5e0b-4066-840b-d496a7cd39as",
@@ -78,8 +78,8 @@ export class Users {
 		)
 	}
 
-	addToUserList(user: UserList) {
-		this.userList.update((currentList) => [...currentList, user]);
+	addToUserList(user: UsersList) {
+		this.usersList.update((currentList) => [...currentList, user]);
 	}
 
 }

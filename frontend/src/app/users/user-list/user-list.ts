@@ -19,14 +19,14 @@ export class UserList implements OnInit {
 
 	protected readonly filteredUserList = computed(() => {
 		const searchStringLowercased = this.searchString().toLowerCase();
-		return this.usersService.userList().filter((user) => 
+		return this.usersService.usersList().filter((user) => 
 			user.displayName.toLowerCase().includes(searchStringLowercased) ||
 			user.email.toLowerCase().includes(searchStringLowercased)
 		)
 	});
 
 	ngOnInit() {
-		this.usersService.getUserList();
+		this.usersService.getUsersList();
 	}
 
 	openCreateUserModal() {

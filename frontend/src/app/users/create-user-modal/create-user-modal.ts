@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { UserList, Users } from '../users';
+import { UsersList, Users } from '../users';
 import { email, form, minLength, required, FormRoot, FormField } from '@angular/forms/signals';
 import { firstValueFrom, timer } from 'rxjs';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -42,7 +42,7 @@ export class CreateUserModal {
 						const formValues = field().value();
 						const reponse = await firstValueFrom(this.usersService.create(formValues));
 
-						const createdUser: UserList = {
+						const createdUser: UsersList = {
 							id: reponse.id,
 							email: formValues.email,
 							displayName: formValues.displayName,
