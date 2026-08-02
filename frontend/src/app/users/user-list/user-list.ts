@@ -3,6 +3,7 @@ import { Users } from '../users';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CreateUserModal } from '../create-user-modal/create-user-modal';
+import { EditUserModal } from '../edit-user-modal/edit-user-modal';
 
 @Component({
 	selector: 'app-user-list',
@@ -20,5 +21,9 @@ export class UserList implements OnInit {
 
 	openCreateUserModal() {
 		this.modalService.open(CreateUserModal);
+	}
+
+	openEditUserModal() {
+		this.modalService.open(EditUserModal);
 	}
 }
