@@ -1,20 +1,26 @@
-import { HttpException } from "@nestjs/common";
-import { ERROR_CATALOG } from "./error-catalog";
-import { ErrorCode } from "./error-code";
-import { exitCode } from "node:process";
+import {
+    Catch,
+  } from '@nestjs/common';
+  import { HttpException } from '@nestjs/common';
+  import { ERROR_CATALOG } from './error-catalog';
+  import { ErrorCode } from './error-code';
 
-export class ApplicationException extends HttpException {
-	constructor(public readonly code: ErrorCode) {
-		const definition = ERROR_CATALOG[code];
 
-		super(
-			{
-				code: code, 
-				message: definition.message,
+@Catch(ApplicationException)
+   export class ApplicationException extends HttpException {
+    public readonly fallbackMessage: string;
 
-			},
-			definition.status,
+    constructor(public readonly code: ErrorCode) {
+      const definition = ERROR_CATALOG[code];
 
-		);
-	}
-}
+      super(
+        {
+          code: code,
+          message: definition.message,
+        },
+        definition.status,
+      );
+
+      this.fallbackMessage = definition.message;
+    }
+  }
