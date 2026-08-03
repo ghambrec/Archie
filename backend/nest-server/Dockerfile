@@ -7,7 +7,7 @@ RUN corepack enable
 
 # Keep dependency installation in a cacheable image layer.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
 COPY . .
 
