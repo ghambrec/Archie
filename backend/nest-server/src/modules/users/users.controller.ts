@@ -39,7 +39,7 @@ export class UsersController {
 
   
   @UseGuards(SessionAuthGuard)
-  @Get(':me')
+  @Get('me')
   async getCurrentUser( @Req() req: Request): Promise <UserSummaryDto> {
     return this.usersService.findProfileById(req.userId!);
   }
