@@ -31,12 +31,15 @@ export class UsersController {
   }
 
   //@UseGuards(SessionAuthGuard)
-  //@Patch ('me')
-  //async updateMyself (@Req () ))
+  //@Patch('passwd')
+  //async updateCurrentUserPasswd {
+
+  //}
+ 
 
   
   @UseGuards(SessionAuthGuard)
-  @Get(':me')
+  @Get('me')
   async getCurrentUser( @Req() req: Request): Promise <UserSummaryDto> {
     return this.usersService.findProfileById(req.userId!);
   }
