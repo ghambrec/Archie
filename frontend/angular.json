@@ -8,7 +8,11 @@
   "projects": {
     "frontend": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -18,6 +22,7 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
+			"inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
@@ -25,8 +30,9 @@
               }
             ],
             "styles": [
-              "src/styles.css"
-            ]
+				"node_modules/bootstrap-icons/font/bootstrap-icons.css",
+				"src/styles.scss"
+			]
           },
           "configurations": {
             "production": {
@@ -47,7 +53,13 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.development.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"

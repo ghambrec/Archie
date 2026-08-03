@@ -1,0 +1,43 @@
+{
+	"programName": "Archie",
+	"sidebar": {
+		"home": "Home",
+		"settings": "Settings",
+		"documents": "Documents",
+		"dropdown": {
+			"profile": "Profile",
+			"logOut": "Log out"
+		}
+	},
+	"login": {
+		"title": "Archie - Login",
+		"email": "E-Mail",
+		"password": "Password",
+		"submit": "Log in",
+		"errorGeneral": "Error on log in",
+		"errorInvalidCred": "Invalid email or password"
+	},
+	"users": {
+		"userList": {
+			"heading": "Users",
+			"searchPlaceholder": "Search for name or email",
+			"email": "E-Mail",
+			"displayName": "Name",
+			"lastLogin": "Last login",
+			"active": "Active"
+		},
+		"createUser": {
+			"heading": "Create User",
+			"email": "E-Mail",
+			"password": "Password",
+			"name": "Name",
+			"btnSubmit": "Create User",
+			"btnSubmitPending": "Sending...",
+			"btnCancel": "Cancel",
+			"feedbackMsg": "User successfully created",
+			"errorGeneral": "Unable to create user",
+			"errorConflictMail": "E-Mail already registered",
+			"errorConflictName": "Name already registered"
+		}
+	}
+}
