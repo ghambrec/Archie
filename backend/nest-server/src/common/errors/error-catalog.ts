@@ -26,9 +26,10 @@ export const ERROR_CATALOG ={
 		status: HttpStatus.CONFLICT,
 		message: 'Display Name is already registered.'
 	},
-	[ErrorCode.InteralServerError]: {
-		status: HttpStatus.INTERNAL_SERVER_ERROR,
-		message: 'An unexpected error occurred.',
-	},
+	[ErrorCode.InternalServerError]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message: 'An unexpected error occurred.',
+  },
+
   } satisfies Record<ErrorCode, ErrorDefinition>;
 
