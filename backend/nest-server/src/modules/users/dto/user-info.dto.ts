@@ -1,17 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsString, IsUUID } from 'class-validator';
 
 export class UserInfoDto {
-  @ApiProperty(
-    {example: 'test@example.com'},
-  )
+  @ApiProperty({ example: 'b3f1c2e4-...' })
+  @IsUUID()
+  id!: string;
+
+  @ApiProperty({ example: 'test@example.com' })
   @IsEmail()
   email!: string;
 
-  
-  @ApiProperty(
-    {example: 'password123'},
-  ) 
+  @ApiProperty({ example: 'Max' })
   @IsString()
-  password!: string;
+  displayName!: string;
 }
