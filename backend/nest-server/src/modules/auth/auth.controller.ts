@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, Session, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
@@ -7,6 +7,7 @@ import { LoginRequestDto } from './dto/login-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { SessionAuthGuard } from './guards/session-auth.guard';
+import { UserSummaryDto } from '../users/dto/user-summary.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -47,5 +48,11 @@ export class AuthController {
     const sessionId = this.sessionCookieService.extract(req)!;
     await this.authService.logout(sessionId);
     this.sessionCookieService.clear(res);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('me')
+  async me(@Req() req: Request): Promise<UserSummaryDto> {
+    return this.authService.getCurrentUser(req.userId!);
   }
 }

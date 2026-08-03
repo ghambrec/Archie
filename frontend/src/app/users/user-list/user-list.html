@@ -1,0 +1,26 @@
+<h1> {{ "users.userList.heading" | transloco }} </h1>
+<input type="text" class="form-control mb-1" [placeholder]="'users.userList.searchPlaceholder' | transloco" (input)="searchString.set($event.target.value)"/>
+<table class="table align-middle">
+	<thead>
+		<tr>
+			<th scope="col" class="pe-0"></th>
+			<th scope="col" class="ps-0">{{ "users.userList.email" | transloco }}</th>
+			<th scope="col">{{ "users.userList.displayName" | transloco }}</th>
+			<th scope="col">{{ "users.userList.lastLogin" | transloco }}</th>
+			<th scope="col">{{ "users.userList.active" | transloco }}</th>
+			<th style="width: 1%"> <button type="button" class="btn btn-primary" (click)="openCreateUserModal()"><i class="bi bi-plus-circle-fill"></i></button> </th>
+		</tr>
+	</thead>
+	<tbody class="table-group-divider">
+		@for (user of filteredUserList(); track user.id) {
+			<tr>
+				<td class="pe-0"> <img [src]="user.avatar" alt="" width="32" height="32" class="rounded-circle"> </td>
+				<td class="ps-0">{{ user.email }}</td>
+				<td>{{ user.displayName }}</td>
+				<td>{{ user.lastLogin }}</td>
+				<td> @if (user.isActive) {<i class="bi bi-check-square"></i>} @else {<i class="bi bi-square"></i>} </td>
+				<td> <button type="button" class="btn btn-secondary me-2 display-flex" (click)="openEditUserModal()"><i class="bi bi-pencil-fill"></i></button> </td>
+			</tr>
+		}
+	</tbody>
+</table>

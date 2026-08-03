@@ -1,11 +1,11 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('groups') // database entity - mapped to 'groups'
+@Entity('groups')
 export class Group {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', unique: true })
   name!: string;
 
   @Column({ type: 'varchar', nullable: true })
