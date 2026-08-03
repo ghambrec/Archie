@@ -1,0 +1,35 @@
+<div class="d-flex align-items-center justify-content-center vh-100 bg-light">
+	<form [formRoot]="loginForm" class="card p-4" style="width: 320px;">
+
+			<!-- title -->
+			<h1 class="h4 mb-3 text-center">{{ 'login.title' | transloco }}</h1>
+
+			<!-- email -->
+			<div class="mb-3">
+					<label class="form-label">{{ 'login.email' | transloco }}</label>
+					<input [formField]="loginForm.email" type="email" class="form-control" />
+					@if (loginForm.email().touched() && loginForm.email().invalid()) {
+						<p class="text-danger small mb-0">{{ loginForm.email().errors()[0].message }}</p>
+					}
+			</div>
+
+			<!-- password -->
+			<div class="mb-3">
+					<label class="form-label">{{ 'login.password' | transloco }}</label>
+					<input [formField]="loginForm.password" type="password" class="form-control" />
+					@if (loginForm.password().touched() && loginForm.password().invalid()) {
+						<p class="text-danger small mb-0">{{ loginForm.password().errors()[0].message }}</p>
+					}
+			</div>
+
+			<!-- submit button -->
+			<button type="submit" class="btn btn-primary w-100" [disabled]="loginForm().submitting()">
+				{{ 'login.submit' | transloco }}
+			</button>
+
+			<!-- error message -->
+			@if (loginForm().errors().length > 0) {
+				<p class="text-danger small mt-2 mb-0">{{ loginForm().errors()[0].message | transloco }}</p>
+			}
+	</form>
+</div>

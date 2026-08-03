@@ -101,6 +101,21 @@ services:
         condition: service_healthy
         restart: true
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: unless-stopped
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
+    networks:
+      - archie
+    depends_on:
+      - nest-server
 
 networks:
   archie:
@@ -111,3 +126,4 @@ volumes:
   postgres_data:
   minio_data:
   nest-server-node-modules:
+  frontend-node-modules:

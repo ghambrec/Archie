@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { LoginResult } from './interfaces/login-result.interface';
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { UserSummaryDto } from '../users/dto/user-summary.dto';
 
 @Injectable()
 export class AuthService {
@@ -45,5 +46,9 @@ export class AuthService {
   async logout(sessionId: string) : Promise<void> {
 
     return this.sessionService.destroy(sessionId);
+  }
+
+  async getCurrentUser(userId: string) : Promise<UserSummaryDto> {
+    return this.userService.findProfileById(userId);
   }
 }
