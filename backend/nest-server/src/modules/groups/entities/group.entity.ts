@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { UserGroup } from 'src/modules/user-groups/entities/user-group.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('groups')
 export class Group {
@@ -13,4 +14,7 @@ export class Group {
 
   @Column({ type: 'boolean', name: 'is_system', default: false })
   isSystem!: boolean;
+
+  @OneToMany(() => UserGroup, ug => ug.group)
+  groupUsers!: UserGroup[];
 }
