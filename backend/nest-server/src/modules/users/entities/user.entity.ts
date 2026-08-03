@@ -1,8 +1,10 @@
+import { UserGroup } from 'src/modules/user-groups/entities/user-group.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
