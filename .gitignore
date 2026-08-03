@@ -1,5 +1,5 @@
 # --- general ---
-.env
+/env/.env
 .env.minio
 *.note.*
 dist/
@@ -11,7 +11,10 @@ __pycache__/
 # --- backend ---
 backend/nest-server/dist/
 backend/nest-server/node_modules/
-backend/nest-server/generated/prisma
+# backend/nest-server/generated/prisma
 backend/nest-server/.pnpm-store
 
 /docs
+/.pnpm-store
+/node_modules
+frontend/.pnpm-store

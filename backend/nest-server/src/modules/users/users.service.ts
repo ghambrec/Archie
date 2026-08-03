@@ -8,6 +8,9 @@ import { CreateUserResponseDto } from './dto/create-user-response.dto';
 import { UpdateUserResponseDto } from './dto/update-user-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserSummaryDto } from './dto/user-summary.dto';
+import { ApplicationException } from 'src/common/errors/application.exception';
+import { ErrorCode } from 'src/common/errors/error-code';
+
 
 const PASSWORD_SALT_ROUNDS = 10;
 
@@ -23,11 +26,14 @@ export class UsersService {
   async create(dto: CreateUserDto): Promise<User> {
     const MailExisting = await this.findByEmail(dto.email)
     if(MailExisting)
-      throw new ConflictException('Email already registered');
+      throw new ApplicationException(
+      ErrorCode.EmailAlreadyRegistered,
+    )
     const DisplayNameExisting = await this.findByName(dto.displayName)
     if(DisplayNameExisting)
-      throw new ConflictException('Display name already registered')
-
+      throw new ApplicationException(
+        ErrorCode.UserNameAlreadyRegistered,
+      )
     const passwordHash = await bcrypt.hash(dto.password, PASSWORD_SALT_ROUNDS);
 
     const userEntity = this.usersRepository.create({
@@ -52,7 +58,9 @@ export class UsersService {
       const newEmail = dto.email?.trim().toLowerCase();
       const duplicate = await this.usersRepository.findOneBy({email: newEmail});
       if (duplicate)
-        throw new ConflictException('Email already registered')
+        throw new ApplicationException(
+          ErrorCode.EmailAlreadyRegistered
+        )
       user.email = newEmail; 
     };
 
@@ -61,13 +69,16 @@ export class UsersService {
       const newName = dto.displayName.trim();
       const duplicate = await this.usersRepository.findOneBy({displayName: newName});
       if(duplicate)
-        throw new ConflictException('User Name already given');
+        throw new ApplicationException(
+          ErrorCode.UserNameAlreadyRegistered
+        )
     }
     //if(dto.preferredLanguage !==undefined)
     //{
     //  const newLang = dto.displayName?.trim();
     //  const langExists = await this
     //}
+  
   
     
     Object.assign(user,dto);
@@ -77,6 +88,8 @@ export class UsersService {
       id: updatedUser.id}
 
   };
+
+  //async updatePasswd(userID: stringify, dto )
 
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOneBy({email: email});
@@ -98,8 +111,9 @@ export class UsersService {
       }
     })
     if(!user)
-      throw new NotFoundException('User not found');
-
+      throw new ApplicationException(
+      ErrorCode.UserNotFound,
+    )
     return user;
   }
 }
