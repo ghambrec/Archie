@@ -11,6 +11,6 @@ export class Group {
   @Column({ type: 'varchar', nullable: true })
   description!: string | null;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ type: 'boolean', name: 'is_system', default: false })
   isSystem!: boolean;
 }
