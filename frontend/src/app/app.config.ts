@@ -13,7 +13,7 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideTransloco({
       config: {
-        availableLangs: ['en', 'de'],
+        availableLangs: ['en', 'de', 'es'],
         defaultLang: 'en',
         fallbackLang: 'en',
         reRenderOnLangChange: true,
