@@ -6,13 +6,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { DocumentStatus } from './document-status.enum';
 
-export enum DocumentStatus {
-  Uploaded = 'UPLOADED',
-  Processing = 'PROCESSING',
-  Ready = 'READY',
-  Failed = 'FAILED',
-}
 
 @Entity('documents')
 export class Document {
