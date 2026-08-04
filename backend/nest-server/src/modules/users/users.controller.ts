@@ -1,4 +1,4 @@
-import { Req, Body,Get, Controller, Param, Patch, Post ,ParseUUIDPipe, UseGuards, ConflictException } from '@nestjs/common';
+import { Req, Body,Get, Controller, Param, Patch, Post ,ParseUUIDPipe, UseGuards, ConflictException, Query } from '@nestjs/common';
 
 import { ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
@@ -10,6 +10,8 @@ import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserSummaryDto } from './dto/user-summary.dto';
 import { User } from './entities/user.entity';
+import { GetUsersResponseDto } from './dto/get-users-response.dto';
+import { GetUsersQueryDto } from './dto/get-users-query.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -30,11 +32,11 @@ export class UsersController {
     return this.usersService.updateProfile(req.userId!, dto);
   }
 
-  //@UseGuards(SessionAuthGuard)
-  //@Patch('passwd')
-  //async updateCurrentUserPasswd {
-
-  //}
+  @UseGuards(SessionAuthGuard)
+  @Get()
+  async getAllUsers(@Query() request: GetUsersQueryDto): Promise<GetUsersResponseDto>{
+    return this.usersService.getAllUsers(request);
+  }
  
 
   
