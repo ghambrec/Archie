@@ -6,9 +6,10 @@ import { UserGroup } from './entities/user-group.entity';
 import { User } from '../users/entities/user.entity';
 import { UsersModule } from '../users/users.module';
 import { GroupsModule } from '../groups/groups.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserGroup]), UsersModule, GroupsModule],
+  imports: [TypeOrmModule.forFeature([UserGroup]), UsersModule, GroupsModule, AuthModule],
   providers: [UserGroupsService],
   controllers: [UserGroupsController],
   exports: [UserGroupsService],
