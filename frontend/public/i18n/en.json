@@ -39,5 +39,15 @@
 			"errorConflictMail": "E-Mail already registered",
 			"errorConflictName": "Name already registered"
 		}
-	}
+	}, 
+	"errors": {
+    "AUTH_EMAIL_ALREADY_REGISTERED": "This email address is already registered.",
+    "AUTH_INVALID_CREDENTIALS": "Invalid email or password.",
+    "USER_NOT_FOUND": "User was not found.",
+    "USER_NAME_ALREADY_REGISTERED": "This display name is already registered.",
+    "VALIDATION_FAILED": "The submitted data is invalid.",
+    "INTERNAL_SERVER_ERROR": "An unexpected error occurred.",
+    "UNKNOWN": "An unexpected error occurred."
+  }
+
 }

@@ -6,4 +6,7 @@ export enum ErrorCode {
     UserNotFound = 'USER_NOT_FOUND',
     UserNameAlreadyRegistered = 'USER_NAME_ALREADY_REGISTERED',
     InternalServerError = 'INTERNAL_SERVER_ERROR',
+    ValidationFailed = 'VALIDATION_FAILED',
+
+    //LanguageNotAvailable ='LANGUAGE_NOT_AVAILABLE',
   }

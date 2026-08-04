@@ -30,6 +30,14 @@ export const ERROR_CATALOG ={
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     message: 'An unexpected error occurred.',
   },
+  //[ErrorCode.LanguageNotAvailable]: {
+  //  status: HttpStatus.BAD_REQUEST,
+  //  message: 'Language not available, only <en>, <de> or <es> are available'
+  //}
+  [ErrorCode.ValidationFailed]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: 'The request contains invalid data'
+  }
 
   } satisfies Record<ErrorCode, ErrorDefinition>;
 

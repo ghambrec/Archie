@@ -10,6 +10,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserSummaryDto } from './dto/user-summary.dto';
 import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
+import { SupportedLanguage } from './enums/supported-language.enum';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { GetUsersResponseDto } from './dto/get-users-response.dto';
 
@@ -75,11 +76,11 @@ export class UsersService {
           ErrorCode.UserNameAlreadyRegistered
         )
     }
-    //if(dto.preferredLanguage !==undefined)
-    //{
-    //  const newLang = dto.displayName?.trim();
-    //  const langExists = await this
-    //}
+    if(dto.preferredLanguage !==undefined)
+    {
+      const newLang = dto.preferredLanguage?.trim();
+      
+    }
   
   
     

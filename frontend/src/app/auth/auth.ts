@@ -2,6 +2,7 @@ import { inject, Service, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { firstValueFrom } from 'rxjs';
+import type { SupportedLanguage } from '../core/i18n/supported-language'
 
 export interface LoginRequest {
 	email: string;
@@ -12,13 +13,17 @@ export interface LoginResponse {
 	id: string;
 	email: string;
 	displayName: string;
+	preferredLanguage: SupportedLanguage;
 }
 
 export interface CurrentUser {
 	id: string;
 	email: string;
 	displayName: string;
+	preferredLanguage: SupportedLanguage; 
 }
+
+
 
 @Service()
 export class Auth {
@@ -37,6 +42,11 @@ export class Auth {
 		const url = `${this.baseUrl}/logout`;
 
 		return this.http.get<void>(url, { withCredentials: true });
+	}
+	getCurrentUser(){
+		const url = `${environment.apiUrl}/users/me`;
+
+		return this.http.get<CurrentUser>(url, { withCredentials: true })
 	}
 
 	async checkSession(): Promise<boolean> {

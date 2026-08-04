@@ -1,3 +1,52 @@
 {
-	"comment-gha": "anfangs nur en file benutzen und am ende dann alles ins deutsche und in die dritte sprache übersetzen"
+	"programName": "Archie",
+	"sidebar": {
+		"home": "Startseite",
+		"settings": "Einstellungen",
+		"documents": "Dokumente",
+		"dropdown": {
+			"profile": "Profil",
+			"logOut": "Abmelden"
+		}
+	},
+	"login": {
+		"title": "Archie - Anmeldung",
+		"email": "E-Mail",
+		"password": "Passwort",
+		"submit": "Anmelden",
+		"errorGeneral": "Fehler bei der Anmeldung",
+		"errorInvalidCred": "Ungültige E-Mail-Adresse oder ungültiges Passwort"
+	},
+	"users": {
+		"userList": {
+			"heading": "Benutzer",
+			"searchPlaceholder": "Nach Name oder E-Mail-Adresse suchen",
+			"email": "E-Mail",
+			"displayName": "Name",
+			"lastLogin": "Letzte Anmeldung",
+			"active": "Aktiv"
+		},
+		"createUser": {
+			"heading": "Benutzer erstellen",
+			"email": "E-Mail",
+			"password": "Passwort",
+			"name": "Name",
+			"btnSubmit": "Benutzer erstellen",
+			"btnSubmitPending": "Wird gesendet ...",
+			"btnCancel": "Abbrechen",
+			"feedbackMsg": "Benutzer wurde erfolgreich erstellt",
+			"errorGeneral": "Benutzer konnte nicht erstellt werden",
+			"errorConflictMail": "E-Mail-Adresse ist bereits registriert",
+			"errorConflictName": "Name ist bereits vergeben"
+		}
+	},
+	"errors": {
+		"AUTH_EMAIL_ALREADY_REGISTERED": "Diese E-Mail-Adresse ist bereits registriert.",
+		"AUTH_INVALID_CREDENTIALS": "Ungültige E-Mail-Adresse oder ungültiges Passwort.",
+		"USER_NOT_FOUND": "Der Benutzer wurde nicht gefunden.",
+		"USER_NAME_ALREADY_REGISTERED": "Dieser Anzeigename ist bereits vergeben.",
+		"VALIDATION_FAILED": "Die übermittelten Daten sind ungültig.",
+		"INTERNAL_SERVER_ERROR": "Ein unerwarteter Fehler ist aufgetreten.",
+		"UNKNOWN": "Ein unerwarteter Fehler ist aufgetreten."
+	}
 }
