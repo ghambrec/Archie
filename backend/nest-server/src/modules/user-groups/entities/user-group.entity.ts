@@ -23,15 +23,15 @@ export class UserGroup {
   @CreateDateColumn({ type: 'timestamptz', name: 'joined_at' })
   joinedAt!: Date;
 
-  @ManyToOne(() => User) // AI recommendation:  (() => User, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })// AI recommendation:  (() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne(() => Group) // AI recommendation:  (() => Group, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Group, { onDelete: 'CASCADE' }) // AI recommendation:  (() => Group, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'group_id' })
   group!: Group;
 
-  @ManyToOne(() => User) // AI recommendation:  (() => User, { onDelete: 'SET NULL' })
+  @ManyToOne(() => User, { onDelete: 'SET NULL' }) // AI recommendation:  (() => User, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'invited_by' })
   inviter!: User | null;
 }
