@@ -1,13 +1,11 @@
-import {
-    Catch,
-  } from '@nestjs/common';
-  import { HttpException } from '@nestjs/common';
-  import { ERROR_CATALOG } from './error-catalog';
-  import { ErrorCode } from './error-code';
+
+import { HttpException } from '@nestjs/common';
+import { ERROR_CATALOG } from './error-catalog';
+import { ErrorCode } from './error-code';
 
 
-@Catch(ApplicationException)
-   export class ApplicationException extends HttpException {
+
+  export class ApplicationException extends HttpException {
     public readonly fallbackMessage: string;
 
     constructor(public readonly code: ErrorCode) {
