@@ -45,9 +45,15 @@ export class MinioService {
 
   async uploadUserAvatar(userId: string, file: Express.Multer.File): Promise<string> {
     const objectKey = `users/${userId}/avatar-${randomUUID()}${this.getExtension(file.originalname)}`;
-    await this.client.putObject(this.bucketName, objectKey, file.buffer, {
-      'Content-Type': file.mimetype,
-    });
+    await this.client.putObject(
+      this.bucketName,
+      objectKey,
+      file.buffer,
+      file.buffer.length,
+      {
+        'Content-Type': file.mimetype,
+      },
+    );
     return objectKey;
   }
 

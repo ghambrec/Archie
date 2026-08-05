@@ -90,6 +90,10 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    volumes:
+      - ./backend/nest-server:/app
+      - nest-server-node-modules:/app/node_modules
+      - ./backend/nest-server/pnpm-lock.yaml:/app/pnpm-lock.yaml # <--- Explicitly link host file to container file
     networks:
       - archie
     env_file: "./env/.env"
