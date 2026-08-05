@@ -32,6 +32,24 @@ export class GroupsService {
     return this.groupsRepository.findOneBy({name: name});
   }
 
+  async get(id: string): Promise<Group> {
+    const group = await this.groupsRepository.findOneBy({ id }); // alternative: this.groupRepository.findOneOrFail({ where: { id } });
+    if (!group) {
+      throw new NotFoundException(`Group with id ${id} not found`);
+    }
+    
+    return group;
+  }
+
+  async getByNameOrFail(name: string): Promise<Group> {
+    const group = await this.findByName(name);
+
+    if (!group) {
+      throw new NotFoundException('Group with the name "${name}" not found');
+    }
+    return group;
+  }
+
   async deleteGroup(id: string): Promise<void> {
     const group = await this.groupsRepository.findOneBy({ id });
     if (!group) {
@@ -43,6 +61,5 @@ export class GroupsService {
     await this.groupsRepository.remove(group);
 
     console.log(`Group ${group.id} (${group.name}) has been deleted`);
-
   }
 }
