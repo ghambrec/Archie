@@ -1,4 +1,5 @@
-import { Req, Body,Get, Controller, Param, Patch, Post ,ParseUUIDPipe, UseGuards, ConflictException, Query } from '@nestjs/common';
+import { Req, Body, Get, Controller, Patch, Post, UseGuards, UploadedFile, UseInterceptors, Query } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import { ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
@@ -9,7 +10,6 @@ import { UpdateUserResponseDto } from './dto/update-user-response.dto';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserSummaryDto } from './dto/user-summary.dto';
-import { User } from './entities/user.entity';
 import { GetUsersResponseDto } from './dto/get-users-response.dto';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 
@@ -19,16 +19,21 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('create')
-  async create(@Body() dto: CreateUserDto): Promise<CreateUserResponseDto> {
-    const userEntity = await this.usersService.create(dto);
-    return {id: userEntity.id};
+  @UseInterceptors(FileInterceptor('avatar'))
+  async create(
+    @Body() dto: CreateUserDto,
+    @UploadedFile() avatar?: Express.Multer.File,
+  ): Promise<CreateUserResponseDto> {
+    const userEntity = await this.usersService.create(dto, avatar);
+    return { id: userEntity.id };
   }
 
   @UseGuards(SessionAuthGuard)
   @Patch('me')
-  async updateCurrentUser (
-    @Req() req: Request, 
-    @Body() dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
+  async updateCurrentUser(
+    @Req() req: Request,
+    @Body() dto: UpdateUserDto,
+  ): Promise<UpdateUserResponseDto> {
     return this.usersService.updateProfile(req.userId!, dto);
   }
 

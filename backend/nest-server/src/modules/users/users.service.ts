@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -13,6 +13,7 @@ import { ErrorCode } from 'src/common/errors/error-code';
 import { SupportedLanguage } from './enums/supported-language.enum';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { GetUsersResponseDto } from './dto/get-users-response.dto';
+import { MinioService } from '../minio/minio.service';
 
 
 const PASSWORD_SALT_ROUNDS = 10;
@@ -22,11 +23,12 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly minioService: MinioService,
   ) {}
 
   
 
-  async create(dto: CreateUserDto): Promise<User> {
+  async create(dto: CreateUserDto, avatar?: Express.Multer.File): Promise<User> {
     const MailExisting = await this.findByEmail(dto.email)
     if(MailExisting)
       throw new ApplicationException(
@@ -46,6 +48,12 @@ export class UsersService {
     });
 
     await this.usersRepository.save(userEntity);
+
+    if (avatar) {
+      const objectKey = await this.minioService.uploadUserAvatar(userEntity.id, avatar);
+      userEntity.avatarObjectKey = objectKey;
+      await this.usersRepository.save(userEntity);
+    }
 
     return userEntity;
   };
