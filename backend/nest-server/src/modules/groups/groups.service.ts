@@ -4,6 +4,7 @@ import { Group } from './entities/group.entity';
 import { Repository } from 'typeorm';
 import { CreateGroupsDto } from './dto/create-groups.dto';
 import { CreateGroupsResponseDto } from './dto/create-groups-response.dto';
+import { UpdateGroupsDto } from './dto/update-groups.dto';
 
 @Injectable()
 export class GroupsService {
@@ -52,6 +53,28 @@ export class GroupsService {
 
   async findAll(): Promise<Group[]> {
     return this.groupsRepository.find();
+  }
+
+  //example code for pagination
+  // async findAll(page = 1, limit = 20): Promise<[Group[], number]> {
+  //   return this.groupsRepository.findAndCount({
+  //     skip: (page - 1) * limit,
+  //     take: limit,
+  //   })
+  // }
+
+  async update(id: string, dto: UpdateGroupsDto): Promise<Group> {
+    const group = await this.get(id);
+
+    if ( dto.name && dto.name !== group.name) {
+      const nameTaken = await this.findByName(dto.name);
+      if (nameTaken) {
+        throw new ConflictException('Name is already taken');
+      }
+    }
+
+    Object.assign(group, dto);
+    return this.groupsRepository.save(group);
   }
 
   async deleteGroup(id: string): Promise<void> {
