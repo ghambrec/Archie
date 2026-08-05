@@ -50,6 +50,10 @@ export class GroupsService {
     return group;
   }
 
+  async findAll(): Promise<Group[]> {
+    return this.groupsRepository.find();
+  }
+
   async deleteGroup(id: string): Promise<void> {
     const group = await this.groupsRepository.findOneBy({ id });
     if (!group) {

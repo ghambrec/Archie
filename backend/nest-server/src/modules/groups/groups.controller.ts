@@ -24,6 +24,12 @@ export class GroupsController {
   async getByName(@Param('name') name: string): Promise<Group> {
     return this.groupsService.getByNameOrFail(name);
   }
+
+  @Get()
+  async findAll(): Promise<Group[]> {
+    return this.groupsService.findAll();
+  }
+
   @Delete(':id')
   // @UseGuards(SessionAuthGuard)
   async remove(@Param('id') id: string): Promise<void> {
