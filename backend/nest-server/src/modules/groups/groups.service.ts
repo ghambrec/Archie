@@ -46,7 +46,7 @@ export class GroupsService {
     const group = await this.findByName(name);
 
     if (!group) {
-      throw new NotFoundException('Group with the name "${name}" not found');
+      throw new NotFoundException(`Group with the name "${name}" not found`);
     }
     return group;
   }
