@@ -37,6 +37,7 @@
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.4.2",
     "ioredis": "^5.11.1",
+    "minio": "^8.0.7",
     "nestjs-pino": "^4.6.1",
     "pg": "^8.22.0",
     "pino": "^10.3.1",
