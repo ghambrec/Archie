@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { Client } from 'minio';
-import { getEnv, getEnvBoolean, getEnvNumber, requireEnv } from '../../common/env/env';
+import { getEnv, getEnvBoolean, getEnvNumber, requireEnv } from '../../../common/env/env';
 
 export const MINIO_CLIENT = 'MINIO_CLIENT';
 

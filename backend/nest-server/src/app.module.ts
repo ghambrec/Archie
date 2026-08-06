@@ -13,7 +13,6 @@ import { AuthModule } from './modules/auth/auth.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { GroupsController } from './modules/groups/groups.controller';
 import { AppLoggerModule } from './logger/app-logger.module';
-import { MinioModule } from './modules/minio/minio.module';
 import { StorageModule } from './modules/storage/storage.module';
 
 @Module({
@@ -38,7 +37,6 @@ import { StorageModule } from './modules/storage/storage.module';
     RedisModule,
     AuthModule,
     AppLoggerModule,
-    MinioModule,
     StorageModule,
   ],
   controllers: [AppController, GroupsController],
