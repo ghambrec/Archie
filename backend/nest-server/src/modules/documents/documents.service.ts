@@ -5,6 +5,7 @@ import { randomUUID, createHash } from 'crypto';
 import { StorageService } from '../storage/storage.service';
 import { Document } from './entities/document.entity';
 import { DocumentStatus } from './entities/document-status.enum';
+import { UploadResponseDto } from './dto/upload-response.dto';
 
 const DOCUMENTS_BUCKET = 'documents';
 
@@ -16,7 +17,7 @@ export class DocumentsService {
     private readonly documentsRepository: Repository<Document>,
   ) {}
 
-  async upload(userId: string, file: Express.Multer.File): Promise<{ key: string }> {
+  async upload(userId: string, file: Express.Multer.File): Promise<UploadResponseDto> {
     const sha256 = createHash('sha256').update(file.buffer).digest('hex');
 
     const document = await this.documentsRepository.save(
@@ -42,6 +43,6 @@ export class DocumentsService {
       },
     );
 
-    return { key };
+    return { id: key };
   }
 }

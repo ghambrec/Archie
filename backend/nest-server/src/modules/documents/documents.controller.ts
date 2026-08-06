@@ -12,6 +12,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { DocumentsService } from './documents.service';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { UploadResponseDto } from './dto/upload-response.dto';
 
 @ApiTags('documents')
 @Controller('documents')
@@ -25,7 +26,7 @@ export class DocumentsController {
   async upload(
     @Req() req: Request,
     @UploadedFileDecorator() file: Express.Multer.File,
-  ): Promise<{ key: string }> {
+  ): Promise<UploadResponseDto> {
     if (!file) {
       throw new BadRequestException('No file was provided.');
     }
