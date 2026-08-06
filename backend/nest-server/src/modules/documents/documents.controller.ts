@@ -5,7 +5,9 @@ import {
   UseInterceptors,
   UploadedFile as UploadedFileDecorator,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { DocumentsService } from './documents.service';
@@ -21,12 +23,13 @@ export class DocumentsController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async upload(
+    @Req() req: Request,
     @UploadedFileDecorator() file: Express.Multer.File,
   ): Promise<{ key: string }> {
     if (!file) {
       throw new BadRequestException('No file was provided.');
     }
 
-    return this.documentsService.upload(file);
+    return this.documentsService.upload(req.userId!, file);
   }
 }
