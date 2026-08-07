@@ -41,7 +41,6 @@ export class UsersService {
       email: dto.email.trim().toLowerCase(),
       passwordHash,
       displayName: dto.displayName,
-      
     });
 
     await this.usersRepository.save(userEntity);
