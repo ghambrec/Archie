@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { GroupMinimalDto } from "src/modules/groups/dto/group-minimal.dto";
-import { UserMinimalDto } from "src/modules/users/dto/user-minimal.dto";
+import { GroupMinimalDto } from "src/modules/user-groups/dto/group-minimal.dto";
+import { UserMinimalDto } from "src/modules/user-groups/dto/user-minimal.dto";
 
 export class UserGroupsMinimalDto {
   @ApiProperty()

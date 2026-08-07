@@ -7,8 +7,8 @@ import { GetUserGroupsResponseDto } from './dto/user-groups-response.dto';
 import { UserGroupsMinimalDto } from './dto/user-groups-minimal.dto';
 import { GetUserGroupsMinimalResponseDto } from './dto/user-groups-minimal-response.dt';
 import { User } from '../users/entities/user.entity';
-import { UserMinimalDto } from '../users/dto/user-minimal.dto';
-import { GroupMinimalDto } from '../groups/dto/group-minimal.dto';
+import { UserMinimalDto } from './dto/user-minimal.dto';
+import { GroupMinimalDto } from './dto/group-minimal.dto';
 
 @Injectable()
 export class UserGroupsService {
