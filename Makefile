@@ -15,7 +15,7 @@ deps-repair:
 
 
 up:
-	${COMPOSE} up -d
+	${COMPOSE} up
 
 down:
 	${COMPOSE} down
