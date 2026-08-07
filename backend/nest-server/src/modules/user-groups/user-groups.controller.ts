@@ -37,11 +37,11 @@ export class UserGroupsController {
     return this.userGroupsService.getAllUserGroups(query);
   }
 
-  @Get('groups/:groupId')
-  @UseGuards(SessionAuthGuard)
-  async getGroupById(@Param('groupId') groupId: string) {
-    return this.userGroupsService.getGroupById(groupId);
-  }
+  // @Get('groups/:groupId')
+  // @UseGuards(SessionAuthGuard)
+  // async getGroupById(@Param('groupId') groupId: string) {
+  //   return this.userGroupsService.getGroupById(groupId);
+  // }
 }
 
 

@@ -4,6 +4,11 @@ import { UserGroup } from './entities/user-group.entity';
 import { Repository } from 'typeorm';
 import { GetUserGroupsQueryDto } from './dto/user-groups-query.dto';
 import { GetUserGroupsResponseDto } from './dto/user-groups-response.dto';
+import { UserGroupsMinimalDto } from './dto/user-groups-minimal.dto';
+import { GetUserGroupsMinimalResponseDto } from './dto/user-groups-minimal-response.dt';
+import { User } from '../users/entities/user.entity';
+import { UserMinimalDto } from '../users/dto/user-minimal.dto';
+import { GroupMinimalDto } from '../groups/dto/group-minimal.dto';
 
 @Injectable()
 export class UserGroupsService {
@@ -35,23 +40,38 @@ export class UserGroupsService {
     return this.userGroupRepository.find({ where: { groupId }, relations: { user: true } });
   }
 
-  async getAllUserGroups(query: GetUserGroupsQueryDto): Promise<GetUserGroupsResponseDto> {
+  async getAllUserGroups(query: GetUserGroupsQueryDto): Promise<GetUserGroupsMinimalResponseDto> {
     const page = query.page ?? 1; // Nullish Coalescing Operator
     const limit = query.limit ?? 20; // ist wert NULL, dann 20
 
-    const [data, total] = await this.userGroupRepository.findAndCount({ 
+    const [entities, total] = await this.userGroupRepository.findAndCount({ 
       skip: (page - 1) * limit,
       take: limit,
       order: { joinedAt: 'DESC' },
       relations: { user: true, group: true }
     });
 
+    const data: UserGroupsMinimalDto[] = entities.map(ug => ({
+      userId: ug.userId,
+      groupId: ug.groupId,
+      joinedAt: ug.joinedAt,
+      user: {
+        id: ug.user.id,
+        displayName: ug.user.displayName,
+        email: ug.user.email,
+      } as UserMinimalDto,
+      group: {
+        id: ug.group.id,
+        name: ug.group.name,
+      } as GroupMinimalDto,
+    }));
+
     return { data, page, limit, total, totalPages: Math.ceil(total/limit),};
   }
 
-  async getGroupById(groupId: string) {
-    return this.getMembers(groupId);
-  }
+  // async getGroupById(groupId: string) {
+  //   return this.getMembers(groupId);
+  // }
 }
 
 
