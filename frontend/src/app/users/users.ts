@@ -12,74 +12,73 @@ export interface CreateUserResponse {
 	id: string;
 	email: string;
 	displayName: string;
+
 }
 
-export interface UsersList {
-	id: string;
-	email: string;
-	displayName: string;
-	preferredLanguage: string;
-	lastLogin: string;
-	isActive: boolean;
-	avatar: string;
+export interface UserInfo {
+		id: 	string;
+		email:	string;
+		displayName: string;
+		preferredLanguage: string;
+		isActive: boolean;
+		lastLoginAt: string | null;
+		//avatar: string;
+
+	}
+
+export interface GetUsersResponse{
+	data: UserInfo[];
+	page: number;
+	limit: number;
+	total: number;
+	totalPages: number;
+
 }
+
+//export interface UsersList {
+//	id: string;
+//	email: string;
+//	displayName: string;
+//	preferredLanguage: string;
+//	lastLogin: string;
+//	isActive: boolean;
+//	avatar: string;
+//}
 
 @Service()
 export class Users {
 	private readonly http = inject(HttpClient);
 	private readonly baseUrl = `${environment.apiUrl}/users`;
 
-	readonly usersList = signal<UsersList[]>([]);
+
+	readonly usersList = signal<UserInfo[]>([]);
+	
 
 	create(body: CreateUserRequest) {
 		const url = `${this.baseUrl}/create`;
 
 		return this.http.post<CreateUserResponse>(url, body);
+
 	}
+	//this.usersList.set();
 
-	getUsersList() {
-		// const url = `${this.baseUrl}/xxx`;
-
-		// this.http.get<UserList[]>(url).subscribe((users) => {
-		// 	this.userList.set(users);
-		// });
-
-		// dummy data, no endpoint here
-		this.usersList.set(
-			[
-				{
-					"id": "3d5cd382-5e0b-4066-840b-d496a7cd39as",
-					"email": "user1@mail.de",
-					"displayName": "Paul",
-					"preferredLanguage": "en",
-					"lastLogin": "2026-08-01 14:04:17",
-					"isActive": true,
-					"avatar": "https://api.dicebear.com/9.x/identicon/svg?seed=paul"
+	getUsersList(page =1, limit = 20){
+		return this.http.get<GetUsersResponse>(
+			this.baseUrl,
+			{
+				params: {
+					page: page.toString(),
+					limit: limit.toString(),
 				},
-				{
-					"id": "3d54bb82-5e0b-4066-840b-d496a7cd30ce",
-					"email": "user2@mail.de",
-					"displayName": "Nikita",
-					"preferredLanguage": "en",
-					"lastLogin": "",
-					"isActive": false,
-					"avatar": "https://api.dicebear.com/9.x/identicon/svg?seed=nikita"
-				},
-				{
-					"id": "3d54bb82-5e0b-4066-500b-d496a7cd30ce",
-					"email": "user3@mail.de",
-					"displayName": "Cedric",
-					"preferredLanguage": "en",
-					"lastLogin": "",
-					"isActive": true,
-					"avatar": "https://api.dicebear.com/9.x/identicon/svg?seed=cedric"
-				}
-			]
+				withCredentials: true, 
+			}
 		)
 	}
-
-	addToUserList(user: UsersList) {
-		this.usersList.update((currentList) => [...currentList, user]);
-	}
+	//addToUserlist(user: UserInfo){
+	//	this.usersList.update((currentList)) =>
+	//		const newList = [...currentList]
+	//		newList.push(user);
+	//		return newList
+	//} 
 
 }

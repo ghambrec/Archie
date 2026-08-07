@@ -13,4 +13,18 @@ export class UserInfoDto {
   @ApiProperty({ example: 'Max' })
   @IsString()
   displayName!: string;
+
+  @ApiProperty({ example: 'de' })
+  preferredLanguage!: string;
+
+  @ApiProperty({ example: true })
+  isActive!: boolean;
+
+  @ApiProperty({
+    type: String,
+    format: 'date-time',
+    nullable: true, 
+    example: '2026-08-06T12:30:00.000Z',
+  })
+  lastLoginAt!: Date | null;
 }
