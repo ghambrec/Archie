@@ -4,12 +4,13 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
-import { CreateUserResponseDto } from './dto/create-user-response.dto';
 import { UpdateUserResponseDto } from './dto/update-user-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserSummaryDto } from './dto/user-summary.dto';
 import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
+import { GetUsersQueryDto } from './dto/get-users-query.dto';
+import { GetUsersResponseDto } from './dto/get-users-response.dto';
 
 
 const PASSWORD_SALT_ROUNDS = 10;
@@ -51,7 +52,9 @@ export class UsersService {
 
     const user = await this.usersRepository.findOneBy({id: userID,});
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new ApplicationException (
+        ErrorCode.UserNotFound
+      )
     }
     if(dto.email !== undefined)
     {
@@ -73,11 +76,11 @@ export class UsersService {
           ErrorCode.UserNameAlreadyRegistered
         )
     }
-    //if(dto.preferredLanguage !==undefined)
-    //{
-    //  const newLang = dto.displayName?.trim();
-    //  const langExists = await this
-    //}
+    if(dto.preferredLanguage !==undefined)
+    {
+      const newLang = dto.preferredLanguage?.trim();
+      
+    }
   
   
     
@@ -115,6 +118,33 @@ export class UsersService {
       ErrorCode.UserNotFound,
     )
     return user;
+  }
+
+  async getAllUsers(request: GetUsersQueryDto): Promise<GetUsersResponseDto> {
+    const { page, limit } = request;
+
+    const [users, total] = await this.usersRepository.findAndCount({
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        preferredLanguage: true,
+        isActive: true,
+        lastLoginAt:true,
+        //avatar: true,
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { createdAt: 'DESC' },
+    });
+
+    return {
+      data: users,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 }
 

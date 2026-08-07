@@ -16,5 +16,8 @@ export class UserSummaryDto {
 
     @ApiProperty()
     isActive!: boolean;
+
+    //@ApiProperty()
+    //lastLoginAt!: string;
 }
 

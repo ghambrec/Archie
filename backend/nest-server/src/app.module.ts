@@ -13,6 +13,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { GroupsController } from './modules/groups/groups.controller';
 import { AppLoggerModule } from './logger/app-logger.module';
+import { StorageModule } from './modules/storage/storage.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { AppLoggerModule } from './logger/app-logger.module';
     RedisModule,
     AuthModule,
     AppLoggerModule,
+    StorageModule,
   ],
   controllers: [AppController, GroupsController],
   providers: [AppService],

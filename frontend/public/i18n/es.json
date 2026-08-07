@@ -1,0 +1,52 @@
+{
+	"programName": "Archie",
+	"sidebar": {
+		"home": "Inicio",
+		"settings": "Configuración",
+		"documents": "Documentos",
+		"dropdown": {
+			"profile": "Perfil",
+			"logOut": "Cerrar sesión"
+		}
+	},
+	"login": {
+		"title": "Archie - Inicio de sesión",
+		"email": "Correo electrónico",
+		"password": "Contraseña",
+		"submit": "Iniciar sesión",
+		"errorGeneral": "Error al iniciar sesión",
+		"errorInvalidCred": "Correo electrónico o contraseña no válidos"
+	},
+	"users": {
+		"userList": {
+			"heading": "Usuarios",
+			"searchPlaceholder": "Buscar por nombre o correo electrónico",
+			"email": "Correo electrónico",
+			"displayName": "Nombre",
+			"lastLogin": "Último inicio de sesión",
+			"active": "Activo"
+		},
+		"createUser": {
+			"heading": "Crear usuario",
+			"email": "Correo electrónico",
+			"password": "Contraseña",
+			"name": "Nombre",
+			"btnSubmit": "Crear usuario",
+			"btnSubmitPending": "Enviando...",
+			"btnCancel": "Cancelar",
+			"feedbackMsg": "Usuario creado correctamente",
+			"errorGeneral": "No se pudo crear el usuario",
+			"errorConflictMail": "El correo electrónico ya está registrado",
+			"errorConflictName": "El nombre ya está registrado"
+		}
+	},
+	"errors": {
+		"AUTH_EMAIL_ALREADY_REGISTERED": "Esta dirección de correo electrónico ya está registrada.",
+		"AUTH_INVALID_CREDENTIALS": "El correo electrónico o la contraseña no son válidos.",
+		"USER_NOT_FOUND": "No se encontró el usuario.",
+		"USER_NAME_ALREADY_REGISTERED": "Este nombre para mostrar ya está registrado.",
+		"VALIDATION_FAILED": "Los datos enviados no son válidos.",
+		"INTERNAL_SERVER_ERROR": "Se produjo un error inesperado.",
+		"UNKNOWN": "Se produjo un error inesperado."
+	}
+}

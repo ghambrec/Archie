@@ -4,11 +4,16 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { Logger } from 'nestjs-pino';
+import { ApplicationExceptionFilter } from './common/errors/application-exception.filter';
+import { ErrorCode } from './common/errors/error-code';
+import { ApplicationException } from './common/errors/application.exception';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
+  app.useGlobalFilters(new ApplicationExceptionFilter())
 
   app.useLogger(app.get(Logger));
   
@@ -20,8 +25,14 @@ async function bootstrap() {
   });
 
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, transform: true }),
+    new ValidationPipe({ 
+      whitelist: true, 
+      transform: true, 
+      exceptionFactory:() =>
+        new ApplicationException(ErrorCode.ValidationFailed)
+         }),
   );
+
 
   const config = new DocumentBuilder()
     .setTitle('Documents System API')
