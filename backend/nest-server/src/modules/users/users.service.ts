@@ -4,13 +4,11 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
-import { CreateUserResponseDto } from './dto/create-user-response.dto';
 import { UpdateUserResponseDto } from './dto/update-user-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserSummaryDto } from './dto/user-summary.dto';
 import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
-import { SupportedLanguage } from './enums/supported-language.enum';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { GetUsersResponseDto } from './dto/get-users-response.dto';
 
@@ -43,6 +41,7 @@ export class UsersService {
       email: dto.email.trim().toLowerCase(),
       passwordHash,
       displayName: dto.displayName,
+      
     });
 
     await this.usersRepository.save(userEntity);
@@ -54,7 +53,9 @@ export class UsersService {
 
     const user = await this.usersRepository.findOneBy({id: userID,});
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new ApplicationException (
+        ErrorCode.UserNotFound
+      )
     }
     if(dto.email !== undefined)
     {
@@ -128,6 +129,10 @@ export class UsersService {
         id: true,
         email: true,
         displayName: true,
+        preferredLanguage: true,
+        isActive: true,
+        lastLoginAt:true,
+        //avatar: true,
       },
       skip: (page - 1) * limit,
       take: limit,
