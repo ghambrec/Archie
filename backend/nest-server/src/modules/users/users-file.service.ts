@@ -34,7 +34,7 @@ export class UsersFileService {
       throw new NotFoundException('User was not found.');
     }
 
-    const key = randomUUID();
+    const key = `avatar-${randomUUID()}`;
     await this.storageService.putObject(
       AVATARS_BUCKET,
       key,
