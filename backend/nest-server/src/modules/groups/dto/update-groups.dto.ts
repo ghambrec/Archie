@@ -10,8 +10,4 @@ export class UpdateGroupsDto extends PartialType(CreateGroupsDto) { // erbt alle
   @IsOptional()
   @IsString()
   description?: string | undefined; // maybe remove '| undefined'
-
-  @IsOptional()
-  @IsBoolean()
-  isSystem?: boolean | undefined;
 }
