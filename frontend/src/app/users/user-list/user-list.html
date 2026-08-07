@@ -14,10 +14,16 @@
 	<tbody class="table-group-divider">
 		@for (user of filteredUserList(); track user.id) {
 			<tr>
-				<td class="pe-0"> <img [src]="user.avatar" alt="" width="32" height="32" class="rounded-circle"> </td>
+				<td class="pe-0"> 
+					<!--<img [src]="user.avatar"-->
+					<img src ="/images/default-avatar.svg"
+					 alt="Default user avatar"
+					 width="32" 
+					 height="32" 
+					 class="rounded-circle"> </td>
 				<td class="ps-0">{{ user.email }}</td>
 				<td>{{ user.displayName }}</td>
-				<td>{{ user.lastLogin }}</td>
+				<td>{{ user.lastLoginAt?? "-" }}</td>
 				<td> @if (user.isActive) {<i class="bi bi-check-square"></i>} @else {<i class="bi bi-square"></i>} </td>
 				<td> <button type="button" class="btn btn-secondary me-2 display-flex" (click)="openEditUserModal()"><i class="bi bi-pencil-fill"></i></button> </td>
 			</tr>

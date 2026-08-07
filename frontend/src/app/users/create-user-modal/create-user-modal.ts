@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { UsersList, Users } from '../users';
+import { Users } from '../users';
 import { email, form, minLength, required, FormRoot, FormField } from '@angular/forms/signals';
 import { firstValueFrom, timer } from 'rxjs';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -42,19 +42,19 @@ export class CreateUserModal {
 						const formValues = field().value();
 						const reponse = await firstValueFrom(this.usersService.create(formValues));
 
-						const createdUser: UsersList = {
-							id: reponse.id,
-							email: formValues.email,
-							displayName: formValues.displayName,
-							preferredLanguage: "en",
-							lastLogin: "",
-							isActive: true,
-							avatar: `https://api.dicebear.com/9.x/identicon/svg?seed=${formValues.displayName}`
-						}
+						//const createdUser: UserInfo = {
+						//	id: reponse.id,
+						//	email: formValues.email,
+						//	displayName: formValues.displayName,
+						//	preferredLanguage: "en",
+						//	lastLogin: "null",
+						//	isActive: true,
+							//avatar: `https://api.dicebear.com/9.x/identicon/svg?seed=${formValues.displayName}`
+						//}
 
 						this.feedbackMsg.set('users.createUser.feedbackMsg');
 						await firstValueFrom(timer(500));
-						this.activeModal.close(createdUser);
+						this.activeModal.close();
 						return;
 					} catch (error : any) {
 						let translocoKey = error.status == 409 ? "users.createUser.errorConflict" : "users.createUser.errorGeneral";
