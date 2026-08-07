@@ -1,7 +1,4 @@
 allowBuilds:
   '@scarf/scarf': false
   bcrypt: true
-  pnpm-lock.yaml: false
-  sharp: false
   unrs-resolver: true
-  vue-demi: false
