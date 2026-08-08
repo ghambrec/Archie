@@ -7,6 +7,8 @@ export enum ErrorCode {
     UserNameAlreadyRegistered = 'USER_NAME_ALREADY_REGISTERED',
     InternalServerError = 'INTERNAL_SERVER_ERROR',
     ValidationFailed = 'VALIDATION_FAILED',
+    InvalidAvatarFileType = 'INVALID_AVATAR_FILE_TYPE',
+    AvatarFileTooLarge = 'AVATAR_FILE_TOO_LARGE',
 
     //LanguageNotAvailable ='LANGUAGE_NOT_AVAILABLE',
   }
