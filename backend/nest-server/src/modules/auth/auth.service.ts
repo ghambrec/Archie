@@ -8,6 +8,8 @@ import { RegisterRequestDto } from './dto/register-request.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserSummaryDto } from '../users/dto/user-summary.dto';
 import { Logger } from 'nestjs-pino';
+import { LoginAttemptService } from './login-attempt.service';
+import { LockedException } from './exceptions/locked.exception';
 
 @Injectable()
 export class AuthService {
@@ -15,17 +17,26 @@ export class AuthService {
     private readonly logger: Logger,
     private readonly userService: UsersService,
     private readonly sessionService: SessionService,
+    private readonly loginAttemptService: LoginAttemptService,
   ) {}
 
   async login(request: LoginRequestDto) : Promise<LoginResult> {
     this.logger.debug('Execute login', request.email);
 
+    const retryAfterSeconds = await this.loginAttemptService.isLocked(request.email);
+    if (retryAfterSeconds !== null) {
+      this.logger.warn(`Login blocked for ${request.email}, locked out`);
+      throw new LockedException(retryAfterSeconds);
+    }
+
     const user = await this.userService.findByEmail(request.email);
     if (!user || !(await bcrypt.compare(request.password, user.passwordHash))) {
+      await this.loginAttemptService.registerFailure(request.email);
       this.logger.warn(`Login failed for ${request.email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    await this.loginAttemptService.clearAttempts(request.email);
     const sessionId = await this.sessionService.create(user.id);
     return { user, sessionId };
   }
