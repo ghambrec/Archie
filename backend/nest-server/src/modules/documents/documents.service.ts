@@ -3,10 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { randomUUID, createHash } from 'crypto';
 import { Logger } from 'nestjs-pino';
-import { StorageService } from '../storage/storage.service';
+import { StorageService, DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS } from '../storage/storage.service';
 import { Document } from './entities/document.entity';
 import { DocumentStatus } from './entities/document-status.enum';
 import { UploadResponseDto } from './dto/upload-response.dto';
+import { GetDocumentsQueryDto } from './dto/get-documents-query.dto';
+import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
+import { DocumentSummaryDto } from './dto/document-summary.dto';
+import { DownloadUrlResponseDto } from './dto/download-url-response.dto';
+import { ApplicationException } from 'src/common/errors/application.exception';
+import { ErrorCode } from 'src/common/errors/error-code';
 
 const DOCUMENTS_BUCKET = 'documents';
 
@@ -55,5 +61,70 @@ export class DocumentsService {
     this.logger.log({ documentId: document.id }, 'Document uploaded successfully');
 
     return {id: document.id, objectKey: key };
+  }
+
+  async findAll(userId: string, query: GetDocumentsQueryDto): Promise<GetDocumentsResponseDto> {
+    const { page, limit } = query;
+
+    const [documents, total] = await this.documentsRepository.findAndCount({
+      where: { uploadedBy: userId },
+      select: {
+        id: true,
+        filename: true,
+        mimeType: true,
+        sizeBytes: true,
+        status: true,
+        createdAt: true,
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { createdAt: 'DESC' },
+    });
+
+    return {
+      data: documents,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async findOne(userId: string, id: string): Promise<DocumentSummaryDto> {
+    const document = await this.documentsRepository.findOne({
+      where: { id, uploadedBy: userId },
+      select: {
+        id: true,
+        filename: true,
+        mimeType: true,
+        sizeBytes: true,
+        status: true,
+        createdAt: true,
+      },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    return document;
+  }
+
+  async getDownloadUrl(userId: string, id: string): Promise<DownloadUrlResponseDto> {
+    const document = await this.documentsRepository.findOne({
+      where: { id, uploadedBy: userId },
+      select: { objectKey: true },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    const url = await this.storageService.getPresignedDownloadUrl(
+      DOCUMENTS_BUCKET,
+      document.objectKey,
+    );
+
+    return { url, expiresInSeconds: DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS };
   }
 }
