@@ -66,6 +66,8 @@ export class DocumentsService {
   async findAll(userId: string, query: GetDocumentsQueryDto): Promise<GetDocumentsResponseDto> {
     const { page, limit } = query;
 
+    this.logger.log({ userId, page, limit }, 'Listing documents');
+
     const [documents, total] = await this.documentsRepository.findAndCount({
       where: { uploadedBy: userId },
       select: {
@@ -81,6 +83,8 @@ export class DocumentsService {
       order: { createdAt: 'DESC' },
     });
 
+    this.logger.log({ userId, total }, 'Documents listed successfully');
+
     return {
       data: documents,
       page,
@@ -91,6 +95,9 @@ export class DocumentsService {
   }
 
   async findOne(userId: string, id: string): Promise<DocumentSummaryDto> {
+
+    this.logger.log({ userId, id }, 'Find one document');
+
     const document = await this.documentsRepository.findOne({
       where: { id, uploadedBy: userId },
       select: {
@@ -107,10 +114,15 @@ export class DocumentsService {
       throw new ApplicationException(ErrorCode.DocumentNotFound);
     }
 
+    this.logger.log({ userId, id }, 'One document found');
+
     return document;
   }
 
   async getDownloadUrl(userId: string, id: string): Promise<DownloadUrlResponseDto> {
+
+    this.logger.log({ userId, id }, 'Create Download Url');
+
     const document = await this.documentsRepository.findOne({
       where: { id, uploadedBy: userId },
       select: { objectKey: true },
@@ -124,6 +136,8 @@ export class DocumentsService {
       DOCUMENTS_BUCKET,
       document.objectKey,
     );
+
+    this.logger.log({ userId, id }, 'Download Url is created');
 
     return { url, expiresInSeconds: DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS };
   }
