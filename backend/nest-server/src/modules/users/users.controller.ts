@@ -1,22 +1,37 @@
-import { Req, Body,Get, Controller, Param, Patch, Post ,ParseUUIDPipe, UseGuards, ConflictException, Query } from '@nestjs/common';
+import {
+  Req,
+  Body,Get,
+  Controller,
+  Patch,
+  Post,
+  UseGuards,
+  Query,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 
 import { ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { UsersService } from './users.service';
+import { UsersFileService } from './users-file.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateUserResponseDto } from './dto/create-user-response.dto';
 import { UpdateUserResponseDto } from './dto/update-user-response.dto';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserSummaryDto } from './dto/user-summary.dto';
-import { User } from './entities/user.entity';
 import { GetUsersResponseDto } from './dto/get-users-response.dto';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { PatchAvatarResponseDto } from './dto/patch-avatar-response.dto';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly usersFileService: UsersFileService,
+  ) {}
 
   @Post('create')
   async create(@Body() dto: CreateUserDto): Promise<CreateUserResponseDto> {
@@ -38,7 +53,15 @@ export class UsersController {
     return this.usersService.getAllUsers(request);
   }
  
-
+  @UseGuards(SessionAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  @Patch('me/avatar')
+  async patchAvatar(
+    @Req() req: Request,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<PatchAvatarResponseDto> {
+    return this.usersFileService.patchAvatarImage(req.userId!, file);
+  }
   
   @UseGuards(SessionAuthGuard)
   @Get('me')

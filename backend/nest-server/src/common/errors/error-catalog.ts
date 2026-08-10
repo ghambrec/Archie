@@ -37,6 +37,14 @@ export const ERROR_CATALOG ={
   [ErrorCode.ValidationFailed]: {
     status: HttpStatus.BAD_REQUEST,
     message: 'The request contains invalid data'
+  },
+  [ErrorCode.InvalidAvatarFileType]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: 'Avatar must be a JPEG, PNG, or WebP image.'
+  },
+  [ErrorCode.AvatarFileTooLarge]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: 'Avatar file exceeds the maximum allowed size of 5MB.'
   }
 
   } satisfies Record<ErrorCode, ErrorDefinition>;
