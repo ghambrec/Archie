@@ -27,18 +27,20 @@ export class DocumentsService {
 
     const sha256 = createHash('sha256').update(file.buffer).digest('hex');
 
+    const key = `${DOCUMENTS_BUCKET}-${randomUUID()}`;
+
     const document = await this.documentsRepository.save(
         this.documentsRepository.create({
           uploadedBy: userId,
           filename: file.originalname,
           mimeType: file.mimetype,
+          objectKey: key,
           sizeBytes: file.size,
           sha256,
           status: DocumentStatus.Uploaded,
         }),
       );
 
-    const key = `${document.id}`;
 
     await this.storageService.putObject(
       DOCUMENTS_BUCKET,
@@ -50,8 +52,8 @@ export class DocumentsService {
       },
     );
 
-    this.logger.log({ documentId: key }, 'Document uploaded successfully');
+    this.logger.log({ documentId: document.id }, 'Document uploaded successfully');
 
-    return { id: key };
+    return {id: document.id, objectKey: key };
   }
 }

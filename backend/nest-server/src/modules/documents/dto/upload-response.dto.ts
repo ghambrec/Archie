@@ -6,4 +6,7 @@ import { IsEmail, IsString, MinLength } from 'class-validator';
 export class UploadResponseDto {
   @ApiProperty()
   id!: string;
+
+  @ApiProperty()
+  objectKey!: string;
 }
