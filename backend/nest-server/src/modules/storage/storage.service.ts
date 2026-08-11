@@ -2,6 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { Client } from 'minio';
 import type { Readable } from 'stream';
 import { MINIO_CLIENT } from './minio/minio.module';
+import { ConfigService } from '@nestjs/config';
+
 
 const DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS = 5 * 60;
 
@@ -16,7 +18,15 @@ export interface PutObjectResult {
 
 @Injectable()
 export class StorageService {
-  constructor(@Inject(MINIO_CLIENT) private readonly client: Client) {}
+  private readonly expireURL: number;
+  constructor(
+    @Inject(MINIO_CLIENT)
+    private readonly client: Client,
+    private readonly configService: ConfigService) {
+      this.expireURL = this.configService.getOrThrow<number>(
+        'storage.urlExpire',
+      )
+    }
 
   async putObject(
     bucket: string,
@@ -44,7 +54,7 @@ export class StorageService {
   async getPresignedDownloadUrl(
     bucket: string,
     key: string,
-    expirySeconds: number = DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS,
+    expirySeconds: number = this.expireURL,
   ): Promise<string> {
     return this.client.presignedUrl('GET', bucket, key, expirySeconds);
   }

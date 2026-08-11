@@ -16,6 +16,8 @@ import { AppLoggerModule } from './logger/app-logger.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { ConfigModule } from '@nestjs/config';
 import authConfig from './config/auth.config';
+import redisConfig from './config/redis.config';
+import storageConfig from './config/storage.config';
 
 @Module({
   imports: [
@@ -24,9 +26,9 @@ import authConfig from './config/auth.config';
       load: [
         authConfig,
         //databaseConfig,
-        //redisConfig,
-        //storageConfig
-         ],
+        redisConfig,
+        storageConfig
+        ],
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
