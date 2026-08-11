@@ -7,12 +7,15 @@ import { GroupsResponseDto } from './dto/groups-response.dto';
 import { UpdateGroupsDto } from './dto/update-groups.dto';
 import { group } from 'console';
 import { GroupsAdminResponseDto } from './dto/groups-admin-response';
+import { UserGroup } from '../user-groups/entities/user-group.entity';
 
 @Injectable()
 export class GroupsService {
   constructor(
     @InjectRepository(Group)
     private readonly groupsRepository: Repository<Group>,
+    @InjectRepository(UserGroup)
+    private readonly userGroupsRepository: Repository<UserGroup>
   ) {}
   // async create(dto: CreateGroupsDto, isAdmin: boolean): Promise<GroupsResponseDto | GroupsAdminResponseDto> {
   async create(dto: CreateGroupsDto): Promise<GroupsResponseDto | GroupsAdminResponseDto> {
@@ -85,7 +88,7 @@ export class GroupsService {
     return group;
   }
 
-  async deleteGroup(id: string): Promise<void> {
+  async deleteGroup(id: string, userId: string, skipMembershipCheck: boolean): Promise<void> {
     const group = await this.groupsRepository.findOneBy({ id });
     if (!group) {
       throw new NotFoundException(`Group with id ${id} not found`);
@@ -94,6 +97,13 @@ export class GroupsService {
     // check if user is still in group?
     if (group.isSystem == true) {
       throw new ForbiddenException('System groups cannot be deleted');
+    }
+    if ( !skipMembershipCheck )
+    {
+      const isMember = await this.isUserMemberOfGroup(userId, group.id);
+      if (isMember == false) {
+        throw new ForbiddenException('You are not a member of this group');
+      }
     }
 
     await this.groupsRepository.remove(group);
@@ -159,17 +169,32 @@ export class GroupsService {
     return group;
   }
 
-  async adminDeleteGroup(id: string): Promise<void> {
+  async adminDeleteGroup(id: string, userId: string, skipMembershipCheck: boolean): Promise<void> {
     const group = await this.groupsRepository.findOneBy({ id });
     if (!group) {
       throw new NotFoundException(`Group with id ${id} not found`);
     }
     
     // check if user is still in group?
+    if (group.isSystem == true) {
+      throw new ForbiddenException('System groups cannot be deleted');
+    }
+
+    if ( !skipMembershipCheck )
+    {
+      const isMember = await this.isUserMemberOfGroup(userId, group.id);
+      if (isMember == false) {
+        throw new ForbiddenException('You are not a member of this group');
+      }
+    }
 
     await this.groupsRepository.remove(group);
 
     console.log(`Group ${group.id} (${group.name}) has been deleted`);
   }
 
+  private async isUserMemberOfGroup(userId: string, groupId: string): Promise<boolean> {
+    const membership = await this.userGroupsRepository.findOneBy({userId, groupId});
+    return !!membership; //boolean(membership)
+  }
 }
