@@ -13,8 +13,8 @@ export class LoginAttemptService {
   private readonly lockoutSeconds: number;
   constructor(
     
-    @Inject
-    (REDIS_CLIENT) private readonly redis: Redis,  
+    @Inject(REDIS_CLIENT)
+    private readonly redis: Redis,  
     private readonly configService: ConfigService) {
       this.maxAttempts = this.configService.getOrThrow<number>(
         'auth.maxLoginAttempts',
