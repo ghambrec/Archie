@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { GroupsController } from './groups.controller';
+import { AdminGroupsController, GroupsController } from './groups.controller';
 import { GroupsService } from './groups.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Group } from './entities/group.entity';
@@ -9,7 +9,7 @@ import { PermissionsModule } from '../permissions/permissions.module';
 @Module({
   imports: [TypeOrmModule.forFeature([Group]), SessionModule, PermissionsModule],
   exports: [TypeOrmModule, GroupsService],
-  controllers: [GroupsController],
+  controllers: [GroupsController, AdminGroupsController],
   providers: [GroupsService],
 })
 export class GroupsModule {}
