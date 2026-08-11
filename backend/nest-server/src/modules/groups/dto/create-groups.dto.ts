@@ -13,10 +13,10 @@ export class CreateGroupsDto {
   @IsOptional()
   description?: string;
 
-  @ApiProperty({ example: false})
-  @IsBoolean()
-  @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true )
-  isSystem?: boolean = false;
+  // @ApiProperty({ example: false})
+  // @IsBoolean()
+  // @IsOptional()
+  // @Transform(({ value }) => value === 'true' || value === true )
+  // isSystem?: boolean = false;
 
 }
