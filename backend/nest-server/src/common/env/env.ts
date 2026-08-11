@@ -4,12 +4,20 @@ export function getEnv(key: string, defaultValue: string): string {
 
 export function getEnvNumber(key: string, defaultValue: number): number {
   const value = process.env[key];
+  const parsed = Number(value);
+  if(!Number.isInteger(parsed))
+    throw new Error ( ` env error:  " ${value} " musst be a number`); 
   return value ? Number(value) : defaultValue;
 }
 
 export function getEnvBoolean(key: string, defaultValue: boolean): boolean {
   const value = process.env[key];
-  return value ? value === 'true' : defaultValue;
+  if (value == undefined || value.trim() =='' )
+      return defaultValue
+  const parsed = value.trim().toLocaleLowerCase();
+  if(parsed !== 'true' && parsed !== 'false')
+    throw new Error (` env error ${value}, need to be a boolean`);
+  return true;
 }
 
 export function requireEnv(key: string): string {
