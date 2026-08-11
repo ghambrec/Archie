@@ -7,8 +7,8 @@ import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
 import { GroupsAdminResponseDto } from './dto/groups-admin-response';
 
-@ApiTags('admin/groups')
-@Controller('admin/groups')
+@ApiTags('admin-groups')
+@Controller('admin-groups')
 export class AdminGroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 

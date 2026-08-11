@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import { CreateGroupsDto } from './dto/create-groups.dto';
 import { GroupsResponseDto } from './dto/groups-response.dto';
 import { UpdateGroupsDto } from './dto/update-groups.dto';
-import { group } from 'console';
 import { GroupsAdminResponseDto } from './dto/groups-admin-response';
 import { UserGroup } from '../user-groups/entities/user-group.entity';
 
@@ -17,8 +16,7 @@ export class GroupsService {
     @InjectRepository(UserGroup)
     private readonly userGroupsRepository: Repository<UserGroup>
   ) {}
-  // async create(dto: CreateGroupsDto, isAdmin: boolean): Promise<GroupsResponseDto | GroupsAdminResponseDto> {
-  async create(dto: CreateGroupsDto): Promise<GroupsResponseDto | GroupsAdminResponseDto> {
+  async create(dto: CreateGroupsDto): Promise<GroupsResponseDto> {
     const nameTaken = await this.findByName(dto.name)
     if(nameTaken)
         throw new ConflictException('Name is already taken');
@@ -26,15 +24,10 @@ export class GroupsService {
     const groupEntity = this.groupsRepository.create({
       name: dto.name,
       description: dto.description,
-      // isSystem: dto.isSystem ?? false,
     });
 
     await this.groupsRepository.save(groupEntity);
       
-    // if ( isAdmin ) {
-    //   return new GroupsAdminResponseDto(groupEntity);
-    // }
-
     return new GroupsResponseDto(groupEntity);
   }
 
@@ -43,7 +36,7 @@ export class GroupsService {
   }
 
   async get(id: string): Promise<GroupsResponseDto> {
-    const group = await this.groupsRepository.findOneBy({ id }); // alternative: this.groupRepository.findOneOrFail({ where: { id } });
+    const group = await this.groupsRepository.findOneBy({ id });
     if (!group) {
       throw new NotFoundException(`Group with id ${id} not found`);
     }
@@ -83,9 +76,13 @@ export class GroupsService {
       }
     }
 
-    Object.assign(group, dto);
-    this.groupsRepository.save(group);
-    return group;
+    const result = await this.groupsRepository.update(id, dto);
+    if ( result.affected === 0 ) {
+      throw new NotFoundException(`Group ${id} not found`)
+    }
+    const updatedGroup = await this.get(id);
+
+    return updatedGroup;
   }
 
   async deleteGroup(id: string, userId: string, skipMembershipCheck: boolean): Promise<void> {
@@ -123,7 +120,6 @@ export class GroupsService {
     const groupEntity = this.groupsRepository.create({
       name: dto.name,
       description: dto.description,
-      // isSystem: dto.isSystem ?? false,
     });
 
     await this.groupsRepository.save(groupEntity);
@@ -132,7 +128,7 @@ export class GroupsService {
   }
 
   async adminGet(id: string): Promise<GroupsAdminResponseDto> {
-    const group = await this.groupsRepository.findOneBy({ id }); // alternative: this.groupRepository.findOneOrFail({ where: { id } });
+    const group = await this.groupsRepository.findOneBy({ id });
     if (!group) {
       throw new NotFoundException(`Group with id ${id} not found`);
     }
@@ -154,7 +150,7 @@ export class GroupsService {
     return (await groups).map( group => new GroupsAdminResponseDto(group));
   }
 
-    async adminUpdate(id: string, dto: UpdateGroupsDto): Promise<GroupsAdminResponseDto> {
+  async adminUpdate(id: string, dto: UpdateGroupsDto): Promise<GroupsAdminResponseDto> {
     const group = await this.adminGet(id);
 
     if ( dto.name && dto.name !== group.name) {
@@ -163,10 +159,13 @@ export class GroupsService {
         throw new ConflictException('Name is already taken');
       }
     }
+    const result = await this.groupsRepository.update(id, dto);
+    if ( result.affected === 0 ) {
+      throw new NotFoundException(`Group ${id} not found`)
+    }
+    const updatedGroup = await this.adminGet(id);
 
-    Object.assign(group, dto);
-    this.groupsRepository.save(group);
-    return group;
+    return updatedGroup;
   }
 
   async adminDeleteGroup(id: string, userId: string, skipMembershipCheck: boolean): Promise<void> {
@@ -175,7 +174,6 @@ export class GroupsService {
       throw new NotFoundException(`Group with id ${id} not found`);
     }
     
-    // check if user is still in group?
     if (group.isSystem == true) {
       throw new ForbiddenException('System groups cannot be deleted');
     }
@@ -195,6 +193,6 @@ export class GroupsService {
 
   private async isUserMemberOfGroup(userId: string, groupId: string): Promise<boolean> {
     const membership = await this.userGroupsRepository.findOneBy({userId, groupId});
-    return !!membership; //boolean(membership)
+    return !!membership;
   }
 }

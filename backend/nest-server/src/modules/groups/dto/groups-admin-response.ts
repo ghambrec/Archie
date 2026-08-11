@@ -2,11 +2,6 @@ import { ApiProperty } from "@nestjs/swagger";
 import { GroupsResponseDto } from "./groups-response.dto";
 import { Group } from "../entities/group.entity";
 
-// export class GroupsAdminResponseDto extends GroupsResponseDto {
-//   @ApiProperty()
-//   isSystem!: boolean;
-// }
-
 export class GroupsAdminResponseDto {
   @ApiProperty()
   id!: string;
