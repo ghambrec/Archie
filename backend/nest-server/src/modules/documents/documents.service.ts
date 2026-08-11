@@ -35,17 +35,17 @@ export class DocumentsService {
 
     const key = `${DOCUMENTS_BUCKET}-${randomUUID()}`;
 
-    const document = await this.documentsRepository.save(
-        this.documentsRepository.create({
-          uploadedBy: userId,
-          filename: file.originalname,
-          mimeType: file.mimetype,
-          objectKey: key,
-          sizeBytes: file.size,
-          sha256,
-          status: DocumentStatus.Uploaded,
-        }),
-      );
+    const insertResult = await this.documentsRepository.insert({
+      uploadedBy: userId,
+      filename: file.originalname,
+      mimeType: file.mimetype,
+      objectKey: key,
+      sizeBytes: file.size,
+      sha256,
+      status: DocumentStatus.Uploaded,
+    });
+
+    const documentId = insertResult.identifiers[0].id as string;
 
 
     await this.storageService.putObject(
@@ -58,9 +58,9 @@ export class DocumentsService {
       },
     );
 
-    this.logger.log({ documentId: document.id }, 'Document uploaded successfully');
+    this.logger.log({ documentId }, 'Document uploaded successfully');
 
-    return {id: document.id, objectKey: key };
+    return { id: documentId, objectKey: key };
   }
 
   async findAll(userId: string, query: GetDocumentsQueryDto): Promise<GetDocumentsResponseDto> {
