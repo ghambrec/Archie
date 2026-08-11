@@ -178,7 +178,7 @@ export class GroupsService {
       throw new ForbiddenException('System groups cannot be deleted');
     }
 
-    if ( !skipMembershipCheck )
+    if ( skipMembershipCheck == false )
     {
       const isMember = await this.isUserMemberOfGroup(userId, group.id);
       if (isMember == false) {
