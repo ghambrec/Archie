@@ -36,6 +36,16 @@ export class DocumentsService {
 
     const key = `${DOCUMENTS_BUCKET}-${randomUUID()}`;
 
+    await this.storageService.putObject(
+      DOCUMENTS_BUCKET,
+      key,
+      file.buffer,
+      file.size,
+      {
+        'Content-Type': file.mimetype,
+      },
+    );
+
     const insertResult = await this.documentsRepository.insert({
       uploadedBy: userId,
       filename: file.originalname,
@@ -47,17 +57,6 @@ export class DocumentsService {
     });
 
     const documentId = insertResult.identifiers[0].id as string;
-
-
-    await this.storageService.putObject(
-      DOCUMENTS_BUCKET,
-      key,
-      file.buffer,
-      file.size,
-      {
-        'Content-Type': file.mimetype,
-      },
-    );
 
     this.logger.log({ documentId }, 'Document uploaded successfully');
 
