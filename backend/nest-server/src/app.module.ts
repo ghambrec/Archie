@@ -18,6 +18,7 @@ import { ConfigModule } from '@nestjs/config';
 import authConfig from './config/auth.config';
 import redisConfig from './config/redis.config';
 import storageConfig from './config/storage.config';
+import databaseConfig from './config/database.config';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import storageConfig from './config/storage.config';
       isGlobal: true,
       load: [
         authConfig,
-        //databaseConfig,
+        databaseConfig,
         redisConfig,
         storageConfig
         ],
