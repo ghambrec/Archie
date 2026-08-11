@@ -14,9 +14,20 @@ import { RedisModule } from './modules/redis/redis.module';
 import { GroupsController } from './modules/groups/groups.controller';
 import { AppLoggerModule } from './logger/app-logger.module';
 import { StorageModule } from './modules/storage/storage.module';
+import { ConfigModule } from '@nestjs/config';
+import authConfig from './config/auth.config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [
+        authConfig,
+        //databaseConfig,
+        //redisConfig,
+        //storageConfig
+         ],
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.POSTGRES_HOST,
