@@ -9,10 +9,11 @@ import {
   UploadedFile as UploadedFileDecorator,
   BadRequestException,
   Req,
+  Res,
 } from '@nestjs/common';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DocumentsService } from './documents.service';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { UploadResponseDto } from './dto/upload-response.dto';
@@ -74,5 +75,36 @@ export class DocumentsController {
     @Param('id') id: string,
   ): Promise<DownloadUrlResponseDto> {
     return this.documentsService.getDownloadUrl(req.userId!, id);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get(':id/download')
+  @ApiOperation({ summary: 'Stream the document file contents' })
+  async download(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    // DocumentDownloadStreamDto
+    const documentDownloadStream = await this.documentsService.downloadStream(
+      req.userId!,
+      id,
+    );
+
+    res.setHeader(
+      'Content-Type',documentDownloadStream.mimeType);
+    res.setHeader(
+      'Content-Disposition', `attachment; filename="${documentDownloadStream.filename}"`);
+    res.setHeader(
+      'Content-Length', documentDownloadStream.sizeBytes.toString());
+
+    documentDownloadStream.stream.on('error', () => {
+      if (!res.headersSent) {
+        res.status(500);
+      }
+      res.end();
+    });
+
+    documentDownloadStream.stream.pipe(res);
   }
 }

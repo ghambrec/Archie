@@ -11,6 +11,7 @@ import { GetDocumentsQueryDto } from './dto/get-documents-query.dto';
 import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
 import { DocumentSummaryDto } from './dto/document-summary.dto';
 import { DownloadUrlResponseDto } from './dto/download-url-response.dto';
+import { DocumentDownloadStreamDto } from './dto/document-download-stream.dto';
 import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
 
@@ -140,5 +141,30 @@ export class DocumentsService {
     this.logger.log({ userId, id }, 'Download Url is created');
 
     return { url, expiresInSeconds: DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS };
+  }
+
+  async downloadStream(userId: string, id: string): Promise<DocumentDownloadStreamDto> {
+
+    this.logger.log({ userId, id }, 'Stream document download');
+
+    const document = await this.documentsRepository.findOne({
+      where: { id, uploadedBy: userId },
+      select: { objectKey: true, filename: true, mimeType: true, sizeBytes: true },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    const stream = await this.storageService.getObject(DOCUMENTS_BUCKET, document.objectKey);
+
+    this.logger.log({ userId, id }, 'Document download stream opened');
+
+    return {
+      stream,
+      filename: document.filename,
+      mimeType: document.mimeType,
+      sizeBytes: document.sizeBytes,
+    };
   }
 }
