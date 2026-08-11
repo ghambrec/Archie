@@ -32,6 +32,10 @@ export class StorageService {
     await this.client.removeObject(bucket, key);
   }
 
+  async getObject(bucket: string, key: string): Promise<Readable> {
+    return this.client.getObject(bucket, key);
+  }
+
   async objectExists(bucket: string, key: string): Promise<boolean> {
     try {
       await this.client.statObject(bucket, key);
