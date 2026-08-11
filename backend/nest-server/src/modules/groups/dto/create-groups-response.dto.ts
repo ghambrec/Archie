@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Group } from "../entities/group.entity";
 
 export class CreateGroupsResponseDto {
   @ApiProperty()
@@ -6,4 +7,9 @@ export class CreateGroupsResponseDto {
 
   @ApiProperty()
   name!: string;
+
+  constructor( group: Group ) {
+    this.id = group.id;
+    this.name = group.name;
+  }
 }

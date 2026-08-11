@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateGroupsDto } from './dto/create-groups.dto';
 import { CreateGroupsResponseDto } from './dto/create-groups-response.dto';
 import { UpdateGroupsDto } from './dto/update-groups.dto';
+import { group } from 'console';
 
 @Injectable()
 export class GroupsService {
@@ -26,7 +27,12 @@ export class GroupsService {
 
     await this.groupsRepository.save(groupEntity);
 
-    return groupEntity;
+    // const response = new CreateGroupsResponseDto();
+    // response.id = groupEntity.id;
+    // response.name = groupEntity.name;
+
+    // return response;
+    return new CreateGroupsResponseDto(groupEntity);
   }
 
   async findByName(name: string): Promise<Group | null> {
