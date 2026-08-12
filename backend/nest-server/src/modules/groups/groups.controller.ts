@@ -6,10 +6,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { UpdateGroupsDto } from './dto/update-groups.dto';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { GroupsAdminResponseDto } from './dto/groups-admin-response';
-
-interface AuthenticatedRequest extends Request {
-  userId: string;
-}
+import type { Request } from 'express';
 
 @ApiTags('groups')
 @Controller('groups')
@@ -59,8 +56,8 @@ export class GroupsController {
 
   @Delete(':id')
   @UseGuards(SessionAuthGuard)
-  async remove(@Param('id') id: string,  @Req() req: AuthenticatedRequest ): Promise<void> {
-    await this.groupsService.deleteGroup(id, req.userId, false);
+  async remove(@Param('id') id: string,  @Req() req: Request ): Promise<void> {
+    await this.groupsService.deleteGroup(id, req.userId!, false);
     return;
   }
 }
