@@ -57,7 +57,6 @@ export class GroupsController {
   @Delete(':id')
   @UseGuards(SessionAuthGuard)
   async remove(@Param('id') id: string,  @Req() req: Request ): Promise<void> {
-    await this.groupsService.deleteGroup(id, req.userId!, false);
-    return;
+    return this.groupsService.deleteGroup(id, req.userId!, false);
   }
 }

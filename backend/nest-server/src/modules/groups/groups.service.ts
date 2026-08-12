@@ -38,7 +38,7 @@ export class GroupsService {
   async get(id: string): Promise<GroupsResponseDto> {
     const group = await this.groupsRepository.findOneBy({id});
     if (!group || group.isSystem) {
-      throw new NotFoundException('Group not found');
+      throw new NotFoundException('Cannot create group');
     }
     return new GroupsResponseDto(group);
   }
