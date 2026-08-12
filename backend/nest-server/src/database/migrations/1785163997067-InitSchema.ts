@@ -78,6 +78,7 @@ export class InitSchema1785163997067 implements MigrationInterface {
         "uploaded_by" uuid NOT NULL,
         "filename" varchar NOT NULL,
         "mime_type" varchar NOT NULL,
+        "object_key" varchar NOT NULL,
         "size_bytes" bigint NOT NULL,
         "sha256" varchar NOT NULL,
         "page_count" integer,

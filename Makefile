@@ -5,15 +5,6 @@ NEST_DIR := backend/nest-server
 FRONTEND_DIR := frontend
 
 
-deps-check:
-	cd $(NEST_DIR) && $(PNPM) install --frozen-lockfile
-	cd $(FRONTEND_DIR) && $(PNPM) install --frozen-lockfile
-
-deps-repair:
-	cd $(NEST_DIR) && $(PNPM) install --no-frozen-lockfile
-	cd $(FRONTEND_DIR) && $(PNPM) install --no-frozen-lockfile
-
-
 up:
 	${COMPOSE} up
 
@@ -29,5 +20,14 @@ fclean:
 re:
 	make clean
 	make up
+
+deps-check:
+	cd $(NEST_DIR) && $(PNPM) install --frozen-lockfile
+	cd $(FRONTEND_DIR) && $(PNPM) install --frozen-lockfile
+
+deps-repair:
+	cd $(NEST_DIR) && $(PNPM) install --no-frozen-lockfile
+	cd $(FRONTEND_DIR) && $(PNPM) install --no-frozen-lockfile
+
 
 .PHONY: re clean fclean down up setup

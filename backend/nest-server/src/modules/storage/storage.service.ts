@@ -3,7 +3,7 @@ import type { Client } from 'minio';
 import type { Readable } from 'stream';
 import { MINIO_CLIENT } from './minio/minio.module';
 
-const DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS = 5 * 60;
+export const DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS = 5 * 60;
 
 export interface StoredObjectMetadata {
   [key: string]: string;
@@ -30,6 +30,10 @@ export class StorageService {
 
   async removeObject(bucket: string, key: string): Promise<void> {
     await this.client.removeObject(bucket, key);
+  }
+
+  async getObject(bucket: string, key: string): Promise<Readable> {
+    return this.client.getObject(bucket, key);
   }
 
   async objectExists(bucket: string, key: string): Promise<boolean> {
