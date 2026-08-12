@@ -12,7 +12,6 @@ export default registerAs ('database', () => {
 		username: requireEnv('POSTGRES_USER'),
 		password: requireEnv('POSTGRES_PASSWORD'),
 		dbName:	requireEnv('POSTGRES_DB'),
+		};
 	}
-}
-
-)
+);
