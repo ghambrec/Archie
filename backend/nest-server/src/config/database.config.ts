@@ -1,9 +1,8 @@
 import { registerAs } from "@nestjs/config";
-
 import { getEnvNumber, requireEnv } from "src/common/env/env";
 
 
-export default registerAs ('database', () => {
+export function loadDatabaseConfig () {
 	return {
 		host: requireEnv('POSTGRES_HOST'),
 		port: getEnvNumber('POSTGRES_PORT',
@@ -13,5 +12,9 @@ export default registerAs ('database', () => {
 		password: requireEnv('POSTGRES_PASSWORD'),
 		dbName:	requireEnv('POSTGRES_DB'),
 		};
-	}
+	};
+
+export default registerAs( 
+	'database',
+	 loadDatabaseConfig
 );
