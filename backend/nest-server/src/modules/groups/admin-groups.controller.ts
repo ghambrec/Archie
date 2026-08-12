@@ -6,9 +6,10 @@ import { UpdateGroupsDto } from './dto/update-groups.dto';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
 import { GroupsAdminResponseDto } from './dto/groups-admin-response';
+import type { Request } from 'express';
 
 @ApiTags('admin-groups')
-@Controller('admin-groups')
+@Controller('admin/groups')
 export class AdminGroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 
@@ -46,8 +47,8 @@ export class AdminGroupsController {
 
   @Delete(':id')
   @UseGuards(SessionAuthGuard, AdminRequiredGuard)
-  async remove(@Param('id') id: string, @Req() req: Request & { userId: string }): Promise<void> {
-    await this.groupsService.adminDeleteGroup(id, req.userId, true);
+  async remove(@Param('id') id: string, @Req() req: Request): Promise<void> {
+    await this.groupsService.adminDeleteGroup(id, req.userId!, true);
     return;
   }
 }
