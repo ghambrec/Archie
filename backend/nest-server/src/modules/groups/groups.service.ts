@@ -19,7 +19,7 @@ export class GroupsService {
   async create(dto: CreateGroupsDto): Promise<GroupsResponseDto> {
     const nameTaken = await this.findByName(dto.name)
     if(nameTaken)
-        throw new ConflictException('Name is already taken');
+        throw new NotFoundException('Group not found');
 
     const groupEntity = this.groupsRepository.create({
       name: dto.name,
@@ -36,28 +36,28 @@ export class GroupsService {
   }
 
   async get(id: string): Promise<GroupsResponseDto> {
-    const group = await this.groupsRepository.findOneBy({ id });
-    if (!group) {
-      throw new NotFoundException(`Group with id ${id} not found`);
+    const group = await this.groupsRepository.findOneBy({id});
+    if (!group || group.isSystem) {
+      throw new NotFoundException('Group not found');
     }
-    
     return new GroupsResponseDto(group);
   }
 
   async getByNameOrFail(name: string): Promise<GroupsResponseDto> {
     const group = await this.findByName(name);
 
-    if (!group) {
-      throw new NotFoundException(`Group with the name "${name}" not found`);
+    if (!group || group.isSystem) {
+      throw new NotFoundException('Group not found');
     }
     return new GroupsResponseDto(group);
   }
 
   async findAll(): Promise<GroupsResponseDto[]> {
-    const groups = this.groupsRepository.find();
+    const groups = await this.groupsRepository.find({
+      where: { isSystem: false }
+    });
     return (await groups).map( group => new GroupsResponseDto(group));
   }
-
   //example code for pagination
   // async findAll(page = 1, limit = 20): Promise<[Group[], number]> {
   //   return this.groupsRepository.findAndCount({
@@ -88,12 +88,12 @@ export class GroupsService {
   async deleteGroup(id: string, userId: string, skipMembershipCheck: boolean): Promise<void> {
     const group = await this.groupsRepository.findOneBy({ id });
     if (!group) {
-      throw new NotFoundException(`Group with id ${id} not found`);
+      throw new NotFoundException('Group not found');
     }
     
     // check if user is still in group?
     if (group.isSystem == true) {
-      throw new ForbiddenException('System groups cannot be deleted');
+      throw new NotFoundException('Group not found');
     }
     if ( !skipMembershipCheck )
     {
@@ -178,7 +178,7 @@ export class GroupsService {
       throw new ForbiddenException('System groups cannot be deleted');
     }
 
-    if ( skipMembershipCheck == false )
+    if ( !skipMembershipCheck )
     {
       const isMember = await this.isUserMemberOfGroup(userId, group.id);
       if (isMember == false) {
