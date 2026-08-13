@@ -13,6 +13,7 @@ import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { GetUsersResponseDto } from './dto/get-users-response.dto';
+import { Logger } from 'nestjs-pino';
 
 
 const PASSWORD_SALT_ROUNDS = 10;
@@ -20,6 +21,7 @@ const PASSWORD_SALT_ROUNDS = 10;
 @Injectable()
 export class UsersService {
   constructor(
+    private readonly logger: Logger,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     private readonly dataSource: DataSource,
@@ -28,20 +30,25 @@ export class UsersService {
   
 
   async create(dto: CreateUserDto): Promise<User> {
+    this.logger.log('Execute create', dto.email);
     const passwordHash = await bcrypt.hash(dto.password, PASSWORD_SALT_ROUNDS);
 
     const MailExisting = await this.findByEmail(dto.email)
-    if(MailExisting)
+    if(MailExisting) {
+      this.logger.warn(`Create failed for ${dto.email}, email already registered`);
       throw new ApplicationException(
       ErrorCode.EmailAlreadyRegistered,
     )
+    }
 
     const DisplayNameExisting = await this.findByName(dto.displayName)
-    if(DisplayNameExisting)
+    if(DisplayNameExisting) {
+      this.logger.warn(`Create failed for ${dto.email}, display name already registered`);
       throw new ApplicationException(
         ErrorCode.UserNameAlreadyRegistered,
       )
-    
+    }
+
     return this.dataSource.transaction(async (manager) => {
       const userEntity = manager.create(User, {
         email: dto.email.trim().toLowerCase(),
@@ -62,14 +69,18 @@ export class UsersService {
       });
       await manager.save(userGroup);
 
+      this.logger.log({ userId: userEntity.id, groupId: defaultGroup.id }, 'User created with default group');
+
       return userEntity;
     });
   };
 
   async updateProfile(userID: string, dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
+    this.logger.log('Execute updateProfile', userID);
 
     const user = await this.usersRepository.findOneBy({id: userID,});
     if (!user) {
+      this.logger.warn(`UpdateProfile failed, user ${userID} not found`);
       throw new ApplicationException (
         ErrorCode.UserNotFound
       )
@@ -78,32 +89,34 @@ export class UsersService {
     {
       const newEmail = dto.email?.trim().toLowerCase();
       const duplicate = await this.usersRepository.findOneBy({email: newEmail});
-      if (duplicate)
+      if (duplicate) {
+        this.logger.warn(`UpdateProfile failed for ${userID}, email already registered`);
         throw new ApplicationException(
           ErrorCode.EmailAlreadyRegistered
         )
-      user.email = newEmail; 
+      }
+      user.email = newEmail;
     };
 
     if(dto.displayName !== undefined)
     {
       const newName = dto.displayName.trim();
       const duplicate = await this.usersRepository.findOneBy({displayName: newName});
-      if(duplicate)
+      if(duplicate) {
+        this.logger.warn(`UpdateProfile failed for ${userID}, display name already registered`);
         throw new ApplicationException(
           ErrorCode.UserNameAlreadyRegistered
         )
+      }
     }
     if(dto.preferredLanguage !==undefined)
     {
       const newLang = dto.preferredLanguage?.trim();
-      
     }
-  
-  
-    
+
     Object.assign(user,dto);
     const updatedUser = await this.usersRepository.save(user)
+    this.logger.log({ userId: updatedUser.id }, 'Profile updated successfully');
     ///return { id: updatedUser.id };
     return {
       id: updatedUser.id}
@@ -121,6 +134,7 @@ export class UsersService {
   }
 
   async findProfileById(userId: string): Promise <UserSummaryDto> {
+    this.logger.log('Execute findProfileById', userId);
     const user = await this.usersRepository.findOne({
       where: { id: userId},
       select: {
@@ -128,18 +142,21 @@ export class UsersService {
         email: true,
         displayName : true,
         preferredLanguage: true,
-        isActive: true, 
+        isActive: true,
       }
     })
-    if(!user)
+    if(!user) {
+      this.logger.warn(`FindProfileById failed, user ${userId} not found`);
       throw new ApplicationException(
       ErrorCode.UserNotFound,
     )
+    }
     return user;
   }
 
   async getAllUsers(request: GetUsersQueryDto): Promise<GetUsersResponseDto> {
     const { page, limit } = request;
+    this.logger.log({ page, limit }, 'Execute getAllUsers');
 
     const [users, total] = await this.usersRepository.findAndCount({
       select: {
@@ -156,6 +173,7 @@ export class UsersService {
       order: { createdAt: 'DESC' },
     });
 
+    this.logger.log({ total }, 'Users listed successfully');
     return {
       data: users,
       page,
