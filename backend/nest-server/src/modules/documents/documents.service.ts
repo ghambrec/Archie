@@ -12,8 +12,11 @@ import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
 import { DocumentSummaryDto } from './dto/document-summary.dto';
 import { DownloadUrlResponseDto } from './dto/download-url-response.dto';
 import { DocumentDownloadStreamDto } from './dto/document-download-stream.dto';
+import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
+import { GroupsService } from '../groups/groups.service';
+import { DocumentGroupsService } from '../document-groups/document-groups.service';
 
 const DOCUMENTS_BUCKET = 'documents';
 
@@ -23,6 +26,8 @@ export class DocumentsService {
     private readonly storageService: StorageService,
     @InjectRepository(Document)
     private readonly documentsRepository: Repository<Document>,
+    private readonly groupsService: GroupsService,
+    private readonly documentGroupsService: DocumentGroupsService,
     private readonly logger: Logger,
   ) {}
 
@@ -165,5 +170,32 @@ export class DocumentsService {
       mimeType: document.mimeType,
       sizeBytes: document.sizeBytes,
     };
+  }
+
+  async setGroup(
+    userId: string,
+    id: string,
+    groupId: string,
+  ): Promise<DocumentGroupResponseDto> {
+
+    this.logger.log({ userId, id, groupId }, 'Assign document to group');
+
+    const document = await this.documentsRepository.findOne({
+      where: { id, uploadedBy: userId },
+      select: { id: true },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    // TODO: We need check this implementation of get
+    await this.groupsService.get(groupId);
+
+    await this.documentGroupsService.setGroup(id, groupId);
+
+    this.logger.log({ userId, id, groupId }, 'Document assigned to group');
+
+    return { documentId: id, groupId };
   }
 }
