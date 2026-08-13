@@ -21,7 +21,7 @@ export class AuthService {
   ) {}
 
   async login(request: LoginRequestDto) : Promise<LoginResult> {
-    this.logger.debug('Execute login', request.email);
+    this.logger.log('Execute login', request.email);
 
     const retryAfterSeconds = await this.loginAttemptService.isLocked(request.email);
     if (retryAfterSeconds !== null) {
@@ -42,7 +42,7 @@ export class AuthService {
   }
 
   async register(request: RegisterRequestDto) : Promise<string> {
-    this.logger.debug('Execute register', request.email);
+    this.logger.log('Execute register', request.email);
 
     const userExists = await this.userService.findByEmail(request.email)
     if(userExists)
@@ -61,13 +61,13 @@ export class AuthService {
   }
 
   async logout(sessionId: string) : Promise<void> {
-    this.logger.debug('Execute logout', sessionId);
+    this.logger.log('Execute logout', sessionId);
 
     return this.sessionService.destroy(sessionId);
   }
 
   async getCurrentUser(userId: string) : Promise<UserSummaryDto> {
-    this.logger.debug('Execute getCurrentUser', userId);
+    this.logger.log('Execute getCurrentUser', userId);
     return this.userService.findProfileById(userId);
   }
 }
