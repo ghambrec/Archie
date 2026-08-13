@@ -10,7 +10,7 @@ export class LoginRequestDto {
 
   
   @ApiProperty(
-    {example: 'password123'},
+    {example: 'password1234'},
   ) 
   @IsString()
   password!: string;
