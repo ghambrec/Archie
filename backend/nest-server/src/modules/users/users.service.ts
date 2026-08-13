@@ -1,8 +1,10 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
+import { Group } from '../groups/entities/group.entity';
+import { UserGroup } from '../user-groups/entities/user-group.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserResponseDto } from './dto/update-user-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -20,32 +22,48 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly dataSource: DataSource,
   ) {}
 
   
 
   async create(dto: CreateUserDto): Promise<User> {
+    const passwordHash = await bcrypt.hash(dto.password, PASSWORD_SALT_ROUNDS);
+
     const MailExisting = await this.findByEmail(dto.email)
     if(MailExisting)
       throw new ApplicationException(
       ErrorCode.EmailAlreadyRegistered,
     )
+
     const DisplayNameExisting = await this.findByName(dto.displayName)
     if(DisplayNameExisting)
       throw new ApplicationException(
         ErrorCode.UserNameAlreadyRegistered,
       )
-    const passwordHash = await bcrypt.hash(dto.password, PASSWORD_SALT_ROUNDS);
+    
+    return this.dataSource.transaction(async (manager) => {
+      const userEntity = manager.create(User, {
+        email: dto.email.trim().toLowerCase(),
+        passwordHash,
+        displayName: dto.displayName,
+      });
+      await manager.save(userEntity);
 
-    const userEntity = this.usersRepository.create({
-      email: dto.email.trim().toLowerCase(),
-      passwordHash,
-      displayName: dto.displayName,
+      const defaultGroup = manager.create(Group, {
+        name: `personal-${userEntity.id}`,
+        isSystem: false,
+      });
+      await manager.save(defaultGroup);
+
+      const userGroup = manager.create(UserGroup, {
+        userId: userEntity.id,
+        groupId: defaultGroup.id,
+      });
+      await manager.save(userGroup);
+
+      return userEntity;
     });
-
-    await this.usersRepository.save(userEntity);
-
-    return userEntity;
   };
 
   async updateProfile(userID: string, dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
