@@ -50,28 +50,27 @@ export class UsersService {
     }
 
     return this.dataSource.transaction(async (manager) => {
-      const userEntity = manager.create(User, {
+      const userInsert = await manager.insert(User, {
         email: dto.email.trim().toLowerCase(),
         passwordHash,
         displayName: dto.displayName,
       });
-      await manager.save(userEntity);
+      const userId = userInsert.identifiers[0].id as string;
 
-      const defaultGroup = manager.create(Group, {
-        name: `personal-${userEntity.id}`,
+      const groupInsert = await manager.insert(Group, {
+        name: `personal-${userId}`,
         isSystem: false,
       });
-      await manager.save(defaultGroup);
+      const groupId = groupInsert.identifiers[0].id as string;
 
-      const userGroup = manager.create(UserGroup, {
-        userId: userEntity.id,
-        groupId: defaultGroup.id,
+      await manager.insert(UserGroup, {
+        userId,
+        groupId,
       });
-      await manager.save(userGroup);
 
-      this.logger.log({ userId: userEntity.id, groupId: defaultGroup.id }, 'User created with default group');
+      this.logger.log({ userId, groupId }, 'User created with default group');
 
-      return userEntity;
+      return manager.findOneByOrFail(User, { id: userId });
     });
   };
 
