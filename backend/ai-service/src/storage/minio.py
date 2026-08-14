@@ -202,6 +202,7 @@ class MinioDocumentStore:
 
     def build_chunk_metadata(
         self,
+        document_id: str,
         source_key: str,
         document_index: int,
         creator_user_id: str,
@@ -215,6 +216,7 @@ class MinioDocumentStore:
         - querying user's groups contain document_group_id.
 
         Args:
+            document_id: Logical document UUID from nest-server
             source_key: MinIO object key where this chunk came from
             document_index: Stable index of the document in the bucket
             creator_user_id: UUID of user who uploaded the document
@@ -225,6 +227,7 @@ class MinioDocumentStore:
 
         Example:
             {
+                "document_id": "document-uuid",
                 "source_key": "documents-abc123",
                 "document_index": 5,
                 "creator_user_id": "user-uuid",
@@ -232,6 +235,7 @@ class MinioDocumentStore:
             }
         """
         metadata = {
+            "document_id": document_id,
             "source_key": source_key,
             "document_index": document_index,
             "creator_user_id": creator_user_id,
