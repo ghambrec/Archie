@@ -14,18 +14,41 @@ import { RedisModule } from './modules/redis/redis.module';
 import { GroupsController } from './modules/groups/groups.controller';
 import { AppLoggerModule } from './logger/app-logger.module';
 import { StorageModule } from './modules/storage/storage.module';
+import { ConfigModule, ConfigType } from '@nestjs/config';
+import authConfig from './config/auth.config';
+import redisConfig from './config/redis.config';
+import storageConfig from './config/storage.config';
+import databaseConfig from './config/database.config';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.POSTGRES_HOST,
-      port: Number(process.env.POSTGRES_PORT),
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
-      autoLoadEntities: true,
-      synchronize: false,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [
+        authConfig,
+        databaseConfig,
+        redisConfig,
+        storageConfig
+        ],
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [databaseConfig.KEY],
+
+      useFactory: (
+        config: ConfigType<typeof databaseConfig>
+      ) => {
+        return {
+          type: 'postgres',
+          host: config.host,
+          port: config.port,
+          username: config.username,
+          password: config.password,
+          database: config.dbName,
+          autoLoadEntities: true,
+          synchronize: false,
+
+        }
+      }
     }),
     UsersModule,
     GroupsModule,

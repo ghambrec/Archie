@@ -1,16 +1,25 @@
 import { Global, Module } from '@nestjs/common';
+import { ConfigModule, ConfigType } from '@nestjs/config';
 import Redis from 'ioredis';
-import { requireEnv } from 'src/common/env/env';
+import redisConfig from 'src/config/redis.config';
 
 export const REDIS_CLIENT = 'REDIS_CLIENT';
 
 @Global()
 @Module({
+  imports:[
+    ConfigModule.forFeature(redisConfig)
+  ],
   providers: [
     {
       provide: REDIS_CLIENT,
-      useFactory: () => {
-        return new Redis(requireEnv('REDIS_URL'));
+      inject: [
+        redisConfig.KEY
+      ],
+      useFactory: (
+        config: ConfigType<typeof redisConfig>
+      ) => {
+        return new Redis(config.redisURL);
       },
     },
   ],

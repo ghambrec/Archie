@@ -1,15 +1,22 @@
-import 'dotenv/config';
+//import {config as loadEnv } from 'dotenv';
+//import {resolve } from 'path';
+
+
 import { DataSource } from 'typeorm';
+import { loadDatabaseConfig } from '../config/database.config';
+
 import { User } from '../modules/users/entities/user.entity';
+
+const config = loadDatabaseConfig();
 
 const AppDataSource = new DataSource({
   type: 'postgres',
-  host: process.env.POSTGRES_HOST,
-  port: Number(process.env.POSTGRES_PORT),
-  username: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DB,
-  entities: [User],
+  host: config.host,
+  port: config.port,
+  username: config.username,
+  password: config.password,
+  database: config.dbName,
+  entities: ['src/**/*.entity.ts'],
   migrations: ['src/database/migrations/*.ts'],
 });
 
