@@ -1,14 +1,14 @@
-"""Retrieval service with permission filtering."""
+"""Retrieval domain service for the AI service."""
 
 from __future__ import annotations
 
-from typing import Any, Iterable, List
+from typing import Any, Iterable
 
 
-class PermissionAwareRetriever:
-    """Retrieve relevant document chunks while respecting document permissions."""
+class RetrievalService:
+    """Domain logic for permission-aware document retrieval."""
 
-    def __init__(self, vector_store):
+    def __init__(self, vector_store=None):
         self.vector_store = vector_store
 
     async def retrieve(
@@ -17,12 +17,14 @@ class PermissionAwareRetriever:
         user_id: str,
         user_group_ids: Iterable[str] | None = None,
         top_k: int = 5,
-    ) -> List[dict]:
-        """Return top-k readable chunks for this user.
+    ) -> list[dict[str, Any]]:
+        """Return top-k authorized chunks for a user."""
+        if self.vector_store is None:
+            raise RuntimeError(
+                "RetrievalService is not configured with a vector_store. "
+                "Attach a pgvector-backed adapter before using the route."
+            )
 
-        The permission filter is pushed down into the vector-store query so the
-        database returns the top-k authorized matches directly.
-        """
         access_filter = self.build_access_filter(
             user_id=user_id,
             user_group_ids=user_group_ids,
@@ -38,14 +40,10 @@ class PermissionAwareRetriever:
         user_id: str,
         user_group_ids: Iterable[str] | None = None,
     ) -> dict[str, Any]:
-        """Build a backend-neutral access filter for vector-store implementations.
+        """Build a permission filter for the vector search.
 
-        Semantics:
-        - creator_user_id == user_id
-        - OR document_group_id IN user_group_ids
-
-        Adapters should translate this structure to the native filter syntax of
-        the underlying vector store when needed.
+        A chunk is readable when the querying user created it or the document
+        belongs to one of the user's groups.
         """
         normalized_user_groups = [group_id for group_id in (user_group_ids or []) if group_id]
         clauses: list[dict[str, Any]] = [{"creator_user_id": {"$eq": user_id}}]
