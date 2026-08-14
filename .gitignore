@@ -13,6 +13,7 @@ backend/nest-server/dist/
 backend/nest-server/node_modules/
 # backend/nest-server/generated/prisma
 backend/nest-server/.pnpm-store
+backend/nest-server/src/modules/groups/admin-groups.service.ts
 
 /docs
 /.pnpm-store

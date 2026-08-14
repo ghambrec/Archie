@@ -23,6 +23,9 @@ export class Document {
   @Column({ type: 'varchar', name: 'mime_type' })
   mimeType!: string;
 
+  @Column({ type: 'varchar', name: 'object_key' })
+  objectKey!: string;
+
   @Column({ type: 'bigint', name: 'size_bytes' })
   sizeBytes!: number;
 
