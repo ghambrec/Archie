@@ -8,15 +8,28 @@ from typing import Iterable, List
 class AIService:
     """Entry point for the document ingestion and question-answering workflow."""
 
-    def __init__(self, minio_store, vector_store, retriever, generator):
+    def __init__(
+        self,
+        minio_store,
+        vector_store,
+        ingestion_service=None,
+        retrieval_service=None,
+        generator=None,
+    ):
         self.minio_store = minio_store
         self.vector_store = vector_store
-        self.retriever = retriever
+        self.ingestion_service = ingestion_service
+        self.retrieval_service = retrieval_service
         self.generator = generator
 
-    def ingest_documents(self, object_keys: Iterable[str] | None = None) -> List[str]:
+    async def ingest_documents(self, object_keys: Iterable[str] | None = None) -> List[str]:
         """Run the ingestion flow for documents currently stored in MinIO."""
-        raise NotImplementedError("ingest_documents is not implemented yet")
+        if self.ingestion_service is None:
+            raise RuntimeError(
+                "AIService is not configured with an ingestion service. "
+                "Attach DocumentIngestionService before ingesting documents."
+            )
+        return await self.ingestion_service.ingest_all_documents(object_keys)
 
     def ask(
         self,

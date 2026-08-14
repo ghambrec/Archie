@@ -204,6 +204,14 @@ class VectorStoreAdapter:
             for row in rows
         ]
 
+    async def close(self) -> None:
+        """Release database resources owned by the adapter."""
+        if self.engine is not None:
+            await self.engine.dispose()
+            self.engine = None
+            self.documents_table = None
+            self.sql_metadata = None
+
     def _initialize_embeddings(self) -> HuggingFaceEmbeddings:
         """Load the embedding model onto the best available device."""
         if torch.cuda.is_available():

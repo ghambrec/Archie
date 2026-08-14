@@ -1,7 +1,8 @@
 """API routes for the AI Service."""
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 
+from src.core.service import AIService
 from src.models import (
     AskRequest,
     AskResponse,
@@ -16,14 +17,14 @@ from src.retrieval.service import RetrievalService
 router = APIRouter()
 
 
-def get_retrieval_service() -> RetrievalService:
-    """Wire the retrieval service for API usage.
+def get_ai_service(request: Request) -> AIService:
+    """Return the shared AI service composed at application startup."""
+    return request.app.state.ai_service
 
-    This is intentionally lightweight for now: the core service logic lives in
-    the retrieval service object, while the concrete vector store is attached in
-    the application composition layer later.
-    """
-    return RetrievalService(vector_store=None)
+
+def get_retrieval_service(request: Request) -> RetrievalService:
+    """Return the shared retrieval service composed at application startup."""
+    return request.app.state.retrieval_service
 
 
 @router.get("/health")
@@ -64,7 +65,10 @@ async def retrieve(
 
 
 @router.post("/ingest", response_model=IngestResponse)
-async def ingest(request: IngestRequest):
+async def ingest(
+    request: IngestRequest,
+    service: AIService = Depends(get_ai_service),
+):
     """Ingest documents from MinIO into the vector database.
 
     Args:
@@ -74,7 +78,12 @@ async def ingest(request: IngestRequest):
     Returns:
         IngestResponse with chunk count and list of ingested document keys.
     """
-    raise NotImplementedError("POST /ingest not implemented yet")
+    object_keys = request.object_keys or service.minio_store.list_documents()
+    chunk_ids = await service.ingest_documents(object_keys)
+    return {
+        "chunk_count": len(chunk_ids),
+        "ingested_documents": object_keys,
+    }
 
 
 @router.post("/ask", response_model=AskResponse)

@@ -244,3 +244,7 @@ class MinioDocumentStore:
 
         logger.debug(f"Built chunk metadata: {metadata}")
         return metadata
+
+    def close(self) -> None:
+        """Release HTTP resources owned by the metadata client."""
+        self.http_client.close()
