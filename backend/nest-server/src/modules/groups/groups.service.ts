@@ -132,7 +132,6 @@ export class GroupsService {
     await this.groupsRepository.remove(group);
 
     this.logger.log({ groupId: group.id, userId: userId }, 'User successfully deleted group');
-    console.log(`Group ${group.id} (${group.name}) has been deleted`);
   }
 
 }

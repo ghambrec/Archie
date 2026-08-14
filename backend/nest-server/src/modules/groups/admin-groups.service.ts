@@ -123,7 +123,6 @@ export class AdminGroupsService {
     await this.groupsRepository.remove(group);
 
     this.logger.log({ groupId: group.id, userId: userId }, 'Admin successfully deleted group');
-    console.log(`Group ${group.id} (${group.name}) has been deleted`);
   }
 
 }
