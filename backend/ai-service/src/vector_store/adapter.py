@@ -1,6 +1,8 @@
+"""Vector store abstraction layer."""
+
 from __future__ import annotations
 
-from typing import Any, Iterable, List, Sequence
+from typing import Sequence
 
 
 class VectorStoreAdapter:
@@ -18,7 +20,9 @@ class VectorStoreAdapter:
         """Delete or recreate the target collection before ingestion."""
         raise NotImplementedError("delete_collection is not implemented yet")
 
-    def add_documents(self, documents: Sequence[dict], collection_name: str = "archie_documents") -> List[str]:
+    def add_documents(
+        self, documents: Sequence[dict], collection_name: str = "archie_documents"
+    ) -> list[str]:
         """Insert chunk documents with embedding vectors and metadata."""
         raise NotImplementedError("add_documents is not implemented yet")
 

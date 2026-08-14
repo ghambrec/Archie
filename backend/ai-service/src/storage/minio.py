@@ -1,3 +1,5 @@
+"""MinIO document store adapter."""
+
 from __future__ import annotations
 
 from typing import Iterable, List, Optional
@@ -11,7 +13,14 @@ class MinioDocumentStore:
     chunk.
     """
 
-    def __init__(self, endpoint: str, access_key: str, secret_key: str, secure: bool = False, bucket: str = "documents"):
+    def __init__(
+        self,
+        endpoint: str,
+        access_key: str,
+        secret_key: str,
+        secure: bool = False,
+        bucket: str = "documents",
+    ):
         self.endpoint = endpoint
         self.access_key = access_key
         self.secret_key = secret_key
