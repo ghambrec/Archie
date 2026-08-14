@@ -11,7 +11,7 @@ class PermissionAwareRetriever:
     def __init__(self, vector_store):
         self.vector_store = vector_store
 
-    def retrieve(
+    async def retrieve(
         self,
         query: str,
         user_id: str,
@@ -27,7 +27,7 @@ class PermissionAwareRetriever:
             user_id=user_id,
             user_group_ids=user_group_ids,
         )
-        return self.vector_store.similarity_search(
+        return await self.vector_store.similarity_search(
             query=query,
             k=top_k,
             filter_metadata=access_filter,
