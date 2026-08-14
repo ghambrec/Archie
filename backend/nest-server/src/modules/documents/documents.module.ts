@@ -4,10 +4,18 @@ import { DocumentsService } from './documents.service';
 import { Document } from './entities/document.entity';
 import { SessionModule } from '../auth/session/session.module';
 import { StorageModule } from '../storage/storage.module';
+import { GroupsModule } from '../groups/groups.module';
+import { DocumentGroupsModule } from '../document-groups/document-groups.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Document]), SessionModule, StorageModule],
+  imports: [
+    TypeOrmModule.forFeature([Document]),
+    SessionModule,
+    StorageModule,
+    GroupsModule,
+    DocumentGroupsModule,
+  ],
   controllers: [DocumentsController],
   providers: [DocumentsService],
 })

@@ -4,6 +4,7 @@ import {
   Post,
   Param,
   Query,
+  Body,
   UseGuards,
   UseInterceptors,
   UploadedFile as UploadedFileDecorator,
@@ -21,6 +22,8 @@ import { GetDocumentsQueryDto } from './dto/get-documents-query.dto';
 import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
 import { DocumentSummaryDto } from './dto/document-summary.dto';
 import { DownloadUrlResponseDto } from './dto/download-url-response.dto';
+import { SetDocumentGroupDto } from './dto/set-document-group.dto';
+import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 
 @ApiTags('documents')
 @Controller('documents')
@@ -66,6 +69,16 @@ export class DocumentsController {
   @Get(':id')
   async findOne(@Req() req: Request, @Param('id') id: string): Promise<DocumentSummaryDto> {
     return this.documentsService.findOne(req.userId!, id);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Post(':id/group')
+  async setGroup(
+    @Req() req: Request,
+    @Param('id') documentId: string,
+    @Body() dto: SetDocumentGroupDto,
+  ): Promise<DocumentGroupResponseDto> {
+    return this.documentsService.setGroup(req.userId!, documentId, dto.groupId);
   }
 
   @UseGuards(SessionAuthGuard)
