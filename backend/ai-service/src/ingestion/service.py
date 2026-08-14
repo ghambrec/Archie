@@ -1,3 +1,5 @@
+"""Document ingestion service."""
+
 from __future__ import annotations
 
 from typing import Iterable, List
@@ -10,7 +12,13 @@ class DocumentIngestionService:
     and to enforce role-based filtering during retrieval.
     """
 
-    def __init__(self, minio_store, vector_store, chunk_size: int = 512, chunk_overlap: int = 50):
+    def __init__(
+        self,
+        minio_store,
+        vector_store,
+        chunk_size: int = 512,
+        chunk_overlap: int = 50,
+    ):
         self.minio_store = minio_store
         self.vector_store = vector_store
         self.chunk_size = chunk_size
@@ -28,7 +36,9 @@ class DocumentIngestionService:
         """Split a document into chunks and attach metadata for tracing and RBAC."""
         raise NotImplementedError("chunk_text is not implemented yet")
 
-    def build_chunk_metadata(self, source_key: str, document_index: int, role_permission: str) -> dict:
+    def build_chunk_metadata(
+        self, source_key: str, document_index: int, role_permission: str
+    ) -> dict:
         """Build chunk metadata with MinIO provenance and permission information."""
         return {
             "source_key": source_key,
