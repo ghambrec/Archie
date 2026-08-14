@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 from typing import Any, Sequence
-from uuid import uuid4
 
 import torch
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -142,7 +141,7 @@ class VectorStoreAdapter:
         chunk_ids: list[str] = []
 
         for document, content, embedding in zip(documents, contents, embeddings, strict=True):
-            chunk_id = str(document.get("id") or uuid4())
+            chunk_id = self._extract_chunk_id(document)
             metadata = dict(document.get("metadata") or {})
             chunk_ids.append(chunk_id)
             rows.append(
@@ -307,3 +306,26 @@ class VectorStoreAdapter:
         if not isinstance(content, str) or not content.strip():
             raise ValueError("Each document must include a non-empty 'content' string")
         return content
+
+    def _extract_chunk_id(self, document: dict[str, Any]) -> str:
+        """Return a stable chunk ID for a document row.
+
+        Preferred input shape is an explicit top-level `id`. If that is not
+        provided, fall back to `document_id` + `chunk_index` from metadata.
+        """
+        chunk_id = document.get("id")
+        if chunk_id is not None:
+            chunk_id = str(chunk_id)
+            if chunk_id:
+                return chunk_id
+
+        metadata = dict(document.get("metadata") or {})
+        document_id = metadata.get("document_id")
+        chunk_index = metadata.get("chunk_index")
+        if document_id is None or chunk_index is None:
+            raise ValueError(
+                "Each document must include either a top-level 'id' or both "
+                "'metadata.document_id' and 'metadata.chunk_index'"
+            )
+
+        return f"{document_id}:{chunk_index}"
