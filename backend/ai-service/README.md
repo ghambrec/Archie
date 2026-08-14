@@ -5,9 +5,9 @@ FastAPI microservice for document ingestion and retrieval-augmented generation (
 ## Features
 
 - **Document Ingestion**: Reads text documents from MinIO, chunks them, and stores embeddings in a vector database
-- **Permission-Aware Retrieval**: Filters chunks by creator-user and creator-group overlap
+- **Permission-Aware Retrieval**: Filters chunks by creator-user and document-group membership
 - **RAG Generation**: Generates answers using retrieved context chunks
-- **Metadata Tracking**: Associates chunks with source document keys and creator access metadata
+- **Metadata Tracking**: Associates chunks with source document keys and document access metadata
 
 ## Architecture
 
@@ -16,7 +16,7 @@ MinIO (documents bucket)
     ↓
 Ingestion Service → Chunking → Embeddings
     ↓
-Vector Store (Chroma)
+Vector Store (Postgres + pgvector)
     ↓
 Retriever (Permission-filtered) → Generator
     ↓
@@ -53,7 +53,7 @@ Ingest documents from the MinIO `documents` bucket into the vector database.
 
 - If `object_keys` is `null` or omitted, all documents in the bucket are ingested.
 - Each document is split into chunks with metadata:
-  `source_key`, `document_index`, `creator_user_id`, `creator_group_ids`.
+  `source_key`, `document_index`, `creator_user_id`, `document_group_id`.
 
 **Response:**
 ```json
@@ -85,8 +85,8 @@ Content-Type: application/json
 
 Retrieve relevant document chunks and generate an answer.
 
-- A chunk is readable if the querying `user_id` is the creator OR at least one
-  querying `user_group_ids` value intersects the chunk's `creator_group_ids`.
+- A chunk is readable if the querying `user_id` is the creator OR the chunk's
+  `document_group_id` is present in the querying `user_group_ids`.
 - The generation response includes retrieved sources for transparency.
 
 **Response:**
@@ -99,7 +99,7 @@ Retrieve relevant document chunks and generate an answer.
       "source_key": "policies.txt",
       "document_index": 0,
       "creator_user_id": "user-uuid",
-      "creator_group_ids": ["group-a", "group-b"]
+      "document_group_id": "group-a"
     }
   ]
 }
@@ -133,17 +133,20 @@ MINIO_SECRET_KEY=<your-secret>
 MINIO_SECURE=false
 MINIO_DOCUMENTS_BUCKET=documents
 
-# Vector Database (Chroma)
-VECTOR_DB_TYPE=chroma
-CHROMA_PERSIST_DIRECTORY=/tmp/archie_ai_service_chroma
+# Vector Database (Postgres + pgvector)
+VECTOR_DB_TYPE=pgvector
+PGVECTOR_HOST=postgres
+PGVECTOR_PORT=5432
+PGVECTOR_USER=postgres
+PGVECTOR_PASSWORD=postgres
+PGVECTOR_DB=postgresdb
+PGVECTOR_COLLECTION=archie_documents
 
 # Embedding Model
 EMBEDDING_MODEL=BAAI/bge-m3
 CHUNK_SIZE=512
 CHUNK_OVERLAP=50
 
-# RBAC
-DEFAULT_ROLE_PERMISSION=public
 ```
 
 ## Running Locally
@@ -160,7 +163,7 @@ pip install -r requirements.txt
 ### 2. Run the server
 
 ```bash
-python -m backend.ai_service.main
+python main.py
 ```
 
 The server will start on `http://0.0.0.0:5000`.
@@ -223,10 +226,10 @@ mypy .
 
 ## Implementation Status
 
-- [ ] MinIO adapter (`minio_client.py`)
-- [ ] Document ingestion (`ingestion.py`)
-- [ ] Vector store adapter (`vector_store.py`)
-- [ ] Permission-aware retrieval (`retriever.py`)
-- [ ] Answer generation (`generator.py`)
-- [ ] Service orchestration (`service.py`)
-- [ ] FastAPI routes (`main.py`)
+- [ ] MinIO adapter (`src/storage/minio.py`)
+- [ ] Document ingestion (`src/ingestion/service.py`)
+- [ ] Vector store adapter (`src/vector_store/adapter.py`)
+- [ ] Permission-aware retrieval (`src/retrieval/retriever.py`)
+- [ ] Answer generation (`src/generation/generator.py`)
+- [ ] Service orchestration (`src/core/service.py`)
+- [ ] FastAPI routes (`src/api/routes.py`, `src/app.py`, `main.py`)

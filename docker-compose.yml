@@ -93,11 +93,12 @@ services:
      - "5000:5000"
    volumes:
      - ./backend/ai-service:/app
-     - ai-service-cache:/tmp/archie_ai_service_chroma
    networks:
      - archie
    env_file: "./env/.env"
    depends_on:
+     postgres:
+       condition: service_healthy
      minio:
        condition: service_healthy
 
@@ -151,4 +152,3 @@ volumes:
   minio_data:
   nest-server-node-modules:
   frontend-node-modules:
-  ai-service-cache:

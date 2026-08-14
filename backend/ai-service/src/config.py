@@ -15,19 +15,21 @@ class Settings:
     MINIO_BUCKET = os.getenv("MINIO_DOCUMENTS_BUCKET", "documents")
 
     # Vector Database
-    VECTOR_DB_TYPE = os.getenv("VECTOR_DB_TYPE", "chroma")
-    CHROMA_PERSIST_DIRECTORY = os.getenv(
-        "CHROMA_PERSIST_DIRECTORY",
-        "/tmp/archie_ai_service_chroma",
+    VECTOR_DB_TYPE = os.getenv("VECTOR_DB_TYPE", "pgvector")
+    PGVECTOR_HOST = os.getenv("PGVECTOR_HOST", os.getenv("POSTGRES_HOST", "postgres"))
+    PGVECTOR_PORT = int(os.getenv("PGVECTOR_PORT", os.getenv("POSTGRES_PORT", "5432")))
+    PGVECTOR_USER = os.getenv("PGVECTOR_USER", os.getenv("POSTGRES_USER", "postgres"))
+    PGVECTOR_PASSWORD = os.getenv(
+        "PGVECTOR_PASSWORD",
+        os.getenv("POSTGRES_PASSWORD", "postgres"),
     )
+    PGVECTOR_DB = os.getenv("PGVECTOR_DB", os.getenv("POSTGRES_DB", "postgresdb"))
+    PGVECTOR_COLLECTION = os.getenv("PGVECTOR_COLLECTION", "archie_documents")
 
     # Embedding & Chunking
     EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "BAAI/bge-m3")
     CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "512"))
     CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "50"))
-
-    # RBAC
-    DEFAULT_ROLE_PERMISSION = os.getenv("DEFAULT_ROLE_PERMISSION", "public")
 
 
 settings = Settings()

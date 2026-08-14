@@ -9,7 +9,7 @@ class DocumentIngestionService:
     """Service responsible for converting documents into vector chunks.
 
     Each chunk must keep enough metadata to trace back to the source file in MinIO
-    and to enforce creator-group based filtering during retrieval.
+    and to enforce document-group based filtering during retrieval.
     """
 
     def __init__(
@@ -37,9 +37,9 @@ class DocumentIngestionService:
         text: str,
         source_key: str,
         creator_user_id: str,
-        creator_group_ids: list[str],
+        document_group_id: str | None,
     ) -> list[dict]:
-        """Split text into chunks and attach creator-user/creator-groups metadata."""
+        """Split text into chunks and attach creator-user/document-group metadata."""
         raise NotImplementedError("chunk_text is not implemented yet")
 
     def build_chunk_metadata(
@@ -47,12 +47,12 @@ class DocumentIngestionService:
         source_key: str,
         document_index: int,
         creator_user_id: str,
-        creator_group_ids: list[str],
+        document_group_id: str | None,
     ) -> dict:
-        """Build chunk metadata with MinIO provenance + creator-group access fields."""
+        """Build chunk metadata with MinIO provenance + document-group access fields."""
         return {
             "source_key": source_key,
             "document_index": document_index,
             "creator_user_id": creator_user_id,
-            "creator_group_ids": creator_group_ids,
+            "document_group_id": document_group_id,
         }

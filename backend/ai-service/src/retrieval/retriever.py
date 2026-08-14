@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable, List
+from typing import Any, Iterable, List
 
 
 class PermissionAwareRetriever:
@@ -18,40 +18,42 @@ class PermissionAwareRetriever:
         user_group_ids: Iterable[str] | None = None,
         top_k: int = 5,
     ) -> List[dict]:
-        """Search vector store and keep only chunks readable by this user.
+        """Return top-k readable chunks for this user.
 
-        Access rule:
-        - allow if user_id == chunk.creator_user_id
-        - allow if intersection(user_group_ids, chunk.creator_group_ids) is non-empty
+        The permission filter is pushed down into the vector-store query so the
+        database returns the top-k authorized matches directly.
         """
-        candidates = self.vector_store.similarity_search(query=query, k=top_k)
-        return self.filter_chunks_by_creator_groups(
-            candidates=candidates,
+        access_filter = self.build_access_filter(
             user_id=user_id,
             user_group_ids=user_group_ids,
         )
+        return self.vector_store.similarity_search(
+            query=query,
+            k=top_k,
+            filter_metadata=access_filter,
+        )
 
-    def filter_chunks_by_creator_groups(
+    def build_access_filter(
         self,
-        candidates: Iterable[dict],
         user_id: str,
         user_group_ids: Iterable[str] | None = None,
-    ) -> list[dict]:
-        """Filter retrieval results using creator-user and creator-groups metadata."""
-        allowed: list[dict] = []
-        normalized_user_groups = set(user_group_ids or [])
-        for chunk in candidates:
-            metadata = chunk.get("metadata", {})
-            creator_user_id = metadata.get("creator_user_id")
-            creator_group_ids = metadata.get("creator_group_ids") or []
-            if not isinstance(creator_group_ids, list):
-                creator_group_ids = []
+    ) -> dict[str, Any]:
+        """Build a backend-neutral access filter for vector-store implementations.
 
-            if creator_user_id == user_id:
-                allowed.append(chunk)
-                continue
+        Semantics:
+        - creator_user_id == user_id
+        - OR document_group_id IN user_group_ids
 
-            if normalized_user_groups.intersection(creator_group_ids):
-                allowed.append(chunk)
+        Adapters should translate this structure to the native filter syntax of
+        the underlying vector store when needed.
+        """
+        normalized_user_groups = [group_id for group_id in (user_group_ids or []) if group_id]
+        clauses: list[dict[str, Any]] = [{"creator_user_id": {"$eq": user_id}}]
 
-        return allowed
+        if normalized_user_groups:
+            clauses.append({"document_group_id": {"$in": normalized_user_groups}})
+
+        if len(clauses) == 1:
+            return clauses[0]
+
+        return {"$or": clauses}

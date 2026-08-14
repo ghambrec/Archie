@@ -33,7 +33,7 @@ async def ask(request: AskRequest):
 
     Args:
         request: Contains question + querying user context (user_id, user_group_ids).
-                 Retrieval uses creator-group intersection for access checks.
+                 Retrieval allows creator access and assigned document-group access.
 
     Returns:
         AskResponse with the generated answer and source chunks.

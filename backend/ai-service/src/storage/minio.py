@@ -1,9 +1,9 @@
-"""MinIO document store adapter for fetching documents and creator-group metadata."""
+"""MinIO document store adapter for fetching documents and document-group metadata."""
 
 from __future__ import annotations
 
 import logging
-from typing import Any, Iterable, List, Optional
+from typing import Iterable, List, Optional
 
 from minio import Minio
 import httpx
@@ -17,14 +17,14 @@ class MinioDocumentStore:
     Responsibilities:
     1. Connect to MinIO and list documents in the 'documents' bucket
     2. Download document text content
-    3. Query nest-server API to fetch creator metadata
-       (creator user + all creator groups)
+    3. Query nest-server API to fetch document access metadata
+       (creator user + assigned document group)
     4. Provide stable indexing for documents
     5. Build chunk metadata used for query-time access checks
 
     Access rule expected by retriever:
     - A querying user can read a chunk if they are the creator user, OR
-    - Their groups intersect with the creator's groups stored on the chunk.
+    - They belong to the document's assigned group.
     """
 
     def __init__(
@@ -109,12 +109,12 @@ class MinioDocumentStore:
             raise
 
     def get_document_metadata(self, object_key: str) -> dict:
-        """Fetch creator metadata for a document from nest-server API.
+        """Fetch document access metadata for a document from nest-server API.
 
         Expected payload shape from nest-server:
         - id: document UUID
         - uploadedBy: creator user UUID
-        - creatorGroupIds: list[str] (all groups creator belongs to)
+        - groupId: UUID of document's assigned group, or null
 
         Args:
             object_key: MinIO object key
@@ -123,7 +123,7 @@ class MinioDocumentStore:
             Normalized metadata dictionary with:
             - document_id
             - creator_user_id
-            - creator_group_ids
+            - document_group_id
 
         Raises:
             httpx.HTTPError: If nest-server API call fails
@@ -132,8 +132,7 @@ class MinioDocumentStore:
         try:
             logger.info(f"Fetching metadata from nest-server for: {object_key}")
 
-            # Query nest-server to find document + creator membership by object key.
-            # Endpoint contract is a placeholder until nest-server endpoint is added.
+            # Query nest-server to find a document and its assigned access group by object key.
             response = self.http_client.get(
                 f"/documents/by-key/{object_key}",
                 timeout=10,
@@ -141,16 +140,15 @@ class MinioDocumentStore:
             response.raise_for_status()
 
             metadata = response.json()
-            creator_group_ids = self._extract_creator_group_ids(metadata)
             normalized = {
                 "document_id": metadata.get("id"),
                 "creator_user_id": metadata.get("uploadedBy"),
-                "creator_group_ids": creator_group_ids,
+                "document_group_id": metadata.get("groupId"),
             }
             logger.info(
                 f"Retrieved metadata for {object_key}: "
                 f"creator={normalized['creator_user_id']}, "
-                f"groups={len(creator_group_ids)}"
+                f"group={normalized['document_group_id']}"
             )
 
             return normalized
@@ -165,32 +163,6 @@ class MinioDocumentStore:
         except Exception as e:
             logger.error(f"Failed to fetch metadata for {object_key}: {e}")
             raise
-
-    def _extract_creator_group_ids(self, metadata: dict[str, Any]) -> list[str]:
-        """Normalize creator group IDs from possible response field names.
-
-        This keeps the adapter resilient while the upstream endpoint is evolving.
-        """
-        value = metadata.get("creatorGroupIds")
-        if value is None:
-            value = metadata.get("groupIds")
-        if value is None:
-            value = metadata.get("groups")
-        if value is None:
-            return []
-        if not isinstance(value, list):
-            raise ValueError("Expected creator group IDs to be a list")
-
-        normalized: list[str] = []
-        for item in value:
-            if isinstance(item, str):
-                normalized.append(item)
-            elif isinstance(item, dict):
-                # Supports group objects like {"id": "..."} if that is returned upstream.
-                group_id = item.get("id")
-                if isinstance(group_id, str):
-                    normalized.append(group_id)
-        return normalized
 
     def get_object_index(
         self, object_key: str, all_keys: Optional[Iterable[str]] = None
@@ -233,20 +205,20 @@ class MinioDocumentStore:
         source_key: str,
         document_index: int,
         creator_user_id: str,
-        creator_group_ids: list[str],
+        document_group_id: str | None,
     ) -> dict:
         """Build metadata for each chunk.
 
         This metadata is stored with every chunk in the vector database.
         At retrieval time, access is allowed when:
         - querying user ID == creator_user_id, OR
-        - querying user's groups intersect creator_group_ids.
+        - querying user's groups contain document_group_id.
 
         Args:
             source_key: MinIO object key where this chunk came from
             document_index: Stable index of the document in the bucket
             creator_user_id: UUID of user who uploaded the document
-            creator_group_ids: All group UUIDs the creator belongs to
+            document_group_id: Group UUID assigned to this document, if any
 
         Returns:
             Dictionary with chunk provenance + access metadata
@@ -256,14 +228,14 @@ class MinioDocumentStore:
                 "source_key": "documents-abc123",
                 "document_index": 5,
                 "creator_user_id": "user-uuid",
-                "creator_group_ids": ["group-a", "group-b"],
+                "document_group_id": "group-uuid",
             }
         """
         metadata = {
             "source_key": source_key,
             "document_index": document_index,
             "creator_user_id": creator_user_id,
-            "creator_group_ids": creator_group_ids,
+            "document_group_id": document_group_id,
         }
 
         logger.debug(f"Built chunk metadata: {metadata}")
