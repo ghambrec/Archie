@@ -83,27 +83,47 @@ services:
    networks:
      - archie
 
+  ai-service:
+   build:
+     context: ./backend/ai-service
+     dockerfile: Dockerfile
+   container_name: ai-service
+   restart: unless-stopped
+   ports:
+     - "5000:5000"
+   volumes:
+     - ./backend/ai-service:/app
+     - ai-service-cache:/tmp/archie_ai_service_chroma
+   networks:
+     - archie
+   env_file: "./env/.env"
+   depends_on:
+     minio:
+       condition: service_healthy
+
   nest-server:
-    build:
-      context: ./backend/nest-server
-      dockerfile: Dockerfile
-    container_name: nest-server
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./backend/nest-server:/app
-      - nest-server-node-modules:/app/node_modules
-    networks:
-      - archie
-    env_file: "./env/.env"
-    depends_on:
-      postgres:
-        condition: service_healthy
-        restart: true
-      redis:
-        condition: service_healthy
-        restart: true
+   build:
+     context: ./backend/nest-server
+     dockerfile: Dockerfile
+   container_name: nest-server
+   restart: unless-stopped
+   ports:
+     - "3000:3000"
+   volumes:
+     - ./backend/nest-server:/app
+     - nest-server-node-modules:/app/node_modules
+   networks:
+     - archie
+   env_file: "./env/.env"
+   depends_on:
+     postgres:
+       condition: service_healthy
+       restart: true
+     redis:
+       condition: service_healthy
+       restart: true
+     ai-service:
+       condition: service_healthy
 
   frontend:
     build:
@@ -131,3 +151,4 @@ volumes:
   minio_data:
   nest-server-node-modules:
   frontend-node-modules:
+  ai-service-cache:
