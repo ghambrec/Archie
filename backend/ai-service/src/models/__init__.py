@@ -20,7 +20,8 @@ class AskRequest(BaseModel):
     """Request to ask a question and retrieve answers."""
 
     question: str
-    user_roles: list[str] | None = None
+    user_id: str
+    user_group_ids: list[str] | None = None
 
 
 class SourceChunk(BaseModel):
@@ -29,7 +30,8 @@ class SourceChunk(BaseModel):
     content: str
     source_key: str
     document_index: int
-    role_permission: str
+    creator_user_id: str
+    creator_group_ids: list[str]
 
 
 class AskResponse(BaseModel):

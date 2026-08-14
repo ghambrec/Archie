@@ -18,6 +18,11 @@ class AIService:
         """Run the ingestion flow for documents currently stored in MinIO."""
         raise NotImplementedError("ingest_documents is not implemented yet")
 
-    def ask(self, question: str, user_roles: Iterable[str] | None = None) -> str:
+    def ask(
+        self,
+        question: str,
+        user_id: str,
+        user_group_ids: Iterable[str] | None = None,
+    ) -> str:
         """Retrieve matching chunks, build a prompt, and return the answer."""
         raise NotImplementedError("ask is not implemented yet")

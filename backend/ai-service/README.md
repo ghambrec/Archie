@@ -5,9 +5,9 @@ FastAPI microservice for document ingestion and retrieval-augmented generation (
 ## Features
 
 - **Document Ingestion**: Reads text documents from MinIO, chunks them, and stores embeddings in a vector database
-- **Permission-Aware Retrieval**: Filters documents by user roles during retrieval
+- **Permission-Aware Retrieval**: Filters chunks by creator-user and creator-group overlap
 - **RAG Generation**: Generates answers using retrieved context chunks
-- **Metadata Tracking**: Associates chunks with source document keys and role permissions
+- **Metadata Tracking**: Associates chunks with source document keys and creator access metadata
 
 ## Architecture
 
@@ -52,7 +52,8 @@ Content-Type: application/json
 Ingest documents from the MinIO `documents` bucket into the vector database.
 
 - If `object_keys` is `null` or omitted, all documents in the bucket are ingested.
-- Each document is split into chunks with metadata: `source_key`, `document_index`, `role_permission`.
+- Each document is split into chunks with metadata:
+  `source_key`, `document_index`, `creator_user_id`, `creator_group_ids`.
 
 **Response:**
 ```json
@@ -77,13 +78,15 @@ Content-Type: application/json
 
 {
   "question": "What is the company's policy on remote work?",
-  "user_roles": ["employee", "manager"] | null
+  "user_id": "user-uuid",
+  "user_group_ids": ["group-a", "group-b"] | null
 }
 ```
 
 Retrieve relevant document chunks and generate an answer.
 
-- If `user_roles` is `null` or omitted, only documents tagged as `"public"` are returned.
+- A chunk is readable if the querying `user_id` is the creator OR at least one
+  querying `user_group_ids` value intersects the chunk's `creator_group_ids`.
 - The generation response includes retrieved sources for transparency.
 
 **Response:**
@@ -95,7 +98,8 @@ Retrieve relevant document chunks and generate an answer.
       "content": "...",
       "source_key": "policies.txt",
       "document_index": 0,
-      "role_permission": "employee"
+      "creator_user_id": "user-uuid",
+      "creator_group_ids": ["group-a", "group-b"]
     }
   ]
 }
@@ -107,7 +111,8 @@ curl -X POST http://localhost:5000/ask \
   -H "Content-Type: application/json" \
   -d '{
     "question": "What is the company policy?",
-    "user_roles": ["employee"]
+    "user_id": "user-uuid",
+    "user_group_ids": ["group-a"]
   }'
 ```
 
@@ -191,7 +196,8 @@ const response = await fetch('http://ai-service:5000/ask', {
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
     question: 'What is the policy?',
-    user_roles: ['employee']
+    user_id: 'user-uuid',
+    user_group_ids: ['group-a']
   })
 });
 const data = await response.json();
