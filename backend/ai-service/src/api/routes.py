@@ -32,7 +32,8 @@ async def ask(request: AskRequest):
     """Ask a question and retrieve answers using RAG.
 
     Args:
-        request: Contains the question and optional user_roles for permission filtering.
+        request: Contains question + querying user context (user_id, user_group_ids).
+                 Retrieval uses creator-group intersection for access checks.
 
     Returns:
         AskResponse with the generated answer and source chunks.
