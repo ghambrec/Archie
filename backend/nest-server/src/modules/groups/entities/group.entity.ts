@@ -1,4 +1,4 @@
-import { UserGroup } from 'src/modules/user-groups/entities/user-group.entity';
+import { UserGroup } from '../../user-groups/entities/user-group.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('groups')

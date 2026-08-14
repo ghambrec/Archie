@@ -1,4 +1,6 @@
-import { UserGroup } from 'src/modules/user-groups/entities/user-group.entity';
+
+import { UserGroup } from '../../user-groups/entities/user-group.entity';
+
 import {
   Column,
   CreateDateColumn,
@@ -49,4 +51,8 @@ export class User {
 
   @DeleteDateColumn({ type: 'timestamptz', name: 'deleted_at' })
   deletedAt!: Date | null;
+
+  @OneToMany(() => UserGroup, userGroup => userGroup.user)
+  userGroups!: UserGroup[];
+
 }

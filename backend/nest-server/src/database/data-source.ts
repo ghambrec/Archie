@@ -1,6 +1,9 @@
-import 'dotenv/config';
+//import {config as loadEnv } from 'dotenv';
+//import {resolve } from 'path';
+
+
 import { DataSource } from 'typeorm';
-import { loadDatabaseConfig } from 'src/config/database.config';
+import { loadDatabaseConfig } from '../config/database.config';
 
 import { User } from '../modules/users/entities/user.entity';
 
@@ -13,7 +16,7 @@ const AppDataSource = new DataSource({
   username: config.username,
   password: config.password,
   database: config.dbName,
-  entities: [User],
+  entities: ['src/**/*.entity.ts'],
   migrations: ['src/database/migrations/*.ts'],
 });
 

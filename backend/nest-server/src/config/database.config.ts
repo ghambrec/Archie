@@ -1,5 +1,5 @@
 import { registerAs } from "@nestjs/config";
-import { getEnvNumber, requireEnv } from "src/common/env/env";
+import { getEnvNumber, requireEnv } from "../common/env/env";
 
 
 export function loadDatabaseConfig () {
