@@ -31,7 +31,7 @@ class SourceChunk(BaseModel):
     source_key: str
     document_index: int
     creator_user_id: str
-    creator_group_ids: list[str]
+    document_group_id: str | None
 
 
 class AskResponse(BaseModel):

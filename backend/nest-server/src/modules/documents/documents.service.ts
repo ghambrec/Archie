@@ -13,6 +13,7 @@ import { DocumentSummaryDto } from './dto/document-summary.dto';
 import { DownloadUrlResponseDto } from './dto/download-url-response.dto';
 import { DocumentDownloadStreamDto } from './dto/document-download-stream.dto';
 import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
+import { DocumentRagMetadataDto } from './dto/document-rag-metadata.dto';
 import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
 import { GroupsService } from '../groups/groups.service';
@@ -122,6 +123,29 @@ export class DocumentsService {
     this.logger.log({ userId, id }, 'One document found');
 
     return document;
+  }
+
+  async findByObjectKey(objectKey: string): Promise<DocumentRagMetadataDto> {
+    this.logger.log({ objectKey }, 'Finding document metadata by object key');
+
+    const document = await this.documentsRepository.findOne({
+      where: { objectKey },
+      select: { id: true, uploadedBy: true },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    const groupId = await this.documentGroupsService.getGroupId(document.id);
+
+    this.logger.log({ objectKey, documentId: document.id, groupId }, 'Document metadata found');
+
+    return {
+      id: document.id,
+      uploadedBy: document.uploadedBy,
+      groupId,
+    };
   }
 
   async getDownloadUrl(userId: string, id: string): Promise<DownloadUrlResponseDto> {

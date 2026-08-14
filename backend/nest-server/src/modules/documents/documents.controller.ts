@@ -24,6 +24,7 @@ import { DocumentSummaryDto } from './dto/document-summary.dto';
 import { DownloadUrlResponseDto } from './dto/download-url-response.dto';
 import { SetDocumentGroupDto } from './dto/set-document-group.dto';
 import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
+import { DocumentRagMetadataDto } from './dto/document-rag-metadata.dto';
 
 @ApiTags('documents')
 @Controller('documents')
@@ -63,6 +64,12 @@ export class DocumentsController {
     @Query() query: GetDocumentsQueryDto,
   ): Promise<GetDocumentsResponseDto> {
     return this.documentsService.findAll(req.userId!, query);
+  }
+
+  @Get('by-key/:objectKey')
+  @ApiOperation({ summary: 'Internal lookup for AI ingestion by MinIO object key' })
+  async findByObjectKey(@Param('objectKey') objectKey: string): Promise<DocumentRagMetadataDto> {
+    return this.documentsService.findByObjectKey(objectKey);
   }
 
   @UseGuards(SessionAuthGuard)

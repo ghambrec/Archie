@@ -8,8 +8,9 @@ from typing import Sequence
 class VectorStoreAdapter:
     """Abstract adapter around the embedding/vector database.
 
-    The implementation can later use Chroma, pgvector, or any other backend, but
-    the storage interface should remain stable for the retrieval layer.
+    The project targets pgvector on Postgres as the primary backend. The
+    storage interface remains generic so the retrieval layer stays isolated from
+    backend-specific query details.
     """
 
     def connect(self) -> None:
@@ -33,5 +34,10 @@ class VectorStoreAdapter:
         k: int = 5,
         filter_metadata: dict | None = None,
     ) -> list[dict]:
-        """Return the best matching chunks, optionally filtered by metadata."""
+        """Return the best matching chunks, optionally filtered by metadata.
+
+        Important: when ``filter_metadata`` is provided, implementations should
+        apply it inside the vector-database query so the returned rows are the
+        top-k authorized matches rather than top-k global matches filtered later.
+        """
         raise NotImplementedError("similarity_search is not implemented yet")

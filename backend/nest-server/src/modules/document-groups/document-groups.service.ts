@@ -21,4 +21,9 @@ export class DocumentGroupsService {
 
     await this.documentGroupsRepository.insert({ documentId, groupId });
   }
+
+  async getGroupId(documentId: string): Promise<string | null> {
+    const documentGroup = await this.documentGroupsRepository.findOneBy({ documentId });
+    return documentGroup?.groupId ?? null;
+  }
 }
