@@ -15,9 +15,9 @@ COPY . .
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 
-EXPOSE 5000
+EXPOSE 5001
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-    CMD curl -f http://localhost:5000/health || exit 1
+    CMD curl -f "http://localhost:5001/health" || exit 1
 
 CMD ["python", "main.py"]
