@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Pre-download the default embedding model so the container starts faster.
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('BAAI/bge-m3')"
+
 COPY . .
 
 ENV PYTHONUNBUFFERED=1
