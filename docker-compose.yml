@@ -8,7 +8,7 @@ services:
     env_file:
       - ./env/.env
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
@@ -56,7 +56,7 @@ services:
    volumes:
      - minio_data:/data
    healthcheck:
-     test: ["CMD-SHELL", "minio server health alive"]
+     test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live || exit 1"]
      interval: 30s
      timeout: 5s
      retries: 5
@@ -92,7 +92,7 @@ services:
    container_name: ai-service
    restart: unless-stopped
    ports:
-     - "5000:5000"
+     - "5001:5001"
    volumes:
      - ./backend/ai-service:/app
    networks:
