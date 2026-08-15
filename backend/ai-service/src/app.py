@@ -4,10 +4,12 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from langchain_anthropic import ChatAnthropic
 
 from src.api.routes import router as api_router
 from src.config import settings
 from src.core.service import AIService
+from src.generation.generator import GenerationService
 from src.ingestion.service import DocumentIngestionService
 from src.retrieval.service import RetrievalService
 from src.storage.minio import MinioDocumentStore
@@ -20,6 +22,11 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Initialize and cleanup on app startup/shutdown."""
     logger.info("🚀 AI Service starting up...")
+    if not settings.ANTHROPIC_API_KEY:
+        raise RuntimeError(
+            "ANTHROPIC_API_KEY is required to start ai-service because /ask uses Claude."
+        )
+
     minio_store = MinioDocumentStore(
         minio_endpoint=settings.MINIO_ENDPOINT,
         minio_access_key=settings.MINIO_ACCESS_KEY,
@@ -44,11 +51,19 @@ async def lifespan(app: FastAPI):
         embedding_model=settings.EMBEDDING_MODEL,
     )
     retrieval_service = RetrievalService(vector_store=vector_store)
+    generation_service = GenerationService(
+        model_client=ChatAnthropic(
+            model=settings.CLAUDE_MODEL,
+            api_key=settings.ANTHROPIC_API_KEY,
+            temperature=settings.CLAUDE_TEMPERATURE,
+        )
+    )
     ai_service = AIService(
         minio_store=minio_store,
         vector_store=vector_store,
         ingestion_service=ingestion_service,
         retrieval_service=retrieval_service,
+        generator=generation_service,
     )
 
     await vector_store.connect()
@@ -57,6 +72,7 @@ async def lifespan(app: FastAPI):
     app.state.vector_store = vector_store
     app.state.ingestion_service = ingestion_service
     app.state.retrieval_service = retrieval_service
+    app.state.generation_service = generation_service
     app.state.ai_service = ai_service
 
     try:

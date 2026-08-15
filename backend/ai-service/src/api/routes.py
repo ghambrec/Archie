@@ -87,7 +87,10 @@ async def ingest(
 
 
 @router.post("/ask", response_model=AskResponse)
-async def ask(request: AskRequest):
+async def ask(
+    request: AskRequest,
+    service: AIService = Depends(get_ai_service),
+):
     """Ask a question and retrieve answers using RAG.
 
     Args:
@@ -97,4 +100,22 @@ async def ask(request: AskRequest):
     Returns:
         AskResponse with the generated answer and source chunks.
     """
-    raise NotImplementedError("POST /ask not implemented yet")
+    result = await service.ask(
+        question=request.question,
+        user_id=request.user_id,
+        user_group_ids=request.user_group_ids,
+    )
+
+    return {
+        "answer": result["answer"],
+        "sources": [
+            {
+                "content": item["content"],
+                "source_key": item.get("metadata", {}).get("source_key", ""),
+                "document_index": item.get("metadata", {}).get("document_index", -1),
+                "creator_user_id": item.get("metadata", {}).get("creator_user_id", ""),
+                "document_group_id": item.get("metadata", {}).get("document_group_id"),
+            }
+            for item in result["sources"]
+        ],
+    }
