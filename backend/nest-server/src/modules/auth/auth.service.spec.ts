@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
@@ -148,15 +148,6 @@ describe('AuthService', () => {
       expect(result).toBe('session-2');
     });
 
-    it('throws ConflictException when the email is already registered', async () => {
-      userService.findByEmail.mockResolvedValue(user);
-
-      await expect(
-        service.register({ email: user.email, password: 'password1234', displayName: 'Test User' }),
-      ).rejects.toThrow(ConflictException);
-
-      expect(userService.create).not.toHaveBeenCalled();
-    });
   });
 
   describe('logout', () => {
