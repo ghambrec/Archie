@@ -1,5 +1,5 @@
 COMPOSE := docker compose -f ./docker-compose.yml 
-PNPM := corepack pnpm
+PNPM := pnpm
 
 NEST_DIR := backend/nest-server
 FRONTEND_DIR := frontend
@@ -21,6 +21,9 @@ re:
 	make clean
 	make up
 
+unit:
+	cd $(NEST_DIR) && $(PNPM) test
+
 deps-check:
 	cd $(NEST_DIR) && $(PNPM) install --frozen-lockfile
 	cd $(FRONTEND_DIR) && $(PNPM) install --frozen-lockfile
@@ -30,4 +33,4 @@ deps-repair:
 	cd $(FRONTEND_DIR) && $(PNPM) install --no-frozen-lockfile
 
 
-.PHONY: re clean fclean down up setup
+.PHONY: re clean fclean down up setup deps-check deps-repair
