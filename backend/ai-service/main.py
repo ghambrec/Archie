@@ -13,12 +13,12 @@ if __name__ == "__main__":
     import uvicorn
 
     logger.info(
-        f"Starting AI Service on {settings.API_HOST}:{settings.API_PORT} "
+        f"Starting AI Service on 0.0.0.0:{settings.AI_SERVICE_PORT} "
         f"in {settings.ENVIRONMENT} mode"
     )
     uvicorn.run(
         "src.app:app",
-        host=settings.API_HOST,
-        port=settings.API_PORT,
+        host="0.0.0.0",
+        port=settings.AI_SERVICE_PORT,
         reload=settings.ENVIRONMENT == "development",
     )
