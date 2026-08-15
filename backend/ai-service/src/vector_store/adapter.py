@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any, Sequence
 
@@ -65,9 +66,12 @@ class VectorStoreAdapter:
         if self.engine is not None and self.documents_table is not None:
             return
 
-        self.embeddings = self._InitializeEmbeddings()
+        self.embeddings = await asyncio.to_thread(self._InitializeEmbeddings)
         self.embedding_dimensions = len(
-            self.embeddings.embed_query(DEFAULT_EMBEDDING_PROBE_TEXT)
+            await asyncio.to_thread(
+                self.embeddings.embed_query,
+                DEFAULT_EMBEDDING_PROBE_TEXT,
+            )
         )
 
         self.engine = create_async_engine(
@@ -136,7 +140,10 @@ class VectorStoreAdapter:
             return []
 
         contents = [self._ExtractContent(document) for document in documents]
-        embeddings = self.embeddings.embed_documents(contents)
+        embeddings = await asyncio.to_thread(
+            self.embeddings.embed_documents,
+            contents,
+        )
         rows: list[dict[str, Any]] = []
         chunk_ids: list[str] = []
 
@@ -172,7 +179,10 @@ class VectorStoreAdapter:
         assert self.documents_table is not None
         assert self.embeddings is not None
 
-        query_embedding = self.embeddings.embed_query(query)
+        query_embedding = await asyncio.to_thread(
+            self.embeddings.embed_query,
+            query,
+        )
         distance_expr = self.documents_table.c.embedding.cosine_distance(query_embedding)
 
         statement = (

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import Iterable, List
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -45,7 +46,7 @@ class DocumentIngestionService:
         if self.vector_store is None:
             raise RuntimeError("DocumentIngestionService requires a vector store.")
 
-        keys = list(object_keys) if object_keys is not None else self.minio_store.ListDocuments()
+        keys = list(object_keys) if object_keys is not None else await self.minio_store.ListDocuments()
         ingested_chunk_ids: list[str] = []
 
         for object_key in keys:
@@ -60,11 +61,11 @@ class DocumentIngestionService:
         if self.vector_store is None:
             raise RuntimeError("DocumentIngestionService requires a vector store.")
 
-        text = self.minio_store.GetDocumentText(object_key)
-        metadata = self.minio_store.GetDocumentMetadata(object_key)
-        document_index = self.minio_store.GetObjectIndex(object_key)
+        text = await self.minio_store.GetDocumentText(object_key)
+        metadata = await self.minio_store.GetDocumentMetadata(object_key)
+        document_index = await self.minio_store.GetObjectIndex(object_key)
 
-        chunks = self.ChunkText(
+        chunks = await self.ChunkText(
             text=text,
             source_key=object_key,
             document_index=document_index,
@@ -78,7 +79,7 @@ class DocumentIngestionService:
 
         return await self.vector_store.AddDocuments(chunks)
 
-    def ChunkText(
+    async def ChunkText(
         self,
         text: str,
         source_key: str,
@@ -91,7 +92,7 @@ class DocumentIngestionService:
         if not text or not text.strip():
             return []
 
-        chunk_contents = self.chunker.split_text(text)
+        chunk_contents = await asyncio.to_thread(self.chunker.split_text, text)
         chunks: list[dict] = []
 
         for index, chunk_content in enumerate(chunk_contents):

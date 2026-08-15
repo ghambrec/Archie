@@ -77,7 +77,7 @@ async def Ingest(
     Returns:
         IngestResponse with chunk count and list of ingested document keys.
     """
-    object_keys = request.object_keys or service.minio_store.ListDocuments()
+    object_keys = request.object_keys or await service.minio_store.ListDocuments()
     chunk_ids = await service.IngestDocuments(object_keys)
     return {
         "chunk_count": len(chunk_ids),
