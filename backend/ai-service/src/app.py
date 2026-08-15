@@ -28,7 +28,7 @@ async def Lifespan(app: FastAPI):
         )
 
     minio_store = MinioDocumentStore(
-        minio_endpoint=settings.MINIO_ENDPOINT,
+        minio_endpoint=f"{settings.MINIO_ENDPOINT}:{settings.MINIO_PORT}",
         minio_access_key=settings.MINIO_ACCESS_KEY,
         minio_secret_key=settings.MINIO_SECRET_KEY,
         minio_secure=settings.MINIO_SECURE,
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
     uvicorn.run(
         "src.app:app",
-        host=settings.AI_SERVICE_HOST,
+        host="0.0.0.0",
         port=settings.AI_SERVICE_PORT,
         reload=settings.ENVIRONMENT == "development",
     )
