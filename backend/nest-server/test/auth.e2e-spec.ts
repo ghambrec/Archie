@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { AppModule } from '../src/app.module';
 import { ApplicationExceptionFilter } from '../src/common/errors/application-exception.filter';
 import { ErrorCode } from '../src/common/errors/error-code';
@@ -114,6 +114,37 @@ describe('AuthController (e2e)', () => {
         statusCode: statusCodeConflict,
         code: ErrorCode.UserNameAlreadyRegistered,
       });
+    });
+
+    it('rolls back the whole transaction when a later insert inside it fails', async () => {
+      const email = randomEmail();
+      const displayName = randomDisplayName();
+      usedEmails.push(email);
+
+      const originalInsert = EntityManager.prototype.insert;
+      const insertSpy = jest
+        .spyOn(EntityManager.prototype, 'insert')
+        .mockImplementation(function (this: EntityManager, target, ...rest) {
+          if (target === Group) {
+            throw new Error('Simulated group insert failure');
+          }
+          return (originalInsert as (...args: unknown[]) => unknown).apply(this, [
+            target,
+            ...rest,
+          ]) as ReturnType<EntityManager['insert']>;
+        });
+
+      try {
+        await request(app.getHttpServer())
+          .post('/auth/register')
+          .send({ email, password: testPassword, displayName })
+          .expect(500);
+      } finally {
+        insertSpy.mockRestore();
+      }
+
+      const user = await dataSource.manager.findOneBy(User, { email });
+      expect(user).toBeNull();
     });
   });
 });
