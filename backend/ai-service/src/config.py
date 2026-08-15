@@ -3,12 +3,13 @@ import os
 
 class Settings:
     # API Server
-    AI_SERVICE_HOST = os.getenv("AI_SERVICE_HOST", "0.0.0.0")
+    AI_SERVICE_HOST = os.getenv("AI_SERVICE_HOST", "ai-service")
     AI_SERVICE_PORT = int(os.getenv("AI_SERVICE_PORT", "5000"))
     ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
     # MinIO
-    MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "minio:9000")
+    MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "minio")
+    MINIO_PORT = int(os.getenv("MINIO_PORT", "9000"))
     MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "")
     MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "")
     MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() == "true"

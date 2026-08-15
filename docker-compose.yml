@@ -3,10 +3,12 @@ services:
     image: pgvector/pgvector:pg18
     container_name: postgres
     restart: unless-stopped
+    ports:
+      - "5432:5432"
     env_file:
       - ./env/.env
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
@@ -54,7 +56,7 @@ services:
    volumes:
      - minio_data:/data
    healthcheck:
-     test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+     test: ["CMD-SHELL", "minio server health alive"]
      interval: 30s
      timeout: 5s
      retries: 5

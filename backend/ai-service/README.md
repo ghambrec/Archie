@@ -122,12 +122,13 @@ Environment variables (from `.env`):
 
 ```bash
 # API Server
-AI_SERVICE_HOST=0.0.0.0
+AI_SERVICE_HOST=ai-service
 AI_SERVICE_PORT=5000
 ENVIRONMENT=development
 
 # MinIO
-MINIO_ENDPOINT=minio:9000
+MINIO_ENDPOINT=minio
+MINIO_PORT=9000
 MINIO_ACCESS_KEY=<your-key>
 MINIO_SECRET_KEY=<your-secret>
 MINIO_SECURE=false
