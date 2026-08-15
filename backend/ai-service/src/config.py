@@ -10,8 +10,8 @@ class Settings:
     # MinIO
     MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "minio")
     MINIO_PORT = int(os.getenv("MINIO_PORT", "9000"))
-    MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "")
-    MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "")
+    MINIO_ACCESS_KEY = os.getenv("MINIO_APP_ACCESS_KEY", "")
+    MINIO_SECRET_KEY = os.getenv("MINIO_APP_SECRET_KEY", "")
     MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() == "true"
     MINIO_BUCKET = os.getenv("MINIO_DOCUMENTS_BUCKET", "documents")
 
