@@ -17,10 +17,16 @@ const randomDisplayName = () => `e2e-${randomUUID()}`;
 describe('AuthController (e2e)', () => {
   let app: INestApplication<App>;
   let dataSource: DataSource;
+  let usedEmails: string[];
 
   const testPassword = 'password1234';
+  const wrotngPassword = 'wrong-password'
+  const statusCodeOk = 200;
   const statusCodeCreated = 201;
+  const statusCodeUnauthorized = 401;
   const statusCodeConflict = 409;
+  const statusCodeTooManyRequests = 429;
+  const maxLoginAttempts = 5;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -40,23 +46,32 @@ describe('AuthController (e2e)', () => {
     await app.close();
   });
 
-  describe('POST /auth/register', () => {
-    let usedEmails: string[];
+  beforeEach(() => {
+    usedEmails = [];
+  });
 
-    beforeEach(() => {
-      usedEmails = [];
-    });
-
-    afterEach(async () => {
-      for (const email of usedEmails) {
-        const user = await dataSource.manager.findOneBy(User, { email });
-        if (user) {
-          await dataSource.manager.delete(User, { id: user.id });
-          await dataSource.manager.delete(Group, { name: `personal-${user.id}` });
-        }
+  afterEach(async () => {
+    for (const email of usedEmails) {
+      const user = await dataSource.manager.findOneBy(User, { email });
+      if (user) {
+        await dataSource.manager.delete(User, { id: user.id });
+        await dataSource.manager.delete(Group, { name: `personal-${user.id}` });
       }
-    });
+    }
+  });
 
+  const registerUser = async (
+    email: string,
+    displayName: string,
+  ): Promise<void> => {
+    usedEmails.push(email);
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({ email, password: testPassword, displayName })
+      .expect(statusCodeCreated);
+  };
+
+  describe('POST /auth/register', () => {
     it('creates the user and returns a session cookie', async () => {
       const email = randomEmail();
       const displayName = randomDisplayName();
@@ -145,6 +160,86 @@ describe('AuthController (e2e)', () => {
 
       const user = await dataSource.manager.findOneBy(User, { email });
       expect(user).toBeNull();
+    });
+  });
+
+  describe('POST /auth/login', () => {
+    it('logs in with valid credentials and returns a session cookie', async () => {
+      const email = randomEmail();
+      await registerUser(email, randomDisplayName());
+
+      const response = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email, password: testPassword })
+        .expect(statusCodeCreated);
+
+      expect(response.headers['set-cookie']).toBeDefined();
+      expect(response.body).toMatchObject({ email });
+    });
+
+    it('throws Unauthorized for a wrong password', async () => {
+      const email = randomEmail();
+      await registerUser(email, randomDisplayName());
+
+      await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email, password: wrotngPassword })
+        .expect(statusCodeUnauthorized);
+    });
+
+    it('throws Unauthorized for an email that is not registered', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: randomEmail(), password: testPassword })
+        .expect(statusCodeUnauthorized);
+    });
+
+    it('locks the account after too many failed attempts', async () => {
+      const email = randomEmail();
+      await registerUser(email, randomDisplayName());
+
+      for (let attempt = 0; attempt < maxLoginAttempts; attempt++) {
+        await request(app.getHttpServer())
+          .post('/auth/login')
+          .send({ email, password: wrotngPassword })
+          .expect(statusCodeUnauthorized);
+      }
+
+      const response = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email, password: testPassword })
+        .expect(statusCodeTooManyRequests);
+
+      expect(response.body.retryAfterSeconds).toBeGreaterThan(0);
+    });
+  });
+
+  describe('GET /auth/logout', () => {
+    it('destroys the session and clears the cookie', async () => {
+      const email = randomEmail();
+      await registerUser(email, randomDisplayName());
+
+      const loginResponse = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email, password: testPassword })
+        .expect(statusCodeCreated);
+      const sessionCookie = loginResponse.headers['set-cookie'];
+
+      await request(app.getHttpServer())
+        .get('/auth/logout')
+        .set('Cookie', sessionCookie)
+        .expect(statusCodeOk);
+
+      await request(app.getHttpServer())
+        .get('/auth/me')
+        .set('Cookie', sessionCookie)
+        .expect(statusCodeUnauthorized);
+    });
+
+    it('throws Unauthorized when there is no session cookie', async () => {
+      await request(app.getHttpServer())
+        .get('/auth/logout')
+        .expect(statusCodeUnauthorized);
     });
   });
 });
