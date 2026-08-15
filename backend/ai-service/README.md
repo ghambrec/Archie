@@ -146,6 +146,7 @@ PGVECTOR_COLLECTION=archie_documents
 EMBEDDING_MODEL=BAAI/bge-m3
 CHUNK_SIZE=512
 CHUNK_OVERLAP=50
+RETRIEVAL_TOP_K=5
 
 # Claude (LangChain)
 ANTHROPIC_API_KEY=<your-anthropic-api-key>
@@ -234,7 +235,7 @@ mypy .
 - [ ] MinIO adapter (`src/storage/minio.py`)
 - [ ] Document ingestion (`src/ingestion/service.py`)
 - [ ] Vector store adapter (`src/vector_store/adapter.py`)
-- [ ] Permission-aware retrieval (`src/retrieval/retriever.py`)
+- [ ] Permission-aware retrieval (`src/retrieval/service.py`)
 - [ ] Answer generation (`src/generation/generator.py`)
 - [ ] Service orchestration (`src/core/service.py`)
 - [ ] FastAPI routes (`src/api/routes.py`, `src/app.py`, `main.py`)
