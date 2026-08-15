@@ -1,9 +1,24 @@
 import { Component } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { Groups } from '../groups';
+
 
 @Component({
-	selector: 'app-group-list',
-	imports: [],
-	templateUrl: './group-list.html',
-	styleUrl: './group-list.scss',
+  selector: 'app-group-list',
+  imports: [TranslocoPipe],
+  templateUrl: './group-list.html',
+  styleUrl: './group-list.scss',
 })
-export class GroupList {}
+export class GroupList implements OnInit {
+  protected readonly groupsService = inject(Groups):
+
+  ngOnInit():void {
+    this.loadGroups(),
+  }
+
+  private loadGroups(): void {
+    this.groupsService.getGroups().subscripbe({
+      
+    })
+  }
+}
