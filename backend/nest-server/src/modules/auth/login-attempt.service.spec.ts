@@ -2,6 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { LoginAttemptService } from './login-attempt.service';
 import { REDIS_CLIENT } from '../redis/redis.module';
+import test from 'node:test';
+
+const failKey = (email: string) => `login:fail:${email}`;
+const lockKey = (email: string) => `login:lock:${email}`;
 
 describe('LoginAttemptService', () => {
   let service: LoginAttemptService;
@@ -16,6 +20,7 @@ describe('LoginAttemptService', () => {
 
   const maxAttempts = 5;
   const lockoutSeconds = 900;
+  const testMail = 'test@example.com';
 
   beforeEach(async () => {
     multi = {
@@ -63,16 +68,16 @@ describe('LoginAttemptService', () => {
     it('returns the ttl when the account is locked', async () => {
       redis.ttl.mockResolvedValue(30);
 
-      const result = await service.isLocked('test@example.com');
+      const result = await service.isLocked(testMail);
 
-      expect(redis.ttl).toHaveBeenCalledWith('login:lock:test@example.com');
+      expect(redis.ttl).toHaveBeenCalledWith(lockKey(testMail));
       expect(result).toBe(30);
     });
 
     it('returns null when there is no lock', async () => {
       redis.ttl.mockResolvedValue(-2);
 
-      const result = await service.isLocked('test@example.com');
+      const result = await service.isLocked(testMail);
 
       expect(result).toBeNull();
     });
@@ -80,7 +85,7 @@ describe('LoginAttemptService', () => {
     it('returns null when the ttl is zero', async () => {
       redis.ttl.mockResolvedValue(0);
 
-      const result = await service.isLocked('test@example.com');
+      const result = await service.isLocked(testMail);
 
       expect(result).toBeNull();
     });
@@ -90,11 +95,11 @@ describe('LoginAttemptService', () => {
     it('sets an expiry on the first failed attempt', async () => {
       redis.incr.mockResolvedValue(1);
 
-      await service.registerFailure('test@example.com');
+      await service.registerFailure(testMail);
 
-      expect(redis.incr).toHaveBeenCalledWith('login:fail:test@example.com');
+      expect(redis.incr).toHaveBeenCalledWith(failKey(testMail));
       expect(redis.expire).toHaveBeenCalledWith(
-        'login:fail:test@example.com',
+        failKey(testMail),
         lockoutSeconds,
       );
       expect(redis.multi).not.toHaveBeenCalled();
@@ -103,7 +108,7 @@ describe('LoginAttemptService', () => {
     it('does not reset the expiry on subsequent attempts below the threshold', async () => {
       redis.incr.mockResolvedValue(2);
 
-      await service.registerFailure('test@example.com');
+      await service.registerFailure(testMail);
 
       expect(redis.expire).not.toHaveBeenCalled();
       expect(redis.multi).not.toHaveBeenCalled();
@@ -112,22 +117,22 @@ describe('LoginAttemptService', () => {
     it('locks the account once the max attempts are reached', async () => {
       redis.incr.mockResolvedValue(maxAttempts);
 
-      await service.registerFailure('test@example.com');
+      await service.registerFailure(testMail);
 
       expect(multi.set).toHaveBeenCalledWith(
-        'login:lock:test@example.com',
+        lockKey(testMail),
         '1',
         'EX',
         lockoutSeconds,
       );
-      expect(multi.del).toHaveBeenCalledWith('login:fail:test@example.com');
+      expect(multi.del).toHaveBeenCalledWith(failKey(testMail));
       expect(multi.exec).toHaveBeenCalled();
     });
 
     it('locks the account when attempts exceed the max', async () => {
       redis.incr.mockResolvedValue(maxAttempts + 1);
 
-      await service.registerFailure('test@example.com');
+      await service.registerFailure(testMail);
 
       expect(redis.multi).toHaveBeenCalled();
     });
@@ -135,11 +140,11 @@ describe('LoginAttemptService', () => {
 
   describe('clearAttempts', () => {
     it('deletes both the failure and lock keys', async () => {
-      await service.clearAttempts('test@example.com');
+      await service.clearAttempts(testMail);
 
       expect(redis.del).toHaveBeenCalledWith(
-        'login:fail:test@example.com',
-        'login:lock:test@example.com',
+        failKey(testMail),
+        lockKey(testMail),
       );
     });
   });
