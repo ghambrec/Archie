@@ -3,8 +3,8 @@ import os
 
 class Settings:
     # API Server
-    API_HOST = os.getenv("AI_SERVICE_HOST", "0.0.0.0")
-    API_PORT = int(os.getenv("AI_SERVICE_PORT", "5000"))
+    AI_SERVICE_HOST = os.getenv("AI_SERVICE_HOST", "0.0.0.0")
+    AI_SERVICE_PORT = int(os.getenv("AI_SERVICE_PORT", "5000"))
     ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
     # MinIO
@@ -30,6 +30,7 @@ class Settings:
     EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "BAAI/bge-m3")
     CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "512"))
     CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "50"))
+    RETRIEVAL_TOP_K = int(os.getenv("RETRIEVAL_TOP_K", "5"))
 
     # LLM (Claude via LangChain)
     ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")

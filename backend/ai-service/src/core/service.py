@@ -22,21 +22,20 @@ class AIService:
         self.retrieval_service = retrieval_service
         self.generator = generator
 
-    async def ingest_documents(self, object_keys: Iterable[str] | None = None) -> List[str]:
+    async def IngestDocuments(self, object_keys: Iterable[str] | None = None) -> List[str]:
         """Run the ingestion flow for documents currently stored in MinIO."""
         if self.ingestion_service is None:
             raise RuntimeError(
                 "AIService is not configured with an ingestion service. "
                 "Attach DocumentIngestionService before ingesting documents."
             )
-        return await self.ingestion_service.ingest_all_documents(object_keys)
+        return await self.ingestion_service.IngestAllDocuments(object_keys)
 
-    async def ask(
+    async def Ask(
         self,
         question: str,
         user_id: str,
         user_group_ids: Iterable[str] | None = None,
-        top_k: int = 5,
     ) -> dict[str, Any]:
         """Retrieve matching chunks, build a prompt, and return the answer."""
         if self.retrieval_service is None:
@@ -50,13 +49,12 @@ class AIService:
                 "Attach GenerationService before answering questions."
             )
 
-        sources = await self.retrieval_service.retrieve(
+        sources = await self.retrieval_service.Retrieve(
             query=question,
             user_id=user_id,
             user_group_ids=user_group_ids,
-            top_k=top_k,
         )
-        answer = await self.generator.generate(question, sources)
+        answer = await self.generator.Generate(question, sources)
         return {
             "answer": answer,
             "sources": sources,

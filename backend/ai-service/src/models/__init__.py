@@ -47,7 +47,6 @@ class RetrieveRequest(BaseModel):
     query: str
     user_id: str
     user_group_ids: list[str] | None = None
-    top_k: int = 5
 
 
 class RetrievedChunk(BaseModel):

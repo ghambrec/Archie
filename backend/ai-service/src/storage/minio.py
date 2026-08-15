@@ -64,7 +64,7 @@ class MinioDocumentStore:
             f"Initialized MinioDocumentStore: endpoint={minio_endpoint}, bucket={bucket}"
         )
 
-    def list_documents(self) -> List[str]:
+    def ListDocuments(self) -> List[str]:
         """List all object keys in the documents bucket.
 
         Returns:
@@ -83,7 +83,7 @@ class MinioDocumentStore:
             logger.error(f"Failed to list documents from MinIO: {e}")
             raise
 
-    def get_document_text(self, object_key: str) -> str:
+    def GetDocumentText(self, object_key: str) -> str:
         """Download and read document content from MinIO.
 
         Currently supports plain text and UTF-8 encoded files.
@@ -108,7 +108,7 @@ class MinioDocumentStore:
             logger.error(f"Failed to download document {object_key}: {e}")
             raise
 
-    def get_document_metadata(self, object_key: str) -> dict:
+    def GetDocumentMetadata(self, object_key: str) -> dict:
         """Fetch document access metadata for a document from nest-server API.
 
         Expected payload shape from nest-server:
@@ -164,7 +164,7 @@ class MinioDocumentStore:
             logger.error(f"Failed to fetch metadata for {object_key}: {e}")
             raise
 
-    def get_object_index(
+    def GetObjectIndex(
         self, object_key: str, all_keys: Optional[Iterable[str]] = None
     ) -> int:
         """Assign a stable index to this object within the bucket.
@@ -185,7 +185,7 @@ class MinioDocumentStore:
         try:
             # Use provided keys or fetch from MinIO
             if all_keys is None:
-                all_keys = self.list_documents()
+                all_keys = self.ListDocuments()
 
             sorted_keys = sorted(all_keys)
 
@@ -200,7 +200,7 @@ class MinioDocumentStore:
             logger.error(f"Failed to get object index for {object_key}: {e}")
             raise
 
-    def build_chunk_metadata(
+    def BuildChunkMetadata(
         self,
         document_id: str,
         source_key: str,
@@ -245,6 +245,6 @@ class MinioDocumentStore:
         logger.debug(f"Built chunk metadata: {metadata}")
         return metadata
 
-    def close(self) -> None:
+    def Close(self) -> None:
         """Release HTTP resources owned by the metadata client."""
         self.http_client.close()

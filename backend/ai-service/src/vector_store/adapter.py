@@ -60,12 +60,12 @@ class VectorStoreAdapter:
         self.embeddings: HuggingFaceEmbeddings | None = None
         self.embedding_dimensions: int | None = None
 
-    async def connect(self) -> None:
+    async def Connect(self) -> None:
         """Initialize the embedding model, database engine, and storage table."""
         if self.engine is not None and self.documents_table is not None:
             return
 
-        self.embeddings = self._initialize_embeddings()
+        self.embeddings = self._InitializeEmbeddings()
         self.embedding_dimensions = len(
             self.embeddings.embed_query(DEFAULT_EMBEDDING_PROBE_TEXT)
         )
@@ -81,11 +81,11 @@ class VectorStoreAdapter:
         async with self.engine.begin() as connection:
             await connection.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
 
-        self.documents_table = self._build_table(self.embedding_dimensions)
+        self.documents_table = self._BuildTable(self.embedding_dimensions)
         async with self.engine.begin() as connection:
             await connection.run_sync(self.sql_metadata.create_all)
 
-        await self._ensure_indexes()
+        await self._EnsureIndexes()
 
         logger.info(
             "Connected async pgvector adapter",
@@ -98,12 +98,12 @@ class VectorStoreAdapter:
             },
         )
 
-    async def delete_collection(
+    async def DeleteCollection(
         self,
         collection_name: str = settings.PGVECTOR_COLLECTION,
     ) -> None:
         """Delete all rows for a logical collection."""
-        await self.connect()
+        await self.Connect()
         assert self.engine is not None
         assert self.documents_table is not None
 
@@ -114,7 +114,7 @@ class VectorStoreAdapter:
                 )
             )
 
-    async def add_documents(
+    async def AddDocuments(
         self,
         documents: Sequence[dict],
         collection_name: str = settings.PGVECTOR_COLLECTION,
@@ -127,7 +127,7 @@ class VectorStoreAdapter:
             "metadata": {...}
         }
         """
-        await self.connect()
+        await self.Connect()
         assert self.engine is not None
         assert self.documents_table is not None
         assert self.embeddings is not None
@@ -135,13 +135,13 @@ class VectorStoreAdapter:
         if not documents:
             return []
 
-        contents = [self._extract_content(document) for document in documents]
+        contents = [self._ExtractContent(document) for document in documents]
         embeddings = self.embeddings.embed_documents(contents)
         rows: list[dict[str, Any]] = []
         chunk_ids: list[str] = []
 
         for document, content, embedding in zip(documents, contents, embeddings, strict=True):
-            chunk_id = self._extract_chunk_id(document)
+            chunk_id = self._ExtractChunkId(document)
             metadata = dict(document.get("metadata") or {})
             chunk_ids.append(chunk_id)
             rows.append(
@@ -159,7 +159,7 @@ class VectorStoreAdapter:
 
         return chunk_ids
 
-    async def similarity_search(
+    async def SimilaritySearch(
         self,
         query: str,
         collection_name: str = settings.PGVECTOR_COLLECTION,
@@ -167,7 +167,7 @@ class VectorStoreAdapter:
         filter_metadata: dict | None = None,
     ) -> list[dict]:
         """Return the top-k matching chunks filtered inside the database query."""
-        await self.connect()
+        await self.Connect()
         assert self.engine is not None
         assert self.documents_table is not None
         assert self.embeddings is not None
@@ -187,7 +187,7 @@ class VectorStoreAdapter:
             .limit(k)
         )
 
-        metadata_clause = self._build_metadata_clause(filter_metadata)
+        metadata_clause = self._BuildMetadataClause(filter_metadata)
         if metadata_clause is not None:
             statement = statement.where(metadata_clause)
 
@@ -204,7 +204,7 @@ class VectorStoreAdapter:
             for row in rows
         ]
 
-    async def close(self) -> None:
+    async def Close(self) -> None:
         """Release database resources owned by the adapter."""
         if self.engine is not None:
             await self.engine.dispose()
@@ -212,7 +212,7 @@ class VectorStoreAdapter:
             self.documents_table = None
             self.sql_metadata = None
 
-    def _initialize_embeddings(self) -> HuggingFaceEmbeddings:
+    def _InitializeEmbeddings(self) -> HuggingFaceEmbeddings:
         """Load the embedding model onto the best available device."""
         if torch.cuda.is_available():
             device = "cuda"
@@ -226,7 +226,7 @@ class VectorStoreAdapter:
             model_kwargs={"device": device},
         )
 
-    def _build_table(self, embedding_dimensions: int) -> Table:
+    def _BuildTable(self, embedding_dimensions: int) -> Table:
         """Create the SQLAlchemy table definition used by the adapter."""
         self.sql_metadata = MetaData()
         return Table(
@@ -239,7 +239,7 @@ class VectorStoreAdapter:
             Column("embedding", Vector(embedding_dimensions), nullable=False),
         )
 
-    async def _ensure_indexes(self) -> None:
+    async def _EnsureIndexes(self) -> None:
         """Create metadata indexes used by access-filtered retrieval."""
         assert self.engine is not None
 
@@ -263,7 +263,7 @@ class VectorStoreAdapter:
                 )
             )
 
-    def _build_metadata_clause(self, filter_metadata: dict[str, Any] | None):
+    def _BuildMetadataClause(self, filter_metadata: dict[str, Any] | None):
         """Translate a neutral metadata filter into SQLAlchemy expressions.
 
         Supported operators:
@@ -276,7 +276,7 @@ class VectorStoreAdapter:
         assert self.documents_table is not None
 
         if "$or" in filter_metadata:
-            clauses = [self._build_metadata_clause(item) for item in filter_metadata["$or"]]
+            clauses = [            self._BuildMetadataClause(item) for item in filter_metadata["$or"]]
             return or_(*[clause for clause in clauses if clause is not None])
 
         clauses = []
@@ -306,7 +306,7 @@ class VectorStoreAdapter:
 
         return and_(*clauses) if clauses else None
 
-    def _extract_content(self, document: dict) -> str:
+    def _ExtractContent(self, document: dict) -> str:
         """Normalize supported input document shapes to plain text."""
         content = document.get("content")
         if content is None:
@@ -315,7 +315,7 @@ class VectorStoreAdapter:
             raise ValueError("Each document must include a non-empty 'content' string")
         return content
 
-    def _extract_chunk_id(self, document: dict[str, Any]) -> str:
+    def _ExtractChunkId(self, document: dict[str, Any]) -> str:
         """Return a stable chunk ID for a document row.
 
         Preferred input shape is an explicit top-level `id`. If that is not

@@ -17,37 +17,36 @@ from src.retrieval.service import RetrievalService
 router = APIRouter()
 
 
-def get_ai_service(request: Request) -> AIService:
+def GetAIService(request: Request) -> AIService:
     """Return the shared AI service composed at application startup."""
     return request.app.state.ai_service
 
 
-def get_retrieval_service(request: Request) -> RetrievalService:
+def GetRetrievalService(request: Request) -> RetrievalService:
     """Return the shared retrieval service composed at application startup."""
     return request.app.state.retrieval_service
 
 
 @router.get("/health")
-async def health_check():
+async def HealthCheck():
     """Liveness probe for orchestrators."""
     return {"status": "ok"}
 
 
 @router.post("/retrieve", response_model=RetrieveResponse)
-async def retrieve(
+async def Retrieve(
     request: RetrieveRequest,
-    service: RetrievalService = Depends(get_retrieval_service),
+    service: RetrievalService = Depends(GetRetrievalService),
 ):
     """Return the top-k authorized chunks for a user via the retrieval service.
 
     The route remains a thin HTTP adapter; all access-aware logic lives in the
     service layer and the vector-store adapter.
     """
-    results = await service.retrieve(
+    results = await service.Retrieve(
         query=request.query,
         user_id=request.user_id,
         user_group_ids=request.user_group_ids,
-        top_k=request.top_k,
     )
 
     return {
@@ -65,9 +64,9 @@ async def retrieve(
 
 
 @router.post("/ingest", response_model=IngestResponse)
-async def ingest(
+async def Ingest(
     request: IngestRequest,
-    service: AIService = Depends(get_ai_service),
+    service: AIService = Depends(GetAIService),
 ):
     """Ingest documents from MinIO into the vector database.
 
@@ -78,8 +77,8 @@ async def ingest(
     Returns:
         IngestResponse with chunk count and list of ingested document keys.
     """
-    object_keys = request.object_keys or service.minio_store.list_documents()
-    chunk_ids = await service.ingest_documents(object_keys)
+    object_keys = request.object_keys or service.minio_store.ListDocuments()
+    chunk_ids = await service.IngestDocuments(object_keys)
     return {
         "chunk_count": len(chunk_ids),
         "ingested_documents": object_keys,
@@ -87,9 +86,9 @@ async def ingest(
 
 
 @router.post("/ask", response_model=AskResponse)
-async def ask(
+async def Ask(
     request: AskRequest,
-    service: AIService = Depends(get_ai_service),
+    service: AIService = Depends(GetAIService),
 ):
     """Ask a question and retrieve answers using RAG.
 
@@ -100,7 +99,7 @@ async def ask(
     Returns:
         AskResponse with the generated answer and source chunks.
     """
-    result = await service.ask(
+    result = await service.Ask(
         question=request.question,
         user_id=request.user_id,
         user_group_ids=request.user_group_ids,

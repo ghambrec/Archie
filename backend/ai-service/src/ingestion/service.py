@@ -38,33 +38,33 @@ class DocumentIngestionService:
             chunk_overlap=self.chunk_overlap,
         )
 
-    async def ingest_all_documents(self, object_keys: Iterable[str] | None = None) -> List[str]:
+    async def IngestAllDocuments(self, object_keys: Iterable[str] | None = None) -> List[str]:
         """Ingest all documents from MinIO into the vector database."""
         if self.minio_store is None:
             raise RuntimeError("DocumentIngestionService requires a MinIO store.")
         if self.vector_store is None:
             raise RuntimeError("DocumentIngestionService requires a vector store.")
 
-        keys = list(object_keys) if object_keys is not None else self.minio_store.list_documents()
+        keys = list(object_keys) if object_keys is not None else self.minio_store.ListDocuments()
         ingested_chunk_ids: list[str] = []
 
         for object_key in keys:
-            ingested_chunk_ids.extend(await self.ingest_document(object_key))
+            ingested_chunk_ids.extend(await self.IngestDocument(object_key))
 
         return ingested_chunk_ids
 
-    async def ingest_document(self, object_key: str) -> List[str]:
+    async def IngestDocument(self, object_key: str) -> List[str]:
         """Ingest a single document and return the IDs of the created chunks."""
         if self.minio_store is None:
             raise RuntimeError("DocumentIngestionService requires a MinIO store.")
         if self.vector_store is None:
             raise RuntimeError("DocumentIngestionService requires a vector store.")
 
-        text = self.minio_store.get_document_text(object_key)
-        metadata = self.minio_store.get_document_metadata(object_key)
-        document_index = self.minio_store.get_object_index(object_key)
+        text = self.minio_store.GetDocumentText(object_key)
+        metadata = self.minio_store.GetDocumentMetadata(object_key)
+        document_index = self.minio_store.GetObjectIndex(object_key)
 
-        chunks = self.chunk_text(
+        chunks = self.ChunkText(
             text=text,
             source_key=object_key,
             document_index=document_index,
@@ -76,9 +76,9 @@ class DocumentIngestionService:
         if not chunks:
             return []
 
-        return await self.vector_store.add_documents(chunks)
+        return await self.vector_store.AddDocuments(chunks)
 
-    def chunk_text(
+    def ChunkText(
         self,
         text: str,
         source_key: str,
@@ -100,9 +100,9 @@ class DocumentIngestionService:
 
             chunks.append(
                 {
-                    "id": self.build_chunk_id(document_id=document_id, chunk_index=index),
+                    "id": self.BuildChunkId(document_id=document_id, chunk_index=index),
                     "content": chunk_content,
-                    "metadata": self.build_chunk_metadata(
+                    "metadata": self.BuildChunkMetadata(
                         document_id=document_id,
                         source_key=source_key,
                         document_index=document_index,
@@ -115,7 +115,7 @@ class DocumentIngestionService:
 
         return chunks
 
-    def build_chunk_metadata(
+    def BuildChunkMetadata(
         self,
         document_id: str,
         source_key: str,
@@ -132,6 +132,6 @@ class DocumentIngestionService:
             "document_group_id": document_group_id,
         }
 
-    def build_chunk_id(self, document_id: str, chunk_index: int) -> str:
+    def BuildChunkId(self, document_id: str, chunk_index: int) -> str:
         """Build a deterministic chunk ID scoped to the source document."""
         return f"{document_id}:{chunk_index}"

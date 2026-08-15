@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def Lifespan(app: FastAPI):
     """Initialize and cleanup on app startup/shutdown."""
     logger.info("🚀 AI Service starting up...")
     if not settings.ANTHROPIC_API_KEY:
@@ -66,7 +66,7 @@ async def lifespan(app: FastAPI):
         generator=generation_service,
     )
 
-    await vector_store.connect()
+    await vector_store.Connect()
 
     app.state.minio_store = minio_store
     app.state.vector_store = vector_store
@@ -79,14 +79,14 @@ async def lifespan(app: FastAPI):
         yield
     finally:
         logger.info("🛑 AI Service shutting down...")
-        minio_store.close()
-        await vector_store.close()
+        minio_store.Close()
+        await vector_store.Close()
 
 
 app = FastAPI(
     title="Archie AI Service",
     description="Document ingestion and retrieval-augmented generation service",
-    lifespan=lifespan,
+    lifespan=Lifespan,
 )
 
 # Include routes
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
     uvicorn.run(
         "src.app:app",
-        host=settings.API_HOST,
-        port=settings.API_PORT,
+        host=settings.AI_SERVICE_HOST,
+        port=settings.AI_SERVICE_PORT,
         reload=settings.ENVIRONMENT == "development",
     )
