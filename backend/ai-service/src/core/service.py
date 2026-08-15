@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable, List
+from typing import Any, Iterable, List
 
 
 class AIService:
@@ -31,11 +31,33 @@ class AIService:
             )
         return await self.ingestion_service.ingest_all_documents(object_keys)
 
-    def ask(
+    async def ask(
         self,
         question: str,
         user_id: str,
         user_group_ids: Iterable[str] | None = None,
-    ) -> str:
+        top_k: int = 5,
+    ) -> dict[str, Any]:
         """Retrieve matching chunks, build a prompt, and return the answer."""
-        raise NotImplementedError("ask is not implemented yet")
+        if self.retrieval_service is None:
+            raise RuntimeError(
+                "AIService is not configured with a retrieval service. "
+                "Attach RetrievalService before answering questions."
+            )
+        if self.generator is None:
+            raise RuntimeError(
+                "AIService is not configured with a generation service. "
+                "Attach GenerationService before answering questions."
+            )
+
+        sources = await self.retrieval_service.retrieve(
+            query=question,
+            user_id=user_id,
+            user_group_ids=user_group_ids,
+            top_k=top_k,
+        )
+        answer = await self.generator.generate(question, sources)
+        return {
+            "answer": answer,
+            "sources": sources,
+        }

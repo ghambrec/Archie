@@ -5,6 +5,7 @@ minio==7.2.3
 httpx==0.25.2
 langchain-core==0.1.32
 langchain-community==0.0.25
+langchain-anthropic==0.1.11
 langchain-huggingface==0.0.33
 langchain-text-splitters==0.0.1
 pgvector==0.3.6

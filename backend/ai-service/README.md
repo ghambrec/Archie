@@ -147,6 +147,11 @@ EMBEDDING_MODEL=BAAI/bge-m3
 CHUNK_SIZE=512
 CHUNK_OVERLAP=50
 
+# Claude (LangChain)
+ANTHROPIC_API_KEY=<your-anthropic-api-key>
+CLAUDE_MODEL=claude-3-5-sonnet-20241022
+CLAUDE_TEMPERATURE=0.2
+
 ```
 
 ## Running Locally
