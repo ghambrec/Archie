@@ -6,13 +6,24 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Group } from './entities/group.entity';
 import { SessionModule } from '../auth/session/session.module';
 import { PermissionsModule } from '../permissions/permissions.module';
-import { UserGroupsService } from '../user-groups/user-groups.service';
 import { UserGroup } from '../user-groups/entities/user-group.entity';
+import { AdminGroupsService } from './admin-groups.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Group, UserGroup]), SessionModule, PermissionsModule],
-  exports: [TypeOrmModule, GroupsService],
-  controllers: [GroupsController, AdminGroupsController],
-  providers: [GroupsService],
+  imports: [
+    TypeOrmModule.forFeature([Group, UserGroup]),
+    SessionModule,
+    PermissionsModule
+  ],
+  exports: [
+    TypeOrmModule,
+    GroupsService
+  ],
+  controllers: [
+    GroupsController,
+    AdminGroupsController],
+  providers: [
+    GroupsService,
+    AdminGroupsService],
 })
 export class GroupsModule {}
