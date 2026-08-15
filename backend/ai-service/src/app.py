@@ -79,7 +79,7 @@ async def Lifespan(app: FastAPI):
         yield
     finally:
         logger.info("🛑 AI Service shutting down...")
-        minio_store.Close()
+        await minio_store.Close()
         await vector_store.Close()
 
 

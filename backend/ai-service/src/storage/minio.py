@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Iterable, List, Optional
 
-from minio import Minio
 import httpx
+from minio import Minio
 
 logger = logging.getLogger(__name__)
 
@@ -57,14 +58,14 @@ class MinioDocumentStore:
             secure=minio_secure,
         )
 
-        # HTTP client for nest-server API calls
-        self.http_client = httpx.Client(base_url=nest_server_url)
+        # Async HTTP client for nest-server API calls.
+        self.http_client = httpx.AsyncClient(base_url=nest_server_url)
 
         logger.info(
             f"Initialized MinioDocumentStore: endpoint={minio_endpoint}, bucket={bucket}"
         )
 
-    def ListDocuments(self) -> List[str]:
+    async def ListDocuments(self) -> List[str]:
         """List all object keys in the documents bucket.
 
         Returns:
@@ -75,7 +76,9 @@ class MinioDocumentStore:
         """
         try:
             logger.info(f"Listing documents from MinIO bucket: {self.bucket}")
-            objects = self.minio_client.list_objects(self.bucket)
+            objects = await asyncio.to_thread(
+                lambda: list(self.minio_client.list_objects(self.bucket))
+            )
             keys = [obj.object_name for obj in objects]
             logger.info(f"Found {len(keys)} documents in bucket")
             return keys
@@ -83,7 +86,7 @@ class MinioDocumentStore:
             logger.error(f"Failed to list documents from MinIO: {e}")
             raise
 
-    def GetDocumentText(self, object_key: str) -> str:
+    async def GetDocumentText(self, object_key: str) -> str:
         """Download and read document content from MinIO.
 
         Currently supports plain text and UTF-8 encoded files.
@@ -100,15 +103,23 @@ class MinioDocumentStore:
         """
         try:
             logger.info(f"Downloading document from MinIO: {object_key}")
-            response = self.minio_client.get_object(self.bucket, object_key)
-            content = response.read().decode("utf-8")
+            response = await asyncio.to_thread(
+                self.minio_client.get_object,
+                self.bucket,
+                object_key,
+            )
+            try:
+                content = (await asyncio.to_thread(response.read)).decode("utf-8")
+            finally:
+                await asyncio.to_thread(response.close)
+                await asyncio.to_thread(response.release_conn)
             logger.info(f"Successfully downloaded document: {object_key}")
             return content
         except Exception as e:
             logger.error(f"Failed to download document {object_key}: {e}")
             raise
 
-    def GetDocumentMetadata(self, object_key: str) -> dict:
+    async def GetDocumentMetadata(self, object_key: str) -> dict:
         """Fetch document access metadata for a document from nest-server API.
 
         Expected payload shape from nest-server:
@@ -133,7 +144,7 @@ class MinioDocumentStore:
             logger.info(f"Fetching metadata from nest-server for: {object_key}")
 
             # Query nest-server to find a document and its assigned access group by object key.
-            response = self.http_client.get(
+            response = await self.http_client.get(
                 f"/documents/by-key/{object_key}",
                 timeout=10,
             )
@@ -164,7 +175,7 @@ class MinioDocumentStore:
             logger.error(f"Failed to fetch metadata for {object_key}: {e}")
             raise
 
-    def GetObjectIndex(
+    async def GetObjectIndex(
         self, object_key: str, all_keys: Optional[Iterable[str]] = None
     ) -> int:
         """Assign a stable index to this object within the bucket.
@@ -185,7 +196,7 @@ class MinioDocumentStore:
         try:
             # Use provided keys or fetch from MinIO
             if all_keys is None:
-                all_keys = self.ListDocuments()
+                all_keys = await self.ListDocuments()
 
             sorted_keys = sorted(all_keys)
 
@@ -245,6 +256,6 @@ class MinioDocumentStore:
         logger.debug(f"Built chunk metadata: {metadata}")
         return metadata
 
-    def Close(self) -> None:
+    async def Close(self) -> None:
         """Release HTTP resources owned by the metadata client."""
-        self.http_client.close()
+        await self.http_client.aclose()
