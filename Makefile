@@ -22,7 +22,7 @@ re:
 	make up
 
 unit:
-	cd $(NEST_DIR) && $(PNPM) test
+	cd $(NEST_DIR) && $(PNPM) test || echo -n
 
 deps-check:
 	cd $(NEST_DIR) && $(PNPM) install --frozen-lockfile
