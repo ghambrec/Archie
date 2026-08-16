@@ -2,7 +2,7 @@ name: GitHub Actions First Steps
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  Build-Nest-Server:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -10,4 +10,6 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: '24.18'
-      - run: make unit
+      - name: Enable corepack
+        run: corepack enable
+      - run: make build
