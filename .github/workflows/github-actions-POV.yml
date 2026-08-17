@@ -1,0 +1,53 @@
+name: GitHub Actions Demo
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+on: [push]
+jobs:
+  Test-Backend: 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up backend pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: backend/nest-server/pnpm-lock.yaml
+          run_install: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: "pnpm"
+          cache-dependency-path: backend/nest-server/pnpm-lock.yaml 
+
+      - name: install nest-server dependencies
+        run: make deps-nest
+
+      - name: build nest-server
+        run: make build-nest
+      
+
+
+  Test-Frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up frontend pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file:: frontend/pnpm-lock.yaml
+          run_install: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: "pnpm"
+          cache-dependency-path: frontend/pnpm-lock.yaml 
+      
+      - name: install Frontend dependencies
+        run: make deps-front
+
+      - name: build Angular frontend
+        run: make build-front
+
+  #Integration-Test:
