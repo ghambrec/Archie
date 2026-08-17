@@ -21,16 +21,16 @@ re:
 	make clean
 	make up
 
+build:
+	cd $(NEST_DIR) && $(PNPM) install --frozen-lockfile && $(PNPM) run build
+
 deps-check:
 	cd $(NEST_DIR) && $(PNPM) install --frozen-lockfile
 	cd $(FRONTEND_DIR) && $(PNPM) install --frozen-lockfile
-
-build:
-	cd $(NEST_DIR) && $(PNPM) install --frozen-lockfile && $(PNPM) run build
 
 deps-repair:
 	cd $(NEST_DIR) && $(PNPM) install --no-frozen-lockfile
 	cd $(FRONTEND_DIR) && $(PNPM) install --no-frozen-lockfile
 
 
-.PHONY: re clean fclean down up setup build
+.PHONY: re clean fclean down up setup build deps-check deps-repair
