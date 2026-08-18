@@ -4,6 +4,8 @@ import { UserGroupsService } from './user-groups.service';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { GetUserGroupsQueryDto } from './dto/user-groups-query.dto';
 import { AddMemberDto } from './dto/add-member.dto';
+import { GetGroupsMembersResponseDto } from './dto/group-members-response.dto';
+import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
 
 @ApiTags('user-groups')
 @Controller('user-groups')
@@ -33,15 +35,20 @@ export class UserGroupsController {
 
   @Get()
   @UseGuards(SessionAuthGuard)
-  async getAll(@Query() query: GetUserGroupsQueryDto) {
+  async getAll(
+    @Query() query: GetUserGroupsQueryDto
+  ) {
     return this.userGroupsService.getAllUserGroups(query);
   }
 
-  // @Get('groups/:groupId')
-  // @UseGuards(SessionAuthGuard)
-  // async getGroupById(@Param('groupId') groupId: string) {
-  //   return this.userGroupsService.getGroupById(groupId);
-  // }
+  @Get('groups/:groupId/members')
+  @UseGuards(SessionAuthGuard)
+  async getGroupMembers(
+    @Param('groupId') groupId: string,
+  ): Promise<GetGroupsMembersResponseDto> {
+    return this.userGroupsService.getMembers(groupId);
+  }
+
 }
 
 
