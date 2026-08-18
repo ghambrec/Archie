@@ -10,7 +10,7 @@ jobs:
       - name: Set up backend pnpm
         uses: pnpm/action-setup@v4
         with:
-          package_json_file: backend/nest-server/pnpm-lock.yaml
+          package_json_file: backend/nest-server/package.json
           run_install: false
 
       - uses: actions/setup-node@v7
@@ -35,7 +35,7 @@ jobs:
       - name: Set up frontend pnpm
         uses: pnpm/action-setup@v4
         with:
-          package_json_file:: frontend/pnpm-lock.yaml
+          package_json_file: frontend/package.json
           run_install: false
 
       - uses: actions/setup-node@v7
