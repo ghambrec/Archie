@@ -106,8 +106,8 @@ services:
      redis:
        condition: service_healthy
        restart: true
-     ai-service:
-       condition: service_healthy
+    #  ai-service:
+    #    condition: service_healthy
 
   frontend:
     build:
@@ -125,32 +125,32 @@ services:
     depends_on:
       - nest-server
 
-  ai-service:
-   build:
-     context: ./backend/ai-service
-     dockerfile: Dockerfile
-   container_name: ai-service
-   restart: unless-stopped
-   ports:
-     - "5001:5001"
-   volumes:
-     - ./backend/ai-service:/app
-   networks:
-     - archie
-   env_file: "./env/.env"
-   healthcheck:
-     test: ["CMD-SHELL", "curl -fsS http://localhost:5001/health || exit 1"]
-     interval: 30s
-     timeout: 5s
-     retries: 5
-     start_period: 180s
-   depends_on:
-    postgres:
-      condition: service_healthy
-    minio:
-      condition: service_healthy
-    ollama-init:
-      condition: service_completed_successfully
+  # ai-service:
+  #  build:
+  #    context: ./backend/ai-service
+  #    dockerfile: Dockerfile
+  #  container_name: ai-service
+  #  restart: unless-stopped
+  #  ports:
+  #    - "5001:5001"
+  #  volumes:
+  #    - ./backend/ai-service:/app
+  #  networks:
+  #    - archie
+  #  env_file: "./env/.env"
+  #  healthcheck:
+  #    test: ["CMD-SHELL", "curl -fsS http://localhost:5001/health || exit 1"]
+  #    interval: 30s
+  #    timeout: 5s
+  #    retries: 5
+  #    start_period: 180s
+  #  depends_on:
+  #   postgres:
+  #     condition: service_healthy
+  #   minio:
+  #     condition: service_healthy
+  #   ollama-init:
+  #     condition: service_completed_successfully
 
   ollama:
     image: ollama/ollama:latest
