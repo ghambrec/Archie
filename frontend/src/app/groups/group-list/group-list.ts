@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { Groups } from '../groups';
+import { OnInit, inject, Component, signal } from '@angular/core';
 
 
 @Component({
@@ -9,20 +9,26 @@ import { Groups } from '../groups';
   templateUrl: './group-list.html',
   styleUrl: './group-list.scss',
 })
-//export class GroupList implements OnInit {
-//  protected readonly groupsService = inject(Groups):
+export class GroupList implements OnInit {
+  protected readonly groupsService = inject(Groups);
+  protected readonly hasLoadError = signal(false);
 
-//  ngOnInit():void {
-//    this.loadGroups(),
-//  }
+  ngOnInit():void {
+    this.loadGroups();
+  }
 
-//  private loadGroups(): void {
-//    this.groupsService.getGroups().subscribe({
-//      next: Groups => {
-//        this.groupsService.groupsList.set(Groups)
-//      }
-//      //logger?
-//      //error:
-//    })
-//  }
-//}
+  private loadGroups(): void {
+	this.hasLoadError.set(false);
+
+    this.groupsService.getGroups().subscribe({
+      next: groups => {
+        this.groupsService.groupsList.set(groups)
+      },
+      //logger?
+      error: (error) => {
+		console.error('Unable to load groups', error);
+		this.hasLoadError.set(true);
+	  },
+    });
+  }
+}

@@ -39,7 +39,17 @@
 			"errorConflictMail": "E-Mail already registered",
 			"errorConflictName": "Name already registered"
 		}
+
 	}, 
+	"groups": {
+		"groupList": {
+			"heading": "Groups",
+			"name": "Name",
+			"description": "Description",
+			"errorLoading": "Unable to load groups",
+			"empty": "No groups exist."	
+			}
+	},
 	"errors": {
     "AUTH_EMAIL_ALREADY_REGISTERED": "This email address is already registered.",
     "AUTH_INVALID_CREDENTIALS": "Invalid email or password.",
