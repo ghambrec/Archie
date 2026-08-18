@@ -8,10 +8,10 @@ import { GetUserGroupsMinimalResponseDto } from './dto/user-groups-minimal-respo
 import { UserMinimalDto } from './dto/user-minimal.dto';
 import { GroupMinimalDto } from './dto/group-minimal.dto';
 import { Logger } from 'nestjs-pino';
-import { group } from 'console';
 import { GetGroupsMembersResponseDto } from './dto/group-members-response.dto';
 import { Group } from '../groups/entities/group.entity';
 import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class UserGroupsService {
@@ -20,6 +20,8 @@ export class UserGroupsService {
     private readonly userGroupRepository: Repository<UserGroup>,
     @InjectRepository(Group)
     private readonly groupRepository: Repository<Group>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly logger: Logger
   ) {}
 
@@ -81,7 +83,11 @@ export class UserGroupsService {
     }));
 
     this.logger.log({ groupId: groupId }, 'Fetched all members of this group');
-    return { groupId: group.id, groupName: group.name, members };
+    return {
+      groupId: group.id,
+      groupName: group.name,
+      members
+    };
   }
 
   async getAllUserGroups(query: GetUserGroupsQueryDto): Promise<GetUserGroupsMinimalResponseDto> {
@@ -113,17 +119,58 @@ export class UserGroupsService {
     }));
 
     this.logger.log('Fetched all possible groups');
-    return { data, page, limit, total, totalPages: Math.ceil(total/limit),};
+    return {
+      data,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total/limit),
+    };
   }
 
   async getGroupsByUserId( userId: string ): Promise<GetGroupsByUserIdResponseDto> {
-    this.log({ userId: userId }, 'Fetching all groups that user belongs to');
+    this.logger.log({ userId: userId }, 'Fetching all groups that user belongs to');
 
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if ( !user ) {
+      this.logger.log({ userId: userId }, 'User could not be fetched');
+      throw new NotFoundException('User not found');
+    }
+
+    const entities = await this.userGroupRepository.find({
+      where: { userId },
+      relations: { group: true }, //JOIN auf Group Entity
+      order: { joinedAt: 'DESC' },
+    });
+
+    const groups = entities.map( ug => ({
+      userId: ug.userId,
+      groupId: ug.groupId,
+      joinedAt: ug.joinedAt,
+      user: {
+        id: user.id,
+        displayName: user.displayName,
+        email: user.email,
+      } as UserMinimalDto,
+      group: {
+        id: ug.group.id,
+        name: ug.group.name,
+      } as GroupMinimalDto,
+    }));
+
+    this.logger.log({ userId: userId }, 'Fetched all groups the user belongs to');
+    return {
+      userId: user.id,
+      displayname: user.displayName,
+      email: user.email,
+      groups,
+    };
   }
-  // async getGroupById(groupId: string) {
-  //   return this.getMembers(groupId);
-  // }
 }
+
+// async getGroupById(groupId: string) {
+//   return this.getMembers(groupId);
+// }
 
 // example response:
 // data	      | type: [UserGroup]	Array von UserGroup-Objekten (kein einzelnes Beispiel, nur Typ)
