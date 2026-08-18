@@ -9,12 +9,17 @@ import { UserMinimalDto } from './dto/user-minimal.dto';
 import { GroupMinimalDto } from './dto/group-minimal.dto';
 import { Logger } from 'nestjs-pino';
 import { group } from 'console';
+import { GetGroupsMembersResponseDto } from './dto/group-members-response.dto';
+import { Group } from '../groups/entities/group.entity';
+import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
 
 @Injectable()
 export class UserGroupsService {
   constructor(
     @InjectRepository(UserGroup)// userGroups.entity.ts
     private readonly userGroupRepository: Repository<UserGroup>,
+    @InjectRepository(Group)
+    private readonly groupRepository: Repository<Group>,
     private readonly logger: Logger
   ) {}
 
@@ -44,10 +49,39 @@ export class UserGroupsService {
     this.logger.log({ groupId: groupId, userId: userId }, 'Removed user from group');
   }
 
-  async getMembers(groupId: string) {
-    this.logger.log({ groupId: groupId }, 'Fetching group members');
+  async getMembers(groupId: string): Promise<GetGroupsMembersResponseDto>
+  {
+    this.logger.log({ groupId: groupId }, 'Fetching all members of this group');
 
-    return this.userGroupRepository.find({ where: { groupId }, relations: { user: true } });
+    const group = await this.groupRepository.findOneBy({ id: groupId });
+    if ( !group ) {
+      this.logger.warn({ groupId: groupId }, 'Group could not be fetched');
+      throw new NotFoundException('Group not found');
+    }
+
+    const entities = await this.userGroupRepository.find({
+      where: { groupId },
+      relations: { user: true },
+      order: { joinedAt: 'DESC' },
+    });
+
+    const members: UserGroupsMinimalDto[] = entities.map(ug => ({
+      userId: ug.userId,
+      groupId: ug.groupId,
+      joinedAt: ug.joinedAt,
+      user: {
+        id: ug.user.id,
+        displayName: ug.user.displayName,
+        email: ug.user.email,
+      } as UserMinimalDto,
+      group: {
+        id: group.id,
+        name: group.name,
+      } as GroupMinimalDto,
+    }));
+
+    this.logger.log({ groupId: groupId }, 'Fetched all members of this group');
+    return { groupId: group.id, groupName: group.name, members };
   }
 
   async getAllUserGroups(query: GetUserGroupsQueryDto): Promise<GetUserGroupsMinimalResponseDto> {
@@ -82,6 +116,10 @@ export class UserGroupsService {
     return { data, page, limit, total, totalPages: Math.ceil(total/limit),};
   }
 
+  async getGroupsByUserId( userId: string ): Promise<GetGroupsByUserIdResponseDto> {
+    this.log({ userId: userId }, 'Fetching all groups that user belongs to');
+
+  }
   // async getGroupById(groupId: string) {
   //   return this.getMembers(groupId);
   // }
