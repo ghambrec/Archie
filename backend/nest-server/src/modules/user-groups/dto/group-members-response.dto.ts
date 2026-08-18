@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { UserGroupsMinimalDto } from "./user-groups-minimal.dto";
+import { GroupMemberDto } from "./group-members.dto";
 
 export class GetGroupsMembersResponseDto {
   @ApiProperty()
@@ -8,6 +8,6 @@ export class GetGroupsMembersResponseDto {
   @ApiProperty()
   groupName!: string;
 
-  @ApiProperty({ type: [UserGroupsMinimalDto] })
-  members!: UserGroupsMinimalDto[];
+  @ApiProperty({ type: [GroupMemberDto] })
+  members!: GroupMemberDto[];
 }

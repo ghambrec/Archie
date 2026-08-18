@@ -11,6 +11,7 @@ import { Logger } from 'nestjs-pino';
 import { GetGroupsMembersResponseDto } from './dto/group-members-response.dto';
 import { Group } from '../groups/entities/group.entity';
 import { User } from '../users/entities/user.entity';
+import { GroupMemberDto } from './dto/group-members.dto';
 import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
 
 @Injectable()
@@ -67,19 +68,11 @@ export class UserGroupsService {
       order: { joinedAt: 'DESC' },
     });
 
-    const members: UserGroupsMinimalDto[] = entities.map(ug => ({
+    const members: GroupMemberDto[] = entities.map(ug => ({
       userId: ug.userId,
-      groupId: ug.groupId,
+      displayName: ug.user.displayName,
       joinedAt: ug.joinedAt,
-      user: {
-        id: ug.user.id,
-        displayName: ug.user.displayName,
-        email: ug.user.email,
-      } as UserMinimalDto,
-      group: {
-        id: group.id,
-        name: group.name,
-      } as GroupMinimalDto,
+      email: ug.user.email,
     }));
 
     this.logger.log({ groupId: groupId }, 'Fetched all members of this group');
