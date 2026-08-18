@@ -7,10 +7,13 @@ ENV_FILE = REPO_ROOT / "env" / ".env"
 class Settings(BaseSettings):
 	model_config = SettingsConfigDict(env_file=ENV_FILE, env_file_encoding="utf-8", extra="ignore")
 
-	# ----- DATABASE -----
+	# --- APP
+	ai_service_port: int
+
+	# --- DATABASE
 	postgres_dsn: str
 
-	# ----- OLLAMA -----
+	# --- OLLAMA
 	ollama_host: str
 	ollama_generation_model: str
 	ollama_embedding_model: str
