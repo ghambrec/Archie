@@ -10,8 +10,8 @@ import { GroupMinimalDto } from './dto/group-minimal.dto';
 import { Logger } from 'nestjs-pino';
 import { GetGroupsMembersResponseDto } from './dto/group-members-response.dto';
 import { Group } from '../groups/entities/group.entity';
-import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
 import { User } from '../users/entities/user.entity';
+import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
 
 @Injectable()
 export class UserGroupsService {
@@ -144,24 +144,15 @@ export class UserGroupsService {
     });
 
     const groups = entities.map( ug => ({
-      userId: ug.userId,
       groupId: ug.groupId,
+      name: ug.group.name,
       joinedAt: ug.joinedAt,
-      user: {
-        id: user.id,
-        displayName: user.displayName,
-        email: user.email,
-      } as UserMinimalDto,
-      group: {
-        id: ug.group.id,
-        name: ug.group.name,
-      } as GroupMinimalDto,
     }));
 
     this.logger.log({ userId: userId }, 'Fetched all groups the user belongs to');
     return {
       userId: user.id,
-      displayname: user.displayName,
+      displayName: user.displayName,
       email: user.email,
       groups,
     };
