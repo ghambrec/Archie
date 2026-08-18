@@ -1,0 +1,13 @@
+[project]
+name = "ai-service"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.141.1",
+    "minio>=7.2.20",
+    "pgvector>=0.5.0",
+    "pydantic>=2.13.4",
+    "pydantic-ai>=2.31.1",
+    "uvicorn>=0.52.3",
+]
