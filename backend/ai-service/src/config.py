@@ -1,42 +1,19 @@
-import os
+from pathlib import Path
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+ENV_FILE = REPO_ROOT / "env" / ".env"
 
-class Settings:
-    # API Server
-    AI_SERVICE_HOST = os.getenv("AI_SERVICE_HOST", "ai-service")
-    AI_SERVICE_PORT = int(os.getenv("AI_SERVICE_PORT", "5000"))
-    ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+class Settings(BaseSettings):
+	model_config = SettingsConfigDict(env_file=ENV_FILE, env_file_encoding="utf-8", extra="ignore")
 
-    # MinIO
-    MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "minio")
-    MINIO_PORT = int(os.getenv("MINIO_PORT", "9000"))
-    MINIO_ACCESS_KEY = os.getenv("MINIO_APP_ACCESS_KEY", "")
-    MINIO_SECRET_KEY = os.getenv("MINIO_APP_SECRET_KEY", "")
-    MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() == "true"
-    MINIO_BUCKET = os.getenv("MINIO_DOCUMENTS_BUCKET", "documents")
+	# ----- DATABASE -----
+	postgres_dsn: str
 
-    # Vector Database
-    VECTOR_DB_TYPE = os.getenv("VECTOR_DB_TYPE", "pgvector")
-    PGVECTOR_HOST = os.getenv("PGVECTOR_HOST", os.getenv("POSTGRES_HOST", "postgres"))
-    PGVECTOR_PORT = int(os.getenv("PGVECTOR_PORT", os.getenv("POSTGRES_PORT", "5432")))
-    PGVECTOR_USER = os.getenv("PGVECTOR_USER", os.getenv("POSTGRES_USER", "postgres"))
-    PGVECTOR_PASSWORD = os.getenv(
-        "PGVECTOR_PASSWORD",
-        os.getenv("POSTGRES_PASSWORD", "postgres"),
-    )
-    PGVECTOR_DB = os.getenv("PGVECTOR_DB", os.getenv("POSTGRES_DB", "postgresdb"))
-    PGVECTOR_COLLECTION = os.getenv("PGVECTOR_COLLECTION", "archie_documents")
-
-    # Embedding & Chunking
-    EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "BAAI/bge-m3")
-    CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "512"))
-    CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "50"))
-    RETRIEVAL_TOP_K = int(os.getenv("RETRIEVAL_TOP_K", "5"))
-
-    # LLM (Claude via LangChain)
-    ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-    CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-3-5-sonnet-20241022")
-    CLAUDE_TEMPERATURE = float(os.getenv("CLAUDE_TEMPERATURE", "0.2"))
-
+	# ----- OLLAMA -----
+	ollama_host: str
+	ollama_generation_model: str
+	ollama_embedding_model: str
+	ollama_vision_model: str
 
 settings = Settings()
