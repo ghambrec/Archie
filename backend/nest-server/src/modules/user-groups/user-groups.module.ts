@@ -7,10 +7,11 @@ import { UsersModule } from '../users/users.module';
 import { GroupsModule } from '../groups/groups.module';
 import { AuthModule } from '../auth/auth.module';
 import { Group } from '../groups/entities/group.entity';
+import { User } from '../users/entities/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserGroup, Group]),
+    TypeOrmModule.forFeature([UserGroup, Group, User]),
     UsersModule,
     GroupsModule,AuthModule
   ],

@@ -46,9 +46,16 @@ export class UserGroupsController {
   async getGroupMembers(
     @Param('groupId') groupId: string,
   ): Promise<GetGroupsMembersResponseDto> {
-    return this.userGroupsService.getMembers(groupId);
+    return this.userGroupsService.getMembers(groupId); // delete group from response
   }
 
+  @Get('userId/:userId/groups')
+  @UseGuards(SessionAuthGuard)
+  async getAllGroupByUser(
+    @Param('userId') userId: string,
+  ): Promise<GetGroupsByUserIdResponseDto> {
+    return this.userGroupsService.getGroupsByUserId( userId );
+  }
 }
 
 
