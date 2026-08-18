@@ -85,31 +85,6 @@ services:
    networks:
      - archie
 
-  ai-service:
-   build:
-     context: ./backend/ai-service
-     dockerfile: Dockerfile
-   container_name: ai-service
-   restart: unless-stopped
-   ports:
-     - "5001:5001"
-   volumes:
-     - ./backend/ai-service:/app
-   networks:
-     - archie
-   env_file: "./env/.env"
-   healthcheck:
-     test: ["CMD-SHELL", "curl -fsS http://localhost:5001/health || exit 1"]
-     interval: 30s
-     timeout: 5s
-     retries: 5
-     start_period: 180s
-   depends_on:
-     postgres:
-       condition: service_healthy
-     minio:
-       condition: service_healthy
-
   nest-server:
    build:
      context: ./backend/nest-server
@@ -150,6 +125,75 @@ services:
     depends_on:
       - nest-server
 
+  ai-service:
+   build:
+     context: ./backend/ai-service
+     dockerfile: Dockerfile
+   container_name: ai-service
+   restart: unless-stopped
+   ports:
+     - "5001:5001"
+   volumes:
+     - ./backend/ai-service:/app
+   networks:
+     - archie
+   env_file: "./env/.env"
+   healthcheck:
+     test: ["CMD-SHELL", "curl -fsS http://localhost:5001/health || exit 1"]
+     interval: 30s
+     timeout: 5s
+     retries: 5
+     start_period: 180s
+   depends_on:
+    postgres:
+      condition: service_healthy
+    minio:
+      condition: service_healthy
+    ollama-init:
+      condition: service_completed_successfully
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    environment:
+      OLLAMA_MAX_LOADED_MODELS: ${OLLAMA_MAX_LOADED_MODELS}
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE}
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - archie
+      
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_GENERATION_MODEL: ${OLLAMA_GENERATION_MODEL}
+      OLLAMA_VISION_MODEL: ${OLLAMA_VISION_MODEL}
+      OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL}
+    entrypoint: >
+      /bin/sh -c "
+      ollama pull \"$$OLLAMA_GENERATION_MODEL\" &&
+      ollama pull \"$$OLLAMA_VISION_MODEL\" &&
+      ollama pull \"$$OLLAMA_EMBEDDING_MODEL\" &&
+      echo 'ollama modules pulled'
+      "
+    networks:
+      - archie
+
 networks:
   archie:
     driver: bridge
@@ -160,3 +204,4 @@ volumes:
   minio_data:
   nest-server-node-modules:
   frontend-node-modules:
+  ollama_data:
