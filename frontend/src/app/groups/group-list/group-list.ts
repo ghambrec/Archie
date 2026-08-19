@@ -1,6 +1,8 @@
 import { TranslocoPipe } from '@jsverse/transloco';
 import { Groups } from '../groups';
 import { computed, OnInit, inject, Component, signal } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { CreateGroupModal } from '../create-group-modal/create-group-modal';
 
 
 @Component({
@@ -13,6 +15,7 @@ export class GroupList implements OnInit {
   protected readonly groupsService = inject(Groups);
   protected readonly hasLoadError = signal(false);
   protected readonly searchString = signal("");
+  protected readonly modalService = inject(NgbModal);
 
   ngOnInit():void {
     this.loadGroups();
@@ -38,7 +41,21 @@ export class GroupList implements OnInit {
     return this.groupsService.groupsList().filter((groups) => {
       groups.name.trim().toLowerCase().includes(searchStringGroups);
       groups.description?.trim().toLowerCase().includes(searchStringGroups);
-    })
-      
+    });
   });
+  openCreateGroupModal(): void {
+    const modal = this.modalService.open(
+      CreateGroupModal,
+      {centered: true},
+    )
+  modal.closed.subscribe(() => {
+    this.loadGroups();
+  }
+
+  )
+  };
+
+
+
+
 }
