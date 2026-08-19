@@ -1,6 +1,6 @@
 import { TranslocoPipe } from '@jsverse/transloco';
 import { Groups } from '../groups';
-import { OnInit, inject, Component, signal } from '@angular/core';
+import { computed, OnInit, inject, Component, signal } from '@angular/core';
 
 
 @Component({
@@ -12,6 +12,7 @@ import { OnInit, inject, Component, signal } from '@angular/core';
 export class GroupList implements OnInit {
   protected readonly groupsService = inject(Groups);
   protected readonly hasLoadError = signal(false);
+  protected readonly searchString = signal("");
 
   ngOnInit():void {
     this.loadGroups();
@@ -26,9 +27,18 @@ export class GroupList implements OnInit {
       },
       //logger?
       error: (error) => {
-		console.error('Unable to load groups', error);
-		this.hasLoadError.set(true);
+		    console.error('Unable to load groups', error);
+	    	this.hasLoadError.set(true);
 	  },
     });
   }
+  protected readonly filteredGroupList = computed(() => {
+    const searchStringGroups = this.searchString().trim().toLowerCase();
+    
+    return this.groupsService.groupsList().filter((groups) => {
+      groups.name.trim().toLowerCase().includes(searchStringGroups);
+      groups.description?.trim().toLowerCase().includes(searchStringGroups);
+    })
+      
+  });
 }

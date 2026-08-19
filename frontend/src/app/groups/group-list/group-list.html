@@ -1,21 +1,41 @@
+<h1> {{ "groups.groupList.heading" | transloco }} </h1>
+<input
+	type="text" 
+	class="form-control mb-1"
+	[placeholder]= "'groups.groupList.searchPlaceholder' | transloco" 
+	(input)="searchString.set($event.target.value)"
+/>
 @if (hasLoadError()) {
 	<p class="text-danger"> 
 	{{ 'groups.groupList.errorLoading' | transloco}}
 	</p>
 }	@else {
-	<table class="table">
-		<thead>
-			<tr> {{ groups.groupList.name | transloco }}</tr>
-			<tr> {{ groups.groupList.description | transloco }}</tr>
-		</thead>
+	<table class="table align-middle">
+	<thead>
+        <tr>
+          <th scope="col">
+            {{ 'groups.groupList.name' | transloco }}
+          </th>
 
-	<tbody>
-		@for (group of groupsService.groupsList(); track group.id) {
-		<tr> 
-			<td> {{ group.name }} </td>
-			<td> {{ group.description ?? '-'}}</td>
-		</tr>
-	}
-	</tbody>
-	</table>
-}
+          <th scope="col">
+            {{ 'groups.groupList.description' | transloco }}
+          </th>
+        </tr>
+      </thead>
+
+      <tbody class="table-group-divider">
+        @for (group of filteredGroupList(); track group.id) {
+          <tr>
+            <td>{{ group.name }}</td>
+            <td>{{ group.description ?? '—' }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="2">
+              {{ 'groups.groupList.empty' | transloco }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }

@@ -44,6 +44,7 @@
 	"groups": {
 		"groupList": {
 			"heading": "Groups",
+			"searchPlaceholder": "Search for group name",
 			"name": "Name",
 			"description": "Description",
 			"errorLoading": "Unable to load groups",
