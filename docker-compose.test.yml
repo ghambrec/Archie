@@ -1,0 +1,96 @@
+services:
+  postgres-test:
+    image: pgvector/pgvector:pg18
+    container_name: postgres-test
+    restart: "no"
+    env_file:
+      - ./env/.env.test
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - archie-test
+
+  redis-test:
+    image: redis:latest
+    container_name: redis-test
+    restart: "no"
+    tmpfs:
+      - /data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - archie-test
+
+  minio-test:
+    image: pgsty/minio:RELEASE.2026-06-18T00-00-00Z
+    container_name: minio-test
+    restart: "no"
+    env_file: "./env/.env.test"
+    command: server /data --console-address ":9001"
+    tmpfs:
+      - /data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - archie-test
+
+  minio-init-test:
+    image: pgsty/mc:latest
+    container_name: minio-init-test
+    depends_on:
+      minio-test:
+        condition: service_healthy
+    restart: "no"
+    env_file: "./env/.env.test"
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio-test:9000 \"$$MINIO_ROOT_USER\" \"$$MINIO_ROOT_PASSWORD\" &&
+      mc mb --ignore-existing local/documents &&
+      mc mb --ignore-existing local/avatars &&
+      (mc admin user add local \"$$MINIO_APP_ACCESS_KEY\" \"$$MINIO_APP_SECRET_KEY\" || true) &&
+      (mc admin policy attach local readwrite --user=\"$$MINIO_APP_ACCESS_KEY\" || true) &&
+      echo 'MinIO init done.'
+      "
+    networks:
+      - archie-test
+
+  nest-server-test:
+    build:
+      context: ./backend/nest-server
+      dockerfile: Dockerfile
+    container_name: nest-server-test
+    restart: "no"
+    command: ["sh", "-c", "pnpm run migration:run && pnpm run test:e2e"]
+    volumes:
+      - ./backend/nest-server:/app
+      - nest-server-test-node-modules:/app/node_modules
+    networks:
+      - archie-test
+    env_file: "./env/.env.test"
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+      minio-init-test:
+        condition: service_completed_successfully
+
+networks:
+  archie-test:
+    driver: bridge
+
+volumes:
+  nest-server-test-node-modules:
