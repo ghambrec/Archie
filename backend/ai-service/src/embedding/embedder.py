@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from openai import AsyncOpenAI
 
-from config_tmp import settings
+from src.config import settings
 
 client = AsyncOpenAI(base_url=f"{settings.ollama_host}/v1", api_key="ollama")
 
@@ -21,4 +21,4 @@ if __name__ == "__main__":
     print(len(vector))
     print(vector[:10])
 
-# uv run python src/embedding/embedder.py
+# uv run python -m src.embedding.embedder

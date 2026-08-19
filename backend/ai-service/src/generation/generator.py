@@ -7,7 +7,7 @@ from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 
 # from src.config import settings
-from config_tmp import settings
+from src.config import settings
 
 # SYSTEM_PROMPT = "You are Archie AI. Answer strictly using the provided authorized context. If the context does not contain the answer, say you do not have enough authorized information."
 SYSTEM_PROMPT = "You are a helpful assistant"
@@ -45,4 +45,4 @@ if __name__ == "__main__":
     answer = asyncio.run(generate("Do you know the 42 ecole?"))
     print(answer)
 
-# uv run python src/generation/generator.py
+# uv run python -m src.generation.generator
