@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     # --- DATABASE
     postgres_dsn: str
 
-	# --- LLM PROVIDER
+    # --- LLM PROVIDER
     llm_provider: Literal["ollama", "openrouter"] = "ollama"
 
     # --- OLLAMA
@@ -26,9 +26,16 @@ class Settings(BaseSettings):
     ollama_embedding_model: str
     ollama_vision_model: str
 
-	# --- OPENROUTER
+    # --- OPENROUTER
     openrouter_api_key: str | None = None
     openrouter_generation_model: str | None = None
+
+    # --- MINIO
+    minio_endpoint: str
+    minio_port: str
+    minio_use_ssl: str
+    minio_app_access_key: str
+    minio_app_secret_key: str
 
 
 settings = Settings()
