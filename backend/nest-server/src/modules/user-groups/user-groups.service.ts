@@ -2,17 +2,11 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserGroup } from './entities/user-group.entity';
 import { Repository } from 'typeorm';
-import { GetUserGroupsQueryDto } from './dto/user-groups-query.dto';
-import { UserGroupsMinimalDto } from './dto/user-groups-minimal.dto';
-import { GetUserGroupsMinimalResponseDto } from './dto/user-groups-minimal-response.dt';
-import { UserMinimalDto } from './dto/user-minimal.dto';
-import { GroupMinimalDto } from './dto/group-minimal.dto';
 import { Logger } from 'nestjs-pino';
 import { GetGroupsMembersResponseDto } from './dto/group-members-response.dto';
 import { Group } from '../groups/entities/group.entity';
 import { User } from '../users/entities/user.entity';
 import { GroupMemberDto } from './dto/group-members.dto';
-import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
 
 @Injectable()
 export class UserGroupsService {
@@ -82,46 +76,6 @@ export class UserGroupsService {
       members
     };
   }
-
-  async getAllUserGroups(query: GetUserGroupsQueryDto): Promise<GetUserGroupsMinimalResponseDto> {
-    this.logger.log( 'Fetching all possible groups');
-
-    const page = query.page ?? 1; // Nullish Coalescing Operator
-    const limit = query.limit ?? 20; // ist wert NULL, dann 20
-
-    const [entities, total] = await this.userGroupRepository.findAndCount({ 
-      skip: (page - 1) * limit,
-      take: limit,
-      order: { joinedAt: 'DESC' },
-      relations: { user: true, group: true }
-    });
-
-    const data: UserGroupsMinimalDto[] = entities.map(ug => ({
-      userId: ug.userId,
-      groupId: ug.groupId,
-      joinedAt: ug.joinedAt,
-      user: {
-        id: ug.user.id,
-        displayName: ug.user.displayName,
-        email: ug.user.email,
-      } as UserMinimalDto,
-      group: {
-        id: ug.group.id,
-        name: ug.group.name,
-      } as GroupMinimalDto,
-    }));
-
-    this.logger.log('Fetched all possible groups');
-    return {
-      data,
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total/limit),
-    };
-  }
-
-
 }
 
 // async getGroupById(groupId: string) {

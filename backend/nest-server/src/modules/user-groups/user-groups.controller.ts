@@ -18,7 +18,6 @@ export class UserGroupsController {
   @ApiBody({ type: AddMemberDto })
   async addMember(
     @Param('groupId') groupId: string,
-    // @Body('userId') userId: string,
     @Body() dto: AddMemberDto,
     @Req() req: Request & { userId: string },
   ) {
@@ -32,14 +31,6 @@ export class UserGroupsController {
     @Param('userId') userId: string, 
   ) {
     await this.userGroupsService.remove(userId, groupId);
-  }
-
-  @Get()
-  @UseGuards(SessionAuthGuard)
-  async getAll(
-    @Query() query: GetUserGroupsQueryDto
-  ) {
-    return this.userGroupsService.getAllUserGroups(query);
   }
 
   @Get('groups/:groupId/members')
