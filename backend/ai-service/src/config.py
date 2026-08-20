@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     # --- MINIO
     minio_endpoint: str
     minio_port: str
-    minio_use_ssl: str
+    minio_use_ssl: bool
     minio_app_access_key: str
     minio_app_secret_key: str
 
