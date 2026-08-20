@@ -1,55 +1,32 @@
-"""Async pgvector-backed vector store adapter"""
+"""stores vectors in ai_chunks"""
 
 from __future__ import annotations
 
 import asyncpg
-from pgvector.asyncpg import register_vector
 
-from src.config import settings
-from src.embedding.embedder import embed
+from uuid import UUID
 
 
-async def test() -> None:
-    conn = await asyncpg.connect(dsn=settings.postgres_dsn)
-    await register_vector(conn)
+async def save_chunks(pool: asyncpg.Pool, doc_id: UUID, chunks: list[dict]):
 
-    await conn.execute(
-        """
-                create table if not exists vector_test (id serial primary key, content text, embedding vector(1024));
-                """
-    )
+    delete = "delete from ai_chunks where ai_document_id = $1"
+    insert = """
+                insert into ai_chunks (ai_document_id, chunk_index, content, embedding, token_count)
+                values ($1, $2, $3, $4, $5)
+            """
 
-    saetze = [
-        "berlin is the capital from germany",
-        "paris is the capital from france",
-        "amsterdam is the capital from netherlands"
-    ]
-    for satz in saetze:
-        vector = await embed(satz)
-        await conn.execute(
-            "insert into vector_test (content, embedding) values ($1, $2)",
-            satz,
-            vector
+    rows = [
+        (
+            doc_id,
+            chunk["chunk_index"],
+            chunk["content"],
+            chunk["embedding"],
+            len(chunk["content"]) // 4      # 4 chars ~ 1 token
         )
+        for chunk in chunks
+    ]
 
-    query_vector = await embed("what is the capital from germany?")
-    rows = await conn.fetch(
-        """
-        select content, embedding <=> $1 as distance
-        from vector_test
-        order by distance asc
-        """,
-        query_vector
-    )
-    for row in rows:
-        print(f"{row['distance']:.4f}  {row['content']}")
-
-    # await conn.execute("drop table vector_test")
-    await conn.close()
-
-if __name__ == "__main__":
-    import asyncio
-
-    asyncio.run(test())
-
-# uv run python -m src.vector_store.adapter
+    async with pool.acquire() as conn:
+        async with conn.transaction():
+            await conn.execute(delete, doc_id)
+            await conn.executemany(insert, rows)

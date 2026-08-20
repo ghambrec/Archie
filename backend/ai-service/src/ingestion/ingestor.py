@@ -8,6 +8,7 @@ from uuid import UUID
 from src.storage.minio import MinioDocumentStore
 from src.chunking.chunker import chunk_text
 from src.embedding.embedder import embed
+from src.vector_store import adapter
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,13 @@ async def ingest_doc(
     for index, content in enumerate(chunks):
         logger.info("start embedding")
         embedding = await embed(content)
-        results.append({"chunk_index": index, "content": content, "embedding": embedding})
+        results.append({
+            "chunk_index": index,
+            "content": content,
+            "embedding": embedding
+        })
         logger.info("chunk %s embedded (%s chars, %s dimensions)", index, len(content), len(embedding))
+
+    await adapter.save_chunks(pool, doc_id, results)
 
     return results
