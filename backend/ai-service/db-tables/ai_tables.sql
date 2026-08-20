@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS ai_documents (
 	status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
 	ai_summary TEXT,
 	language VARCHAR(10),
-	error_message TEXT,
+	error_msg TEXT,
 	retry_count SMALLINT NOT NULL DEFAULT 0,
 	processed_at TIMESTAMPTZ,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

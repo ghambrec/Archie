@@ -2,6 +2,8 @@
 
 from fastapi import APIRouter, HTTPException, Request
 
+from src.ingestion import ingestor
+
 # , Depends, Request
 
 # from src.core.service import AIService
@@ -34,6 +36,13 @@ async def ready_check(request: Request):
     except Exception as ex:
         raise HTTPException(status_code=503, detail="database unavailable") from ex
     return {"status": "ok"}
+
+
+@router.post("/ingest")
+async def ingest(request: Request):
+    """start ingestion pipeline"""
+    pool = request.app.state.db_pool
+    await ingestor.update_db(pool, "ca7017c6-5be9-4a85-a270-4f0b3dc7ecda")
 
 
 # def GetAIService(request: Request) -> AIService:
