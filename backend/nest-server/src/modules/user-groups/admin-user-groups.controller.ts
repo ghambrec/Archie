@@ -4,6 +4,7 @@ import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
 import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
 import { AdminUserGroupsService } from './admin-user-groups.service';
+import { GetUserGroupsQueryDto } from './dto/user-groups-query.dto';
 
 @ApiTags('admin-user-groups')
 @Controller('admin-user-groups')
@@ -19,6 +20,14 @@ export class AdminUserGroupsController {
   async getAllGroupByUser(
     @Param('userId') userId: string,
   ): Promise<GetGroupsByUserIdResponseDto> {
-    return this.adminUserGroupsService.getGroupsByUserId( userId );
+    return this.adminUserGroupsService.adminGetGroupsByUserId( userId );
+  }
+
+  @Get()
+  @UseGuards(SessionAuthGuard)
+  async getAll(
+    @Query() query: GetUserGroupsQueryDto
+  ) {
+    return this.adminUserGroupsService.adminGetAllUserGroups(query);
   }
 }
