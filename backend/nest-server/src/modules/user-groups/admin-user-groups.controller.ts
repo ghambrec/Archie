@@ -24,7 +24,11 @@ export class AdminUserGroupsController {
   }
 
   @Get()
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, AdminRequiredGuard)
+  @ApiOperation({
+    summary: 'Gets all user-groups that exist',
+    description: 'Only Admin can call this endpoint: Showing every group with every user that is a member of the group.'
+  })
   async getAll(
     @Query() query: GetUserGroupsQueryDto
   ) {
