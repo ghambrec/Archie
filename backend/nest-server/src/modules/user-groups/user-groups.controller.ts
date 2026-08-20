@@ -1,5 +1,5 @@
 import { Controller, Param, Post, UseGuards, Body, Req, Delete, Query, Get } from '@nestjs/common';
-import { ApiAcceptedResponse, ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiAcceptedResponse, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserGroupsService } from './user-groups.service';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { GetUserGroupsQueryDto } from './dto/user-groups-query.dto';
@@ -16,6 +16,10 @@ export class UserGroupsController {
   @Post('groups/:groupId/members')
   @UseGuards(SessionAuthGuard)
   @ApiBody({ type: AddMemberDto })
+  @ApiOperation({
+      summary: 'Adds a user to a group',
+      description: 'Adds a user to a group. You enter the groupId of the group you want to add a user to and send the userId in the body of the request.'
+    })
   async addMember(
     @Param('groupId') groupId: string,
     @Body() dto: AddMemberDto,
@@ -26,6 +30,10 @@ export class UserGroupsController {
 
   @Delete('groups/:groupId/members/:userId')
   @UseGuards(SessionAuthGuard)
+  @ApiOperation({
+      summary: '',
+      description: '.'
+    })
   async removeMember(
     @Param('groupId') groupId: string,
     @Param('userId') userId: string, 
@@ -35,6 +43,10 @@ export class UserGroupsController {
 
   @Get('groups/:groupId/members')
   @UseGuards(SessionAuthGuard)
+  @ApiOperation({
+      summary: '',
+      description: '.'
+    })
   async getGroupMembers(
     @Param('groupId') groupId: string,
   ): Promise<GetGroupsMembersResponseDto> {
