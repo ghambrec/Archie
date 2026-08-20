@@ -37,5 +37,9 @@ class Settings(BaseSettings):
     minio_app_access_key: str
     minio_app_secret_key: str
 
+    # --- CHUNKING
+    chunk_size_chars: int
+    chunk_overlap_chars: int
+
 
 settings = Settings()
