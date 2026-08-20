@@ -1,0 +1,5 @@
+- write tests - uni tests - checkout nikitas last merge request
+- remove Get() logic form user-groups
+- FOR ADMIN: protect get all groups based on user id with admin guard
+- FOR REGULAR USER: create get all groups for own user - BY NAME not id
+- wirte ApiOperation description & title oder so zu jedem Endpoint...
