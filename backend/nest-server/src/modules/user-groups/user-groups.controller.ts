@@ -6,6 +6,7 @@ import { GetUserGroupsQueryDto } from './dto/user-groups-query.dto';
 import { AddMemberDto } from './dto/add-member.dto';
 import { GetGroupsMembersResponseDto } from './dto/group-members-response.dto';
 import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
+import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
 
 @ApiTags('user-groups')
 @Controller('user-groups')
@@ -47,14 +48,6 @@ export class UserGroupsController {
     @Param('groupId') groupId: string,
   ): Promise<GetGroupsMembersResponseDto> {
     return this.userGroupsService.getMembers(groupId); // delete group from response
-  }
-
-  @Get('userId/:userId/groups')
-  @UseGuards(SessionAuthGuard)
-  async getAllGroupByUser(
-    @Param('userId') userId: string,
-  ): Promise<GetGroupsByUserIdResponseDto> {
-    return this.userGroupsService.getGroupsByUserId( userId );
   }
 }
 
