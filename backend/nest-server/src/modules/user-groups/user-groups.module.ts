@@ -8,21 +8,29 @@ import { GroupsModule } from '../groups/groups.module';
 import { AuthModule } from '../auth/auth.module';
 import { Group } from '../groups/entities/group.entity';
 import { User } from '../users/entities/user.entity';
+import { PermissionsModule } from '../permissions/permissions.module';
+import { AdminUserGroupsController } from './admin-user-groups.controller';
+import { AdminUserGroupsService } from './admin-user-groups.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserGroup, Group, User]),
     UsersModule,
-    GroupsModule,AuthModule
+    GroupsModule,
+    AuthModule,
+    PermissionsModule,
   ],
   providers: [
-    UserGroupsService
+    UserGroupsService,
+    AdminUserGroupsService,
   ],
   controllers: [
-    UserGroupsController
+    UserGroupsController,
+    AdminUserGroupsController,
   ],
   exports: [
-    UserGroupsService
+    UserGroupsService,
+    AdminUserGroupsService
   ],
 })
 export class UserGroupsModule {}
