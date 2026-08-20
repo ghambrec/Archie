@@ -121,35 +121,7 @@ export class UserGroupsService {
     };
   }
 
-  async getGroupsByUserId( userId: string ): Promise<GetGroupsByUserIdResponseDto> {
-    this.logger.log({ userId: userId }, 'Fetching all groups that user belongs to');
 
-    const user = await this.userRepository.findOneBy({ id: userId });
-    if ( !user ) {
-      this.logger.log({ userId: userId }, 'User could not be fetched');
-      throw new NotFoundException('User not found');
-    }
-
-    const entities = await this.userGroupRepository.find({
-      where: { userId },
-      relations: { group: true }, //JOIN auf Group Entity
-      order: { joinedAt: 'DESC' },
-    });
-
-    const groups = entities.map( ug => ({
-      groupId: ug.groupId,
-      name: ug.group.name,
-      joinedAt: ug.joinedAt,
-    }));
-
-    this.logger.log({ userId: userId }, 'Fetched all groups the user belongs to');
-    return {
-      userId: user.id,
-      displayName: user.displayName,
-      email: user.email,
-      groups,
-    };
-  }
 }
 
 // async getGroupById(groupId: string) {
