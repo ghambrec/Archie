@@ -1,10 +1,16 @@
 """Main entry point for the AI Service."""
 
 import logging
+
+from uvicorn.logging import DefaultFormatter
 from src.config import settings
 
-logging.basicConfig(level=logging.INFO)
+# LOGGER SETTINGS
+handler = logging.StreamHandler()
+handler.setFormatter(DefaultFormatter("%(levelprefix)s %(name)s: %(message)s"))
+logging.basicConfig(level=logging.INFO, handlers=[handler])
 logger = logging.getLogger(__name__)
+
 
 if __name__ == "__main__":
     import uvicorn
