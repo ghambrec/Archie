@@ -19,4 +19,3 @@ backend/nest-server/.pnpm-store
 /node_modules
 frontend/.pnpm-store
 /notesForCedric.md
-/backend/nest-server/src/modules/user-groups/TODO.md
