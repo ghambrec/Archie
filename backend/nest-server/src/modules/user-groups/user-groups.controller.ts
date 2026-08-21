@@ -1,12 +1,11 @@
-import { Controller, Param, Post, UseGuards, Body, Req, Delete, Query, Get } from '@nestjs/common';
-import { ApiAcceptedResponse, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, Param, Post, UseGuards, Body, Delete, Req, Get } from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserGroupsService } from './user-groups.service';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
-import { GetUserGroupsQueryDto } from './dto/user-groups-query.dto';
 import { AddMemberDto } from './dto/add-member.dto';
 import { GetGroupsMembersResponseDto } from './dto/group-members-response.dto';
 import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
-import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
+import type { Request } from 'express';
 
 @ApiTags('user-groups')
 @Controller('user-groups')
@@ -51,6 +50,18 @@ export class UserGroupsController {
     @Param('groupId') groupId: string,
   ): Promise<GetGroupsMembersResponseDto> {
     return this.userGroupsService.getMembers(groupId); // delete group from response
+  }
+
+  @Get('me/groups')
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({
+    summary: 'Gets all groups for the current user',
+    description: 'This endpoint fetches all groups that the user you are currently logged-in with is a member of.'
+  })
+  async getMyGroups(
+    @Req() req: Request & { userId: string },
+  ): Promise<GetGroupsByUserIdResponseDto> {
+    return this.userGroupsService.getMyGroups(req.userId);
   }
 }
 
