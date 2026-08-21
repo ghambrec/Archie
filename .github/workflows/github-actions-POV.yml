@@ -24,7 +24,9 @@ jobs:
 
       - name: build nest-server
         run: make build-nest
-      
+
+      - name: run nest-server unit tests
+        run: cd backend/nest-server && pnpm test
 
 
   Test-Frontend:
@@ -49,6 +51,9 @@ jobs:
 
       - name: build Angular frontend
         run: make build-front
+
+      - name: run frontend unit tests
+        run: cd frontend && pnpm run test
 
 
   Integration-Test:
