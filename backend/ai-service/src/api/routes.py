@@ -45,7 +45,7 @@ async def ingest(request: Request):
     """start ingestion pipeline"""
     pool = request.app.state.db_pool
     minio = MinioDocumentStore(
-        minio_endpoint=f"localhost:{settings.minio_port}",
+        minio_endpoint=f"{settings.minio_endpoint}:{settings.minio_port}",
         minio_access_key=f"{settings.minio_app_access_key}",
         minio_secret_key=f"{settings.minio_app_secret_key}",
         minio_secure=False
