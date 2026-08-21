@@ -44,15 +44,13 @@ async def ready_check(request: Request):
 async def ingest(request: Request):
     """start ingestion pipeline"""
     pool = request.app.state.db_pool
-    # await ingestor.update_db(pool, "ca7017c6-5be9-4a85-a270-4f0b3dc7ecda")
     minio = MinioDocumentStore(
         minio_endpoint=f"localhost:{settings.minio_port}",
         minio_access_key=f"{settings.minio_app_access_key}",
         minio_secret_key=f"{settings.minio_app_secret_key}",
         minio_secure=False
     )
-    result = await ingestor.ingest_doc(pool, minio, "ca7017c6-5be9-4a85-a270-4f0b3dc7ecda")
-    print(f"{len(result)} Chunks verarbeitet")
+    await ingestor.ingest_doc(pool, minio, "ca7017c6-5be9-4a85-a270-4f0b3dc7ecda")
 
 
 # def GetAIService(request: Request) -> AIService:

@@ -9,30 +9,9 @@ from src.storage.minio import MinioDocumentStore
 from src.chunking.chunker import chunk_text
 from src.embedding.embedder import embed
 from src.chunks_storage import ai_chunks
+from src.ingestion import status
 
 logger = logging.getLogger(__name__)
-
-
-async def update_db(pool: asyncpg.Pool, doc_id: UUID) -> None:
-    upsert = """
-                insert into ai_documents (id) values ($1)
-                on conflict (id) do update set
-                    status = 'PENDING', 
-                    ai_summary = NULL, 
-                    language = NULL, 
-                    error_msg = NULL, 
-                    retry_count = ai_documents.retry_count + 1, 
-                    processed_at = NULL, 
-                    updated_at = now()
-                returning (xmax = 0) as inserted
-            """
-
-    row = await pool.fetchrow(upsert, doc_id)
-    if row["inserted"]:
-        print("nicht vorhanden, insert")
-        logger.info("ai_documents row inserted: %s", doc_id)
-    else:
-        logger.info("ai_documents row resetted for reprocessing: %s", doc_id)
 
 
 async def get_object_key(pool: asyncpg.Pool, doc_id: UUID) -> str | None:
@@ -44,23 +23,18 @@ async def ingest_doc(
     pool: asyncpg.Pool,
     minio: MinioDocumentStore,
     doc_id: UUID
-) -> list[dict]:
-    await update_db(pool, doc_id)
+) -> None:
+    await status.init_db_entry(pool, doc_id)
 
     obj_key = await get_object_key(pool, doc_id)
     if obj_key is None:
         raise ValueError(f"No object key found for doc_id {doc_id}") # TODO was passiert bei einem fehler? -> TESTEN!
 
-    logger.info("start getting doc from minio")
     doc_text = await minio.GetDocumentText(obj_key)
-    logger.info("finished getting doc from minio")
-    logger.info("start chunking")
     chunks = chunk_text(doc_text)
-    logger.info("finished chunking")
 
     results: list[dict] = []
     for index, content in enumerate(chunks):
-        logger.info("start embedding")
         embedding = await embed(content)
         results.append({
             "chunk_index": index,
@@ -70,5 +44,4 @@ async def ingest_doc(
         logger.info("chunk %s embedded (%s chars, %s dimensions)", index, len(content), len(embedding))
 
     await ai_chunks.save_chunks(pool, doc_id, results)
-
-    return results
+    await status.mark_as_finished(pool, doc_id)
