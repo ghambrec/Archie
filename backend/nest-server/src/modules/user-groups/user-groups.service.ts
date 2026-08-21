@@ -7,6 +7,7 @@ import { GetGroupsMembersResponseDto } from './dto/group-members-response.dto';
 import { Group } from '../groups/entities/group.entity';
 import { User } from '../users/entities/user.entity';
 import { GroupMemberDto } from './dto/group-members.dto';
+import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
 
 @Injectable()
 export class UserGroupsService {
@@ -74,6 +75,36 @@ export class UserGroupsService {
       groupId: group.id,
       groupName: group.name,
       members
+    };
+  }
+
+  async getMyGroups(userId: string): Promise<GetGroupsByUserIdResponseDto> {
+    this.logger.log({ userId: userId }, 'Fetching all groups of current user');
+
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      this.logger.warn({ userId: userId }, 'User could not be fetched');
+      throw new NotFoundException('User not found');
+    }
+
+    const entities = await this.userGroupRepository.find({
+      where: { userId },
+      relations: { group: true },
+      order: { joinedAt: 'DESC' },
+    });
+
+    const groups = entities.map(ug => ({
+      groupId: ug.groupId,
+      name: ug.group.name,
+      joinedAt: ug.joinedAt,
+    }));
+
+    this.logger.log({ userId: userId }, 'Fetched all groups that current user belongs to');
+    return {
+      userId: user.id,
+      displayName: user.displayName,
+      email: user.email,
+      groups,
     };
   }
 }
