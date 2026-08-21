@@ -2,8 +2,11 @@ from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Literal
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-ENV_FILE = REPO_ROOT / "env" / ".env"
+try:
+    REPO_ROOT = Path(__file__).resolve().parents[3]
+    ENV_FILE = REPO_ROOT / "env" / ".env"
+except IndexError:
+    ENV_FILE = None
 
 
 class Settings(BaseSettings):
