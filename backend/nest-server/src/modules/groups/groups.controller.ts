@@ -17,7 +17,7 @@ export class GroupsController {
   @UseGuards(SessionAuthGuard)
   @ApiOperation({
         summary: 'REGULAR USER: Creates group',
-        description: 'This endpoint creates a group. You send it name and description in the body and it returns you id, name and description.'
+        description: 'This endpoint creates a group. You set name and description in the body and it returns you id, name and description.'
       })
   async create(@Body() dto: CreateGroupsDto): Promise<GroupsResponseDto | GroupsAdminResponseDto> {
     return this.groupsService.create(dto);
