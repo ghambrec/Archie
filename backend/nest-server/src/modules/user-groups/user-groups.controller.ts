@@ -17,9 +17,9 @@ export class UserGroupsController {
   @UseGuards(SessionAuthGuard)
   @ApiBody({ type: AddMemberDto })
   @ApiOperation({
-      summary: 'Adds a user to a group',
-      description: 'Adds a user to a group. You enter the groupId of the group you want to add a user to and send the userId in the body of the request.'
-    })
+    summary: 'Adds a user to a group',
+    description: 'Adds a user to a group. You enter the groupId of the group you want to add a user to and send the userId in the body of the request.'
+  })
   async addMember(
     @Param('groupId') groupId: string,
     @Body() dto: AddMemberDto,
@@ -31,9 +31,9 @@ export class UserGroupsController {
   @Delete('groups/:groupId/members/:userId')
   @UseGuards(SessionAuthGuard)
   @ApiOperation({
-      summary: '',
-      description: '.'
-    })
+    summary: 'Deletes a user from a group',
+    description: 'This endpoint deletes a user from a group. You need to enter the groupId and userId to specify, which user and which group.'
+  })
   async removeMember(
     @Param('groupId') groupId: string,
     @Param('userId') userId: string, 
@@ -44,9 +44,9 @@ export class UserGroupsController {
   @Get('groups/:groupId/members')
   @UseGuards(SessionAuthGuard)
   @ApiOperation({
-      summary: '',
-      description: '.'
-    })
+    summary: 'Gets all user of a group',
+    description: 'This endpoint fetches all members of a specific group - based on the groupId you enter.'
+  })
   async getGroupMembers(
     @Param('groupId') groupId: string,
   ): Promise<GetGroupsMembersResponseDto> {
