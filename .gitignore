@@ -19,3 +19,4 @@ backend/nest-server/.pnpm-store
 /node_modules
 frontend/.pnpm-store
 /notesForCedric.md
+/TODO.md
