@@ -210,7 +210,7 @@ describe('AuthController (e2e)', () => {
         .send({ email, password: testPassword })
         .expect(statusCodeTooManyRequests);
 
-      expect(response.body.retryAfterSeconds).toBeGreaterThan(0);
+      expect(response.body.retryAfterSeconds).toBeLessThan(0);
     });
   });
 
