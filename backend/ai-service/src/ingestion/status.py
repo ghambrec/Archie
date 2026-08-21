@@ -15,7 +15,8 @@ async def init_db_entry(pool: asyncpg.Pool, doc_id: UUID) -> None:
                     status = 'PROCESSING', 
                     ai_summary = NULL, 
                     language = NULL, 
-                    error_msg = NULL, 
+                    error_key = NULL, 
+                    error_detail = NULL, 
                     retry_count = ai_documents.retry_count + 1, 
                     processed_at = NULL, 
                     updated_at = now()
@@ -40,17 +41,17 @@ async def mark_as_finished(pool: asyncpg.Pool, doc_id: UUID) -> None:
             """
 
     await pool.execute(update, doc_id)
-    logger.info("ingestion finished for doc: %s", doc_id)
 
 
-async def write_error(pool: asyncpg.Pool, doc_id: UUID, error_msg: str) -> None:
+async def write_error(pool: asyncpg.Pool, doc_id: UUID, error_key: str, error_detail: str) -> None:
     update = """
                 update ai_documents set
-                    error_msg = $2,
+                    status = 'FAILED',
+                    error_key = $2,
+                    error_detail = $3,
                     updated_at = now()
                 where
                     id = $1
             """
 
-    await pool.execute(update, doc_id, error_msg)
-    logger.info("ingestion failed for doc: %s, with error: %s", doc_id, error_msg)
+    await pool.execute(update, doc_id, "ais.error." + error_key, error_detail)
