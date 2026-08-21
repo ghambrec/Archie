@@ -8,7 +8,7 @@ from uuid import UUID
 from src.storage.minio import MinioDocumentStore
 from src.chunking.chunker import chunk_text
 from src.embedding.embedder import embed
-from src.vector_store import adapter
+from src.chunks_storage import ai_chunks
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +69,6 @@ async def ingest_doc(
         })
         logger.info("chunk %s embedded (%s chars, %s dimensions)", index, len(content), len(embedding))
 
-    await adapter.save_chunks(pool, doc_id, results)
+    await ai_chunks.save_chunks(pool, doc_id, results)
 
     return results
