@@ -27,11 +27,11 @@ async def ingest_doc(
     doc_id: UUID
 ) -> None:
     try:
+        await status.init_db_entry(pool, doc_id)
+
         obj_key = await get_object_key(pool, doc_id)
         if obj_key is None:
             raise ValueError(f"no object key found for doc_id {doc_id}")
-
-        await status.init_db_entry(pool, doc_id)
 
         doc_text = await minio.GetDocumentText(obj_key)
         chunks = chunk_text(doc_text)
