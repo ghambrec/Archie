@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserGroup } from './entities/user-group.entity';
 import { Repository } from 'typeorm';
 import { Logger } from 'nestjs-pino';
-import { Group } from '../groups/entities/group.entity';
 import { User } from '../users/entities/user.entity';
 import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
 import { GetUserGroupsQueryDto } from './dto/user-groups-query.dto';

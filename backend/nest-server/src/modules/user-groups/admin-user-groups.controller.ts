@@ -1,4 +1,4 @@
-import { Controller, Param, Post, UseGuards, Body, Req, Delete, Query, Get } from '@nestjs/common';
+import { Controller, Param, UseGuards, Query, Get } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
