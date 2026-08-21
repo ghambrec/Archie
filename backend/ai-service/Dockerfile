@@ -19,4 +19,4 @@ EXPOSE 5001
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD curl -f "http://localhost:5001/health" || exit 1
 
-CMD ["uv", "run", "python", "main.py"]
+CMD ["sh", "-c", "uv run python -m src.migrate_db && uv run python main.py"]

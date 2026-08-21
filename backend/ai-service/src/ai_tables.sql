@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS ai_chunks (
 	UNIQUE (ai_document_id, chunk_index)
 );
 
-CREATE INDEX ai_chunks_ai_document_id_idx ON ai_chunks (ai_document_id);
-CREATE INDEX ai_chunks_embedding_hnsw_idx ON ai_chunks USING hnsw (embedding vector_cosine_ops);
+CREATE INDEX IF NOT EXISTS ai_chunks_ai_document_id_idx ON ai_chunks (ai_document_id);
+CREATE INDEX IF NOT EXISTS ai_chunks_embedding_hnsw_idx ON ai_chunks USING hnsw (embedding vector_cosine_ops);
 
 -- CREATE TABLE IF NOT EXISTS ai_tags (
 -- 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
