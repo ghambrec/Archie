@@ -6,3 +6,4 @@
 - **Postgres:** 5432
 - **MinIO API:** 9000
 - **MinIO Web Console:** 9001
+- **AI-Service:** 5001
