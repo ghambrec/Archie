@@ -50,4 +50,101 @@ jobs:
       - name: build Angular frontend
         run: make build-front
 
-  #Integration-Test:
+
+  Integration-Test:
+    needs: [Test-Backend, Test-Frontend]
+    runs-on: ubuntu-latest
+
+    # Same throwaway values as env/.env.test, adapted for GH Actions service
+    # containers (hostnames become "localhost" since the job runs directly
+    # on the runner, not inside a container on the compose network).
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgresdb_test
+      POSTGRES_PORT: 5432
+      POSTGRES_HOST: localhost
+      NEST_SERVER_PORT: 3000
+      NODE_ENV: test
+      APP_PUBLIC_URL: http://localhost:3000
+      ADMIN_USER: admin@example.com
+      ADMIN_USER_PASSWORD: change-me
+      REDIS_URL: redis://localhost:6379
+      SESSION_TTL_SECONDS: 604800
+      SESSION_COOKIE_NAME: session_id
+      MINIO_ROOT_USER: root-user
+      MINIO_ROOT_PASSWORD: root-user
+      MINIO_APP_ACCESS_KEY: root-user
+      MINIO_APP_SECRET_KEY: root-user
+      MINIO_ENDPOINT: localhost
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: false
+      AUTH_MAX_LOGIN_ATTEMPTS: 5
+      AUTH_LOGIN_LOCKOUT_SECONDS: 900
+
+    services:
+      postgres-test:
+        image: pgvector/pgvector:pg18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgresdb_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgresdb_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+      redis-test:
+        image: redis:latest
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+      minio-test:
+        image: bitnami/minio:latest
+        env:
+          MINIO_ROOT_USER: root-user
+          MINIO_ROOT_PASSWORD: root-user
+          # Auto-creates the buckets the compose-based minio-init-test step
+          # otherwise creates manually via `mc mb`.
+          MINIO_DEFAULT_BUCKETS: documents,avatars
+        ports:
+          - 9000:9000
+          - 9001:9001
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/live"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 5s
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up backend pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: backend/nest-server/package.json
+          run_install: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: "pnpm"
+          cache-dependency-path: backend/nest-server/pnpm-lock.yaml
+
+      - name: install nest-server dependencies
+        run: make deps-nest
+
+      - name: run database migrations
+        run: cd backend/nest-server && pnpm run migration:run
+
+      - name: run nest-server integration/e2e tests
+        run: cd backend/nest-server && pnpm run test:e2e
