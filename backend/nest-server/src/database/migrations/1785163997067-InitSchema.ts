@@ -65,7 +65,7 @@ export class InitSchema1785163997067 implements MigrationInterface {
         "group_id" uuid NOT NULL,
         "permission_id" uuid NOT NULL,
         CONSTRAINT "PK_user_permission" PRIMARY KEY ("id"),
-        CONSTRAINT "UQ_user_permission_user_permission" UNIQUE ("user_id", "permission_id"),
+        CONSTRAINT "UQ_user_permission_user_group_permission" UNIQUE ("user_id", "group_id", "permission_id"),
         CONSTRAINT "FK_user_permission_user" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE,
         CONSTRAINT "FK_user_permission_group" FOREIGN KEY ("group_id") REFERENCES "groups" ("id") ON DELETE CASCADE,
         CONSTRAINT "FK_user_permission_permission" FOREIGN KEY ("permission_id") REFERENCES "permissions" ("id") ON DELETE CASCADE
