@@ -1,12 +1,11 @@
-name: Tests Nest-Server Frontend
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+name: Tests Nest-Server
+run-name: ${{ github.actor }} is testing out backend 🚀
 on:
   pull_request:
     branches: [main]
     paths:
       - 'backend/**'
-      - 'frontend/**'
-      - '.github/workflows/github-actions-POV.yml'
+      - '.github/workflows/github-actions-backend.yml'
 
 jobs:
   Test-Backend: 
@@ -34,34 +33,6 @@ jobs:
 
       # - name: run nest-server unit tests
       #   run: cd backend/nest-server && pnpm test
-
-
-  Test-Frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Set up frontend pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          package_json_file: frontend/package.json
-          run_install: false
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '24'
-          cache: "pnpm"
-          cache-dependency-path: frontend/pnpm-lock.yaml 
-      
-      - name: install Frontend dependencies
-        run: make deps-front
-
-      - name: build Angular frontend
-        run: make build-front
-
-      # - name: run frontend unit tests
-      #   run: cd frontend && pnpm run test
-
 
   Integration-Test:
     needs: [Test-Backend, Test-Frontend]
