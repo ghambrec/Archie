@@ -2,6 +2,7 @@ name: Tests Frontend
 run-name: ${{ github.actor }} is testing out frontend 🚀
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     branches: [main]
     paths:
       - 'frontend/**'

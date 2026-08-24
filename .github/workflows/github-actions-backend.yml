@@ -2,6 +2,7 @@ name: Tests Nest-Server
 run-name: ${{ github.actor }} is testing out backend 🚀
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     branches: [main]
     paths:
       - 'backend/**'
