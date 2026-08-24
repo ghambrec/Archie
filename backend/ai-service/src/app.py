@@ -4,6 +4,8 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from arq import create_pool as arq_create_pool
+from arq.connections import RedisSettings
 
 from src.config import settings
 from src.storage.minio import MinioDocumentStore
@@ -24,12 +26,14 @@ async def lifespan(app: FastAPI):
         minio_secret_key=f"{settings.minio_app_secret_key}",
         minio_secure=False
     )
+    app.state.arq_pool = await arq_create_pool(RedisSettings(host=settings.redis_host, port=settings.redis_port))
     try:
         yield
     finally:
         logger.info("AI Service shutting down")
         await app.state.db_pool.close()
         await app.state.minio.Close()
+        await app.state.arq_pool.aclose()
 
 
 app = FastAPI(

@@ -153,6 +153,25 @@ services:
         condition: service_healthy
       ollama-init:
         condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  ai-service-worker:
+    build:
+      context: ./backend/ai-service
+      dockerfile: Dockerfile
+    container_name: ai-service-worker
+    restart: unless-stopped
+    command: ["uv", "run", "arq", "src.worker.WorkerSettings"]
+    volumes:
+      - ./backend/ai-service:/app
+      - ai-service-venv:/app/.venv
+    networks:
+      - archie
+    env_file: "./env/.env"
+    depends_on:
+      ai-service:
+        condition: service_healthy
 
   ollama:
     image: ollama/ollama:latest

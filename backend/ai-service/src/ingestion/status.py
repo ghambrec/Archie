@@ -10,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 async def init_db_entry(pool: asyncpg.Pool, doc_id: UUID) -> None:
     upsert = """
-                insert into ai_documents (id) values ($1)
+                insert into ai_documents (id, status) values ($1, 'PENDING')
                 on conflict (id) do update set
-                    status = 'PROCESSING', 
+                    status = 'PENDING', 
                     ai_summary = NULL, 
                     language = NULL, 
                     error_key = NULL, 
@@ -28,6 +28,17 @@ async def init_db_entry(pool: asyncpg.Pool, doc_id: UUID) -> None:
         logger.info("ai_documents row inserted: %s", doc_id)
     else:
         logger.info("ai_documents row resetted for reprocessing: %s", doc_id)
+
+
+async def mark_as_processing(pool: asyncpg.Pool, doc_id: UUID) -> None:
+    update = """
+                update ai_documents set
+                    status = 'PROCESSING',
+                    updated_at = now()
+                where
+                    id = $1
+            """
+    await pool.execute(update, doc_id)
 
 
 async def mark_as_finished(pool: asyncpg.Pool, doc_id: UUID) -> None:

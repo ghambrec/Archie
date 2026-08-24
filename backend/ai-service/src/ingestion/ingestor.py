@@ -27,7 +27,7 @@ async def ingest_doc(
     doc_id: UUID
 ) -> None:
     try:
-        await status.init_db_entry(pool, doc_id)
+        await status.mark_as_processing(pool, doc_id)
 
         obj_key = await get_object_key(pool, doc_id)
         if obj_key is None:

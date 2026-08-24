@@ -44,5 +44,9 @@ class Settings(BaseSettings):
     chunk_size_chars: int
     chunk_overlap_chars: int
 
+    # --- REDIS
+    redis_host: str
+    redis_port: int
+
 
 settings = Settings()
