@@ -144,6 +144,9 @@ jobs:
         run: make deps-nest
 
       - name: run database migrations
+        env:
+          ADMIN_USER: ${{ secrets.ADMIN_USER }}
+          ADMIN_USER_PASSWORD: ${{ secrets.ADMIN_USER_PASSWORD }}
         run: cd backend/nest-server && pnpm run migration:run
 
       - name: run nest-server integration/e2e tests
