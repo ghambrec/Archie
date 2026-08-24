@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
 	selector: 'app-create-group-modal',
@@ -6,4 +7,9 @@ import { Component } from '@angular/core';
 	templateUrl: './create-group-modal.html',
 	styleUrl: './create-group-modal.scss',
 })
-export class CreateGroupModal { }
+export class CreateGroupModal {
+	protected readonly activeModal = inject(NgbModal);
+	
+ }
+	
+

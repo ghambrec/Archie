@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Req, Res, Session, UnauthorizedException, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { SessionCookieService } from './session/session-cookie.service';
@@ -17,6 +17,11 @@ export class AuthController {
     private readonly sessionCookieService: SessionCookieService,
   ) {}
 
+  @ApiOperation({
+    summary: 'Log in',
+    description:
+      'Authenticates a user with email and password, starts a new session, and sets the session cookie on the response.',
+  })
   @Post('login')
   async login(
     @Body() loginRequest: LoginRequestDto,
@@ -29,6 +34,11 @@ export class AuthController {
     return { id: user.id, email: user.email, displayName: user.displayName };
   }
 
+  @ApiOperation({
+    summary: 'Register a new user',
+    description:
+      'Creates a new user account, starts a session for it, and sets the session cookie on the response.',
+  })
   @Post('register')
   async register(
     @Body() registerRequest: RegisterRequestDto,
@@ -39,6 +49,10 @@ export class AuthController {
     this.sessionCookieService.set(res, sessionId);
   }
 
+  @ApiOperation({
+    summary: 'Log out',
+    description: 'Invalidates the current session and clears the session cookie.',
+  })
   @UseGuards(SessionAuthGuard)
   @Get('logout')
   async logout(
@@ -50,6 +64,10 @@ export class AuthController {
     this.sessionCookieService.clear(res);
   }
 
+  @ApiOperation({
+    summary: 'Get the current user',
+    description: 'Returns the profile of the user associated with the active session.',
+  })
   @UseGuards(SessionAuthGuard)
   @Get('me')
   async me(@Req() req: Request): Promise<UserSummaryDto> {
