@@ -4,7 +4,6 @@ from fastapi import APIRouter, HTTPException, Request
 from uuid import UUID
 
 from src.ingestion import ingestor
-from src.config import settings
 
 # , Depends, Request
 
@@ -44,7 +43,8 @@ async def ready_check(request: Request):
 async def ingest(doc_id: UUID, request: Request):
     """start ingestion pipeline"""
     pool = request.app.state.db_pool
-    await ingestor.ingest_doc(pool, doc_id)
+    minio = request.app.state.minio
+    await ingestor.ingest_doc(pool, minio, doc_id)
 
 
 # def GetAIService(request: Request) -> AIService:

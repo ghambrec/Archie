@@ -12,7 +12,6 @@ from src.chunking.chunker import chunk_text
 from src.embedding.embedder import embed
 from src.chunks_storage import ai_chunks
 from src.ingestion import status
-from src.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -24,15 +23,9 @@ async def get_object_key(pool: asyncpg.Pool, doc_id: UUID) -> str | None:
 
 async def ingest_doc(
     pool: asyncpg.Pool,
+    minio: MinioDocumentStore,
     doc_id: UUID
 ) -> None:
-    minio = MinioDocumentStore(
-        minio_endpoint=f"{settings.minio_endpoint}:{settings.minio_port}",
-        minio_access_key=f"{settings.minio_app_access_key}",
-        minio_secret_key=f"{settings.minio_app_secret_key}",
-        minio_secure=False
-    )
-
     try:
         await status.init_db_entry(pool, doc_id)
 
