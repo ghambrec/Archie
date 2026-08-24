@@ -72,10 +72,6 @@ jobs:
       REDIS_URL: redis://localhost:6379
       SESSION_TTL_SECONDS: 604800
       SESSION_COOKIE_NAME: session_id
-      MINIO_ROOT_USER: root-user
-      MINIO_ROOT_PASSWORD: root-user
-      MINIO_APP_ACCESS_KEY: root-user
-      MINIO_APP_SECRET_KEY: root-user
       MINIO_ENDPOINT: localhost
       MINIO_PORT: 9000
       MINIO_USE_SSL: false
