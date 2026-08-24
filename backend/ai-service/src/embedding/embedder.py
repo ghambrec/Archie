@@ -12,13 +12,3 @@ async def embed(text: str) -> list[float]:
         model=settings.ollama_embedding_model, input=text
     )
     return response.data[0].embedding
-
-
-if __name__ == "__main__":
-    import asyncio
-
-    vector = asyncio.run(embed("i am at the 42"))
-    print(len(vector))
-    print(vector[:10])
-
-# uv run python -m src.embedding.embedder
