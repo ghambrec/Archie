@@ -36,7 +36,7 @@ jobs:
       #   run: cd backend/nest-server && pnpm test
 
   Integration-Test:
-    needs: [Test-Backend, Test-Frontend]
+    needs: [Test-Backend]
     runs-on: ubuntu-latest
 
     env:
