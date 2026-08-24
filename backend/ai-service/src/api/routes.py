@@ -1,9 +1,9 @@
 """API routes for the AI Service."""
 
 from fastapi import APIRouter, HTTPException, Request
+from uuid import UUID
 
 from src.ingestion import ingestor
-from src.storage.minio import MinioDocumentStore
 from src.config import settings
 
 # , Depends, Request
@@ -40,17 +40,11 @@ async def ready_check(request: Request):
     return {"status": "ok"}
 
 
-@router.post("/ingest")
-async def ingest(request: Request):
+@router.post("/ingest/{doc_id}")
+async def ingest(doc_id: UUID, request: Request):
     """start ingestion pipeline"""
     pool = request.app.state.db_pool
-    minio = MinioDocumentStore(
-        minio_endpoint=f"{settings.minio_endpoint}:{settings.minio_port}",
-        minio_access_key=f"{settings.minio_app_access_key}",
-        minio_secret_key=f"{settings.minio_app_secret_key}",
-        minio_secure=False
-    )
-    await ingestor.ingest_doc(pool, minio, "ca7017c6-5be9-4a85-a270-4f0b3dc7ecda")
+    await ingestor.ingest_doc(pool, doc_id)
 
 
 # def GetAIService(request: Request) -> AIService:
