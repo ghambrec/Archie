@@ -1,9 +1,12 @@
-name: Archie Tests
+name: Tests Nest-Server Frontend
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
   pull_request:
     branches: [main]
-    paths: ['src/**']
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - '.github/workflows/github-actions-POV.yml'
 
 jobs:
   Test-Backend: 
