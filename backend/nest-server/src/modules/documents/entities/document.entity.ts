@@ -6,8 +6,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { DocumentStatus } from './document-status.enum';
-
 
 @Entity('documents')
 export class Document {
@@ -34,20 +32,6 @@ export class Document {
 
   @Column({ type: 'integer', name: 'page_count', nullable: true })
   pageCount!: number | null;
-
-  @Column({ type: 'text', name: 'ai_summary', nullable: true })
-  aiSummary!: string | null;
-
-  @Column({
-    type: 'enum',
-    enum: DocumentStatus,
-    name: 'status',
-    default: DocumentStatus.Uploaded,
-  })
-  status!: DocumentStatus;
-
-  @Column({ type: 'varchar', name: 'language', nullable: true })
-  language!: string | null;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
