@@ -60,9 +60,6 @@ jobs:
     needs: [Test-Backend, Test-Frontend]
     runs-on: ubuntu-latest
 
-    # Same throwaway values as env/.env.test, adapted for GH Actions service
-    # containers (hostnames become "localhost" since the job runs directly
-    # on the runner, not inside a container on the compose network).
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -72,8 +69,6 @@ jobs:
       NEST_SERVER_PORT: 3000
       NODE_ENV: test
       APP_PUBLIC_URL: http://localhost:3000
-      ADMIN_USER: admin@example.com
-      ADMIN_USER_PASSWORD: change-me
       REDIS_URL: redis://localhost:6379
       SESSION_TTL_SECONDS: 604800
       SESSION_COOKIE_NAME: session_id
@@ -115,10 +110,10 @@ jobs:
       minio-test:
         image: bitnamilegacy/minio:latest
         env:
-          MINIO_ROOT_USER: root-user
-          MINIO_ROOT_PASSWORD: root-user
-          # Auto-creates the buckets the compose-based minio-init-test step
-          # otherwise creates manually via `mc mb`.
+          MINIO_ROOT_USER: ${{ secrets.MINIO_ROOT_USER }}
+          MINIO_ROOT_PASSWORD: ${{ secrets.MINIO_ROOT_PASSWORD }}
+          MINIO_APP_ACCESS_KEY: ${{ secrets.MINIO_APP_ACCESS_KEY }}
+          MINIO_APP_SECRET_KEY: ${{ secrets.MINIO_APP_SECRET_KEY }}
           MINIO_DEFAULT_BUCKETS: documents,avatars
         ports:
           - 9000:9000
@@ -152,4 +147,12 @@ jobs:
         run: cd backend/nest-server && pnpm run migration:run
 
       - name: run nest-server integration/e2e tests
+        env:
+          MINIO_ROOT_USER: ${{ secrets.MINIO_ROOT_USER }}
+          MINIO_ROOT_PASSWORD: ${{ secrets.MINIO_ROOT_PASSWORD }}
+          MINIO_APP_ACCESS_KEY: ${{ secrets.MINIO_APP_ACCESS_KEY }}
+          MINIO_APP_SECRET_KEY: ${{ secrets.MINIO_APP_SECRET_KEY }}
+          ADMIN_USER: ${{ secrets.ADMIN_USER }}
+          ADMIN_USER_PASSWORD: ${{ secrets.ADMIN_USER_PASSWORD }}
+      
         run: cd backend/nest-server && pnpm run test:e2e
