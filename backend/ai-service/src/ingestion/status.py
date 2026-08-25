@@ -41,17 +41,18 @@ async def mark_as_processing(pool: asyncpg.Pool, doc_id: UUID) -> None:
     await pool.execute(update, doc_id)
 
 
-async def mark_as_finished(pool: asyncpg.Pool, doc_id: UUID) -> None:
+async def mark_as_finished(pool: asyncpg.Pool, doc_id: UUID, language: str | None) -> None:
     update = """
                 update ai_documents set
                     status = 'FINISHED',
+                    language = $2,
                     processed_at = now(),
                     updated_at = now()
                 where
                     id = $1
             """
 
-    await pool.execute(update, doc_id)
+    await pool.execute(update, doc_id, language)
 
 
 async def write_error(pool: asyncpg.Pool, doc_id: UUID, error_key: str, error_detail: str) -> None:

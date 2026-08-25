@@ -12,6 +12,7 @@ from src.chunking.chunker import chunk_text
 from src.embedding.embedder import embed
 from src.chunks_storage import ai_chunks
 from src.ingestion import status
+from src.ingestion.language import detect_language
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,8 @@ async def ingest_doc(
             raise ValueError(f"no object key found for doc_id {doc_id}")
 
         doc_text = await minio.GetDocumentText(obj_key)
+
+        language = detect_language(doc_text)
         chunks = chunk_text(doc_text)
 
         results: list[dict] = []
@@ -47,7 +50,7 @@ async def ingest_doc(
             logger.debug("chunk %s embedded (%s chars, %s dimensions)", index, len(content), len(embedding))
 
         await ai_chunks.save_chunks(pool, doc_id, results)
-        await status.mark_as_finished(pool, doc_id)
+        await status.mark_as_finished(pool, doc_id, language)
         logger.info("ingestion finished for doc: %s", doc_id)
 
     except ValueError as e:
