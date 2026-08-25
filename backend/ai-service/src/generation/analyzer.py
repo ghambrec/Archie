@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
-from pydantic_ai import Agent
+from pydantic_ai import Agent, NativeOutput
+
+from pydantic_ai.models.ollama import OllamaModel
 from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.providers.ollama import OllamaProvider
 from pydantic_ai.providers.openai import OpenAIProvider
 
-# from src.config import settings
 from src.config import settings
 
 
@@ -32,16 +34,14 @@ def _build_model() -> OpenAIChatModel:
                 api_key=settings.openrouter_api_key,
             ),
         )
-    return OpenAIChatModel(
+    return OllamaModel(
         settings.ollama_generation_model,
-        provider=OpenAIProvider(
-            base_url=f"{settings.ollama_host}/v1", api_key="ollama"
-        ),
+        provider=OllamaProvider(base_url=f"{settings.ollama_host}/v1")
     )
 
 
 model = _build_model()
-agent = Agent(model, system_prompt=SYSTEM_PROMPT, output_type=DocumentInfos)
+agent = Agent(model, system_prompt=SYSTEM_PROMPT, output_type=NativeOutput(DocumentInfos)) # fuynktioniert native output bei openrouter??
 
 # token cap to ca 2000
 _MAX_CHARS = 8000 
