@@ -1,11 +1,12 @@
 """API routes for the AI Service."""
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Security
 from uuid import UUID
 
+from src.api.auth import check_api_key
 from src.ingestion import status
 
-router = APIRouter()
+router = APIRouter(dependencies=[Security(check_api_key)])
 
 
 @router.post("/ingest/{doc_id}", status_code=202, tags=["queue"], summary="Queue document ingestion")
