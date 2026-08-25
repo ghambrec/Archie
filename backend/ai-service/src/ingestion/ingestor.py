@@ -13,6 +13,7 @@ from src.embedding.embedder import embed
 from src.chunks_storage import ai_chunks
 from src.ingestion import status
 from src.ingestion.language import detect_language
+from src.generation.analyzer import analyze_doc
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,9 @@ async def ingest_doc(
         doc_text = await minio.GetDocumentText(obj_key)
 
         language = detect_language(doc_text)
+        logger.info("> STARTED ANALYZING >>>>>>>>>>>>>>>>>>>>>>>>>")
+        await analyze_doc(doc_text, language)
+        logger.info("> ENDED ANALYZING >>>>>>>>>>>>>>>>>>>>>>>>>")
         chunks = chunk_text(doc_text)
 
         results: list[dict] = []
