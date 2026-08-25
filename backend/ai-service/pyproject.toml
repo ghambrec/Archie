@@ -16,3 +16,8 @@ dependencies = [
     "pydantic-settings>=2.15.0",
     "uvicorn>=0.52.3",
 ]
+
+[dependency-groups]
+dev = [
+    "watchfiles>=1.2.0",
+]

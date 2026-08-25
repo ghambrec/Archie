@@ -162,7 +162,7 @@ services:
       dockerfile: Dockerfile
     container_name: ai-service-worker
     restart: unless-stopped
-    command: ["uv", "run", "arq", "src.worker.WorkerSettings"]
+    command: ["uv", "run", "watchfiles", "uv run arq src.worker.WorkerSettings", "src"]
     volumes:
       - ./backend/ai-service:/app
       - ai-service-venv:/app/.venv
