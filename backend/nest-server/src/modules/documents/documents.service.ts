@@ -5,7 +5,6 @@ import { randomUUID, createHash } from 'crypto';
 import { Logger } from 'nestjs-pino';
 import { StorageService, DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS } from '../storage/storage.service';
 import { Document } from './entities/document.entity';
-import { DocumentStatus } from './entities/document-status.enum';
 import { UploadResponseDto } from './dto/upload-response.dto';
 import { GetDocumentsQueryDto } from './dto/get-documents-query.dto';
 import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
@@ -58,7 +57,6 @@ export class DocumentsService {
       objectKey: key,
       sizeBytes: file.size,
       sha256,
-      status: DocumentStatus.Uploaded,
     });
 
     const documentId = insertResult.identifiers[0].id as string;
@@ -80,7 +78,6 @@ export class DocumentsService {
         filename: true,
         mimeType: true,
         sizeBytes: true,
-        status: true,
         createdAt: true,
       },
       skip: (page - 1) * limit,
@@ -110,7 +107,6 @@ export class DocumentsService {
         filename: true,
         mimeType: true,
         sizeBytes: true,
-        status: true,
         createdAt: true,
       },
     });
