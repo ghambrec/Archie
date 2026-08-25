@@ -16,6 +16,7 @@ class Settings(BaseSettings):
 
     # --- APP
     ai_service_port: int
+    ai_service_api_key: str
 
     # --- DATABASE
     postgres_dsn: str

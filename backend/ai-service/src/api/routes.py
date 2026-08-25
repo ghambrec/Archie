@@ -1,28 +1,11 @@
 """API routes for the AI Service."""
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Request
 from uuid import UUID
 
 from src.ingestion import status
 
 router = APIRouter()
-
-
-@router.get("/health", tags=["app"])
-async def health_check():
-    """health check - checks for server running"""
-    return {"status": "ok"}
-
-
-@router.get("/ready", tags=["app"])
-async def ready_check(request: Request):
-    """ready check - checks for connection to database ready"""
-    pool = request.app.state.db_pool
-    try:
-        await pool.fetchval("SELECT 1")
-    except Exception as ex:
-        raise HTTPException(status_code=503, detail="database unavailable") from ex
-    return {"status": "ok"}
 
 
 @router.post("/ingest/{doc_id}", status_code=202, tags=["queue"], summary="Queue document ingestion")
