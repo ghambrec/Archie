@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
-from pydantic_ai import Agent, NativeOutput
+from pydantic_ai import Agent
 
-from src.generation.model import build_model
+from src.generation.model import build_model, get_output_type
 
 
 SYSTEM_PROMPT = """
@@ -22,7 +22,7 @@ class DocumentInfos(BaseModel):
 
 
 model = build_model()
-agent = Agent(model, system_prompt=SYSTEM_PROMPT, output_type=NativeOutput(DocumentInfos))  # fuynktioniert native output bei openrouter??
+agent = Agent(model, system_prompt=SYSTEM_PROMPT, output_type=get_output_type(DocumentInfos))
 
 # token cap to ca 2000
 _MAX_CHARS = 8000
