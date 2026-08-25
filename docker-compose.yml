@@ -3,10 +3,13 @@ services:
     image: pgvector/pgvector:pg18
     container_name: postgres
     restart: unless-stopped
+    ports:
+      - "5432:5432"
     env_file:
       - ./env/.env
     volumes:
       - postgres_data:/var/lib/postgresql
+      - ./backend/postgres-init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
@@ -54,7 +57,7 @@ services:
    volumes:
      - minio_data:/data
    healthcheck:
-     test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+     test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live || exit 1"]
      interval: 30s
      timeout: 5s
      retries: 5
@@ -84,26 +87,28 @@ services:
      - archie
 
   nest-server:
-    build:
-      context: ./backend/nest-server
-      dockerfile: Dockerfile
-    container_name: nest-server
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./backend/nest-server:/app
-      - nest-server-node-modules:/app/node_modules
-    networks:
-      - archie
-    env_file: "./env/.env"
-    depends_on:
-      postgres:
-        condition: service_healthy
-        restart: true
-      redis:
-        condition: service_healthy
-        restart: true
+   build:
+     context: ./backend/nest-server
+     dockerfile: Dockerfile
+   container_name: nest-server
+   restart: unless-stopped
+   ports:
+     - "3000:3000"
+   volumes:
+     - ./backend/nest-server:/app
+     - nest-server-node-modules:/app/node_modules
+   networks:
+     - archie
+   env_file: "./env/.env"
+   depends_on:
+     postgres:
+       condition: service_healthy
+       restart: true
+     redis:
+       condition: service_healthy
+       restart: true
+    #  ai-service:
+    #    condition: service_healthy
 
   frontend:
     build:
@@ -121,6 +126,89 @@ services:
     depends_on:
       - nest-server
 
+  ai-service:
+    build:
+      context: ./backend/ai-service
+      dockerfile: Dockerfile
+    container_name: ai-service
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./backend/ai-service:/app
+      - ai-service-venv:/app/.venv
+    networks:
+      - archie
+    env_file: "./env/.env"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:5001/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      ollama-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  ai-service-worker:
+    build:
+      context: ./backend/ai-service
+      dockerfile: Dockerfile
+    container_name: ai-service-worker
+    restart: unless-stopped
+    command: ["uv", "run", "arq", "src.worker.WorkerSettings"]
+    volumes:
+      - ./backend/ai-service:/app
+      - ai-service-venv:/app/.venv
+    networks:
+      - archie
+    env_file: "./env/.env"
+    depends_on:
+      ai-service:
+        condition: service_healthy
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    env_file: "./env/.env"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - archie
+      
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+    env_file: "./env/.env"
+    entrypoint: >
+      /bin/sh -c "
+      ollama pull \"$$OLLAMA_GENERATION_MODEL\" &&
+      ollama pull \"$$OLLAMA_VISION_MODEL\" &&
+      ollama pull \"$$OLLAMA_EMBEDDING_MODEL\" &&
+      echo 'ollama modules pulled'
+      "
+    networks:
+      - archie
+
 networks:
   archie:
     driver: bridge
@@ -131,3 +219,5 @@ volumes:
   minio_data:
   nest-server-node-modules:
   frontend-node-modules:
+  ollama_data:
+  ai-service-venv:
