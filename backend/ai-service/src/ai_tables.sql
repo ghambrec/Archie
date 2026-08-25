@@ -26,18 +26,19 @@ CREATE TABLE IF NOT EXISTS ai_chunks (
 CREATE INDEX IF NOT EXISTS ai_chunks_ai_document_id_idx ON ai_chunks (ai_document_id);
 CREATE INDEX IF NOT EXISTS ai_chunks_embedding_hnsw_idx ON ai_chunks USING hnsw (embedding vector_cosine_ops);
 
--- CREATE TABLE IF NOT EXISTS ai_tags (
--- 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
--- 	name VARCHAR(100) NOT NULL UNIQUE,
--- 	label VARCHAR(150) NOT NULL,
--- 	description VARCHAR(500),
--- 	created_at TIMESTAMPTZ NOT NULL DEFAULT now()
--- );
+CREATE TABLE IF NOT EXISTS ai_tags (
+	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	name VARCHAR(50) NOT NULL UNIQUE,
+	parent_id UUID REFERENCES ai_tags(id) ON DELETE SET NULL,
+	-- label VARCHAR(150) NOT NULL,
+	-- description VARCHAR(500),
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 
--- CREATE TABLE IF NOT EXISTS ai_document_tags (
--- 	ai_document_id UUID NOT NULL REFERENCES ai_documents(id) ON DELETE CASCADE,
--- 	ai_tag_id UUID NOT NULL REFERENCES ai_tags(id) ON DELETE CASCADE,
--- 	confidence REAL NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
--- 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
--- 	PRIMARY KEY (ai_document_id, ai_tag_id)
--- );
+CREATE TABLE IF NOT EXISTS ai_document_tags (
+	ai_document_id UUID NOT NULL REFERENCES ai_documents(id) ON DELETE CASCADE,
+	ai_tag_id UUID NOT NULL REFERENCES ai_tags(id) ON DELETE CASCADE,
+	confidence REAL NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+	PRIMARY KEY (ai_document_id, ai_tag_id)
+);
