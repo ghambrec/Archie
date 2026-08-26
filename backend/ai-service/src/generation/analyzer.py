@@ -42,10 +42,13 @@ SYSTEM_PROMPT = """
                     doesn't exist yet. Examples:
                         car insurance policy            -> vehicles + insurance + contract
                         invoice from that same insurer  -> vehicles + insurance + invoice
-                        electricity bill                -> housing + utilities + invoice
+                        electricity bill                -> utilities + invoice
                         payspli                         -> work + statement
                         vaccination record              -> health + certificate
                         flight booking                  -> travel + ticket
+
+                    When both a broad domain tag and one of its more specific children apply, use only the more specific child - never assign a 
+                    tag together with its own parent.
 
                     Never invent a tag that merges two facets ('vehicle-insurance') or that names a specific company, product, person, date or amount.
                     Only propose a new tag if no existing combination fits at all - it must declare its facet and may nest under an existing domain tag as parent.
@@ -68,8 +71,16 @@ _MAX_CHARS = 8000
 def _format_tags(tags: list[dict]) -> str:
     domain = [t for t in tags if t["facet"] == "domain"]
     doctype = [t for t in tags if t["facet"] == "doctype"]
+
+    # domain
     lines = ["Domain tags:"]
-    lines += [f"- {t['name']} ({t['description']})" for t in domain]
+    for t in domain:
+        if t["parent_name"]:
+            lines.append(f"- {t['name']} ({t['description']}) - parent: {t['parent_name']}")
+        else:
+            lines.append(f"- {t['name']} ({t['description']})")
+
+    # doctype
     lines.append("Doctype tags:")
     lines += [f"- {t['name']} ({t['description']})" for t in doctype]
     return "\n".join(lines)

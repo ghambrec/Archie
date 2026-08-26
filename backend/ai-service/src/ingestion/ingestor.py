@@ -26,7 +26,13 @@ async def get_object_key(pool: asyncpg.Pool, doc_id: UUID) -> str | None:
 
 
 async def get_tags(pool: asyncpg.Pool) -> list[dict]:
-    select = "select id, name, label, description, facet from ai_tags order by facet, name"
+    select = """
+                select t.id, t.name, t.label, t.description, t.facet, p.name as parent_name
+                from ai_tags t
+                left join ai_tags p
+                    on p.id = t.parent_id
+                order by t.facet, t.name
+            """
     rows = await pool.fetch(select)
     return [dict(row) for row in rows]
 
