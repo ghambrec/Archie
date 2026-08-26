@@ -19,6 +19,7 @@ class Tags(BaseModel):
                                                         always null when reusing an existing tag.
                                                         """
                                )
+    description: str | None = Field(default=None, description="Only set when creating a new tag not listet in the existing tag list. Describe here why you created this tag and what this tag is about.")
 # wie gut funktioniert das mit der confidence?
 
 class DocumentInfos(BaseModel):
