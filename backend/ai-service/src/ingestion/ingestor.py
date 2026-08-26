@@ -54,14 +54,14 @@ async def write_llm_data(pool: asyncpg.Pool, doc_id: UUID, data: DocumentInfos, 
             parent_id = lookup_map.get(ai_tag.parent.strip().lower()) if ai_tag.parent else None
             insert_tag = """
                             insert into ai_tags (name, label, description, facet, parent_id)
-                            values ($1, $1, $2, $3)
+                            values ($1, $1, $2, $3, $4)
                             on conflict (name) do nothing
                             returning id
                         """
-            new_tag_id = await pool.execute(insert_tag, ai_tag.name, ai_tag.description, ai_tag.facet, parent_id)
-            if new_tag_id is None:
-                new_tag_id = await pool.fetchval("select id from ai_tags where name = $1", ai_tag.name)
-            lookup_map[name] = new_tag_id
+            tag_id = await pool.fetchval(insert_tag, ai_tag.name, ai_tag.description, ai_tag.facet, parent_id)
+            if tag_id is None:
+                tag_id = await pool.fetchval("select id from ai_tags where name = $1", ai_tag.name)
+            lookup_map[name] = tag_id
 
         # write in ai_document_tag table
         insert_doc_tag = "insert into ai_document_tags (ai_document_id, ai_tag_id, confidence) values ($1, $2, $3)"

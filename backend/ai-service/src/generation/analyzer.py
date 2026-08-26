@@ -96,5 +96,5 @@ async def analyze_doc(text: str, language: str | None, tags: list[dict]) -> Docu
     result = await agent.run(prompt)
     logger.debug(f">>> SUMMARY: {result.output.summary}")
     for tag in result.output.tags:
-        logger.debug(f"     - {tag.name,} confidence: {tag.confidence}, parent: {tag.parent}")
+        logger.debug(f"     - {tag.name}, confidence: {tag.confidence}, parent: {tag.parent}")
     return result.output
