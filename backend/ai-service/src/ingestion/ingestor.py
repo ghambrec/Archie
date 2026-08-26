@@ -83,11 +83,10 @@ async def ingest_doc(
         doc_text = await minio.GetDocumentText(obj_key)
 
         language = detect_language(doc_text)
-        logger.info("> STARTED ANALYZING >>>>>>>>>>>>>>>>>>>>>>>>>")
+
         tags = await get_tags(pool)
         doc_infos = await analyze_doc(doc_text, language, tags)
         await write_llm_data(pool, doc_id, doc_infos, tags)
-        logger.info("> ENDED ANALYZING >>>>>>>>>>>>>>>>>>>>>>>>>")
 
         chunks = chunk_text(doc_text)
         results: list[dict] = []

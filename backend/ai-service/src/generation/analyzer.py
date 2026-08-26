@@ -1,6 +1,7 @@
 """analyzes the document and creates ai_summary and tags"""
 
 from __future__ import annotations
+import logging
 
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent
@@ -8,6 +9,8 @@ from pydantic_ai.settings import ModelSettings
 from typing import Literal
 
 from src.generation.model import build_model, get_output_type
+
+logger = logging.getLogger(__name__)
 
 
 class Tags(BaseModel):
@@ -21,7 +24,7 @@ class Tags(BaseModel):
                                                         """
                                )
     description: str | None = Field(default=None, description="Only set when creating a new tag not listet in the existing tag list. Describe here why you created this tag and what this tag is about.")
-# wie gut funktioniert das mit der confidence?
+
 
 class DocumentInfos(BaseModel):
     summary: str = Field(description="2-4 sentence summary of what the document is about. its prupose, key facts, parties involved. never mention or list the choosen tags")
@@ -89,9 +92,9 @@ def _format_tags(tags: list[dict]) -> str:
 async def analyze_doc(text: str, language: str | None, tags: list[dict]) -> DocumentInfos:
     text_snippet = text[:_MAX_CHARS]
     prompt = f"Language: {language}\n\nExisting Tags:\n{_format_tags(tags)}\n\nDocument:\n{text_snippet}"
-    print(f">>> PROMPT:\n{prompt}")
+    logger.debug(f">>> PROMPT:\n{prompt}")
     result = await agent.run(prompt)
-    print(f">>> SUMMARY: {result.output.summary}")
+    logger.debug(f">>> SUMMARY: {result.output.summary}")
     for tag in result.output.tags:
-        print(f"     - {tag.name,} confidence: {tag.confidence}, parent: {tag.parent}")
+        logger.debug(f"     - {tag.name,} confidence: {tag.confidence}, parent: {tag.parent}")
     return result.output
