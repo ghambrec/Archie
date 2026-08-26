@@ -57,9 +57,20 @@ agent = Agent(model, system_prompt=SYSTEM_PROMPT, output_type=get_output_type(Do
 _MAX_CHARS = 8000
 
 
-async def analyze_doc(text: str, language: str | None) -> None:
+def _format_tags(tags: list[dict]) -> str:
+    domain = [t for t in tags if t["facet"] == "domain"]
+    doctype = [t for t in tags if t["facet"] == "doctype"]
+    lines = ["Domain tags:"]
+    lines += [f"- {t['name']} ({t['description']})" for t in domain]
+    lines.append("Doctype tags:")
+    lines += [f"- {t['name']} ({t['description']})" for t in doctype]
+    return "\n".join(lines)
+
+
+async def analyze_doc(text: str, language: str | None, tags: list[dict]) -> None:
     text_snippet = text[:_MAX_CHARS]
-    prompt = f"Language: {language}\n\nDocument: {text_snippet}"
+    prompt = f"Language: {language}\n\nExisting Tags:\n{_format_tags(tags)}\n\nDocument:\n{text_snippet}"
+    print(f">>> PROMPT:\n{prompt}")
     result = await agent.run(prompt)
     print(f">>> SUMMARY: {result.output.summary}")
     for tag in result.output.tags:

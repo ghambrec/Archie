@@ -23,6 +23,12 @@ async def get_object_key(pool: asyncpg.Pool, doc_id: UUID) -> str | None:
     return await pool.fetchval(select, doc_id)
 
 
+async def get_tags(pool: asyncpg.Pool) -> list[dict]:
+    select = "select name, label, description, facet from ai_tags order by facet, name"
+    rows = await pool.fetch(select)
+    return [dict(row) for row in rows]
+
+
 async def ingest_doc(
     pool: asyncpg.Pool,
     minio: MinioDocumentStore,
@@ -39,7 +45,8 @@ async def ingest_doc(
 
         language = detect_language(doc_text)
         logger.info("> STARTED ANALYZING >>>>>>>>>>>>>>>>>>>>>>>>>")
-        await analyze_doc(doc_text, language)
+        tags = await get_tags(pool)
+        await analyze_doc(doc_text, language, tags)
         logger.info("> ENDED ANALYZING >>>>>>>>>>>>>>>>>>>>>>>>>")
         chunks = chunk_text(doc_text)
 
