@@ -6,7 +6,6 @@ import { UsersModule } from './modules/users/users.module';
 import { GroupsModule } from './modules/groups/groups.module';
 import { PermissionsModule } from './modules/permissions/permissions.module';
 import { UserGroupsModule } from './modules/user-groups/user-groups.module';
-import { GroupPermissionsModule } from './modules/group-permissions/group-permissions.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { DocumentGroupsModule } from './modules/document-groups/document-groups.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -15,6 +14,7 @@ import { GroupsController } from './modules/groups/groups.controller';
 import { AppLoggerModule } from './logger/app-logger.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { ConfigModule, ConfigType } from '@nestjs/config';
+import { UserPermissionModule } from './modules/user_permission/user_permission.module';
 import authConfig from './config/auth.config';
 import redisConfig from './config/redis.config';
 import storageConfig from './config/storage.config';
@@ -54,13 +54,13 @@ import databaseConfig from './config/database.config';
     GroupsModule,
     PermissionsModule,
     UserGroupsModule,
-    GroupPermissionsModule,
     DocumentsModule,
     DocumentGroupsModule,
     RedisModule,
     AuthModule,
     AppLoggerModule,
     StorageModule,
+    UserPermissionModule,
   ],
   controllers: [AppController, GroupsController],
   providers: [AppService],

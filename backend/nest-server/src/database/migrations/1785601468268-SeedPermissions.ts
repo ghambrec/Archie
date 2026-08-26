@@ -11,9 +11,6 @@ export class SeedPermissions1785601468268 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-      DELETE FROM "group_permission"
-      WHERE "group_id" IN (SELECT "id" FROM "groups" WHERE "name" = 'Admin')
-    `);
+    await queryRunner.query(`DELETE FROM "groups" WHERE "name" = 'Admin'`);
   }
 }

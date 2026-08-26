@@ -59,12 +59,16 @@ export class InitSchema1785163997067 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      CREATE TABLE IF NOT EXISTS "group_permission" (
+      CREATE TABLE IF NOT EXISTS "user_permission" (
+        "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+        "user_id" uuid NOT NULL,
         "group_id" uuid NOT NULL,
         "permission_id" uuid NOT NULL,
-        CONSTRAINT "PK_group_permission" PRIMARY KEY ("group_id", "permission_id"),
-        CONSTRAINT "FK_group_permission_group" FOREIGN KEY ("group_id") REFERENCES "groups" ("id") ON DELETE CASCADE,
-        CONSTRAINT "FK_group_permission_permission" FOREIGN KEY ("permission_id") REFERENCES "permissions" ("id") ON DELETE CASCADE
+        CONSTRAINT "PK_user_permission" PRIMARY KEY ("id"),
+        CONSTRAINT "UQ_user_permission_user_group_permission" UNIQUE ("user_id", "group_id", "permission_id"),
+        CONSTRAINT "FK_user_permission_user" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE,
+        CONSTRAINT "FK_user_permission_group" FOREIGN KEY ("group_id") REFERENCES "groups" ("id") ON DELETE CASCADE,
+        CONSTRAINT "FK_user_permission_permission" FOREIGN KEY ("permission_id") REFERENCES "permissions" ("id") ON DELETE CASCADE
       )
     `);
 
@@ -100,7 +104,7 @@ export class InitSchema1785163997067 implements MigrationInterface {
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`DROP TABLE "document_groups"`);
     await queryRunner.query(`DROP TABLE "documents"`);
-    await queryRunner.query(`DROP TABLE "group_permission"`);
+    await queryRunner.query(`DROP TABLE "user_permission"`);
     await queryRunner.query(`DROP TABLE "user_groups"`);
     await queryRunner.query(`DROP TABLE "permissions"`);
     await queryRunner.query(`DROP TABLE "groups"`);
