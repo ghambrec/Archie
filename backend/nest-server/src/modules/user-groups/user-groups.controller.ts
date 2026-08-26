@@ -24,7 +24,7 @@ export class UserGroupsController {
     @Body() dto: AddMemberDto,
     @Req() req: Request,
   ) {
-    return this.userGroupsService.add(dto.userId, groupId, req.userId );
+    return this.userGroupsService.add(dto.userId, groupId, req.userId! );
   }
 
   @Delete('groups/:groupId/members/:userId')
@@ -61,7 +61,7 @@ export class UserGroupsController {
   async getMyGroups(
     @Req() req: Request,
   ): Promise<GetGroupsByUserIdResponseDto> {
-    return this.userGroupsService.getMyGroups(req.userId);
+    return this.userGroupsService.getMyGroups(req.userId!);
   }
 }
 
