@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent
+from pydantic_ai.settings import ModelSettings
 from typing import Literal
 
 from src.generation.model import build_model, get_output_type
@@ -52,7 +53,13 @@ SYSTEM_PROMPT = """
                 """
 
 model = build_model()
-agent = Agent(model, system_prompt=SYSTEM_PROMPT, output_type=get_output_type(DocumentInfos))
+agent = Agent(
+    model, 
+    system_prompt=SYSTEM_PROMPT, 
+    output_type=get_output_type(DocumentInfos),
+    model_settings=ModelSettings(temperature=0.5),
+    retries={"output": 3}
+    )
 
 # token cap to ca 2000
 _MAX_CHARS = 8000

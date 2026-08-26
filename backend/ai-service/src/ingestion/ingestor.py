@@ -4,6 +4,7 @@ import logging
 import asyncpg
 import urllib3.exceptions
 from minio.error import MinioException
+from pydantic_ai import UnexpectedModelBehavior
 
 from uuid import UUID
 
@@ -108,6 +109,10 @@ async def ingest_doc(
     except (urllib3.exceptions.MaxRetryError, urllib3.exceptions.NewConnectionError) as e:
         logger.exception("minio not reachable during ingest for doc %s", doc_id)
         await status.write_error(pool, doc_id, "minio_connection", str(e))
+
+    except UnexpectedModelBehavior as e:
+        logger.exception("llm output validation failed for doc %s", doc_id)
+        await status.write_error(pool, doc_id, "llm_error", str(e))
 
     except Exception as e:
         logger.exception("unexpected error during ingest for doc: %s [%s]: %s", doc_id, type(e).__name__, str(e))
