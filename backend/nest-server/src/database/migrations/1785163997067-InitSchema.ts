@@ -73,10 +73,6 @@ export class InitSchema1785163997067 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      CREATE TYPE "documents_status_enum" AS ENUM ('UPLOADED', 'PROCESSING', 'READY', 'FAILED')
-    `);
-
-    await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "documents" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
         "uploaded_by" uuid NOT NULL,
@@ -86,9 +82,6 @@ export class InitSchema1785163997067 implements MigrationInterface {
         "size_bytes" bigint NOT NULL,
         "sha256" varchar NOT NULL,
         "page_count" integer,
-        "ai_summary" text,
-        "status" "documents_status_enum" NOT NULL DEFAULT 'UPLOADED',
-        "language" varchar,
         "created_at" timestamptz NOT NULL DEFAULT now(),
         "updated_at" timestamptz NOT NULL DEFAULT now(),
         "deleted_at" timestamptz,
@@ -111,7 +104,6 @@ export class InitSchema1785163997067 implements MigrationInterface {
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`DROP TABLE "document_groups"`);
     await queryRunner.query(`DROP TABLE "documents"`);
-    await queryRunner.query(`DROP TYPE "documents_status_enum"`);
     await queryRunner.query(`DROP TABLE "user_permission"`);
     await queryRunner.query(`DROP TABLE "user_groups"`);
     await queryRunner.query(`DROP TABLE "permissions"`);

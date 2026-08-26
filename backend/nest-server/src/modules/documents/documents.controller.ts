@@ -30,6 +30,10 @@ import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
+  @ApiOperation({
+    summary: 'Upload a document',
+    description: 'Uploads a file and stores it as a new document owned by the current user.',
+  })
   @UseGuards(SessionAuthGuard)
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
@@ -56,6 +60,10 @@ export class DocumentsController {
     return this.documentsService.upload(req.userId!, file);
   }
 
+  @ApiOperation({
+    summary: 'List documents',
+    description: "Returns a paginated, filterable list of the current user's documents.",
+  })
   @UseGuards(SessionAuthGuard)
   @Get()
   async findAll(
@@ -65,12 +73,20 @@ export class DocumentsController {
     return this.documentsService.findAll(req.userId!, query);
   }
 
+  @ApiOperation({
+    summary: 'Get a document',
+    description: 'Returns the metadata summary of a single document by its ID.',
+  })
   @UseGuards(SessionAuthGuard)
   @Get(':id')
   async findOne(@Req() req: Request, @Param('id') id: string): Promise<DocumentSummaryDto> {
     return this.documentsService.findOne(req.userId!, id);
   }
 
+  @ApiOperation({
+    summary: 'Assign a document to a group',
+    description: 'Sets or changes the group that owns the given document.',
+  })
   @UseGuards(SessionAuthGuard)
   @Post(':id/group')
   async setGroup(
@@ -81,6 +97,10 @@ export class DocumentsController {
     return this.documentsService.setGroup(req.userId!, documentId, dto.groupId);
   }
 
+  @ApiOperation({
+    summary: '[Don\'t use it] Get a document download URL',
+    description: 'Returns a short-lived, pre-signed URL for downloading the document directly.',
+  })
   @UseGuards(SessionAuthGuard)
   @Get(':id/download-url')
   async getDownloadUrl(
@@ -92,7 +112,10 @@ export class DocumentsController {
 
   @UseGuards(SessionAuthGuard)
   @Get(':id/download')
-  @ApiOperation({ summary: 'Stream the document file contents' })
+  @ApiOperation({
+    summary: 'Download a document',
+    description: 'Streams the raw file contents of the document as an attachment.',
+  })
   async download(
     @Req() req: Request,
     @Param('id') id: string,

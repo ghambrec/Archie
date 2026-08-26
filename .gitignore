@@ -7,12 +7,24 @@ dist/
 __pycache__/
 .venv/
 .DS_Store
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+.coverage
+.ruff_cache/
 
 # --- backend ---
 backend/nest-server/dist/
 backend/nest-server/node_modules/
 # backend/nest-server/generated/prisma
 backend/nest-server/.pnpm-store
+backend/ai-service/__pycache__/
+backend/ai-service/.venv/
+backend/ai-service/venv/
 
 /docs
 /.pnpm-store
