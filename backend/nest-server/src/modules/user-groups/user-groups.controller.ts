@@ -22,7 +22,7 @@ export class UserGroupsController {
   async addMember(
     @Param('groupId') groupId: string,
     @Body() dto: AddMemberDto,
-    @Req() req: Request & { userId: string },
+    @Req() req: Request,
   ) {
     return this.userGroupsService.add(dto.userId, groupId, req.userId );
   }
@@ -59,7 +59,7 @@ export class UserGroupsController {
     description: 'This endpoint fetches all groups that the user you are currently logged-in with is a member of.'
   })
   async getMyGroups(
-    @Req() req: Request & { userId: string },
+    @Req() req: Request,
   ): Promise<GetGroupsByUserIdResponseDto> {
     return this.userGroupsService.getMyGroups(req.userId);
   }
