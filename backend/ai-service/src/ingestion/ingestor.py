@@ -14,6 +14,7 @@ from src.chunks_storage import ai_chunks
 from src.ingestion import status
 from src.ingestion.language import detect_language
 from src.generation.analyzer import analyze_doc
+from src.generation.analyzer import DocumentInfos
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +28,11 @@ async def get_tags(pool: asyncpg.Pool) -> list[dict]:
     select = "select name, label, description, facet from ai_tags order by facet, name"
     rows = await pool.fetch(select)
     return [dict(row) for row in rows]
+
+
+async def write_llm_data(pool: asyncpg.Pool, doc_id: UUID, data: DocumentInfos) -> None:
+    update_summary = "update ai_documents set ai_summary = $2 where id = $1"
+    await pool.execute(update_summary, doc_id, data.summary)
 
 
 async def ingest_doc(
@@ -46,7 +52,8 @@ async def ingest_doc(
         language = detect_language(doc_text)
         logger.info("> STARTED ANALYZING >>>>>>>>>>>>>>>>>>>>>>>>>")
         tags = await get_tags(pool)
-        await analyze_doc(doc_text, language, tags)
+        doc_infos = await analyze_doc(doc_text, language, tags)
+        await write_llm_data(pool, doc_id, doc_infos)
         logger.info("> ENDED ANALYZING >>>>>>>>>>>>>>>>>>>>>>>>>")
         chunks = chunk_text(doc_text)
 

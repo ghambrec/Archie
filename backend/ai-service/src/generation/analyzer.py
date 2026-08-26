@@ -67,7 +67,7 @@ def _format_tags(tags: list[dict]) -> str:
     return "\n".join(lines)
 
 
-async def analyze_doc(text: str, language: str | None, tags: list[dict]) -> None:
+async def analyze_doc(text: str, language: str | None, tags: list[dict]) -> DocumentInfos:
     text_snippet = text[:_MAX_CHARS]
     prompt = f"Language: {language}\n\nExisting Tags:\n{_format_tags(tags)}\n\nDocument:\n{text_snippet}"
     print(f">>> PROMPT:\n{prompt}")
@@ -75,3 +75,4 @@ async def analyze_doc(text: str, language: str | None, tags: list[dict]) -> None
     print(f">>> SUMMARY: {result.output.summary}")
     for tag in result.output.tags:
         print(f"     - {tag.name,} confidence: {tag.confidence}, parent: {tag.parent}")
+    return result.output
