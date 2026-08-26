@@ -3,6 +3,12 @@
 import logging
 from uvicorn.logging import DefaultFormatter
 
+# LOGGER SETTINGS
+handler = logging.StreamHandler()
+handler.setFormatter(DefaultFormatter("%(levelprefix)s %(name)s: %(message)s"))
+logging.basicConfig(level=logging.INFO, handlers=[handler])
+logger = logging.getLogger(__name__)
+
 from uuid import UUID
 from arq import func
 from arq.connections import RedisSettings
@@ -12,11 +18,6 @@ from src.db import create_pool
 from src.ingestion import ingestor
 from src.storage.minio import MinioDocumentStore
 
-# LOGGER SETTINGS
-handler = logging.StreamHandler()
-handler.setFormatter(DefaultFormatter("%(levelprefix)s %(name)s: %(message)s"))
-logging.basicConfig(level=logging.INFO, handlers=[handler])
-logger = logging.getLogger(__name__)
 
 # FUNCTIONS
 
