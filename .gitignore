@@ -31,3 +31,4 @@ backend/ai-service/venv/
 /node_modules
 frontend/.pnpm-store
 /notesForCedric.md
+/TODO.md
