@@ -8,8 +8,10 @@ from arq import create_pool as arq_create_pool
 from arq.connections import RedisSettings
 
 from src.config import settings
-from src.api.routes import router as api_router
 from src.db import create_pool
+
+from src.api.health import router as health_router
+from src.api.routes import router as api_router
 
 logger = logging.getLogger(__name__)
 
@@ -35,4 +37,5 @@ app = FastAPI(
     swagger_ui_parameters={"defaultModelsExpandDepth": -1}
 )
 
+app.include_router(health_router)
 app.include_router(api_router)
