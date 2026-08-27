@@ -56,6 +56,9 @@ jobs:
       MINIO_USE_SSL: false
       AUTH_MAX_LOGIN_ATTEMPTS: 5
       AUTH_LOGIN_LOCKOUT_SECONDS: 900
+      AI_SERVICE_HOST:ai-service-test
+      AI_SERVICE_PORT:5001
+      AI_SERVICE_API_KEY:test-ai-service-key
 
     services:
       postgres-test:
