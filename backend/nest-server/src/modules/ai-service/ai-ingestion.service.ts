@@ -14,23 +14,19 @@ export class AiIngestionService {
   async triggerIngestion(documentId: string): Promise<void> {
     const url = `http://${this.config.host}:${this.config.port}/ingest/${documentId}`;
 
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'X-API-KEY': this.config.apiKey },
-      });
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'X-API-KEY': this.config.apiKey },
+    });
 
-      if (!response.ok) {
-        this.logger.error(
-          { documentId, status: response.status },
-          'AI service rejected ingestion request',
-        );
-        return;
-      }
-
-      this.logger.log({ documentId }, 'Ingestion job queued');
-    } catch (error) {
-      this.logger.error({ documentId, error }, 'Failed to reach AI service for ingestion');
+    if (!response.ok) {
+      this.logger.error(
+        { documentId, status: response.status },
+        'AI service rejected ingestion request',
+      );
+      return;
     }
+
+    this.logger.log({ documentId }, 'Ingestion job queued');
   }
 }
