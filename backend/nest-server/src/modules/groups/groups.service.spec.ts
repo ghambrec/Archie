@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GroupsService } from './groups.service';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Group } from './entities/group.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
@@ -39,6 +39,7 @@ describe('GroupsService', () => {
     userGroupRepo = module.get(getRepositoryToken(UserGroup));
   });
 
+  //create
   it('create() should create a group and return it', async () => {
     //Arrange
     const dto = { name: 'Test', description: 'Desc' };
@@ -74,8 +75,68 @@ describe('GroupsService', () => {
   it('should reject when group does not exist', async () => {
     repo.findOneBy.mockResolvedValue(null);
 
-    await expect
+    await expect(service.get('g1')).rejects.toThrow(NotFoundException);
+  });
+
+  it('shoul reject system groups', async () => {
+    repo.findOneBy.mockResolvedValue(
+      createMockGroup({ id: 'g1', isSystem: true }),
+    );
+
+    await expect(service.get('g1')).rejects.toThrow(NotFoundException);
+  });
+
+  // getByNameOrFail
+  it('getByNameOrFail() should return group when found', async () => {
+    const group = createMockGroup({ id: 'g1', name: 'Test' });
+    repo.findOneBy.mockResolvedValue(group);
+    const result = await service.getByNameOrFail('Test');
+    expect(result).toEqual(new GroupsResponseDto(group));
   })
+
+  it('getByNameOrFail() should throw if not found', async () => {
+    repo.findOneBy.mockResolvedValue(null);
+    await expect(service.getByNameOrFail('Missing')).rejects.toThrow(NotFoundException);
+  })
+
+  it('getByNameOrFail() should throw if system group', async () => {
+    await expect(service.getByNameOrFail('System')).rejects.toThrow(NotFoundException);
+  })
+
+  // findAll()
+  it('should fetch only regular groups', async () => {
+    repo.find.mockResolvedValue([]);
+
+    await service.findAll();
+
+    expect(repo.find).toHaveBeenCalledWith({
+      where: { isSystem: false },
+    });
+  });
+
+  //update
+  it('should reject an already-userd new name', async () => {
+    const existingGroup = createMockGroup({
+      id: 'g1',
+      name: 'Old name',
+    });
+
+    const conflictingGroup = createMockGroup({
+      id: 'g2',
+      name: 'Name taken',
+    });
+
+    repo.findOneBy.mockResolvedValueOnce(existingGroup).mockRejectedValueOnce(conflictingGroup);
+
+    await expect(
+      service.update('g1', { name: 'Taken name' }),
+    ).rejects.toThrow(NotFoundException);
+
+    expect(repo.update).not.toHaveBeenCalled();
+  });
+
+  //deleteGroup
+
 
 });
 
