@@ -126,8 +126,7 @@ describe('GroupsService', () => {
       name: 'Name taken',
     });
 
-    repo.findOneBy.mockResolvedValueOnce(existingGroup).mockRejectedValueOnce(conflictingGroup);
-
+    repo.findOneBy.mockResolvedValueOnce(existingGroup).mockResolvedValueOnce(conflictingGroup);
     await expect(
       service.update('g1', { name: 'Taken name' }),
     ).rejects.toThrow(NotFoundException);
@@ -136,7 +135,7 @@ describe('GroupsService', () => {
   });
 
   //deleteGroup
-
+  
 
 });
 
