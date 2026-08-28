@@ -16,6 +16,7 @@ import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
 import { GroupsService } from '../groups/groups.service';
 import { DocumentGroupsService } from '../document-groups/document-groups.service';
+import { AiIngestionService } from '../ai-service/ai-ingestion.service';
 
 const DOCUMENTS_BUCKET = 'documents';
 
@@ -27,6 +28,7 @@ export class DocumentsService {
     private readonly documentsRepository: Repository<Document>,
     private readonly groupsService: GroupsService,
     private readonly documentGroupsService: DocumentGroupsService,
+    private readonly aiIngestionService: AiIngestionService,
     private readonly logger: Logger,
   ) {}
 
@@ -62,6 +64,8 @@ export class DocumentsService {
     const documentId = insertResult.identifiers[0].id as string;
 
     this.logger.log({ documentId }, 'Document uploaded successfully');
+
+    await this.aiIngestionService.triggerIngestion(documentId);
 
     return { id: documentId, objectKey: key };
   }

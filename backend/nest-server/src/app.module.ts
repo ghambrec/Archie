@@ -19,6 +19,7 @@ import authConfig from './config/auth.config';
 import redisConfig from './config/redis.config';
 import storageConfig from './config/storage.config';
 import databaseConfig from './config/database.config';
+import aiServiceConfig from './config/ai-service.config';
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import databaseConfig from './config/database.config';
         authConfig,
         databaseConfig,
         redisConfig,
-        storageConfig
+        storageConfig,
+        aiServiceConfig
         ],
     }),
     TypeOrmModule.forRootAsync({
