@@ -3,7 +3,7 @@ import { GroupsService } from './groups.service';
 import { Not, Repository } from 'typeorm';
 import { Group } from './entities/group.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { GroupsResponseDto } from './dto/groups-response.dto';
 import { createMockGroup } from './test-utils/group.factory';
 import { UserGroup } from '../user-groups/entities/user-group.entity';
@@ -135,7 +135,36 @@ describe('GroupsService', () => {
   });
 
   //deleteGroup
-  
+  it('deleteGroup() should throw if group not found', async () => {
+  repo.findOneBy.mockResolvedValue(null);
+  await expect(service.deleteGroup('x', 'user1', false)).rejects.toThrow(NotFoundException);
+  });
+
+  it('deleteGroup() should throw if system group', async () => {
+  repo.findOneBy.mockResolvedValue(createMockGroup({ id: 'g1', isSystem: true }));
+  await expect(service.deleteGroup('g1', 'user1', false)).rejects.toThrow(NotFoundException);
+  });
+
+  it('deleteGroup() should throw ForbiddenException if user not member', async () => {
+  repo.findOneBy.mockResolvedValue(createMockGroup({ id: 'g1' }));
+  userGroupRepo.findOneBy.mockResolvedValue(null);
+  await expect(service.deleteGroup('g1', 'user1', false)).rejects.toThrow(ForbiddenException);
+  });
+
+  it('deleteGroup() should succeed when skipMembershipCheck=true', async () => {
+  const group = createMockGroup({ id: 'g1' });
+  repo.findOneBy.mockResolvedValue(group);
+  await service.deleteGroup('g1', 'user1', true);
+  expect(repo.remove).toHaveBeenCalledWith(group);
+  });
+
+  it('deleteGroup() should succeed when user is member', async () => {
+  const group = createMockGroup({ id: 'g1' });
+  repo.findOneBy.mockResolvedValue(group);
+  userGroupRepo.findOneBy.mockResolvedValue({} as any);
+  await service.deleteGroup('g1', 'user1', false);
+  expect(repo.remove).toHaveBeenCalledWith(group);
+  });
 
 });
 
