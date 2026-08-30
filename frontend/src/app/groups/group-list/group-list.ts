@@ -32,15 +32,24 @@ export class GroupList implements OnInit {
       error: (error) => {
 		    console.error('Unable to load groups', error);
 	    	this.hasLoadError.set(true);
-	  },
+	    },
     });
   }
   protected readonly filteredGroupList = computed(() => {
     const searchStringGroups = this.searchString().trim().toLowerCase();
     
-    return this.groupsService.groupsList().filter((groups) => {
-      groups.name.trim().toLowerCase().includes(searchStringGroups);
-      groups.description?.trim().toLowerCase().includes(searchStringGroups);
+    return this.groupsService.groupsList().filter((group) => {
+      const matchesName = group.name
+        .trim()
+        .toLowerCase()
+        .includes(searchStringGroups);
+        
+      const matchesDescription = group.description
+        ?.trim()
+        .toLowerCase()
+        .includes(searchStringGroups);
+
+        return matchesName || !!matchesDescription;
     });
   });
   openCreateGroupModal(): void {
