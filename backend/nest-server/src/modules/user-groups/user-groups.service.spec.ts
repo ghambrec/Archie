@@ -6,7 +6,7 @@ import { Group } from '../groups/entities/group.entity';
 import { User } from '../users/entities/user.entity';
 import { provideMockRepository } from '../groups/test-utils/mock-repositories';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
 
 describe('UserGroupsService', () => {
@@ -57,6 +57,74 @@ describe('UserGroupsService', () => {
     await expect(service.add('u1', 'g1')).rejects.toThrow(ConflictException);
   });
 
-});
+  it('remove() should delete user from a group', async () => {
+    userGroupRepo.delete.mockResolvedValue({ affected: 1 } as any);
+    await expect(service.remove('u1', 'g1')).resolves.toBeUndefined();
 
+    expect(userGroupRepo.delete).toHaveBeenCalledWith({ userId: 'u1', groupId: 'g1' });
+  });
+
+  it('remove() should throw NotFoundException if not fouud', async () => {
+    userGroupRepo.delete.mockResolvedValue({ affected: 0 } as any);
+    await expect(service.remove('u1', 'g1')).rejects.toThrow(NotFoundException);
+  });
+
+  // getMembers()
+  it('getMembers() should return members for existing group', async () => {
+    groupRepo.findOneBy.mockResolvedValue({ id: 'g1', name: 'Group 1' } as any);
+    userGroupRepo.find.mockResolvedValue([
+      { userId: 'u1', joinedAt: new Date(), user: { displayName: 'Alice', email: 'a@test.com' } },
+    ] as any);
+
+    const result = await service.getMembers('g1');
+      
+    expect(result.groupId).toBe('g1');
+    expect(result.groupName).toBe('Group 1');
+    expect(result.members[0]).toEqual({
+      userId: 'u1',
+      displayName: 'Alice',
+      email: 'a@test.com',
+      joinedAt: expect.any(Date),
+    });
+  });
+
+  it('getMembers()  should throw NotFoundExpection if group not found', async () => {
+    groupRepo.findOneBy.mockResolvedValue(null);
+    await expect(service.getMembers('g1')).rejects.toThrow(NotFoundException);
+  });
+
+  //getMyGroups
+  it('getMyGroups() should return groups for user', async () => {
+    userRepo.findOneBy.mockResolvedValue({
+      id: 'u1',
+      displayName: 'Alice',
+      email: 'a@test.com'
+    } as any);
+
+    userGroupRepo.find.mockResolvedValue([
+      { 
+        userId: 'u1',
+        groupId: 'g1',
+        joinedAt: new Date(),
+        group: { id: 'g1', name: 'Group 1' }
+      },
+    ] as any);
+
+    const result = await service.getMyGroups('u1');
+
+    expect(result.userId).toBe('u1');
+    expect(result.displayName).toBe('Alice');
+    expect(result.groups[0]).toEqual({
+      groupId: 'g1',
+      name: 'Group 1',
+      joinedAt: expect.any(Date),
+    });
+  });
+
+  it('getMyGroups() should throw NotFoundExpection if no user found', async () => {
+    userRepo.findOneBy.mockResolvedValue(null);
+    await expect(service.getMyGroups('u1')).rejects.toThrow(NotFoundException);
+  });
+
+});
 //test with: npm test -- user-groups.service.spec.ts
