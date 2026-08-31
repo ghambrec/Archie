@@ -20,6 +20,16 @@
           <th scope="col">
             {{ 'groups.groupList.description' | transloco }}
           </th>
+
+          <th scope="col" style="width: 1%">
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="openCreateGroupModal()"
+              title="Add group">
+              <i class="bi bi-plus-circle-fill"></i>
+            </button>
+          </th>
         </tr>
       </thead>
 
@@ -28,10 +38,31 @@
           <tr>
             <td>{{ group.name }}</td>
             <td>{{ group.description ?? '—' }}</td>
+            <td>
+              <div class="d-flex">
+                <button
+                  type="button"
+                  class="btn btn-secondary me-2 display-flex"
+                  (click)="openEditGroupModal()"
+                  title="Edit group"
+                  aria-label="Edit group">
+                  <i class="bi bi-pencil-fill"></i>
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-danger me-2 display-flex align-items-center justify-content-center"
+                  (click)="openEditGroupModal()"
+                  title="Delete group"
+                  aria-label="Delete group">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </div>
+            </td>
           </tr>
         } @empty {
           <tr>
-            <td colspan="2">
+            <td colspan="3">
               {{ 'groups.groupList.empty' | transloco }}
             </td>
           </tr>
