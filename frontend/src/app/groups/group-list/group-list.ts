@@ -64,6 +64,12 @@ export class GroupList implements OnInit {
   )
   };
 
+  openEditGroupModal() {
+    this.modalService.open(
+      CreateGroupModal,
+      { centered: true }
+    );
+  }
 
 
 
