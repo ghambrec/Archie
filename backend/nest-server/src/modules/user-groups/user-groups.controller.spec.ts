@@ -33,16 +33,7 @@ describe('UserGroupsController', () => {
     service = module.get(UserGroupsService);
   });
 
-  it('POST /groups/:groupId/members calls service.add', async () => {
-    const dto = { userId: 'u1' };
-    const expected = { userId: 'u1', groupId: 'g1', joinedAt: new Date() } as any;
-    service.add.mockResolvedValue(expected);
-
-    const result = await controller.addMember('g1', dto, { userId: 'u2' } as any );
-    expect(result).toEqual(expected);
-    expect(service.add).toHaveBeenCalledWith('u1', 'g1', 'u2');
-  });
-
+  // GET my group
   it('GET /me/groups calls service.getMyGroups', async () => {
     const expected: GetGroupsByUserIdResponseDto = {
       userId: 'u1', displayName: 'Test', email: 't@t.com', groups: []
@@ -54,11 +45,45 @@ describe('UserGroupsController', () => {
     expect(service.getMyGroups).toHaveBeenCalledWith('u1');
   });
 
-  // remove
-  // getGroupMembers
-  // adminGetAllgroupByUser
-  // adminGetGroupsByUserId
-  // adminGetAll
+  // GET /groups/:groupId/members
+  it('GET /groups/:groupId/members calls service.getMembers', async () => {
+    const expected = {
+      groupId: 'g1',
+      groupName: 'Group 1',
+      members: [{
+        userId: 'u1',
+        displayName: 'Alice',
+        email: 'a@test.com',
+        joinedAt: new Date()
+      }]
+    };
+    service.getMembers.mockResolvedValue(expected);
+
+    const result = await controller.getGroupMembers('g1');
+
+    expect(result).toEqual(expected);
+    expect(service.getMembers).toHaveBeenCalledWith('g1');
+  });
+
+  it('POST /groups/:groupId/members calls service.add', async () => {
+    const dto = { userId: 'u1' };
+    const expected = { userId: 'u1', groupId: 'g1', joinedAt: new Date() } as any;
+    service.add.mockResolvedValue(expected);
+
+    const result = await controller.addMember('g1', dto, { userId: 'u2' } as any );
+    expect(result).toEqual(expected);
+    expect(service.add).toHaveBeenCalledWith('u1', 'g1', 'u2');
+  });
+
+  // DELETE /groups/:groupId/members/:userId
+  it('DELETE /groups/:groupId/members/:userId calls service.remove', async () => {
+    service.remove.mockResolvedValue(undefined);
+
+    await controller.removeMember('g1', 'u1');
+
+    expect(service.remove).toHaveBeenCalledWith('u1', 'g1');
+  });
+  
 });
 
 //test with: npm test -- user-groups.controller.spec.ts
