@@ -12,6 +12,7 @@ import { CreateGroupModal } from '../create-group-modal/create-group-modal';
   styleUrl: './group-list.scss',
 })
 export class GroupList implements OnInit {
+
   protected readonly groupsService = inject(Groups);
   protected readonly hasLoadError = signal(false);
   protected readonly searchString = signal("");
@@ -22,7 +23,7 @@ export class GroupList implements OnInit {
   }
 
   private loadGroups(): void {
-	this.hasLoadError.set(false);
+    this.hasLoadError.set(false);
 
     this.groupsService.getGroups().subscribe({
       next: groups => {
@@ -35,33 +36,30 @@ export class GroupList implements OnInit {
 	    },
     });
   }
+
   protected readonly filteredGroupList = computed(() => {
     const searchStringGroups = this.searchString().trim().toLowerCase();
     
-    return this.groupsService.groupsList().filter((group) => {
-      const matchesName = group.name
+    if (!searchStringGroups) {
+      return this.groupsService.groupsList();
+    }
+
+    return this.groupsService.groupsList().filter((group) => 
+        group.name
         .trim()
         .toLowerCase()
-        .includes(searchStringGroups);
-        
-      const matchesDescription = group.description
-        ?.trim()
-        .toLowerCase()
-        .includes(searchStringGroups);
-
-        return matchesName || !!matchesDescription;
-    });
+        .includes(searchStringGroups)
+    );
   });
+
   openCreateGroupModal(): void {
     const modal = this.modalService.open(
       CreateGroupModal,
       {centered: true},
     )
-  modal.closed.subscribe(() => {
-    this.loadGroups();
-  }
-
-  )
+    modal.closed.subscribe(() => {
+      this.loadGroups();
+    });
   };
 
   openEditGroupModal() {
@@ -70,7 +68,4 @@ export class GroupList implements OnInit {
       { centered: true }
     );
   }
-
-
-
 }
