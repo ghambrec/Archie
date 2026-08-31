@@ -61,6 +61,18 @@ describe('GroupsService', () => {
     await expect(service.create({ name: 'Test', description: '' })).rejects.toThrow(NotFoundException);
   });
 
+  it('create() should call repository.create with correct data', async () => {
+    const dto = { name: 'Test', description: 'Desc' };
+    const savedGroup = createMockGroup({ id: 'uuid-1', ...dto });
+    repo.findOneBy.mockResolvedValue(null);
+    repo.create.mockReturnValue(savedGroup as any);
+    repo.save.mockResolvedValue(savedGroup as any);
+
+    await service.create(dto);
+
+    expect(repo.create).toHaveBeenCalledWith({ name: 'Test', description: 'Desc' });
+  })  
+
   //get
   it('should return group if found', async () => {
     const group = createMockGroup({ id: 'g1' });
@@ -78,7 +90,7 @@ describe('GroupsService', () => {
     await expect(service.get('g1')).rejects.toThrow(NotFoundException);
   });
 
-  it('shoul reject system groups', async () => {
+  it('should reject system groups', async () => {
     repo.findOneBy.mockResolvedValue(
       createMockGroup({ id: 'g1', isSystem: true }),
     );
@@ -100,6 +112,7 @@ describe('GroupsService', () => {
   })
 
   it('getByNameOrFail() should throw if system group', async () => {
+    repo.findOneBy.mockResolvedValue(createMockGroup({ id: 'g1', isSystem: true }));
     await expect(service.getByNameOrFail('System')).rejects.toThrow(NotFoundException);
   })
 
@@ -115,7 +128,7 @@ describe('GroupsService', () => {
   });
 
   //update
-  it('should reject an already-userd new name', async () => {
+  it('should reject an already-used new name', async () => {
     const existingGroup = createMockGroup({
       id: 'g1',
       name: 'Old name',
@@ -132,6 +145,40 @@ describe('GroupsService', () => {
     ).rejects.toThrow(NotFoundException);
 
     expect(repo.update).not.toHaveBeenCalled();
+  });
+
+  it('update() should update group without name change', async () => {
+    const existing = createMockGroup({ id: 'g1', name: 'Old' });
+    const updated = createMockGroup({ id: 'g1', name: 'Old', description: 'New desc' });
+
+    repo.findOneBy
+      .mockResolvedValueOnce(existing)
+      .mockResolvedValueOnce(updated); // getss id
+    repo.update.mockResolvedValue({ affected: 1} as any);
+
+    const result = await service.update('g1', { description: 'New desc' });
+    expect(result).toEqual(new GroupsResponseDto(updated));
+    expect(repo.update).toHaveBeenCalledWith('g1', { description: 'New desc' });
+  });
+
+  it('update() should update group with new available name', async () => {
+    const existing = createMockGroup({ id: 'g1', name: 'Old' });
+    const updated = createMockGroup({ id: 'g1', name: 'New' });
+    
+    repo.findOneBy
+      .mockResolvedValueOnce(existing) // get(id)
+      .mockResolvedValueOnce(null)     // findGroupByName(newName) - available
+      .mockResolvedValueOnce(updated);
+    repo.update.mockResolvedValue({ affected: 1 } as any);
+    
+    const result = await service.update('g1', { name: 'New' });
+    expect(result).toEqual(new GroupsResponseDto(updated));
+  });
+
+  it('update() should throw if group not found (affected=0)', async () => {
+    repo.findOneBy.mockResolvedValue(createMockGroup({ id: 'g1' }));
+    repo.update.mockResolvedValue({ affected: 0 } as any);
+    await expect(service.update('g1', { name: 'New' })).rejects.toThrow(NotFoundException);
   });
 
   //deleteGroup
@@ -164,6 +211,14 @@ describe('GroupsService', () => {
   userGroupRepo.findOneBy.mockResolvedValue({} as any);
   await service.deleteGroup('g1', 'user1', false);
   expect(repo.remove).toHaveBeenCalledWith(group);
+  });
+
+  it('findAll() should return mapped groups when data exists', async () => {
+    const groups = [createMockGroup({ id: '1' }), createMockGroup({ id: '2' })];
+    repo.find.mockResolvedValue(groups);
+    const result = await service.findAll();
+    expect(result).toHaveLength(2);
+    expect(result[0]).toBeInstanceOf(GroupsResponseDto);
   });
 
 });
