@@ -65,6 +65,26 @@ class MinioDocumentStore:
             f"Initialized MinioDocumentStore: endpoint={minio_endpoint}, bucket={bucket}"
         )
 
+    async def GetDocumentBytes(self, object_key: str) -> bytes:
+        """download raw file in bytes"""
+        try:
+            logger.info(f"Downloading document from MinIO: {object_key}")
+            response = await asyncio.to_thread(
+                self.minio_client.get_object,
+                self.bucket,
+                object_key,
+            )
+            try:
+                content = (await asyncio.to_thread(response.read))
+            finally:
+                await asyncio.to_thread(response.close)
+                await asyncio.to_thread(response.release_conn)
+            logger.info(f"Successfully downloaded document: {object_key}")
+            return content
+        except Exception as e:
+            logger.error(f"Failed to download document {object_key}: {e}")
+            raise
+
     async def ListDocuments(self) -> List[str]:
         """List all object keys in the documents bucket.
 

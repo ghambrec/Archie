@@ -80,7 +80,9 @@ async def ingest_doc(
         if obj_key is None:
             raise ValueError(f"no object key found for doc_id {doc_id}")
 
-        doc_text = await minio.GetDocumentText(obj_key)
+        # doc_text = await minio.GetDocumentText(obj_key)
+        doc_raw = await minio.GetDocumentBytes(obj_key)
+        doc_text = doc_raw.decode("utf-8")
 
         language = detect_language(doc_text)
 
