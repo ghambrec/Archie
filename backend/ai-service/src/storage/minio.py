@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Iterable, List, Optional
+from typing import List
 
-import httpx
 from minio import Minio
 
 logger = logging.getLogger(__name__)
@@ -35,7 +34,6 @@ class MinioDocumentStore:
         minio_secret_key: str,
         minio_secure: bool = False,
         bucket: str = "documents",
-        nest_server_url: str = "http://nest-server:3000",
     ):
         """Initialize MinIO adapter.
 
@@ -48,7 +46,6 @@ class MinioDocumentStore:
             nest_server_url: Base URL of nest-server for metadata queries
         """
         self.bucket = bucket
-        self.nest_server_url = nest_server_url
 
         # Initialize MinIO client
         self.minio_client = Minio(
@@ -57,9 +54,6 @@ class MinioDocumentStore:
             secret_key=minio_secret_key,
             secure=minio_secure,
         )
-
-        # Async HTTP client for nest-server API calls.
-        self.http_client = httpx.AsyncClient(base_url=nest_server_url)
 
         logger.info(
             f"Initialized MinioDocumentStore: endpoint={minio_endpoint}, bucket={bucket}"
@@ -105,7 +99,3 @@ class MinioDocumentStore:
         except Exception as e:
             logger.error(f"Failed to list documents from MinIO: {e}")
             raise
-
-    async def Close(self) -> None:
-        """Release HTTP resources owned by the metadata client."""
-        await self.http_client.aclose()
