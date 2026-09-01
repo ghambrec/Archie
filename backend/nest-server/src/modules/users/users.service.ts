@@ -27,8 +27,6 @@ export class UsersService {
     private readonly dataSource: DataSource,
   ) {}
 
-  
-
   async create(dto: CreateUserDto): Promise<User> {
     this.logger.log('Execute create', dto.email);
     const passwordHash = await bcrypt.hash(dto.password, PASSWORD_SALT_ROUNDS);
@@ -132,7 +130,7 @@ export class UsersService {
     return this.usersRepository.findOneBy({displayName: name})
   }
 
-  async findProfileById(userId: string): Promise <UserSummaryDto> {
+  async findProfileById(userId: string): Promise<Omit<UserSummaryDto, 'isAdmin'>> {
     this.logger.log('Execute findProfileById', userId);
     const user = await this.usersRepository.findOne({
       where: { id: userId},

@@ -10,6 +10,7 @@ import { UserSummaryDto } from '../users/dto/user-summary.dto';
 import { Logger } from 'nestjs-pino';
 import { LoginAttemptService } from './login-attempt.service';
 import { LockedException } from './exceptions/locked.exception';
+import { PermissionsService } from '../permissions/permissions.service';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +19,7 @@ export class AuthService {
     private readonly userService: UsersService,
     private readonly sessionService: SessionService,
     private readonly loginAttemptService: LoginAttemptService,
+    private readonly permissionsService: PermissionsService,
   ) {}
 
   async login(request: LoginRequestDto) : Promise<LoginResult> {
@@ -64,6 +66,14 @@ export class AuthService {
 
   async getCurrentUser(userId: string) : Promise<UserSummaryDto> {
     this.logger.log('Execute getCurrentUser', userId);
-    return this.userService.findProfileById(userId);
+    // return this.userService.findProfileById(userId); 
+    
+    const user = await this.userService.findProfileById(userId);
+    const isAdmin = await this.permissionsService.isUserAdmin(userId);
+
+    return {
+      ...user,
+      isAdmin,
+    };
   }
 }

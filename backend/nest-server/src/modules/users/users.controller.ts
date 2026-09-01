@@ -65,7 +65,7 @@ export class UsersController {
   
   @UseGuards(SessionAuthGuard)
   @Get('me')
-  async getCurrentUser( @Req() req: Request): Promise <UserSummaryDto> {
+  async getCurrentUser( @Req() req: Request): Promise<Omit<UserSummaryDto, 'isAdmin'>> {
     return this.usersService.findProfileById(req.userId!);
   }
 
