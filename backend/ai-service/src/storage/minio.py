@@ -12,20 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class MinioDocumentStore:
-    """Adapter for getting documents from MinIO
-
-    Responsibilities:
-    1. Connect to MinIO and list documents in the 'documents' bucket
-    2. Download document text content
-    3. Query nest-server API to fetch document access metadata
-       (creator user + assigned document group)
-    4. Provide stable indexing for documents
-    5. Build chunk metadata used for query-time access checks
-
-    Access rule expected by retriever:
-    - A querying user can read a chunk if they are the creator user, OR
-    - They belong to the document's assigned group.
-    """
+    """Adapter for getting documents from MinIO"""
 
     def __init__(
         self,
@@ -35,16 +22,6 @@ class MinioDocumentStore:
         minio_secure: bool = False,
         bucket: str = "documents",
     ):
-        """Initialize MinIO adapter.
-
-        Args:
-            minio_endpoint: MinIO server address (e.g., "minio:9000")
-            minio_access_key: MinIO access key
-            minio_secret_key: MinIO secret key
-            minio_secure: Use HTTPS (False for local development)
-            bucket: MinIO bucket name containing documents
-            nest_server_url: Base URL of nest-server for metadata queries
-        """
         self.bucket = bucket
 
         # Initialize MinIO client
