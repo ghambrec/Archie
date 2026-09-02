@@ -8,7 +8,7 @@ from pydantic_ai import Agent
 from pydantic_ai.settings import ModelSettings
 from typing import Literal
 
-from src.generation.model import build_model, get_output_type
+from src.generation.model import build_model, get_output_type, get_max_input_chars
 
 logger = logging.getLogger(__name__)
 
@@ -67,8 +67,8 @@ agent = Agent(
     retries={"output": 3}
     )
 
-# token cap to ca 2000
-_MAX_CHARS = 8000
+# token cap depending on choosen llm provider
+_MAX_CHARS = get_max_input_chars()
 
 
 def _format_tags(tags: list[dict]) -> str:

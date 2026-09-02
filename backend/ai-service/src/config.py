@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     minio_app_access_key: str
     minio_app_secret_key: str
 
+    # --- ANALYZER
+    analyzer_max_chars_ollama: int
+    analyzer_max_chars_openrouter: int
+
     # --- CHUNKING
     chunk_size_chars: int
     chunk_overlap_chars: int

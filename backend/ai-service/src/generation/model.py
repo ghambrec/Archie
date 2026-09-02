@@ -39,3 +39,9 @@ def get_output_type(output_model: type[T]) -> NativeOutput[T] | type[T]:
     if settings.llm_provider == "ollama":
         return NativeOutput(output_model)
     return output_model
+
+
+def get_max_input_chars() -> int:
+    if settings.llm_provider == "ollama":
+        return settings.analyzer_max_chars_ollama
+    return settings.analyzer_max_chars_openrouter
