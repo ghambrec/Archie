@@ -22,12 +22,14 @@
 		</li>
 
 		<!-- settings -->
+		@if (authService.isAdminUser()) {
 		<li>
 			<a routerLink="/settings" class="nav-link" routerLinkActive="active">
 				<i class="bi bi-gear-fill me-2"></i>
 				{{ "sidebar.settings" | transloco }}
 			</a>
 		</li>
+		}
 
 	</ul>
 
