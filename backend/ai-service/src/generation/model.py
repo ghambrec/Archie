@@ -6,10 +6,14 @@ import logging
 
 from pydantic import BaseModel
 from pydantic_ai import NativeOutput
-from pydantic_ai.models.ollama import OllamaModel
+
 from pydantic_ai.models.openai import OpenAIChatModel
+
+from pydantic_ai.models.ollama import OllamaModel
 from pydantic_ai.providers.ollama import OllamaProvider
-from pydantic_ai.providers.openai import OpenAIProvider
+
+from pydantic_ai.models.openrouter import OpenRouterModel
+from pydantic_ai.providers.openrouter import OpenRouterProvider
 
 from src.config import settings
 
@@ -21,12 +25,9 @@ T = TypeVar("T", bound=BaseModel)
 def build_model() -> OpenAIChatModel:
     if settings.llm_provider == "openrouter":
         logger.info("LLM Provider: OpenRouter")
-        return OpenAIChatModel(
+        return OpenRouterModel(
             settings.openrouter_generation_model,
-            provider=OpenAIProvider(
-                base_url="https://openrouter.ai/api/v1",
-                api_key=settings.openrouter_api_key,
-            ),
+            provider=OpenRouterProvider(api_key=settings.openrouter_api_key)
         )
     logger.info("LLM Provider: Ollama")
     return OllamaModel(
