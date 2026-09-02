@@ -18,6 +18,12 @@ class Settings(BaseSettings):
     ai_service_port: int
     ai_service_api_key: str
 
+    # --- LANGFUSE
+    langfuse_enabled: bool = False
+    langfuse_host: str | None = None
+    langfuse_public_key: str | None = None
+    langfuse_secret_key: str | None = None
+
     # --- DATABASE
     postgres_dsn: str
 
