@@ -32,3 +32,4 @@ backend/ai-service/venv/
 frontend/.pnpm-store
 /notesForCedric.md
 /TODO.md
+x_gha/
