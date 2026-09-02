@@ -7,9 +7,10 @@ import { adminGuard, authGuard, guestGuard } from './auth/auth-guard';
 import { Profile } from './profile/profile';
 import { Documents } from './documents/documents';
 import { AdminShell } from './admin/admin-shell/admin-shell';
-import { AdminUsers } from './admin/admin-users/admin-users'; 
+// import { AdminUsers } from './admin/admin-users.ts/admin-user'; 
 import { AdminGroups } from './admin/admin-groups/admin-groups';
-import { AdminSettings } from './admin/admin-settings/admin-settings';
+import { AdminHome } from './admin/admin-home/admin-home';
+// import { AdminSettings } from './admin/admin-settings/admin-settings';
 
 export const routes: Routes = [
 	{
@@ -39,11 +40,6 @@ export const routes: Routes = [
 				title: 'Documents',
 			},
 			{
-				path: 'settings',
-				component: Settings,
-				title: 'Settings',
-			},
-			{
 				path: 'profile',
 				component: Profile,
 				title: 'Profile',
@@ -51,27 +47,44 @@ export const routes: Routes = [
 		],
 	},
 	{
-		path: 'admin',
-		component: AdminShell,
+		path: '',
+		component: Shell,
 		canActivate: [authGuard, adminGuard],
 		children: [
 			{
-				path: '',
-				redirectTo: 'users',
-				pathMatch: 'full',
-			},
-			{
-				path: 'users',
-				component: AdminUsers
-			},
-			{
-				path: 'groups',
-				component: AdminGroups
-			},
-			{ 
 				path: 'settings',
-				component: AdminSettings
-			},
-		],
+				component: Settings,
+				title: 'Settings',
+			}
+		]
 	}
+	// {
+	// 	path: 'admin',
+	// 	component: AdminShell,
+	// 	canActivate: [authGuard, adminGuard],
+	// 	children: [
+	// 		{
+	// 			path: '',
+	// 			redirectTo: 'admin-home',
+	// 			pathMatch: 'full',
+	// 		},
+	// 		{
+	// 			path: 'admin-home',
+	// 			component: AdminHome,
+	// 			title: 'Admin Home',
+	// 		},
+	// 		// {
+	// 		// 	path: 'users',
+	// 		// 	component: AdminUsers
+	// 		// },
+	// 		{
+	// 			path: 'groups',
+	// 			component: AdminGroups
+	// 		},
+	// 		// { 
+	// 		// 	path: 'settings',
+	// 		// 	component: AdminSettings
+	// 		// },
+	// 	],
+	// }
 ];
