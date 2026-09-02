@@ -1,0 +1,6 @@
+<h1>Admin groups</h1>
+<ul>
+  @for (group of groups(); track group.id) {
+    <li>{{ group.name }}</li>
+  }
+</ul>
