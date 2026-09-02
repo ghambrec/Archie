@@ -21,6 +21,10 @@
             {{ 'groups.groupList.description' | transloco }}
           </th>
 
+          <th scope="col">
+            {{ 'groups.groupList.isSystem' | transloco }}
+          </th>
+
           <th scope="col" style="width: 1%">
             <button
               type="button"
@@ -38,6 +42,7 @@
           <tr>
             <td>{{ group.name }}</td>
             <td>{{ group.description ?? '—' }}</td>
+            <td>{{ group.isSystem ? 'Yes' : 'No' }}</td>
             <td>
               <div class="d-flex">
                 <button
@@ -62,7 +67,7 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="3">
+            <td colspan="4">
               {{ 'groups.groupList.empty' | transloco }}
             </td>
           </tr>

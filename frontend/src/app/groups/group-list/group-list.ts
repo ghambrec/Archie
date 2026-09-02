@@ -25,7 +25,7 @@ export class GroupList implements OnInit {
   private loadGroups(): void {
     this.hasLoadError.set(false);
 
-    this.groupsService.getGroups().subscribe({
+    this.groupsService.getGroupsAdmin().subscribe({
       next: groups => {
         this.groupsService.groupsList.set(groups)
       },
@@ -57,6 +57,7 @@ export class GroupList implements OnInit {
       CreateGroupModal,
       {centered: true},
     )
+    
     modal.closed.subscribe(() => {
       this.loadGroups();
     });
