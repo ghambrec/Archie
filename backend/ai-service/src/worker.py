@@ -14,6 +14,10 @@ from arq import func
 from arq.connections import RedisSettings
 
 from src.config import settings
+from src.langfuse_client import setup_langfuse_client
+
+setup_langfuse_client()
+
 from src.db import create_pool
 from src.ingestion import ingestor
 from src.storage.minio import MinioDocumentStore

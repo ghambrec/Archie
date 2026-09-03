@@ -18,6 +18,12 @@ class Settings(BaseSettings):
     ai_service_port: int
     ai_service_api_key: str
 
+    # --- LANGFUSE
+    langfuse_enabled: bool = False
+    langfuse_host: str | None = None
+    langfuse_public_key: str | None = None
+    langfuse_secret_key: str | None = None
+
     # --- DATABASE
     postgres_dsn: str
 
@@ -40,6 +46,10 @@ class Settings(BaseSettings):
     minio_use_ssl: bool
     minio_app_access_key: str
     minio_app_secret_key: str
+
+    # --- ANALYZER
+    analyzer_max_chars_ollama: int
+    analyzer_max_chars_openrouter: int
 
     # --- CHUNKING
     chunk_size_chars: int

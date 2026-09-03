@@ -16,6 +16,7 @@ from src.ingestion import status
 from src.ingestion.language import detect_language
 from src.generation.analyzer import analyze_doc
 from src.generation.analyzer import DocumentInfos
+from src.ingestion.extraction import extract_text
 
 logger = logging.getLogger(__name__)
 
@@ -80,9 +81,8 @@ async def ingest_doc(
         if obj_key is None:
             raise ValueError(f"no object key found for doc_id {doc_id}")
 
-        # doc_text = await minio.GetDocumentText(obj_key)
         doc_raw = await minio.GetDocumentBytes(obj_key)
-        doc_text = doc_raw.decode("utf-8")
+        doc_text = extract_text(doc_raw)
 
         language = detect_language(doc_text)
 
