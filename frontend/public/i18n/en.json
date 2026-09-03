@@ -61,6 +61,16 @@
 				"feedbackMsg": "Group successfully created",
 				"errorGeneral": "Unable to create Group",
 				"errorConflictName": "Name already registered"
+			},
+			"deleteGroup": {
+				"heading": "Delete Group",
+				"question": "Do you really want to delete the group:",
+				"btnDelete": "Delete",
+				"btnCancel": "Cancel",
+				"btnDeletePending": "Deleting...",
+				"errorForbidden": "Deleting this group is forbidden.",
+				"errorNotFound": "Group not found.",
+				"errorGeneral": "Unable to delete group"
 			}
 	},
 	"errors": {
