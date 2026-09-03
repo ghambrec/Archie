@@ -62,7 +62,7 @@
 				"errorGeneral": "Unable to create Group",
 				"errorConflictName": "Name already registered"
 			},
-			"deleteGroup": {
+			"deleteGroupAdmin": {
 				"heading": "Delete Group",
 				"question": "Do you really want to delete the group:",
 				"btnDelete": "Delete",
@@ -71,6 +71,17 @@
 				"errorForbidden": "Deleting this group is forbidden.",
 				"errorNotFound": "Group not found.",
 				"errorGeneral": "Unable to delete group"
+			},
+			"editGroupAdmin": {
+				"heading": "Edit Group",
+				"name": "Name",
+				"description": "Description",
+				"btnSubmit": "Edit Group",
+				"btnSubmitPending": "Sending...",
+				"btnCancel": "Cancel",
+				"feedbackMsg": "Group successfully edited",
+				"errorGeneral": "Unable to edit Group",
+				"errorConflictName": "Name already Taken"
 			}
 	},
 	"errors": {
