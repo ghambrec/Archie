@@ -6,10 +6,10 @@ import { Login } from './auth/login/login';
 import { adminGuard, authGuard, guestGuard } from './auth/auth-guard';
 import { Profile } from './profile/profile';
 import { Documents } from './documents/documents';
-import { AdminShell } from './admin/admin-shell/admin-shell';
-// import { AdminUsers } from './admin/admin-users.ts/admin-user'; 
-import { AdminGroups } from './admin/admin-groups/admin-groups';
-import { AdminHome } from './admin/admin-home/admin-home';
+// import { AdminShell } from './admin/admin-shell/admin-shell';
+// // import { AdminUsers } from './admin/admin-users.ts/admin-user'; 
+// import { AdminGroups } from './admin/admin-groups/admin-groups';
+// import { AdminHome } from './admin/admin-home/admin-home';
 // import { AdminSettings } from './admin/admin-settings/admin-settings';
 
 export const routes: Routes = [
