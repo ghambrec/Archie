@@ -14,6 +14,11 @@ export interface CreateGroupDto {
 	description?: string | null;
 }
 
+export interface UpdateGroupDto {
+	name?: string;
+	description?: string | null;
+}
+
 @Service()
 export class Groups {
 	private readonly http = inject(HttpClient);
@@ -41,8 +46,18 @@ export class Groups {
 
 	deleteGroupAdmin(id: string) {
 		return this.http.delete<void>(`${this.baseUrl}/${id}`,
-		{
-			withCredentials: true,
-		});
+			{
+				withCredentials: true,
+			}
+		);
+	}
+
+	editGroupAdmin(id: string, dto: UpdateGroupDto) {
+		return this.http.patch<void>(`${this.baseUrl}/${id}`,
+			dto,
+			{
+				withCredentials: true,
+			}
+		);
 	}
 }
