@@ -39,7 +39,10 @@ export class Groups {
 		);
 	}
 
-	// deleteGroupAdmin() {
-	// 	return this.http.
-	// }
+	deleteGroupAdmin(id: string) {
+		return this.http.delete<void>(`${this.baseUrl}/${id}`,
+		{
+			withCredentials: true,
+		});
+	}
 }
