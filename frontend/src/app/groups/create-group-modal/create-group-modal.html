@@ -1,37 +1,71 @@
 <div class="modal-header">
 	<h5 class="modal-title">{{ "groups.createGroupAdmin.heading" | transloco }}</h5>
-	<button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
+	<button
+		type="button"
+		class="btn-close"
+		aria-label="Close"
+		(click)="activeModal.dismiss()">
+	</button>
 </div>
 
 <div class="modal-body">
 	<form [formRoot]="createGroupAdminForm">
 
 		<div class="mb-3">
-			<label class="form-label">{{ "groups.createGroupAdmin.name" | transloco }}</label>
-			<input type="text" class="form-control"
-				[class.is-invalid]="createGroupAdminForm.name().touched() && createGroupAdminForm.name().invalid()"
+			<label class="form-label">
+				{{ "groups.createGroupAdmin.name" | transloco }}
+			</label>
+			<input
+				type="text"
+				class="form-control"
+				[class.is-invalid]="createGroupAdminForm.name().touched() &&
+					createGroupAdminForm.name().invalid()"
 				[formField]="createGroupAdminForm.name" />
-			@if (createGroupAdminForm.name().touched() && createGroupAdminForm.name().invalid()) {
-			<div class="invalid-feedback">{{ createGroupAdminForm.name().errors()[0].message }}</div>
+			@if (createGroupAdminForm.name().touched() &&
+				createGroupAdminForm.name().invalid()) {
+				<div class="invalid-feedback">
+					{{ createGroupAdminForm.name().errors()[0].message | transloco }}
+				</div>
 			}
 		</div>
 
 		<div class="mb-3">
-			<label class="form-label">{{ "groups.createGroupAdmin.description" | transloco }}</label>
-      <textarea class="form-control" [formField]="createGroupAdminForm.description"></textarea>
+			<label class="form-label">
+				{{ "groups.createGroupAdmin.description" | transloco }}
+			</label>
+      <textarea
+				class="form-control"
+				[formField]="createGroupAdminForm.description">
+			</textarea>
     </div>
 		@if (createGroupAdminForm().errors().length > 0) {
-		<div class="text-danger">{{ createGroupAdminForm().errors()[0].message | transloco }}</div>
+			<div class="text-danger">
+				{{ createGroupAdminForm().errors()[0].message | transloco }}
+			</div>
 		}
 		@if (feedbackMsg()) {
-		<div class="text-success">{{ feedbackMsg() | transloco }}</div>
+			<div class="text-success">
+				{{ feedbackMsg() | transloco }}
+			</div>
 		}
 
 		<div class="d-flex justify-content-between">
-			<button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">{{ "groups.createGroupAdmin.btnCancel" | transloco }}</button>
+			<button
+				type="button"
+				class="btn btn-secondary"
+				(click)="activeModal.dismiss()">
+					{{ "groups.createGroupAdmin.btnCancel" | transloco }}
+			</button>
 			
-			<button type="submit" class="btn btn-primary" [disabled]="createGroupAdminForm().submitting()">
-				@if (createGroupAdminForm().submitting()) { {{ "groups.createGroupAdmin.btnSubmitPending" | transloco }} } @else { {{ "groups.createGroupAdmin.btnSubmit" | transloco }} }
+			<button
+				type="submit"
+				class="btn btn-primary"
+				[disabled]="createGroupAdminForm().submitting()">
+				@if (createGroupAdminForm().submitting()) {
+					{{ "groups.createGroupAdmin.btnSubmitPending" | transloco }}
+				} @else {
+					{{ "groups.createGroupAdmin.btnSubmit" | transloco }}
+				}
 			</button>
 		</div>
 

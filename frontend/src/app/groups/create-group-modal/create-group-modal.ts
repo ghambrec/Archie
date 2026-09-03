@@ -39,7 +39,7 @@ export class CreateGroupModal {
 							description: formValues.description?.trim() ? formValues.description.trim() : null,
 						};
 						
-						const response = await firstValueFrom(this.groupsService.createGroupAdmin(input));
+						await firstValueFrom(this.groupsService.createGroupAdmin(input));
 
 						this.feedbackMsg.set('groups.createGroupAdmin.feedbackMsg');
 						await firstValueFrom(timer(500));
@@ -47,16 +47,19 @@ export class CreateGroupModal {
 						return;
 					} catch (error : any) {
 						let translocoKey = error.status == 409
-							? "groups.createGroupAdmin.errorConflict"
-							: "groups.createGroupAdmin.errorGeneral";
+							? 'groups.createGroupAdmin.errorConflict'
+							: 'groups.createGroupAdmin.errorGeneral';
 
-						if (translocoKey == "groups.createGroupAdmin.errorConflict" 
-							&& error.error?.message.toLowerCase().includes("name")) {
-							translocoKey = "groups.createGroupAdmin.errorConflictName"
+						if (translocoKey == 'groups.createGroupAdmin.errorConflict' 
+							&& error.error?.message.toLowerCase().includes('name')) {
+							translocoKey = 'groups.createGroupAdmin.errorConflictName'
 						} else {
-							translocoKey = "groups.createGroupAdmin.errorGeneral";
+							translocoKey = 'groups.createGroupAdmin.errorGeneral';
 						}
-						return { kind: 'serverError', message: translocoKey };
+						return {
+							kind: 'serverError',
+							message: translocoKey
+						};
 					}
 				}
 			}
