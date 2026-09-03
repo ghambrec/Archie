@@ -4,6 +4,7 @@ import { computed, OnInit, inject, Component, signal } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CreateGroupModal } from '../create-group-modal/create-group-modal';
 import { DeleteGroupModal } from '../delete-group-modal/delete-group-modal';
+import { EditGroupModal } from '../edit-group-modal/edit-group-modal';
 
 
 @Component({
@@ -65,21 +66,27 @@ export class GroupList implements OnInit {
       this.loadGroups();
     });
   };
-
-  openEditGroupModal() {
-    this.modalService.open(
-      CreateGroupModal,
-      {
-        centered: true
-      },
-    );
-  };
-
+  
   openDeleteGroupModal(group: GroupResponseAdmin): void {
     const modal = this.modalService.open(
       DeleteGroupModal,
       {
         centered: true,
+      },
+    );
+    
+    modal.componentInstance.selectedGroup = group;
+    
+    modal.closed.subscribe(() => {
+      this.loadGroups();
+    });
+  };
+  
+  openEditGroupModal(group: GroupResponseAdmin): void {
+    const modal = this.modalService.open(
+      EditGroupModal,
+      {
+        centered: true
       },
     );
 
