@@ -6,7 +6,7 @@ import { GroupResponseAdmin, Groups } from "../groups";
 
 @Component({
   selector: 'app-delete-group-modal',
-	imports: [FormRoot, TranslocoPipe],
+	imports: [TranslocoPipe],
 	templateUrl: './delete-group-modal.html',
 	styleUrl: './delete-group-modal.scss',
 })
