@@ -7,9 +7,10 @@ import { SessionService } from './session/session.service';
 import { SessionCookieService } from './session/session-cookie.service';
 import { SessionAuthGuard } from './guards/session-auth.guard';
 import { LoginAttemptService } from './login-attempt.service';
+import { PermissionsModule } from '../permissions/permissions.module';
 
 @Module({
-  imports: [UsersModule, SessionModule],
+  imports: [UsersModule, SessionModule, PermissionsModule],
   controllers: [AuthController],
   providers: [AuthService, SessionService, SessionCookieService, SessionAuthGuard, LoginAttemptService,],
   exports: [SessionService, SessionCookieService, SessionAuthGuard,],

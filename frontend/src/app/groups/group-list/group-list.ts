@@ -1,8 +1,10 @@
 import { TranslocoPipe } from '@jsverse/transloco';
-import { Groups } from '../groups';
+import { GroupResponseAdmin, Groups } from '../groups';
 import { computed, OnInit, inject, Component, signal } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CreateGroupModal } from '../create-group-modal/create-group-modal';
+import { DeleteGroupModal } from '../delete-group-modal/delete-group-modal';
+import { EditGroupModal } from '../edit-group-modal/edit-group-modal';
 
 
 @Component({
@@ -12,6 +14,7 @@ import { CreateGroupModal } from '../create-group-modal/create-group-modal';
   styleUrl: './group-list.scss',
 })
 export class GroupList implements OnInit {
+
   protected readonly groupsService = inject(Groups);
   protected readonly hasLoadError = signal(false);
   protected readonly searchString = signal("");
@@ -22,9 +25,9 @@ export class GroupList implements OnInit {
   }
 
   private loadGroups(): void {
-	this.hasLoadError.set(false);
+    this.hasLoadError.set(false);
 
-    this.groupsService.getGroups().subscribe({
+    this.groupsService.getGroupsAdmin().subscribe({
       next: groups => {
         this.groupsService.groupsList.set(groups)
       },
@@ -32,30 +35,65 @@ export class GroupList implements OnInit {
       error: (error) => {
 		    console.error('Unable to load groups', error);
 	    	this.hasLoadError.set(true);
-	  },
+	    },
     });
   }
+
   protected readonly filteredGroupList = computed(() => {
     const searchStringGroups = this.searchString().trim().toLowerCase();
     
-    return this.groupsService.groupsList().filter((groups) => {
-      groups.name.trim().toLowerCase().includes(searchStringGroups);
-      groups.description?.trim().toLowerCase().includes(searchStringGroups);
-    });
+    if (!searchStringGroups) {
+      return this.groupsService.groupsList();
+    }
+
+    return this.groupsService.groupsList().filter((group) => 
+        group.name
+        .trim()
+        .toLowerCase()
+        .includes(searchStringGroups)
+    );
   });
+
   openCreateGroupModal(): void {
     const modal = this.modalService.open(
       CreateGroupModal,
-      {centered: true},
+      {
+        centered: true
+      },
     )
-  modal.closed.subscribe(() => {
-    this.loadGroups();
-  }
-
-  )
+    
+    modal.closed.subscribe(() => {
+      this.loadGroups();
+    });
   };
+  
+  openDeleteGroupModal(group: GroupResponseAdmin): void {
+    const modal = this.modalService.open(
+      DeleteGroupModal,
+      {
+        centered: true,
+      },
+    );
+    
+    modal.componentInstance.selectedGroup = group;
+    
+    modal.closed.subscribe(() => {
+      this.loadGroups();
+    });
+  };
+  
+  openEditGroupModal(group: GroupResponseAdmin): void {
+    const modal = this.modalService.open(
+      EditGroupModal,
+      {
+        centered: true
+      },
+    );
 
+    modal.componentInstance.selectedGroup = group;
 
-
-
+    modal.closed.subscribe(() => {
+      this.loadGroups();
+    });
+  };
 }

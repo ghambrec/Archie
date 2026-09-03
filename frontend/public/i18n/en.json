@@ -47,8 +47,41 @@
 			"searchPlaceholder": "Search for group name",
 			"name": "Name",
 			"description": "Description",
+			"isSystem": "System-group",
 			"errorLoading": "Unable to load groups",
 			"empty": "No groups exist."	
+			},
+			"createGroupAdmin": {
+				"heading": "Create Group",
+				"name": "Name",
+				"description": "Description",
+				"btnSubmit": "Create Group",
+				"btnSubmitPending": "Sending...",
+				"btnCancel": "Cancel",
+				"feedbackMsg": "Group successfully created",
+				"errorGeneral": "Unable to create Group",
+				"errorConflictName": "Name already registered"
+			},
+			"deleteGroupAdmin": {
+				"heading": "Delete Group",
+				"question": "Do you really want to delete the group:",
+				"btnDelete": "Delete",
+				"btnCancel": "Cancel",
+				"btnDeletePending": "Deleting...",
+				"errorForbidden": "Deleting this group is forbidden.",
+				"errorNotFound": "Group not found.",
+				"errorGeneral": "Unable to delete group"
+			},
+			"editGroupAdmin": {
+				"heading": "Edit Group",
+				"name": "Name",
+				"description": "Description",
+				"btnSubmit": "Edit Group",
+				"btnSubmitPending": "Sending...",
+				"btnCancel": "Cancel",
+				"feedbackMsg": "Group successfully edited",
+				"errorGeneral": "Unable to edit Group",
+				"errorConflictName": "Name already Taken"
 			}
 	},
 	"errors": {

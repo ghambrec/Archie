@@ -21,3 +21,19 @@ export const guestGuard: CanActivateFn = async () => {
 	}
 	return router.parseUrl('/home');
 }
+
+export const adminGuard: CanActivateFn = async () => {
+	const auth = inject(Auth);
+	const router = inject(Router);
+
+	//check session, then role
+	if (auth.currentUser() || await auth.checkSession()) {
+		if (auth.isAdmin()) {
+			return true;
+		}
+		// User is logged in but not admin => regular UI 
+		return router.parseUrl('/home');
+	}
+	// not logged in
+	return router.parseUrl('/login');
+}
