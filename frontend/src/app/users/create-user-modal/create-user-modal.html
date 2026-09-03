@@ -43,11 +43,11 @@
 		}
 
 		<div class="d-flex justify-content-between">
+			<button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">{{ "users.createUser.btnCancel" | transloco }}</button>
+
 			<button type="submit" class="btn btn-primary" [disabled]="createUserForm().submitting()">
 				@if (createUserForm().submitting()) { {{ "users.createUser.btnSubmitPending" | transloco }} } @else { {{ "users.createUser.btnSubmit" | transloco }} }
 			</button>
-
-			<button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">{{ "users.createUser.btnCancel" | transloco }}</button>
 		</div>
 
 	</form>
