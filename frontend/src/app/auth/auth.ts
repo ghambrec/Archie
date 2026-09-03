@@ -1,4 +1,4 @@
-import { inject, Service, signal } from '@angular/core';
+import { inject, Service, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { firstValueFrom } from 'rxjs';
@@ -20,10 +20,9 @@ export interface CurrentUser {
 	id: string;
 	email: string;
 	displayName: string;
-	preferredLanguage: SupportedLanguage; 
+	preferredLanguage: SupportedLanguage;
+	isAdmin: boolean; 
 }
-
-
 
 @Service()
 export class Auth {
@@ -31,6 +30,12 @@ export class Auth {
 	private readonly baseUrl = `${environment.apiUrl}/auth`;
 
 	readonly currentUser = signal<CurrentUser | null>(null);
+
+	readonly isAdminUser = computed(() => this.currentUser()?.isAdmin === true);
+
+	isAdmin(): boolean {
+		return this.currentUser()?.isAdmin === true;
+	}
 
 	login(body: LoginRequest) {
 		const url = `${this.baseUrl}/login`;

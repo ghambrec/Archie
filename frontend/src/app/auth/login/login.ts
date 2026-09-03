@@ -37,7 +37,8 @@ export class Login {
 						);
 						const user = await firstValueFrom(this.authService.getCurrentUser(),
 						);
-						this.authService.currentUser.set(user);
+						this.authService.checkSession();
+						// this.authService.currentUser.set(user);
 						this.translocoService.setActiveLang(user.preferredLanguage);
 						this.router.navigateByUrl('/home');
 						return

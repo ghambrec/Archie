@@ -9,6 +9,7 @@ import { LoginAttemptService } from './login-attempt.service';
 import { LockedException } from './exceptions/locked.exception';
 import { User } from '../users/entities/user.entity';
 import { UserSummaryDto } from '../users/dto/user-summary.dto';
+import { PermissionsService } from '../permissions/permissions.service';
 
 jest.mock('bcrypt');
 
@@ -17,6 +18,7 @@ describe('AuthService', () => {
   let userService: jest.Mocked<UsersService>;
   let sessionService: jest.Mocked<SessionService>;
   let loginAttemptService: jest.Mocked<LoginAttemptService>;
+  let permissionsService: jest.Mocked<PermissionsService>;
 
   const user = {
     id: 'user-id-1',
@@ -60,6 +62,12 @@ describe('AuthService', () => {
             clearAttempts: jest.fn()
           }
         },
+        {
+          provide: PermissionsService,
+          useValue: {
+            isUserAdmin: jest.fn(),
+          }
+        }
       ],
     }).compile();
 
@@ -67,6 +75,7 @@ describe('AuthService', () => {
     userService = module.get(UsersService);
     sessionService = module.get(SessionService);
     loginAttemptService = module.get(LoginAttemptService);
+    permissionsService = module.get(PermissionsService);
   });
 
   afterEach(() => {
@@ -160,7 +169,7 @@ describe('AuthService', () => {
 
   describe('getCurrentUser', () => {
     it('returns the user profile', async () => {
-      const profile: UserSummaryDto = {
+      const profile: Omit<UserSummaryDto, 'isAdmin'> = {
         id: user.id,
         email: user.email,
         displayName: 'Test User',
@@ -168,11 +177,13 @@ describe('AuthService', () => {
         isActive: user.isActive};
 
       userService.findProfileById.mockResolvedValue(profile);
+      permissionsService.isUserAdmin.mockResolvedValue(false);
 
       const result = await service.getCurrentUser(user.id);
 
       expect(userService.findProfileById).toHaveBeenCalledWith(user.id);
-      expect(result).toEqual(profile);
+      expect(permissionsService.isUserAdmin).toHaveBeenCalledWith(user.id);
+      expect(result).toEqual({...profile, isAdmin: false});
     });
   });
 });

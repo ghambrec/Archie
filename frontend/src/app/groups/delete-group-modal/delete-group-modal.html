@@ -1,0 +1,40 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    {{ 'groups.deleteGroup.heading' | transloco }}
+  </h5>
+
+  <button
+    type="button"
+    class="btn-close"
+    aria-label="Close"
+    (click)="closeModal()">
+  </button>
+</div>
+
+<div class="modal-body">
+  <p>
+    {{ 'groups.deleteGroup.question' | transloco }}
+    <strong>{{ selectedGroup?.name }}</strong>
+  </p>
+
+  @if (errorMsg()) {
+    <div class="text-danger">
+      {{ errorMsg() | transloco }}
+    </div>
+  }
+  <div class="d-flex justify-content-between">
+    <button
+      type="button"
+      class="btn btn-secondary"
+      (click)="closeModal()">
+      {{ 'groups.deleteGroupAdmin.btnCancel' | transloco }}
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-danger"
+      (click)="confirmDelete()">
+      {{ 'groups.deleteGroupAdmin.btnDelete' | transloco }}
+    </button>
+  </div>
+</div>
