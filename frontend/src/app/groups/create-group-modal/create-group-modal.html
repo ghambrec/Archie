@@ -28,16 +28,11 @@
 		}
 
 		<div class="d-flex justify-content-between">
+			<button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">{{ "groups.createGroupAdmin.btnCancel" | transloco }}</button>
+			
 			<button type="submit" class="btn btn-primary" [disabled]="createGroupAdminForm().submitting()">
 				@if (createGroupAdminForm().submitting()) { {{ "groups.createGroupAdmin.btnSubmitPending" | transloco }} } @else { {{ "groups.createGroupAdmin.btnSubmit" | transloco }} }
-				<!-- @if (createGroupAdminForm().submitting()) {
-						<span>Sending...</span>
-				} @else {
-						<span>Create Group</span>
-				} -->
 			</button>
-
-			<button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">{{ "groups.createGroupAdmin.btnCancel" | transloco }}</button>
 		</div>
 
 	</form>
