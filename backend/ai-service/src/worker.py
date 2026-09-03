@@ -41,7 +41,6 @@ async def on_startup(ctx: dict) -> None:
 async def on_shutdown(ctx: dict) -> None:
     logger.info("AI Service Worker shutting down")
     await ctx["db_pool"].close()
-    await ctx["minio"].Close()
 
 
 class WorkerSettings:
