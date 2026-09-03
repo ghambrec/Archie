@@ -26,27 +26,39 @@ CREATE TABLE IF NOT EXISTS ai_chunks (
 CREATE INDEX IF NOT EXISTS ai_chunks_ai_document_id_idx ON ai_chunks (ai_document_id);
 CREATE INDEX IF NOT EXISTS ai_chunks_embedding_hnsw_idx ON ai_chunks USING hnsw (embedding vector_cosine_ops);
 
-CREATE TABLE IF NOT EXISTS ai_tags (
+-- wird verschoben in nest server als tabelle "tags" - ehemals ai_tags
+CREATE TABLE IF NOT EXISTS tags (
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	name VARCHAR(100) NOT NULL UNIQUE,
 	label VARCHAR(150) NOT NULL,
 	description VARCHAR(500),
 	facet VARCHAR(16) NOT NULL DEFAULT 'domain' CHECK (facet IN ('domain', 'doctype')),
-	parent_id UUID REFERENCES ai_tags(id) ON DELETE SET NULL,
+	parent_id UUID REFERENCES tags(id) ON DELETE SET NULL,
 	is_system BOOLEAN NOT NULL DEFAULT false,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	CONSTRAINT no_self_parent CHECK (parent_id IS DISTINCT FROM id)
 );
 
 CREATE TABLE IF NOT EXISTS ai_document_tags (
+	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	ai_document_id UUID NOT NULL REFERENCES ai_documents(id) ON DELETE CASCADE,
-	ai_tag_id UUID NOT NULL REFERENCES ai_tags(id) ON DELETE CASCADE,
+	ai_tag_id UUID NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+	proposed_name VARCHAR(100),
+	proposed_label VARCHAR(150),
+	proposed_facet VARCHAR(16) CHECK (proposed_facet IN ('domain', 'doctype')),
+	proposed_parent_id UUID REFERENCES tags(id) ON DELETE SET NULL,
 	confidence REAL NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-	PRIMARY KEY (ai_document_id, ai_tag_id)
+	CONSTRAINT ai_document_tags_tag_exists_or_proposal CHECK (
+		(ai_tag_id IS NOT NULL AND proposed_name IS NULL)
+		OR (ai_tag_id IS NULL AND proposed_name IS NOT NULL)
+	)
 );
+CREATE UNIQUE INDEX IF NOT EXISTS ai_document_tags_unique_tag ON ai_document_tags (ai_document_id, COALESCE(ai_tag_id::text, proposed_name));
 
-INSERT INTO ai_tags (name, label, description, facet, is_system) VALUES
+CREATE INDEX IF NOT EXISTS ai_document_tags_idx ON ai_document_tags (ai_document_id);
+
+INSERT INTO tags (name, label, description, facet, is_system) VALUES
 	('work',      'Work',            	'Employment, career, employer',              			'domain', true),
 	('education', 'Education',       	'Schooling, studies, courses, training',     			'domain', true),
 	('health',    'Health',          	'Medicine, doctors, therapy, medication',    			'domain', true),
@@ -64,7 +76,7 @@ INSERT INTO ai_tags (name, label, description, facet, is_system) VALUES
 ON CONFLICT (name) DO UPDATE
 SET label = EXCLUDED.label, description = EXCLUDED.description, facet = EXCLUDED.facet;
 
-INSERT INTO ai_tags (name, label, description, facet, is_system, parent_id)
+INSERT INTO tags (name, label, description, facet, is_system, parent_id)
 SELECT v.name, v.label, v.description, 'domain', true, p.id
 FROM (VALUES
 	('banking',      'Bank Account',      'Checking account, credit card, payments', 		'finance'),
@@ -78,11 +90,11 @@ FROM (VALUES
 	('property',     'Property Ownership','Ownership, property management, property tax',	'housing'),
 	('identity',     'ID Documents',      'ID card, passport, driver''s license',    		'family')
 ) AS v(name, label, description, parent_name)
-JOIN ai_tags p ON p.name = v.parent_name
+JOIN tags p ON p.name = v.parent_name
 ON CONFLICT (name) DO UPDATE
 SET label = EXCLUDED.label, description = EXCLUDED.description, parent_id = EXCLUDED.parent_id, facet = EXCLUDED.facet;
 
-INSERT INTO ai_tags (name, label, description, facet, is_system) VALUES
+INSERT INTO tags (name, label, description, facet, is_system) VALUES
 	('contract',      'Contract',           'Contracts, policies, agreements, terminations', 					'doctype', true),
 	('invoice',       'Invoice & Receipt',  'Invoices, receipts, bills, reminders',          					'doctype', true),
 	('statement',     'Statement',          'Bank statements, payslips, annual statements',  					'doctype', true),
