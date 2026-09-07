@@ -51,5 +51,4 @@ class WorkerSettings:
     functions = [func(ingest_job, max_tries=1)]
     on_startup = on_startup
     on_shutdown = on_shutdown
-    redis_settings = RedisSettings(
-        host=settings.redis_host, port=settings.redis_port)
+    redis_settings = RedisSettings.from_dsn(settings.redis_dsn)

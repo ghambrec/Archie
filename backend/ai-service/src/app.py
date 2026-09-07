@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
     """Initialize and cleanup on app startup/shutdown."""
     logger.info("AI Service starting up")
     app.state.db_pool = await create_pool()
-    app.state.arq_pool = await arq_create_pool(RedisSettings(host=settings.redis_host, port=settings.redis_port))
+    app.state.arq_pool = await arq_create_pool(RedisSettings.from_dsn(settings.redis_dsn))
     try:
         yield
     finally:
