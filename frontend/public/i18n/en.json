@@ -92,7 +92,10 @@
 				"empty": "This group has no members.",
 				"btnClose": "Close",
 				"memberCount": "{{count}} members.",
-				"noMembers": "No members."
+				"noMembers": "No members.",
+				"searchUser": "Add user",
+				"searchUserPlaceholder": "Search by username or email",
+				"btnAddUser": "Add"
 			}
 	},
 	"errors": {
