@@ -45,6 +45,15 @@
             <td>{{ group.isSystem ? 'Yes' : 'No' }}</td>
             <td>
               <div class="d-flex">
+                <button 
+                  type="button"
+                  class="btn btn-info me-2 d-flex align-items-center justify-content-center"
+                  (click)="openInforGroupModal(group)"
+                  title="Group Information"
+                  aria-label="Group Information">
+                  <i class="bi bi-info-circle-fill"></i>
+                </button>
+
                 <button
                   type="button"
                   class="btn btn-secondary me-2 display-flex"

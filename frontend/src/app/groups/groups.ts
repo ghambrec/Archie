@@ -19,6 +19,19 @@ export interface UpdateGroupDto {
 	description?: string | null;
 }
 
+export interface GroupMember {
+	userId: string;
+	displayName: string;
+	joinedAt: string;
+	email: string;
+}
+
+export interface GroupMembersResponse {
+	groupId: string;
+	groupName: string;
+	members: GroupMember[];
+}
+
 @Service()
 export class Groups {
 	private readonly http = inject(HttpClient);
@@ -58,6 +71,14 @@ export class Groups {
 			{
 				withCredentials: true,
 			}
+		);
+	}
+
+	infoGroups(id: string) {
+		return this.http.get<GroupMembersResponse>(`${environment.apiUrl}/user-groups/groups/${id}/members`,
+			{
+				withCredentials: true,
+			},
 		);
 	}
 }
