@@ -26,14 +26,14 @@ CREATE TABLE IF NOT EXISTS ai_chunks (
 CREATE INDEX IF NOT EXISTS ai_chunks_ai_document_id_idx ON ai_chunks (ai_document_id);
 CREATE INDEX IF NOT EXISTS ai_chunks_embedding_hnsw_idx ON ai_chunks USING hnsw (embedding vector_cosine_ops);
 
--- wird verschoben in nest server als tabelle "tags" - ehemals ai_tags
+-- wird verschoben in nest server als tabelle "tags" - ehemals ai_tags (erstellung kann hier entfernt werden sobald die tabelle in nest erstellt wird)
 CREATE TABLE IF NOT EXISTS tags (
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	name VARCHAR(100) NOT NULL UNIQUE,
 	label VARCHAR(150) NOT NULL,
 	description VARCHAR(500),
 	facet VARCHAR(16) NOT NULL DEFAULT 'domain' CHECK (facet IN ('domain', 'doctype')),
-	parent_id UUID REFERENCES tags(id) ON DELETE SET NULL,
+	parent_id UUID REFERENCES tags(id) ON DELETE RESTRICT,
 	is_system BOOLEAN NOT NULL DEFAULT false,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	CONSTRAINT no_self_parent CHECK (parent_id IS DISTINCT FROM id)
@@ -42,9 +42,9 @@ CREATE TABLE IF NOT EXISTS tags (
 CREATE TABLE IF NOT EXISTS ai_document_tags (
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	ai_document_id UUID NOT NULL REFERENCES ai_documents(id) ON DELETE CASCADE,
-	ai_tag_id UUID NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+	ai_tag_id UUID REFERENCES tags(id) ON DELETE CASCADE,
 	proposed_name VARCHAR(100),
-	proposed_label VARCHAR(150),
+	proposed_description VARCHAR(500),
 	proposed_facet VARCHAR(16) CHECK (proposed_facet IN ('domain', 'doctype')),
 	proposed_parent_id UUID REFERENCES tags(id) ON DELETE SET NULL,
 	confidence REAL NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
