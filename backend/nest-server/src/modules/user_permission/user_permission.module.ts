@@ -6,11 +6,13 @@ import { GroupPermissionGuard } from './guards/group-permission.guard';
 import { UserPermissionController } from './user_permission.controller';
 import { UserPermissionService } from './user_permission.service';
 import { SessionModule } from '../auth/session/session.module';
+import { PermissionsModule } from '../permissions/permissions.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserPermission, Permission]),
-    SessionModule
+    SessionModule,
+    PermissionsModule,
   ],
   controllers: [UserPermissionController],
   providers: [UserPermissionService, GroupPermissionGuard],
