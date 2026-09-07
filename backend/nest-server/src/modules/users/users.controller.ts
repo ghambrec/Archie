@@ -1,5 +1,6 @@
 import {
   Req,
+  Res,
   Body,Get,
   Controller,
   Patch,
@@ -10,8 +11,8 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 
-import { ApiTags } from '@nestjs/swagger';
-import type { Request } from 'express';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { Request, Response } from 'express';
 import { UsersService } from './users.service';
 import { UsersFileService } from './users-file.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -63,6 +64,31 @@ export class UsersController {
     return this.usersFileService.patchAvatarImage(req.userId!, file);
   }
   
+  @ApiOperation({
+    summary: 'Get current user avatar',
+    description: 'Streams the raw image contents of the current user\'s avatar.',
+  })
+  @UseGuards(SessionAuthGuard)
+  @Get('me/avatar')
+  async getAvatar(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<void> {
+    const avatar = await this.usersFileService.getAvatarImage(req.userId!);
+
+    res.setHeader('Content-Type', avatar.mimeType);
+    res.setHeader('Content-Length', avatar.sizeBytes.toString());
+
+    avatar.stream.on('error', () => {
+      if (!res.headersSent) {
+        res.status(500);
+      }
+      res.end();
+    });
+
+    avatar.stream.pipe(res);
+  }
+
   @UseGuards(SessionAuthGuard)
   @Get('me')
   async getCurrentUser( @Req() req: Request): Promise<Omit<UserSummaryDto, 'isAdmin'>> {
