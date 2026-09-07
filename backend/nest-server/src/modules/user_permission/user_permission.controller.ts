@@ -15,15 +15,16 @@ import { GrantPermissionDto } from './dto/grant-permission.dto';
 import { UserPermissionResponseDto } from './dto/user-permission-response.dto';
 import { GroupPermissionGuard } from './guards/group-permission.guard';
 import { UserPermissionService } from './user_permission.service';
+import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
 
 @ApiTags('user-permission')
 @Controller('user-permission/:groupId/permissions')
-@UseGuards(SessionAuthGuard, GroupPermissionGuard)
+@UseGuards(SessionAuthGuard)
 export class UserPermissionController {
   constructor(private readonly userPermissionService: UserPermissionService) {}
 
   @Post()
-  @RequireGroupPermission('group.manage_users')
+  @UseGuards(AdminRequiredGuard)
   @ApiOperation({
     summary: 'Grant a permission to a user in a group',
     description:
@@ -39,7 +40,7 @@ export class UserPermissionController {
   }
 
   @Delete(':userId/:permKey')
-  @RequireGroupPermission('group.manage_users')
+  @UseGuards(AdminRequiredGuard)
   @ApiOperation({
     summary: 'Revoke a permission from a user in a group',
     description:
@@ -56,7 +57,7 @@ export class UserPermissionController {
   }
 
   @Get()
-  @RequireGroupPermission('group.manage_users')
+  @UseGuards(AdminRequiredGuard)
   @ApiOperation({
     summary: 'List permission grants in a group',
     description:
