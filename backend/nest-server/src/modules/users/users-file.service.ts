@@ -14,6 +14,7 @@ const AVATARS_BUCKET = 'avatars';
 const ALLOWED_AVATAR_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024; // 5 Mb
 const DEFAULT_AVATAR_MIME_TYPE = 'application/octet-stream';
+const MIME_TYPE_KEY = 'content-type';
 
 @Injectable()
 export class UsersFileService {
@@ -82,7 +83,7 @@ export class UsersFileService {
     const getAvatarResponse: GetAvatarResponseDto = {
       stream: stream,
       sizeBytes: fileData.size,
-      mimeType: fileData.metaData['content-type'] ?? DEFAULT_AVATAR_MIME_TYPE,
+      mimeType: fileData.metaData[MIME_TYPE_KEY] ?? DEFAULT_AVATAR_MIME_TYPE,
     };
 
     return getAvatarResponse;
