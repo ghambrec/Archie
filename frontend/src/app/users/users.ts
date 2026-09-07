@@ -2,6 +2,19 @@ import { Service, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
+export interface UserGroupMembership {
+	groupId: string;
+	name: string;
+	joinedAt: string;
+}
+
+export interface UserGroupsResponse {
+	userId: string;
+	displayName: string;
+	email: string;
+	groups: UserGroupMembership[];
+}
+
 export interface CreateUserRequest {
 	email: string;
 	password: string;
@@ -73,6 +86,15 @@ export class Users {
 				withCredentials: true, 
 			}
 		)
+	}
+
+	getGroupsByUserId(userId: string) {
+		return this.http.get<UserGroupsResponse>(
+			`${environment.apiUrl}/admin-user-groups/userId/${userId}/groups`,
+			{
+				withCredentials: true,
+			},
+		);
 	}
 	//addToUserlist(user: UserInfo){
 	//	this.usersList.update((currentList)) =>
