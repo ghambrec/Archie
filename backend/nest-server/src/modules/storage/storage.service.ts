@@ -16,6 +16,13 @@ export interface PutObjectResult {
   versionId: string | null;
 }
 
+export interface ObjectStats {
+  size: number;
+  etag: string;
+  lastModified: Date;
+  metaData: StoredObjectMetadata;
+}
+
 @Injectable()
 export class StorageService {
   private readonly expireURL: number;
@@ -53,6 +60,16 @@ export class StorageService {
     } catch {
       return false;
     }
+  }
+
+  async getStats(bucket: string, key: string): Promise<ObjectStats> {
+    const stat = await this.client.statObject(bucket, key);
+    return {
+      size: stat.size,
+      etag: stat.etag,
+      lastModified: stat.lastModified,
+      metaData: stat.metaData,
+    };
   }
 
   async getPresignedDownloadUrl(
