@@ -90,6 +90,9 @@
             <th scope="col">
               {{ "groups.infoGroup.email" | transloco }}
             </th>
+            <th scope="col">
+              {{ "groups.infoGroup.actions" | transloco }}
+            </th>
           </tr>
         </thead>
 
@@ -98,10 +101,18 @@
           <tr>
             <td>{{ member.displayName }}</td>
             <td>{{ member.email }} </td>
+            <td>
+              <button
+                type="button"
+                class="btn btn-danger btn-sm"
+                (click)="removeUserFromGroup(member.userId)">
+                {{ "groups.infoGroup.btnRemoveUser" | transloco }}
+              </button>
+            </td>
           </tr>
         } @empty {
           <tr>
-            <td colspan="2">
+            <td colspan="3">
               {{ "groups.infoGroup.empty" | transloco }}
             </td>
           </tr>
