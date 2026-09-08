@@ -68,11 +68,11 @@ export class InfoGroupModal {
     }
 
     return this.userService.usersList().filter(user =>
-      !this.members().some(
-        member => member.userId === user.id
-      ) &&
+      !this.members().some(member => member.userId === user.id) &&
+      (
       user.displayName.toLowerCase().includes(search) ||
       user.email.toLowerCase().includes(search)
+      )
     );
   });
 
