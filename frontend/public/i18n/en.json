@@ -112,7 +112,8 @@
 				"userRemoved": "User removed from group.",
 				"errorRemovingUser": "The user could not be removed from the group.",
 				"actions": "Actions",
-				"btnRemoveUser": "Delete"
+				"btnRemoveUser": "Delete",
+				"errorLoadingUsers": "Unable to load users"
 			}
 	},
 	"errors": {
