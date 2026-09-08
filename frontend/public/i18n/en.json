@@ -108,7 +108,11 @@
 				"btnAddUser": "Add",
 				"userAdded": "User added to group",
 				"errorAddingUser": "The user could not be added.",
-				"userAlreadyMember": "The user is already assigned to this group."
+				"userAlreadyMember": "The user is already assigned to this group.",
+				"userRemoved": "User removed from group.",
+				"errorRemovingUser": "The user could not be removed from the group.",
+				"actions": "Actions",
+				"btnRemoveUser": "Delete"
 			}
 	},
 	"errors": {
