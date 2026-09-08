@@ -111,8 +111,8 @@ export class InfoGroupModal {
         this.feedbackMsg.set("groups.infoGroup.userRemoved");
         this.loadMembers();
       },
-      error: error => {
-        this.actionError.set("groups.infoGroup.errorRemovingUser"); 
+      error: () => {
+        this.actionError.set("groups.infoGroup.errorRemovingUser");
       },
     });
   }
