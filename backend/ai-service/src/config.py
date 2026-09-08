@@ -25,7 +25,15 @@ class Settings(BaseSettings):
     langfuse_secret_key: str | None = None
 
     # --- DATABASE
-    postgres_dsn: str
+    postgres_user: str
+    postgres_password: str
+    postgres_host: str
+    postgres_port: int = 5432
+    postgres_db: str
+
+    @property
+    def postgres_dsn(self) -> str:
+        return (f"postgresql://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}")
 
     # --- LLM PROVIDER
     llm_provider: Literal["ollama", "openrouter"] = "ollama"
@@ -56,8 +64,11 @@ class Settings(BaseSettings):
     chunk_overlap_chars: int
 
     # --- REDIS
-    redis_host: str
-    redis_port: int
+    redis_url: str
+
+    @property
+    def redis_dsn(self) -> str:
+            return (f"redis://{self.redis_url}")
 
 
 settings = Settings()

@@ -1,0 +1,13 @@
+.group-list {
+  min-height: 8rem;
+  max-height: 60vh;
+  overflow: auto;
+  resize: vertical;
+}
+
+.member-count {
+  margin-left:  auto;
+  margin-right: 1rem;
+  font-size: 1rem;
+  color: var(--bs-secondary-color);
+}

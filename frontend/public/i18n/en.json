@@ -38,6 +38,16 @@
 			"errorGeneral": "Unable to create user",
 			"errorConflictMail": "E-Mail already registered",
 			"errorConflictName": "Name already registered"
+		},
+		"userInfo": {
+			"heading": "User groups",
+			"groupName": "Group name",
+			"loading": "Loading groups...",
+			"errorLoading": "Unable to load user's groups",
+			"empty": "This user is not assigned to any group.",
+			"btnClose": "Close",
+			"description": "User is assigned to following groups:",
+			"groupCount": "{{count}} groups."
 		}
 
 	}, 
@@ -82,6 +92,17 @@
 				"feedbackMsg": "Group successfully edited",
 				"errorGeneral": "Unable to edit Group",
 				"errorConflictName": "Name already Taken"
+			},
+			"infoGroup": {
+				"heading": "Group members",
+				"displayName": "User-name",
+				"email": "E-Mail",
+				"loading": "Loading members...",
+				"errorLoading": "Unable to load members",
+				"empty": "This group has no members.",
+				"btnClose": "Close",
+				"memberCount": "{{count}} members.",
+				"noMembers": "No members."
 			}
 	},
 	"errors": {

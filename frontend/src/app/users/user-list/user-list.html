@@ -25,7 +25,28 @@
 				<td>{{ user.displayName }}</td>
 				<td>{{ user.lastLoginAt?? "-" }}</td>
 				<td> @if (user.isActive) {<i class="bi bi-check-square"></i>} @else {<i class="bi bi-square"></i>} </td>
-				<td> <button type="button" class="btn btn-secondary me-2 display-flex" (click)="openEditUserModal()"><i class="bi bi-pencil-fill"></i></button> </td>
+				<td>
+					<div class="d-flex">
+						<button
+							type="button"
+							class="btn btn-info me-2 d-flex align-items-center justify-content-center"
+							(click)="openUserInfoModal(user)"
+							title="User Information"
+							aria-label="User Information">
+							<i class="bi bi-info-circle-fill"></i>
+						</button>
+
+						<button
+							type="button"
+							class="btn btn-secondary me-2 d-flex align-items-center justify-content-center"
+							(click)="openEditUserModal()"
+							title="Edit user"
+							aria-label="Edit user">
+							<i class="bi bi-pencil-fill"></i>
+						</button>
+					</div>
+					
+				</td>
 			</tr>
 		}
 	</tbody>

@@ -9,6 +9,7 @@ export enum ErrorCode {
     ValidationFailed = 'VALIDATION_FAILED',
     InvalidAvatarFileType = 'INVALID_AVATAR_FILE_TYPE',
     AvatarFileTooLarge = 'AVATAR_FILE_TOO_LARGE',
+    AvatarNotExisted = 'AVATAR_NOT_EXIST',
     DocumentNotFound = 'DOCUMENT_NOT_FOUND',
     DocumentAlreadyInGroup = 'DOCUMENT_ALREADY_IN_GROUP',
 

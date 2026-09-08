@@ -46,6 +46,10 @@ export const ERROR_CATALOG ={
     status: HttpStatus.BAD_REQUEST,
     message: 'Avatar file exceeds the maximum allowed size of 5MB.'
   },
+  [ErrorCode.AvatarNotExisted]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: 'User has no avatar image.'
+  },
   [ErrorCode.DocumentNotFound]: {
     status: HttpStatus.NOT_FOUND,
     message: 'Document was not found.'
