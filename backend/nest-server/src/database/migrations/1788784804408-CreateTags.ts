@@ -23,7 +23,7 @@ export class CreateTags1788784804408 implements MigrationInterface {
         await queryRunner.query(`
             CREATE INDEX IF NOT EXISTS tags_parent_id_idx
             ON tags (parent_id);
-            `)
+            `);
 
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS document_tags (
@@ -45,7 +45,7 @@ export class CreateTags1788784804408 implements MigrationInterface {
         await queryRunner.query(`
             CREATE INDEX IF NOT EXISTS document_tags_tag_id_idx
             ON document_tags (tag_id);
-            `);
+        `);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {

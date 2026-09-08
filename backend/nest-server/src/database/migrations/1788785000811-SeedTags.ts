@@ -72,9 +72,9 @@ export class SeedTags1788785000811 implements MigrationInterface {
             ON CONFLICT (name) DO UPDATE
             SET label = EXCLUDED.label,
             description = EXCLUDED.description, 
-            facet = EXCLUDED.facet;
+            facet = EXCLUDED.facet,
             is_system = EXCLUDED.is_system
-            `)
+            `);
         
     }
     
