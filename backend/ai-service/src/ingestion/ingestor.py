@@ -29,8 +29,8 @@ async def get_object_key(pool: asyncpg.Pool, doc_id: UUID) -> str | None:
 async def get_tags(pool: asyncpg.Pool) -> list[dict]:
     select = """
                 select t.id, t.name, t.label, t.description, t.facet, p.name as parent_name
-                from ai_tags t
-                left join ai_tags p
+                from tags t
+                left join tags p
                     on p.id = t.parent_id
                 order by t.facet, t.name
             """
@@ -50,23 +50,18 @@ async def write_llm_data(pool: asyncpg.Pool, doc_id: UUID, data: DocumentInfos, 
         name = ai_tag.name.strip().lower()
         tag_id = lookup_map.get(name)
 
-        # insert new tag
         if tag_id is None:
+            # tag not exist, insert into proposed_ fields
             parent_id = lookup_map.get(ai_tag.parent.strip().lower()) if ai_tag.parent else None
-            insert_tag = """
-                            insert into ai_tags (name, label, description, facet, parent_id)
-                            values ($1, $1, $2, $3, $4)
-                            on conflict (name) do nothing
-                            returning id
-                        """
-            tag_id = await pool.fetchval(insert_tag, ai_tag.name, ai_tag.description, ai_tag.facet, parent_id)
-            if tag_id is None:
-                tag_id = await pool.fetchval("select id from ai_tags where name = $1", ai_tag.name)
-            lookup_map[name] = tag_id
-
-        # write in ai_document_tag table
-        insert_doc_tag = "insert into ai_document_tags (ai_document_id, ai_tag_id, confidence) values ($1, $2, $3)"
-        await pool.execute(insert_doc_tag, doc_id, tag_id, ai_tag.confidence)
+            insert_proposed_tag = """
+                                    insert into ai_document_tags (ai_document_id, proposed_name, proposed_facet, proposed_description, proposed_parent_id, confidence)
+                                    values ($1, $2, $3, $4, $5, $6)
+                                """
+            await pool.execute(insert_proposed_tag, doc_id, ai_tag.name, ai_tag.facet, ai_tag.description, parent_id, ai_tag.confidence)
+        else:
+            # tag exist, write as normal tag
+            insert_doc_tag = "insert into ai_document_tags (ai_document_id, ai_tag_id, confidence) values ($1, $2, $3)"
+            await pool.execute(insert_doc_tag, doc_id, tag_id, ai_tag.confidence)
 
 
 async def ingest_doc(
