@@ -108,6 +108,6 @@ export class GroupList implements OnInit {
     );
     modal.componentInstance.selectedGroup = group;
     modal.componentInstance.loadMembers();
-    // no subsrcibe - list doesnt change...
+    modal.componentInstance.loadUsers();
   }
 }
