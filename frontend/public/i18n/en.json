@@ -105,7 +105,10 @@
 				"noMembers": "No members.",
 				"searchUser": "Add user",
 				"searchUserPlaceholder": "Search by username or email",
-				"btnAddUser": "Add"
+				"btnAddUser": "Add",
+				"userAdded": "User added to group",
+				"errorAddingUser": "The user could not be added.",
+				"userAlreadyMember": "The user is already assigned to this group."
 			}
 	},
 	"errors": {
