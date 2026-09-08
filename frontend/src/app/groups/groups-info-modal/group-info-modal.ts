@@ -47,6 +47,19 @@ export class InfoGroupModal {
   readonly actionError = signal<string | null>(null);
   readonly feedbackMsg = signal<string | null>(null);
 
+  loadUsers(): void {
+    const request = this.userService.getUsersList(1, 100);
+    
+    request.subscribe({
+      next: response => {
+        this.userService.usersList.set(response.data);
+      },
+      error: () => {
+        this.actionError.set("groups.infoGroup.errorLoadingUsers");
+      },
+    });
+  }
+
   protected readonly filteredUserList = computed(() => {
     const  search = this.searchString().trim().toLowerCase();
 
@@ -55,8 +68,9 @@ export class InfoGroupModal {
     }
 
     return this.userService.usersList().filter(user =>
-      !this.members().some(member =>
-        member.userId === user.id) &&
+      !this.members().some(
+        member => member.userId === user.id
+      ) &&
       user.displayName.toLowerCase().includes(search) ||
       user.email.toLowerCase().includes(search)
     );
@@ -82,19 +96,6 @@ export class InfoGroupModal {
         }
 
         this.actionError.set(translocoKey);
-      },
-    });
-  }
-
-  loadUsers(): void {
-    const request = this.userService.getUsersList(1, 100);
-    
-    request.subscribe({
-      next: response => {
-        this.userService.usersList.set(response.data);
-      },
-      error: () => {
-        this.actionError.set("groups.infoGroup.errorLoadingUsers");
       },
     });
   }
