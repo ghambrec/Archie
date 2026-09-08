@@ -35,16 +35,43 @@
         id="user-search"
         type="search"
         class="form-control"
+        [value]="searchString()"
+        (input)="searchString.set($any($event.target).value)"
         [placeholder]="'groups.infoGroup.searchUserPlaceholder' | transloco"
         autocomplete="off" />
-
-      <button
-        type="button"
-        class="btn btn-primary">
-        {{ "groups.infoGroup.btnAddUser" | transloco }}
-      </button>
     </div>
+
+      @if (filteredUserList().length > 0) {
+        <div class="search-results mb-3">
+          @for (user of filteredUserList(); track user.id) {
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+              <span>
+                {{ user.displayName }} - {{ user.email }}
+              </span>
+
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="addUserToGroup(user.id)">
+                {{ "groups.infoGroup.btnAddUser" | transloco }}
+              </button>
+            </div>
+          }
+        </div>
+      }
   </div>
+
+  @if (actionError()) {
+    <div class="text-danger mb-2">
+      {{ actionError() | transloco }}
+    </div>
+  }
+
+  @if (feedbackMsg()) {
+    <div class="text-success mb-2">
+      {{ feedbackMsg() | transloco }}
+    </div>
+  }
 
   @if (isLoading()) {
    <p>{{ "groups.infoGroup.loading" | transloco}}</p> 
