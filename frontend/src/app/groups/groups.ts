@@ -92,8 +92,8 @@ export class Groups {
 		);
 	}
 
-	removeUserFromGroup(userId: string) {
-		return this.http.delete(`${this.userGroupsUrl}/members/${userId}`,
+	removeUserFromGroup(groupId: string, userId: string) {
+		return this.http.delete(`${this.userGroupsUrl}/groups/${groupId}/members/${userId}`,
 			{
 				withCredentials: true
 			},
