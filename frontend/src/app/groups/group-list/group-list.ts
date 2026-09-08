@@ -5,7 +5,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CreateGroupModal } from '../create-group-modal/create-group-modal';
 import { DeleteGroupModal } from '../delete-group-modal/delete-group-modal';
 import { EditGroupModal } from '../edit-group-modal/edit-group-modal';
-import { InfoGroupModal } from '../groups-info-modal/group-info-modal';
+import { InfoGroupModal } from '../group-info-modal/group-info-modal';
 
 
 @Component({
@@ -91,7 +91,7 @@ export class GroupList implements OnInit {
       },
     );
 
-    modal.componentInstance.selectedGroup = group;
+    modal.componentInstance.initialize(group);
 
     modal.closed.subscribe(() => {
       this.loadGroups();
