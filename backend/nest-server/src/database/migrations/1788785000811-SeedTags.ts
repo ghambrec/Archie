@@ -56,7 +56,8 @@ export class SeedTags1788785000811 implements MigrationInterface {
             `);
         
         await queryRunner.query(`
-            INSERT INTO tags (name, label, description, facet, is_system) VALUES
+            INSERT INTO tags (name, label, description, facet, is_system) 
+            VALUES
                 ('contract',      'Contract',           'Contracts, policies, agreements, terminations', 					'doctype', true),
                 ('invoice',       'Invoice & Receipt',  'Invoices, receipts, bills, reminders',          					'doctype', true),
                 ('statement',     'Statement',          'Bank statements, payslips, annual statements',  					'doctype', true),
