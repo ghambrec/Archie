@@ -79,6 +79,52 @@ export class SeedTags1788785000811 implements MigrationInterface {
     
 
     public async down(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`
+            DELETE FROM tags
+            WHERE name IN ( 
+                'banking',
+                'taxes',
+                'retirement',
+                'investments',
+                'loans',
+                'utilities',
+                'telecom',
+                'rental',
+                'property',
+                'identity'
+            )
+            `);
+
+        await queryRunner.query(`
+            DELETE FROM tags
+            WHERE name IN (
+                'work',
+                'education',
+                'health',
+                'insurance',
+                'finance',
+                'housing',
+                'vehicles',
+                'travel',
+                'leisure',
+                'shopping',
+                'family',
+                'legal',
+                'pets',
+                'other',
+                'contract',
+                'invoice',
+                'statement',
+                'notice',
+                'certificate',
+                'report',
+                'ticket',
+                'application',
+                'id-document',
+                'manual',
+                'correspondence'
+            )
+            `);
     }
 
 }
