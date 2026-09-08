@@ -100,6 +100,23 @@ export class InfoGroupModal {
     });
   }
 
+  removeUserFromGroup(userId: string): void {
+    this.actionError.set(null);
+    this.feedbackMsg.set(null);
+
+    const request = this.groupsService.removeUserFromGroup(this.selectedGroup.id, userId);
+
+    request.subscribe({
+      next: () => {
+        this.feedbackMsg.set("groups.infoGroup.userRemoved");
+        this.loadMembers();
+      },
+      error: error => {
+        this.actionError.set("groups.infoGroup.errorRemovingUser"); 
+      },
+    });
+  }
+
   closeModal(): void {
     this.activeModal.dismiss();
   }
