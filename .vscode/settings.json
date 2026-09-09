@@ -1,0 +1,3 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/ai-service/.venv/bin/python"
+}
