@@ -47,7 +47,8 @@ async def ask(request: Request, body: AskRequest, conv_id: UUID, user_id: UUID =
 @router.get("/conversations/{conv_id}/messages", summary="get all messages to a conversation from a user")
 async def get_messages(request: Request, conv_id: UUID, user_id: UUID = Depends(get_user_id)):
     pool = request.app.state.db_pool
-    # TODO
+    rows = await conversations.get_messages(pool, user_id, conv_id)
+    return {"count": len(rows), "data": rows}
 
 
 @router.delete("/conversations", status_code=204, summary="delete all conversations from a user")

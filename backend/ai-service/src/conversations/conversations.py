@@ -40,6 +40,23 @@ async def ask_question(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, questio
     # TODO: hier weiter mit retrieval pipeline (embedding etc)
 
 
+async def get_messages(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID):
+    select = """
+                SELECT 
+                    am.sender, am."content" 
+                FROM ai_messages AS am 
+                LEFT JOIN ai_conversations AS ac 
+                    ON ac.id  = am.conv_id 
+                WHERE
+                    am.conv_id = $1
+                    AND ac.user_id = $2
+                ORDER BY am.created_at ASC
+            """
+
+    rows = await pool.fetch(select, conv_id, user_id)
+    return rows
+
+
 async def create_conversation(pool: asyncpg.Pool, user_id: UUID) -> UUID:
     insert = """
                 INSERT INTO ai_conversations (user_id) VALUES ($1)
