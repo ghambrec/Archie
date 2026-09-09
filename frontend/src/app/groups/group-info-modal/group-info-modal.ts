@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from "@angular/core";
 import { TranslocoPipe } from "@jsverse/transloco";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { GroupMember, GroupResponseAdmin, Groups } from "../groups";
+import { GroupMember, GroupResponseAdmin, Groups, UserPermission } from "../groups";
 import { Users } from "../../users/users";
 
 @Component({
@@ -122,6 +122,37 @@ export class InfoGroupModal {
   // selectUser(userId: string): void {
   //   this.selectedUserId.set(userId);
   // }
+
+  readonly permissions = signal<UserPermission[]>([]);
+
+  // openUserPermissions(member: GroupMember): void {
+  // const groupId = this.selectedGroup.id;
+  // const userId = member.userId;
+
+  
+
+  // }
+
+  //load permissions for all user
+  loadPermissions(): void {
+    const request = this.groupsService.getGroupPermissions(this.selectedGroup.id);
+
+    request.subscribe({
+      next: returnedPermissions => {
+        this.permissions.set(returnedPermissions);
+      },
+      error: () => {
+        this.actionError.set("groups.infoGroup.errorLoadingPermissions");
+      },
+    });
+  }
+
+  //filter userPermissions for each user
+  getPermissionsForUser(userId: string): string[] {
+    const filteredPermissions = this.permissions().filter(permission => permission.userId === userId);
+
+    return filteredPermissions.map(permission => permission.permKey);
+  }
 
   closeModal(): void {
     this.activeModal.dismiss();
