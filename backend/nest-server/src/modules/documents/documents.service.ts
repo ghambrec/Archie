@@ -5,6 +5,10 @@ import { randomUUID, createHash } from 'crypto';
 import { Logger } from 'nestjs-pino';
 import { StorageService, DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS } from '../storage/storage.service';
 import { Document } from './entities/document.entity';
+import { User } from '../users/entities/user.entity';
+import { Group } from '../groups/entities/group.entity';
+import { DocumentGroup } from '../document-groups/entities/document-group.entity';
+import { DocumentAiStatus } from './dto/document-ai-status.enum';
 import { UploadResponseDto } from './dto/upload-response.dto';
 import { GetDocumentsQueryDto } from './dto/get-documents-query.dto';
 import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
@@ -75,19 +79,55 @@ export class DocumentsService {
 
     this.logger.log({ userId, page, limit }, 'Listing documents');
 
-    const [documents, total] = await this.documentsRepository.findAndCount({
-      where: { uploadedBy: userId },
-      select: {
-        id: true,
-        filename: true,
-        mimeType: true,
-        sizeBytes: true,
-        createdAt: true,
-      },
-      skip: (page - 1) * limit,
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
+    const baseQuery = this.documentsRepository
+      .createQueryBuilder('document')
+      .where('document.uploadedBy = :userId', { userId });
+
+    const total = await baseQuery.getCount();
+
+    const raw = await baseQuery
+      .clone()
+      .innerJoin(User, 'uploader', 'uploader.id = document.uploadedBy')
+      .leftJoin(DocumentGroup, 'documentGroup', 'documentGroup.documentId = document.id')
+      .leftJoin(Group, 'group', 'group.id = documentGroup.groupId')
+      .select([
+        'document.id AS "id"',
+        'document.filename AS "filename"',
+        'document.mimeType AS "mimeType"',
+        'document.sizeBytes AS "sizeBytes"',
+        'document.createdAt AS "createdAt"',
+        'document.updatedAt AS "updatedAt"',
+        'uploader.id AS "uploaderId"',
+        'uploader.displayName AS "uploaderName"',
+      ])
+      .addSelect(
+        `COALESCE(
+          json_agg(json_build_object('id', "group"."id", 'name', "group"."name"))
+            FILTER (WHERE "group"."id" IS NOT NULL),
+          '[]'
+        )`,
+        'groups',
+      )
+      .groupBy('document.id')
+      .addGroupBy('uploader.id')
+      .orderBy('document.createdAt', 'DESC')
+      .offset((page - 1) * limit)
+      .limit(limit)
+      .getRawMany();
+
+    const documents = raw.map((row) => ({
+      id: row.id,
+      filename: row.filename,
+      mimeType: row.mimeType,
+      sizeBytes: Number(row.sizeBytes),
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      uploadedBy: { id: row.uploaderId, name: row.uploaderName },
+      groups: row.groups,
+      tags: [],
+      aiStatus: DocumentAiStatus.PENDING,
+      language: '',
+    }));
 
     this.logger.log({ userId, total }, 'Documents listed successfully');
 
@@ -104,24 +144,54 @@ export class DocumentsService {
 
     this.logger.log({ userId, id }, 'Find one document');
 
-    const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
-      select: {
-        id: true,
-        filename: true,
-        mimeType: true,
-        sizeBytes: true,
-        createdAt: true,
-      },
-    });
+    const raw = await this.documentsRepository
+      .createQueryBuilder('document')
+      .innerJoin(User, 'uploader', 'uploader.id = document.uploadedBy')
+      .leftJoin(DocumentGroup, 'documentGroup', 'documentGroup.documentId = document.id')
+      .leftJoin(Group, 'group', 'group.id = documentGroup.groupId')
+      .where('document.id = :id', { id })
+      .andWhere('document.uploadedBy = :userId', { userId })
+      .select([
+        'document.id AS "id"',
+        'document.filename AS "filename"',
+        'document.mimeType AS "mimeType"',
+        'document.sizeBytes AS "sizeBytes"',
+        'document.createdAt AS "createdAt"',
+        'document.updatedAt AS "updatedAt"',
+        'uploader.id AS "uploaderId"',
+        'uploader.displayName AS "uploaderName"',
+      ])
+      .addSelect(
+        `COALESCE(
+          json_agg(json_build_object('id', "group"."id", 'name', "group"."name"))
+            FILTER (WHERE "group"."id" IS NOT NULL),
+          '[]'
+        )`,
+        'groups',
+      )
+      .groupBy('document.id')
+      .addGroupBy('uploader.id')
+      .getRawOne();
 
-    if (!document) {
+    if (!raw) {
       throw new ApplicationException(ErrorCode.DocumentNotFound);
     }
 
     this.logger.log({ userId, id }, 'One document found');
 
-    return document;
+    return {
+      id: raw.id,
+      filename: raw.filename,
+      mimeType: raw.mimeType,
+      sizeBytes: Number(raw.sizeBytes),
+      createdAt: raw.createdAt,
+      updatedAt: raw.updatedAt,
+      uploadedBy: { id: raw.uploaderId, name: raw.uploaderName },
+      groups: raw.groups,
+      tags: [],
+      aiStatus: DocumentAiStatus.PENDING,
+      language: '',
+    };
   }
 
   async getDownloadUrl(userId: string, id: string): Promise<DownloadUrlResponseDto> {
