@@ -70,5 +70,8 @@ class Settings(BaseSettings):
     def redis_dsn(self) -> str:
             return (f"redis://{self.redis_url}")
 
+    # --- OCR EXTRACTION
+    ocr_min_chars: int = 20
+    ocr_image_resultion_dpi: int = 200
 
 settings = Settings()

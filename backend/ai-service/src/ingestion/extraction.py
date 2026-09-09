@@ -4,6 +4,17 @@ from enum import Enum, auto
 
 #import libmagic
 import magic
+import pymupdf
+import pymupdf4llm
+
+from io import BytesIO
+from PIL import Image
+import pytesseract 
+
+from src.config import settings
+COLOR_REPRESENTATION = pymupdf.csRGB
+INCLUDE_TRANSPARENCY = False
+
 
 class FileType(Enum):
     UNKNOWN = auto()
@@ -27,7 +38,7 @@ class FileType(Enum):
 
 def dectect_file_type(raw:bytes) -> FileType:
     """
-    
+    inspect magic bytes with magic libary and return a enum fileType
     """
 
 
@@ -70,10 +81,6 @@ def dectect_file_type(raw:bytes) -> FileType:
         detected_type = FileType.UNKNOWN
     return detected_type
 
-    
-    return dectected_type
-
-
 
 def extract_text(raw: bytes) -> str:
     """
@@ -102,8 +109,11 @@ ext ,
     dectected_type = dectect_file_type(raw)
     logging.info("FileType %s", dectected_type.name )
 
+    if dectected_type == FileType.TEXT:
+        return text_parser(raw)
+
     if dectected_type == FileType.PDF:
-        text_buffer = pdf_parser(raw)
+        return pdf_parser(raw)
 
 
 
@@ -115,11 +125,53 @@ ext ,
 def pdf_parser(raw:bytes) -> str:
     """
     dispatch pdfs 
+    check each page and call the ocr model if less less then 20 chars get read
     """
-    logging.error("Pdf extration not implemented")
-    raise NotImplementedError("PDF extraction is not implemented yet")
+    results = []
 
-def test_parser(raw:bytes) -> str:
+    with pymupdf.open(stream=raw, filetype="pdf") as document:
+        for page in document:
+            text = page.get_text("text")
+            char_count = sum(char.isalnum() for char in text)
+            logging.info("chars dectected: %d " , char_count)
 
-    raw.decode("utf-8")
+            if char_count < settings.ocr_min_chars:
+                image = page.get_pixmap(
+                    dpi = settings.ocr_image_resultion_dpi,
+                    colorspace = COLOR_REPRESENTATION,
+                    alpha = INCLUDE_TRANSPARENCY,
+                )
+                text_extracted = ocr_image(image.tobytes("png"))
+                char_count_image = sum( char.isalnum() for char in text_extracted )
+                if char_count_image < settings.ocr_min_chars:
+                    logging.error("Nearly no chars extracted form image by OCR")
+
+
+            else:
+                logging.info("Pdf extration as markdown")
+                text_extracted = pymupdf4llm.to_markdown(document)
+
+            results.append(text_extracted)
+
+    return "\n\n".join(results)
+
+
+def text_parser(raw:bytes) -> str:
+
+    #results = []
+
+    #for page in document:
+    text = raw.decode("utf-8")
+    return text
+
+
+def ocr_image(png_bytes: bytes) -> str:
+    with Image.open(BytesIO(png_bytes)) as image:
+        text = pytesseract.image_to_string(
+            image,
+            lang="eng+deu+spa",
+            )
+        logging.info("OCR input type: %s", type(image))
+        logging.info("image_bytes %d", sum(text))
+        return text
     
