@@ -1,8 +1,9 @@
 import { Component, computed, inject, signal } from "@angular/core";
 import { TranslocoPipe } from "@jsverse/transloco";
-import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { GroupMember, GroupResponseAdmin, Groups, UserPermission } from "../groups";
 import { Users } from "../../users/users";
+import { EditUserPermissionsModal } from "../edit-user-permissions-modal/edit-user-permissions-modal";
 
 @Component({
   selector: 'app-info-group-modal',
@@ -124,14 +125,24 @@ export class InfoGroupModal {
   // }
 
   readonly permissions = signal<UserPermission[]>([]);
+  private readonly modalService = inject(NgbModal);
 
-  // openUserPermissions(member: GroupMember): void {
+  openUserPermissions(member: GroupMember): void {
+  const modal = this.modalService.open(EditUserPermissionsModal,
+    {
+      centered: true,
+  });
+
+  const userPermissions = this.permissions().filter(
+    permission => permission.userId === member.userId
+  );
+
+  modal.componentInstance.selectedGroup = this.selectedGroup;
+  modal.componentInstance.selectedUser = member;
+  modal.componentInstance.userPermissions = userPermissions;
   // const groupId = this.selectedGroup.id;
   // const userId = member.userId;
-
-  
-
-  // }
+  }
 
   //load permissions for all user
   loadPermissions(): void {
