@@ -24,12 +24,14 @@ export class DeleteGroupModal {
         this.activeModal.close();
       },
       error: (error) => {
-        let translocoKey = 'groups.deleteGroup.errorGeneral';
+        let translocoKey = 'groups.deleteGroupAdmin.errorGeneral';
 
         if (error.status === 403) {
-          translocoKey = 'groups.deleteGroup.errorForbidden';
+          translocoKey = 'groups.deleteGroupAdmin.errorForbidden';
         } else if (error.status === 404) {
-          translocoKey = 'groups.deleteGroup.errorNotFound';
+          translocoKey = 'groups.deleteGroupAdmin.errorNotFound';
+        } else if (error.status === 409) {
+          translocoKey = 'groups.deleteGroupAdmin.errorHasDocuments'
         }
 
         this.errorMsg.set(translocoKey);

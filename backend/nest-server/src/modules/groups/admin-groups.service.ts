@@ -1,6 +1,6 @@
+import { Group } from './entities/group.entity';
 import { Injectable, ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Group } from './entities/group.entity';
 import { Repository } from 'typeorm';
 import { CreateGroupsDto } from './dto/create-groups.dto';
 import { UpdateGroupsDto } from './dto/update-groups.dto';
@@ -9,6 +9,7 @@ import { UserGroup } from '../user-groups/entities/user-group.entity';
 import { Logger } from 'nestjs-pino';
 import { isUserMemberOfGroup } from './groups.helper';
 import { findGroupByName } from './groups.helper';
+import { DocumentGroup } from '../document-groups/entities/document-group.entity';
 
 // ADMIN LOGIC
 
@@ -16,10 +17,12 @@ import { findGroupByName } from './groups.helper';
 export class AdminGroupsService {
   constructor(
     @InjectRepository(Group)
-        private readonly groupsRepository: Repository<Group>,
-        @InjectRepository(UserGroup)
-        private readonly userGroupsRepository: Repository<UserGroup>,
-        private readonly logger: Logger
+    private readonly groupsRepository: Repository<Group>,
+    @InjectRepository(UserGroup)
+    private readonly userGroupsRepository: Repository<UserGroup>,
+    @InjectRepository(DocumentGroup)
+    private readonly documentGroupsRepository: Repository<DocumentGroup>,
+    private readonly logger: Logger,
   ) {}
 
   async adminCreate(dto: CreateGroupsDto): Promise<GroupsAdminResponseDto> {
@@ -118,6 +121,13 @@ export class AdminGroupsService {
       if (isMember == false) {
         throw new ForbiddenException('You are not a member of this group');
       }
+    }
+
+    const documentCount = await this.documentGroupsRepository.countBy({
+      groupId: id,
+    });
+    if (documentCount > 0) {
+      throw new ConflictException('Group still contains documents');
     }
 
     await this.groupsRepository.remove(group);

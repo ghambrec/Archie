@@ -8,10 +8,15 @@ import { SessionModule } from '../auth/session/session.module';
 import { PermissionsModule } from '../permissions/permissions.module';
 import { UserGroup } from '../user-groups/entities/user-group.entity';
 import { AdminGroupsService } from './admin-groups.service';
+import { DocumentGroup } from '../document-groups/entities/document-group.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Group, UserGroup]),
+    TypeOrmModule.forFeature([
+      Group,
+      UserGroup,
+      DocumentGroup
+    ]),
     SessionModule,
     PermissionsModule
   ],
