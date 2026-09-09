@@ -33,3 +33,17 @@ async def get_conversations(pool: asyncpg.Pool, user_id: UUID):
             """
     rows = await pool.fetch(select, user_id)
     return rows
+
+
+async def del_conversations(pool: asyncpg.Pool, user_id: UUID):
+    delete = """
+                DELETE FROM ai_conversations WHERE user_id = $1
+            """
+    await pool.execute(delete, user_id)
+
+
+async def del_conversation(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID):
+    delete = """
+                DELETE FROM ai_conversations WHERE user_id = $1 AND id = $2
+            """
+    await pool.execute(delete, user_id, conv_id)

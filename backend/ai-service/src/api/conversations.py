@@ -37,3 +37,15 @@ async def ask(request: Request, conv_id: UUID, user_id: UUID = Depends(get_user_
 async def get_messages(request: Request, conv_id: UUID, user_id: UUID = Depends(get_user_id)):
     pool = request.app.state.db_pool
     # TODO
+
+
+@router.delete("/conversations", status_code=204, summary="delete all conversations from a user")
+async def del_conversations(request: Request, user_id: UUID = Depends(get_user_id)):
+    pool = request.app.state.db_pool
+    await conversations.del_conversations(pool, user_id)
+
+
+@router.delete("/conversations/{conv_id}", status_code=204, summary="delete a single conversation from a user")
+async def del_conversation(request: Request, conv_id: UUID, user_id: UUID = Depends(get_user_id)):
+    pool = request.app.state.db_pool
+    await conversations.del_conversation(pool, user_id, conv_id)
