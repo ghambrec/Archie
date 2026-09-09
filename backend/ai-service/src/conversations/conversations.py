@@ -2,10 +2,15 @@ from __future__ import annotations
 
 import logging
 import asyncpg
+from asyncpg.exceptions import ForeignKeyViolationError
 
 from uuid import UUID
 
 logger = logging.getLogger(__name__)
+
+
+class UserNotFoundError(Exception):
+    """raised when given user not exist"""
 
 
 async def create_conversation(pool: asyncpg.Pool, user_id: UUID) -> UUID:
@@ -13,9 +18,13 @@ async def create_conversation(pool: asyncpg.Pool, user_id: UUID) -> UUID:
                 INSERT INTO ai_conversations (user_id) VALUES ($1)
                 RETURNING id
             """
-    conv_id = await pool.fetchval(insert, user_id)
-    logger.debug("conversation '%s' created for user '%s'", conv_id, user_id)
-    return conv_id
+    try:
+        conv_id = await pool.fetchval(insert, user_id)
+        logger.debug("conversation '%s' created for user '%s'", conv_id, user_id)
+        return conv_id
+    except ForeignKeyViolationError as e:
+        logger.debug("create conversation failed, no user found this given id")
+        raise UserNotFoundError(str(user_id)) from e
 
 
 async def get_conversations(pool: asyncpg.Pool, user_id: UUID):

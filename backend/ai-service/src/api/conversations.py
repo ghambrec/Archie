@@ -1,6 +1,6 @@
 """conversation routes for the AI Service."""
 
-from fastapi import APIRouter, Request, Security, Depends
+from fastapi import APIRouter, Request, Security, Depends, HTTPException
 from uuid import UUID
 
 from src.api.auth import check_api_key, get_user_id
@@ -13,7 +13,10 @@ router = APIRouter(tags=["conversations"], dependencies=[Security(check_api_key)
 @router.post("/conversations", status_code=201, summary="create a new conversation for a user")
 async def create_conversation(request: Request, user_id: UUID = Depends(get_user_id)):
     pool = request.app.state.db_pool
-    conversation_id = await conversations.create_conversation(pool, user_id)
+    try:
+        conversation_id = await conversations.create_conversation(pool, user_id)
+    except conversations.UserNotFoundError:
+        raise HTTPException(status_code=400, detail="user does not exist")
     return {"id": conversation_id}
 
 
