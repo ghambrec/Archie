@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Param,
   Query,
   Body,
@@ -9,6 +10,8 @@ import {
   UseInterceptors,
   UploadedFile as UploadedFileDecorator,
   BadRequestException,
+  HttpCode,
+  HttpStatus,
   Req,
   Res,
 } from '@nestjs/common';
@@ -142,5 +145,16 @@ export class DocumentsController {
     });
 
     documentDownloadStream.stream.pipe(res);
+  }
+
+  @ApiOperation({
+    summary: 'Delete a document',
+    description: 'Soft-deletes the document by its ID.',
+  })
+  @UseGuards(SessionAuthGuard)
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Req() req: Request, @Param('id') id: string): Promise<void> {
+    return this.documentsService.remove(req.userId!, id);
   }
 }
