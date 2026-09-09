@@ -1,0 +1,96 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    {{ "groups.userPermissions.heading" | transloco }}
+  </h5>
+
+  <button
+    type="button"
+    class="btn-close"
+    aria-label="Close"
+    (click)="activeModal.dismiss()">
+  </button>
+</div>
+
+<div class="modal-body">
+  <p>
+    {{ "groups.userPermissions.permissionsOf" | transloco: {
+      userName: selectedUser.displayName
+    } }}
+  </p>
+
+  <div class="form-check">
+    <input
+      id="documents-read"
+      type="checkbox"
+      class="form-check-input"
+      [checked]="hasPermission('documents.read')"
+      (change)="setPermission('documents.read', $event)">
+
+    <label
+      for="documents-read"
+      class="form-check-label">
+      {{ "groups.userPermissions.documentsRead" | transloco }}
+    </label>
+  </div>
+
+  <div class="form-check">
+    <input
+      id="documents-upload"
+      type="checkbox"
+      class="form-check-input"
+      [checked]="hasPermission('documents.upload')"
+      (change)="setPermission('documents.upload', $event)">
+      
+      <label
+        for="documents-upload"
+        class="form-check-label">
+        {{ "groups.userPermissions.documentsUpload" | transloco }}
+      </label>
+  </div>
+  
+  <div class="form-check">
+    <input
+      id="documents-update"
+      type="checkbox"
+      class="form-check-input"
+      [checked]="hasPermission('documents.update')"
+      (change)="setPermission('documents.update', $event)">
+
+    <label
+      for="documents-update"
+      class="form-check-label">
+      {{ "groups.userPermissions.documentsUpdate" | transloco }}
+    </label>
+  </div>
+
+  <div class="form-check">
+    <input
+      id="documents-delete"
+      type="checkbox"
+      class="form-check-input"
+      [checked]="hasPermission('documents.delete')"
+      (change)="setPermission('documents.delete', $event)">
+
+    <label
+      for="documents-delete"
+      class="form-check-label">
+      {{ "groups.userPermissions.documentsDelete" | transloco }}
+    </label>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button
+    type="button"
+    class="btn btn-secondary"
+    (click)="activeModal.dismiss()">
+    {{ "groups.userPermissions.btnCancel" | transloco }}
+  </button>
+
+  <button
+    type="button"
+    class="btn btn-primary"
+    (click)="save()">
+    {{ "groups.userPermissions.btnSave" | transloco }}
+  </button>
+</div>

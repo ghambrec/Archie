@@ -1,8 +1,9 @@
 import { Component, computed, inject, signal } from "@angular/core";
 import { TranslocoPipe } from "@jsverse/transloco";
-import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { GroupMember, GroupResponseAdmin, Groups } from "../groups";
+import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { GroupMember, GroupResponseAdmin, Groups, UserPermission } from "../groups";
 import { Users } from "../../users/users";
+import { EditUserPermissionsModal } from "../edit-user-permissions-modal/edit-user-permissions-modal";
 
 @Component({
   selector: 'app-info-group-modal',
@@ -122,6 +123,47 @@ export class InfoGroupModal {
   // selectUser(userId: string): void {
   //   this.selectedUserId.set(userId);
   // }
+
+  readonly permissions = signal<UserPermission[]>([]);
+  private readonly modalService = inject(NgbModal);
+
+  openUserPermissions(member: GroupMember): void {
+  const modal = this.modalService.open(EditUserPermissionsModal,
+    {
+      centered: true,
+  });
+
+  const userPermissions = this.permissions().filter(
+    permission => permission.userId === member.userId
+  );
+
+  modal.componentInstance.selectedGroup = this.selectedGroup;
+  modal.componentInstance.selectedUser = member;
+  modal.componentInstance.userPermissions = userPermissions;
+  // const groupId = this.selectedGroup.id;
+  // const userId = member.userId;
+  }
+
+  //load permissions for all user
+  loadPermissions(): void {
+    const request = this.groupsService.getGroupPermissions(this.selectedGroup.id);
+
+    request.subscribe({
+      next: returnedPermissions => {
+        this.permissions.set(returnedPermissions);
+      },
+      error: () => {
+        this.actionError.set("groups.infoGroup.errorLoadingPermissions");
+      },
+    });
+  }
+
+  //filter userPermissions for each user
+  getPermissionsForUser(userId: string): string[] {
+    const filteredPermissions = this.permissions().filter(permission => permission.userId === userId);
+
+    return filteredPermissions.map(permission => permission.permKey);
+  }
 
   closeModal(): void {
     this.activeModal.dismiss();
