@@ -91,7 +91,8 @@
 				"btnCancel": "Cancel",
 				"feedbackMsg": "Group successfully edited",
 				"errorGeneral": "Unable to edit Group",
-				"errorConflictName": "Name already Taken"
+				"errorConflictName": "Name already Taken",
+				"errorNameRequired": "Name cannot be empty"
 			},
 			"infoGroup": {
 				"heading": "Group members",
