@@ -20,7 +20,8 @@ async def create_conversation(request: Request, user_id: UUID = Depends(get_user
 @router.get("/conversations", summary="get all conversations from a user")
 async def get_conversations(request: Request, user_id: UUID = Depends(get_user_id)):
     pool = request.app.state.db_pool
-    # todo
+    rows = await conversations.get_conversations(pool, user_id)
+    return {"count": len(rows), "data": rows}
 
 
 @router.post("/conversations/{conv_id}/ask", summary="ask a question to a conversation from a user")
