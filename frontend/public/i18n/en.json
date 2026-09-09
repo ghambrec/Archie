@@ -80,7 +80,8 @@
 				"btnDeletePending": "Deleting...",
 				"errorForbidden": "Deleting this group is forbidden.",
 				"errorNotFound": "Group not found.",
-				"errorGeneral": "Unable to delete group"
+				"errorGeneral": "Unable to delete group",
+				"errorHasDocuments": "This group cannot be deleted. The group still contains documents."
 			},
 			"editGroupAdmin": {
 				"heading": "Edit Group",
