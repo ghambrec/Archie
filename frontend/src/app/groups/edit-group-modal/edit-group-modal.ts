@@ -35,7 +35,11 @@ export class EditGroupModal {
 
   editGroupAdminForm = form(
     this.editGroupModal,
-    (p) => {},
+    (p) => {
+      required(p.name, {
+        message: "groups.editGroupAdmin.errorNameRequired",
+      });
+    },
     {
       submission: {
         action: async (field) => {
