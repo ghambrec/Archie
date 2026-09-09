@@ -12,6 +12,7 @@ from src.db import create_pool
 
 from src.api.health import router as health_router
 from src.api.queue import router as queue_router
+from src.api.conversations import router as conversations_router
 
 logger = logging.getLogger(__name__)
 
@@ -39,3 +40,4 @@ app = FastAPI(
 
 app.include_router(health_router)
 app.include_router(queue_router)
+app.include_router(conversations_router)
