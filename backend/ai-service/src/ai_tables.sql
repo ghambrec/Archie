@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS ai_chunks (
 CREATE INDEX IF NOT EXISTS ai_chunks_ai_document_id_idx ON ai_chunks (ai_document_id);
 CREATE INDEX IF NOT EXISTS ai_chunks_embedding_hnsw_idx ON ai_chunks USING hnsw (embedding vector_cosine_ops);
 
+
 -- wird verschoben in nest server als tabelle "tags" - ehemals ai_tags (erstellung kann hier entfernt werden sobald die tabelle in nest erstellt wird)
 CREATE TABLE IF NOT EXISTS tags (
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

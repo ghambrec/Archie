@@ -4,13 +4,17 @@ import { Repository } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { User } from './entities/user.entity';
 import { StorageService } from '../storage/storage.service';
+import { ObjectStatsDto } from '../storage/dto/object-stats.dto';
 import { PatchAvatarResponseDto } from './dto/patch-avatar-response.dto';
 import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
+import { GetAvatarResponseDto } from './dto/get-avatar-response.dto';
 
 const AVATARS_BUCKET = 'avatars';
 const ALLOWED_AVATAR_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024; // 5 Mb
+const DEFAULT_AVATAR_MIME_TYPE = 'application/octet-stream';
+const MIME_TYPE_KEY = 'content-type';
 
 @Injectable()
 export class UsersFileService {
@@ -55,5 +59,33 @@ export class UsersFileService {
     }
 
     return { objectAvatarKey: key };
+  }
+
+  async getAvatarImage(userId: string): Promise<GetAvatarResponseDto> {
+    const user = await this.usersRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new ApplicationException(ErrorCode.UserNotFound);
+    }
+
+    const key = user.avatarObjectKey;
+    if (key == null) {
+      throw new ApplicationException(ErrorCode.AvatarNotExisted);
+    }
+
+    let fileData: ObjectStatsDto;
+    try {
+      fileData = await this.storageService.getStats(AVATARS_BUCKET, key);
+    } catch {
+      throw new ApplicationException(ErrorCode.AvatarNotExisted);
+    }
+
+    const stream = await this.storageService.getObject(AVATARS_BUCKET, key);
+    const getAvatarResponse: GetAvatarResponseDto = {
+      stream: stream,
+      sizeBytes: fileData.size,
+      mimeType: fileData.metaData[MIME_TYPE_KEY] ?? DEFAULT_AVATAR_MIME_TYPE,
+    };
+
+    return getAvatarResponse;
   }
 }

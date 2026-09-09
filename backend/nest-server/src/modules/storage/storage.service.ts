@@ -3,18 +3,11 @@ import type { Client } from 'minio';
 import type { Readable } from 'stream';
 import { MINIO_CLIENT } from './minio/minio.module';
 import { ConfigService } from '@nestjs/config';
-
+import { PutObjectResultDto } from './dto/put-object-result';
+import { ObjectStatsDto } from './dto/object-stats.dto';
+import { StoredObjectMetadataDto } from './dto/stored-object-metadat.dto'
 
 export const DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS = 5 * 60;
-
-export interface StoredObjectMetadata {
-  [key: string]: string;
-}
-
-export interface PutObjectResult {
-  etag: string;
-  versionId: string | null;
-}
 
 @Injectable()
 export class StorageService {
@@ -33,8 +26,8 @@ export class StorageService {
     key: string,
     data: Buffer | Readable,
     size: number,
-    metadata?: StoredObjectMetadata,
-  ): Promise<PutObjectResult> {
+    metadata?: StoredObjectMetadataDto,
+  ): Promise<PutObjectResultDto> {
     return this.client.putObject(bucket, key, data, size, metadata);
   }
 
@@ -53,6 +46,16 @@ export class StorageService {
     } catch {
       return false;
     }
+  }
+
+  async getStats(bucket: string, key: string): Promise<ObjectStatsDto> {
+    const stat = await this.client.statObject(bucket, key);
+    return {
+      size: stat.size,
+      etag: stat.etag,
+      lastModified: stat.lastModified,
+      metaData: stat.metaData,
+    };
   }
 
   async getPresignedDownloadUrl(
