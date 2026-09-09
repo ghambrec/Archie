@@ -115,7 +115,10 @@
 				"errorRemovingUser": "The user could not be removed from the group.",
 				"actions": "Actions",
 				"btnRemoveUser": "Delete",
-				"errorLoadingUsers": "Unable to load users"
+				"errorLoadingUsers": "Unable to load users",
+				"editUserPermission": "Edit Permissions",
+				"userPermissions": "Permissions",
+				"errorLoadingPermissions": "Unable to load permissions"
 			}
 	},
 	"errors": {
