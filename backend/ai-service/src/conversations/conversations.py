@@ -40,6 +40,7 @@ async def ask_question(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, questio
     # TODO: hier weiter mit retrieval pipeline (embedding etc)
 
 
+# TODO: wenn retriaval fertig hier noch quelle hinzufuegen etc damit im frontend auf die quell datei verwiesen werden kann
 async def get_messages(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID):
     select = """
                 SELECT 
