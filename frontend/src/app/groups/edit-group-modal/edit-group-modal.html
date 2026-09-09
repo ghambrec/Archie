@@ -19,6 +19,12 @@
         type="text"
         class="form-control"
 				[formField]="editGroupAdminForm.name" />
+
+        @if (editGroupAdminForm.name().errors().length > 0) {
+          <div class="text-danger">
+            {{ editGroupAdminForm.name().errors()[0].message | transloco }}
+          </div>
+        }
 		</div>
 
 		<div class="mb-3">
