@@ -80,7 +80,8 @@
 				"btnDeletePending": "Deleting...",
 				"errorForbidden": "Deleting this group is forbidden.",
 				"errorNotFound": "Group not found.",
-				"errorGeneral": "Unable to delete group"
+				"errorGeneral": "Unable to delete group",
+				"errorHasDocuments": "This group cannot be deleted. The group still contains documents."
 			},
 			"editGroupAdmin": {
 				"heading": "Edit Group",
@@ -91,7 +92,8 @@
 				"btnCancel": "Cancel",
 				"feedbackMsg": "Group successfully edited",
 				"errorGeneral": "Unable to edit Group",
-				"errorConflictName": "Name already Taken"
+				"errorConflictName": "Name already Taken",
+				"errorNameRequired": "Name cannot be empty"
 			},
 			"infoGroup": {
 				"heading": "Group members",
@@ -102,7 +104,18 @@
 				"empty": "This group has no members.",
 				"btnClose": "Close",
 				"memberCount": "{{count}} members.",
-				"noMembers": "No members."
+				"noMembers": "No members.",
+				"searchUser": "Add user",
+				"searchUserPlaceholder": "Search by username or email",
+				"btnAddUser": "Add",
+				"userAdded": "User added to group",
+				"errorAddingUser": "The user could not be added.",
+				"userAlreadyMember": "The user is already assigned to this group.",
+				"userRemoved": "User removed from group.",
+				"errorRemovingUser": "The user could not be removed from the group.",
+				"actions": "Actions",
+				"btnRemoveUser": "Delete",
+				"errorLoadingUsers": "Unable to load users"
 			}
 	},
 	"errors": {
