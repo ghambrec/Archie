@@ -2,7 +2,7 @@ FROM  python:3.14-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl \
+RUN apt-get update && apt-get install -y curl libmagic1 \
 	&& rm -rf /var/lib/apt/lists/*
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
