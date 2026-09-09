@@ -119,6 +119,16 @@
 				"editUserPermission": "Edit Permissions",
 				"userPermissions": "Permissions",
 				"errorLoadingPermissions": "Unable to load permissions"
+			},
+			"userPermissions": {
+				"heading": "User Permissions",
+				"permissionsOf": "Permissions of user: {{userName}}",
+				"documentsRead": "Read documents",
+				"documentsUpload": "Upload documents",
+				"documentsUpdate": "Update documents",
+				"documentsDelete": "Delete documents",
+				"btnCancel": "Cancel",
+				"btnSave": "Save"
 			}
 	},
 	"errors": {
