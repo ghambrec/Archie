@@ -91,6 +91,9 @@
               {{ "groups.infoGroup.email" | transloco }}
             </th>
             <th scope="col">
+              {{ "groups.infoGroup.userPermissions" | transloco }}
+            </th>
+            <th scope="col">
               {{ "groups.infoGroup.actions" | transloco }}
             </th>
           </tr>
@@ -102,6 +105,20 @@
             <td>{{ member.displayName }}</td>
             <td>{{ member.email }} </td>
             <td>
+              @for (permission of getPermissionsForUser(member.userId); track permission) {
+                <div>{{ permission }}</div>
+              } @empty {
+                <span>-</span>
+              }
+            </td>
+            <td>
+              <!-- <button
+                type="button"
+                class="btn btn-secondary btn-sm me-2"
+                (click)="openUserPermissions(member)"> 
+                TODO
+                {{ "groups.infoGroup.editUserPermission" | transloco }}
+              </button> -->
               <button
                 type="button"
                 class="btn btn-danger btn-sm"
@@ -112,7 +129,7 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="3">
+            <td colspan="4">
               {{ "groups.infoGroup.empty" | transloco }}
             </td>
           </tr>
