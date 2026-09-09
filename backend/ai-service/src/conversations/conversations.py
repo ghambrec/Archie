@@ -13,6 +13,33 @@ class UserNotFoundError(Exception):
     """raised when given user not exist"""
 
 
+class ConversationNotFoundError(Exception):
+    """raised then given conversation not exist for given user"""
+
+
+async def ask_question(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, question: str):
+    select = """
+                SELECT 1 FROM ai_conversations WHERE user_id = $1 AND id = $2
+            """
+    insert = """
+                INSERT INTO ai_messages (conv_id, sender, content)
+                VALUES ($1, $2, $3)
+            """
+
+    conv_exist = await pool.fetchval(select, user_id, conv_id)
+    if conv_exist is None:
+        logger.debug("conversation %s not found for user %s", conv_id, user_id)
+        raise ConversationNotFoundError(str(conv_id))
+
+    try:
+        await pool.execute(insert, conv_id, "user", question)
+    except ForeignKeyViolationError as e:
+        logger.debug("create message failed, no user found for given id")
+        raise UserNotFoundError(str(user_id)) from e
+
+    # TODO: hier weiter mit retrieval pipeline (embedding etc)
+
+
 async def create_conversation(pool: asyncpg.Pool, user_id: UUID) -> UUID:
     insert = """
                 INSERT INTO ai_conversations (user_id) VALUES ($1)
