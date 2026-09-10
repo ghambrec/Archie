@@ -116,6 +116,7 @@ ext ,
         return pdf_parser(raw)
 
 
+    raise Exception("Document type not supported")
 
     return raw.decode("utf-8")
 
@@ -172,6 +173,6 @@ def ocr_image(png_bytes: bytes) -> str:
             lang="eng+deu+spa",
             )
         logging.info("OCR input type: %s", type(image))
-        logging.info("image_bytes %d", sum(text))
+        logging.info("OCR extracted characters: %d", len(text))
         return text
     

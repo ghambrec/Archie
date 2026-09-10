@@ -15,10 +15,19 @@ def setup_langfuse_client() -> None:
         logger.info("Langfuse disabled")
         return
 
-    client = get_client()
-    if not client.auth_check():
-        logger.error("Langfuse auth check failed")
+    try:
+        client = get_client()
+        if not client.auth_check():
+            logger.warning("Langfuse auth check failed; continuing without instrumentation")
+            return
+
+        Agent.instrument_all()
+    except Exception:
+        logger.warning(
+            "Langfuse initialization failed; continuing without instrumentation. "
+            "Check the Langfuse endpoint and container DNS/network connectivity.",
+            exc_info=True,
+        )
         return
 
     logger.info("Langfuse connected")
-    Agent.instrument_all()
