@@ -24,9 +24,22 @@ export class EditGroupModal {
     description: '',
   });
 
+  initialize(group: GroupResponseAdmin): void {
+    this.selectedGroup = group;
+
+    this.editGroupModal.set({
+      name: group.name,
+      description: group.description ?? '',
+    });
+  }
+
   editGroupAdminForm = form(
     this.editGroupModal,
-    (p) => {},
+    (p) => {
+      required(p.name, {
+        message: "groups.editGroupAdmin.errorNameRequired",
+      });
+    },
     {
       submission: {
         action: async (field) => {
@@ -40,10 +53,13 @@ export class EditGroupModal {
               input.name = formValues.name.trim();
             }
 
-            if (formValues.description.trim() !== '') {
-              input.description = formValues.description.trim();
-            }
+            // if (formValues.description.trim() !== '') {
+            //   input.description = formValues.description.trim();
+            // }
+            input.description = formValues.description.trim();
 
+
+              // error message einbauen wenn name leer ist!!
             if (Object.keys(input).length === 0) {
               this.activeModal.close();
               return;

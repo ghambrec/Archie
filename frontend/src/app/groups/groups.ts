@@ -35,13 +35,14 @@ export interface GroupMembersResponse {
 @Service()
 export class Groups {
 	private readonly http = inject(HttpClient);
-	private readonly baseUrl = `${environment.apiUrl}/admin/groups`;
+	private readonly adminGroupsUrl = `${environment.apiUrl}/admin/groups`;
+	private readonly userGroupsUrl = `${environment.apiUrl}/user-groups`;
 	
 	readonly groupsList = signal<GroupResponseAdmin[]>([]);
 	
 	getGroupsAdmin() {
 		return this.http.get<GroupResponseAdmin[]>(
-			this.baseUrl,
+			this.adminGroupsUrl,
 			{
 				withCredentials: true,
 			}
@@ -49,7 +50,7 @@ export class Groups {
 	}
 
 	createGroupAdmin(dto: CreateGroupDto) {
-		return this.http.post<GroupResponseAdmin>(`${this.baseUrl}/create`,
+		return this.http.post<GroupResponseAdmin>(`${this.adminGroupsUrl}/create`,
 			dto,
 			{
 				withCredentials: true
@@ -58,7 +59,7 @@ export class Groups {
 	}
 
 	deleteGroupAdmin(id: string) {
-		return this.http.delete<void>(`${this.baseUrl}/${id}`,
+		return this.http.delete<void>(`${this.adminGroupsUrl}/${id}`,
 			{
 				withCredentials: true,
 			}
@@ -66,7 +67,7 @@ export class Groups {
 	}
 
 	editGroupAdmin(id: string, dto: UpdateGroupDto) {
-		return this.http.patch<void>(`${this.baseUrl}/${id}`,
+		return this.http.patch<void>(`${this.adminGroupsUrl}/${id}`,
 			dto,
 			{
 				withCredentials: true,
@@ -75,10 +76,28 @@ export class Groups {
 	}
 
 	infoGroups(id: string) {
-		return this.http.get<GroupMembersResponse>(`${environment.apiUrl}/user-groups/groups/${id}/members`,
+		return this.http.get<GroupMembersResponse>(`${this.userGroupsUrl}/groups/${id}/members`,
 			{
 				withCredentials: true,
 			},
 		);
 	}
+
+	addUserToGroup(groupId: string, userId: string) {
+		return this.http.post(`${this.userGroupsUrl}/groups/${groupId}/members`,
+			{ userId },
+			{
+				withCredentials: true,
+			},
+		);
+	}
+
+	removeUserFromGroup(groupId: string, userId: string) {
+		return this.http.delete(`${this.userGroupsUrl}/groups/${groupId}/members/${userId}`,
+			{
+				withCredentials: true
+			},
+		);
+	}
+
 }
