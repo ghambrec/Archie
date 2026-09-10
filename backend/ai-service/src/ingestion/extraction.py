@@ -9,7 +9,14 @@ import pymupdf4llm
 
 from io import BytesIO
 from PIL import Image
+from docx import Document
+from openpyxl import load_workbook
+
 import pytesseract 
+import pylibheif
+
+
+
 
 from charset_normalizer import from_bytes
 
@@ -35,6 +42,53 @@ class FileType(Enum):
     PPT = auto()
     PPTX = auto()
     ODP = auto()
+
+
+
+def extract_text(raw: bytes) -> str:
+    """
+    logic for extraction pdf , openTraise NotImplementedError("PDF extraction is not implemented yet")
+    ext , 
+    seperate logic 
+
+    dateitypen:
+    - plain text (verschiedene codierungen, z.b. utf8 oder 8859-1)
+    - pdf mit text layer
+    - pdf ohne text layer
+    - bilder (jpg, png, heic)
+    - optional: xlsx, docx
+
+
+    fallback
+    wenn ocr verdeachtiges wenig chars 
+    dann auf Vison modell - beschreiben lassen 
+    """
+
+
+
+    dectected_type = dectect_file_type(raw)
+    logging.info("FileType %s", dectected_type.name )
+
+    if dectected_type == FileType.TEXT:
+        return text_parser(raw)
+
+    if dectected_type == FileType.PDF:
+        return pdf_parser(raw)
+
+    if dectected_type in (FileType.PNG, FileType.JPEG):
+        return ocr_image(raw)
+
+    if dectected_type in ( FileType.HEIC):
+        return heic_image(raw)
+
+    if dectected_type == FileType.DOCX:
+        return docx_parser(raw)
+
+
+    if dectected_type == FileType.XLSX:
+        return xlsx_parser(raw)
+    
+    raise Exception("Document type not supported")
 
 
 
@@ -84,44 +138,30 @@ def dectect_file_type(raw:bytes) -> FileType:
     return detected_type
 
 
-def extract_text(raw: bytes) -> str:
+def xlsx_parser(raw)-> str:
+    result = []
+
+
+    return result
+    
+
+
+def docx_parser(raw:bytes) -> str:
     """
-    logic for extraction pdf , openTraise NotImplementedError("PDF extraction is not implemented yet")
-ext , 
-    seperate logic 
-
-    dateitypen:
-    - plain text (verschiedene codierungen, z.b. utf8 oder 8859-1)
-    - pdf mit text layer
-    - pdf ohne text layer
-    - bilder (jpg, png, heic)
-    - optional: xlsx, docx
-
-
-    fallback
-    wenn ocr verdeachtiges wenig chars 
-    dann auf Vison modell - beschreiben lassen 
+    read docx documents, screenshots will be missed,
+      would require to create a pdf file with libreoffice and than only run the ocr modal  over it
     """
+    
+    results = []
+    logging.info("docx file gets read , but no screenshots will be missed")
+    with BytesIO(raw) as stream:
+        document = Document(stream)
+        paragraphs = document.paragraphs
 
-   
+        logging.info("DOCX: found %d body paragraphs", len(paragraphs))
 
-    # check if it can read more than 10 chars plausibel 
-   
-
-    dectected_type = dectect_file_type(raw)
-    logging.info("FileType %s", dectected_type.name )
-
-    if dectected_type == FileType.TEXT:
-        return text_parser(raw)
-
-    if dectected_type == FileType.PDF:
-        return pdf_parser(raw)
-
-    if dectected_type in (FileType.PNG, FileType.JPEG):
-        return ocr_image(raw)
-    raise Exception("Document type not supported")
-
-
+        results.append(paragraphs)
+        return "\n\n".join(results)
 
 
 def pdf_parser(raw:bytes) -> str:
@@ -134,10 +174,10 @@ def pdf_parser(raw:bytes) -> str:
     with pymupdf.open(stream=raw, filetype="pdf") as document:
         for page in document:
             text = page.get_text("text")
-            char_count = sum(char.isalnum() for char in text)
-            logging.info("chars dectected: %d " , char_count)
+            word_count = len(text.split())
+            logging.info("chars dectected: %d " , word_count)
 
-            if char_count < settings.ocr_min_chars:
+            if word_count < settings.ocr_min_chars:
                 image = page.get_pixmap(
                     dpi = settings.ocr_image_resultion_dpi,
                     colorspace = COLOR_REPRESENTATION,
@@ -151,7 +191,7 @@ def pdf_parser(raw:bytes) -> str:
 
             else:
                 logging.info("Pdf extration as markdown")
-                text_extracted = pymupdf4llm.to_markdown(document)
+                text_extracted = pymupdf4llm.to_markdown(page)
 
             results.append(text_extracted)
 
@@ -169,6 +209,26 @@ def text_parser(raw: bytes) -> str:
     logging.info("Estimated text encoding: %s", match.encoding)
     return str(match)
 
+
+
+def heic_image(heic_bytes: bytes ) -> str:
+    with pylibheif.HeifContext() as ctx:
+        ctx.read_from_memory('heic_bytes')
+
+        handle = ctx.get_primary_image_handle()
+        img = handle.decode(
+            pylibheif.HeifColorspace.RGB, 
+            pylibheif.HeifChroma.InterleavedRGB
+        )
+    pixels = img.get_plane(pylibheif.HeifChannel.Interleaved, False)
+
+    text = pytesseract.image_to_string(
+        pixels,
+        lang="eng+deu+spa",
+    )
+    logging.info("OCR input type: %s", type(pixels))
+    logging.info("OCR extracted characters: %d", len(text))
+    return text
 
 def ocr_image(png_bytes: bytes) -> str:
     with Image.open(BytesIO(png_bytes)) as image:
