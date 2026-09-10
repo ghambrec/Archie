@@ -47,21 +47,9 @@ class FileType(Enum):
 
 def extract_text(raw: bytes) -> str:
     """
-    logic for extraction pdf , openTraise NotImplementedError("PDF extraction is not implemented yet")
-    ext , 
-    seperate logic 
-
-    dateitypen:
-    - plain text (verschiedene codierungen, z.b. utf8 oder 8859-1)
-    - pdf mit text layer
-    - pdf ohne text layer
-    - bilder (jpg, png, heic)
-    - optional: xlsx, docx
-
-
-    fallback
-    wenn ocr verdeachtiges wenig chars 
-    dann auf Vison modell - beschreiben lassen 
+    bytes come as a bytesobject, always needs to be converted in a bytes stream
+    extracts TEXT, PDF, PNG, JPEG, HEIC, DOCX and XLSX, 
+    and uses for pdfs, png, heic images an OCR Modasl
     """
 
 
@@ -139,10 +127,37 @@ def dectect_file_type(raw:bytes) -> FileType:
 
 
 def xlsx_parser(raw)-> str:
-    result = []
+    """
+    reads XLS files 
+    """
+    results = []
 
+    with BytesIO(raw) as stream:
+        workbook = load_workbook(
+            stream,
+            read_only=True, 
+            date_only=True,
+        )
+        try:
+            for sheet in workbook.worksheets:
+                results.append(f"Sheet: {sheet.title}")
+                for row in sheet.iter_rows(values_only=True):
+                      cells = []
 
-    return result
+                      for value in row:
+                          text = "" if value is None else str(value)
+                          cells.append(text)
+
+                      if not any(text.strip() for text in cells):
+                          continue
+
+                      results.append("\t".join(cells))
+
+                results.append("")
+        finally:
+            workbook.close()
+
+    return "\n".join(results)
     
 
 
