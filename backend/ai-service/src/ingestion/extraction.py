@@ -11,6 +11,8 @@ from io import BytesIO
 from PIL import Image
 import pytesseract 
 
+from charset_normalizer import from_bytes
+
 from src.config import settings
 COLOR_REPRESENTATION = pymupdf.csRGB
 INCLUDE_TRANSPARENCY = False
@@ -115,10 +117,9 @@ ext ,
     if dectected_type == FileType.PDF:
         return pdf_parser(raw)
 
-
+    if dectected_type in (FileType.PNG, FileType.JPEG):
+        return ocr_image(raw)
     raise Exception("Document type not supported")
-
-    return raw.decode("utf-8")
 
 
 
@@ -157,13 +158,16 @@ def pdf_parser(raw:bytes) -> str:
     return "\n\n".join(results)
 
 
-def text_parser(raw:bytes) -> str:
+def text_parser(raw: bytes) -> str:
+    if not raw:
+        return ""
 
-    #results = []
+    match = from_bytes(raw, cp_isolation=["utf_8", "cp1252"]).best()
+    if match is None:
+        raise RuntimeError("Could not decode text as UTF-8 or Windows-1252")
 
-    #for page in document:
-    text = raw.decode("utf-8")
-    return text
+    logging.info("Estimated text encoding: %s", match.encoding)
+    return str(match)
 
 
 def ocr_image(png_bytes: bytes) -> str:
