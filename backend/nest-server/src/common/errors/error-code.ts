@@ -14,6 +14,7 @@ export enum ErrorCode {
     DocumentAlreadyInGroup = 'DOCUMENT_ALREADY_IN_GROUP',
     TagNotFound = 'TAG_NOT_FOUND',
     TagNameAlreadyRegistered = 'TAG_NAME_ALREADY_REGISTERED',
+    TagHasDependents = 'TAG_HAS_DEPENDENTS',
 
     //LanguageNotAvailable ='LANGUAGE_NOT_AVAILABLE',
   }

@@ -65,6 +65,10 @@ export const ERROR_CATALOG ={
   [ErrorCode.TagNameAlreadyRegistered]: {
     status: HttpStatus.CONFLICT,
     message: 'Tag name is already taken.'
+  },
+  [ErrorCode.TagHasDependents]: {
+    status: HttpStatus.CONFLICT,
+    message: 'Tag still has child tags or documents assigned to it.'
   }
 
   } satisfies Record<ErrorCode, ErrorDefinition>;
