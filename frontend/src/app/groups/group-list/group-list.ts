@@ -1,5 +1,5 @@
 import { TranslocoPipe } from '@jsverse/transloco';
-import { GroupResponseAdmin, Groups } from '../groups';
+import { GroupMember, GroupResponseAdmin, Groups } from '../groups';
 import { computed, OnInit, inject, Component, signal } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CreateGroupModal } from '../create-group-modal/create-group-modal';
@@ -109,5 +109,7 @@ export class GroupList implements OnInit {
     modal.componentInstance.selectedGroup = group;
     modal.componentInstance.loadMembers();
     modal.componentInstance.loadUsers();
+    modal.componentInstance.loadPermissions();
   }
+
 }
