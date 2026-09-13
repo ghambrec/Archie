@@ -245,6 +245,28 @@ export class DocumentsService {
     return { documentId: id, groupId };
   }
 
+  async removeGroup(
+    userId: string,
+    id: string,
+    groupId: string,
+  ): Promise<void> {
+
+    this.logger.log({ userId, id, groupId }, 'Remove document from group');
+
+    const document = await this.documentsRepository.findOne({
+      where: { id, uploadedBy: userId },
+      select: { id: true },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    await this.documentGroupsService.removeGroup(id, groupId);
+
+    this.logger.log({ userId, id, groupId }, 'Document removed from group');
+  }
+
   async remove(userId: string, id: string): Promise<void> {
 
     this.logger.log({ userId, id }, 'Delete document');

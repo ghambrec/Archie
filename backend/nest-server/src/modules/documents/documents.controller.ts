@@ -133,6 +133,23 @@ export class DocumentsController {
     documentDownloadStream.stream.pipe(res);
   }
 
+
+  @ApiOperation({
+    summary: 'Remove a document from a group',
+    description: 'Removes the given document from the specified group.',
+  })
+  @UseGuards(SessionAuthGuard)
+  @Delete(':id/groups/:groupId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  // There is no check on permision for user. If user can delete it.
+  async removeGroup(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Param('groupId') groupId: string,
+  ): Promise<void> {
+    return this.documentsService.removeGroup(req.userId!, id, groupId);
+  }
+
   @ApiOperation({
     summary: 'Delete a document',
     description: 'Soft-deletes the document by its ID.',
