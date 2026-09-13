@@ -24,7 +24,6 @@ import { UploadResponseDto } from './dto/upload-response.dto';
 import { GetDocumentsQueryDto } from './dto/get-documents-query.dto';
 import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
 import { DocumentSummaryDto } from './dto/document-summary.dto';
-import { DownloadUrlResponseDto } from './dto/download-url-response.dto';
 import { SetDocumentGroupDto } from './dto/set-document-group.dto';
 import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 
@@ -98,19 +97,6 @@ export class DocumentsController {
     @Body() dto: SetDocumentGroupDto,
   ): Promise<DocumentGroupResponseDto> {
     return this.documentsService.setGroup(req.userId!, documentId, dto.groupId);
-  }
-
-  @ApiOperation({
-    summary: '[Don\'t use it] Get a document download URL',
-    description: 'Returns a short-lived, pre-signed URL for downloading the document directly.',
-  })
-  @UseGuards(SessionAuthGuard)
-  @Get(':id/download-url')
-  async getDownloadUrl(
-    @Req() req: Request,
-    @Param('id') id: string,
-  ): Promise<DownloadUrlResponseDto> {
-    return this.documentsService.getDownloadUrl(req.userId!, id);
   }
 
   @UseGuards(SessionAuthGuard)

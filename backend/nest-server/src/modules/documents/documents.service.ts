@@ -13,7 +13,6 @@ import { UploadResponseDto } from './dto/upload-response.dto';
 import { GetDocumentsQueryDto } from './dto/get-documents-query.dto';
 import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
 import { DocumentSummaryDto } from './dto/document-summary.dto';
-import { DownloadUrlResponseDto } from './dto/download-url-response.dto';
 import { DocumentDownloadStreamDto } from './dto/document-download-stream.dto';
 import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 import { ApplicationException } from 'src/common/errors/application.exception';
@@ -192,29 +191,6 @@ export class DocumentsService {
       aiStatus: DocumentAiStatus.PENDING,
       language: '',
     };
-  }
-
-  async getDownloadUrl(userId: string, id: string): Promise<DownloadUrlResponseDto> {
-
-    this.logger.log({ userId, id }, 'Create Download Url');
-
-    const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
-      select: { objectKey: true },
-    });
-
-    if (!document) {
-      throw new ApplicationException(ErrorCode.DocumentNotFound);
-    }
-
-    const url = await this.storageService.getPresignedDownloadUrl(
-      DOCUMENTS_BUCKET,
-      document.objectKey,
-    );
-
-    this.logger.log({ userId, id }, 'Download Url is created');
-
-    return { url, expiresInSeconds: DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS };
   }
 
   async downloadStream(userId: string, id: string): Promise<DocumentDownloadStreamDto> {
