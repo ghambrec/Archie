@@ -1,0 +1,49 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Logger } from 'nestjs-pino';
+import { Tag } from './entities/tag.entity';
+import { CreateTagDto } from './dto/create-tag.dto';
+import { TagAdminResponseDto } from './dto/tag-admin-response.dto';
+import { ApplicationException } from 'src/common/errors/application.exception';
+import { ErrorCode } from 'src/common/errors/error-code';
+
+@Injectable()
+export class AdminTagsService {
+  constructor(
+    @InjectRepository(Tag)
+    private readonly tagsRepository: Repository<Tag>,
+    private readonly logger: Logger,
+  ) {}
+
+  async create(dto: CreateTagDto): Promise<TagAdminResponseDto> {
+    this.logger.log({ name: dto.name }, 'Admin is creating tag');
+
+    const nameTaken = await this.tagsRepository.findOneBy({ name: dto.name });
+    if (nameTaken) {
+      this.logger.warn({ name: dto.name }, 'Tag name is already taken');
+      throw new ApplicationException(ErrorCode.TagNameAlreadyRegistered);
+    }
+
+    if (dto.parentId) {
+      const parent = await this.tagsRepository.findOneBy({ id: dto.parentId });
+      if (!parent) {
+        this.logger.warn({ parentId: dto.parentId }, 'Parent tag not found');
+        throw new ApplicationException(ErrorCode.TagNotFound);
+      }
+    }
+
+    const tag = this.tagsRepository.create({
+      name: dto.name,
+      label: dto.label,
+      description: dto.description ?? null,
+      facet: dto.facet ?? 'domain',
+      parentId: dto.parentId ?? null,
+    });
+
+    await this.tagsRepository.save(tag);
+
+    this.logger.log({ tagId: tag.id, name: tag.name }, 'Admin created tag successfully');
+    return new TagAdminResponseDto(tag);
+  }
+}
