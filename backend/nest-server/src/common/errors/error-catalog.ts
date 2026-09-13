@@ -53,6 +53,10 @@ export const ERROR_CATALOG ={
   [ErrorCode.DocumentAlreadyInGroup]: {
     status: HttpStatus.CONFLICT,
     message: 'Document is already assigned to a group.'
+  },
+  [ErrorCode.DocumentNotInGroup]: {
+    status: HttpStatus.NOT_FOUND,
+    message: 'Document is not assigned to the given group.'
   }
 
   } satisfies Record<ErrorCode, ErrorDefinition>;

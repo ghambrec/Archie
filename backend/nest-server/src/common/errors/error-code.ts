@@ -11,6 +11,7 @@ export enum ErrorCode {
     AvatarFileTooLarge = 'AVATAR_FILE_TOO_LARGE',
     DocumentNotFound = 'DOCUMENT_NOT_FOUND',
     DocumentAlreadyInGroup = 'DOCUMENT_ALREADY_IN_GROUP',
+    DocumentNotInGroup = 'DOCUMENT_NOT_IN_GROUP',
 
     //LanguageNotAvailable ='LANGUAGE_NOT_AVAILABLE',
   }
