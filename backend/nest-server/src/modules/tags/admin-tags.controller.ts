@@ -1,7 +1,8 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, ParseUUIDPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminTagsService } from './admin-tags.service';
 import { CreateTagDto } from './dto/create-tag.dto';
+import { UpdateTagDto } from './dto/update-tag.dto';
 import { TagAdminResponseDto } from './dto/tag-admin-response.dto';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
@@ -20,5 +21,19 @@ export class AdminTagsController {
   })
   async create(@Body() dto: CreateTagDto): Promise<TagAdminResponseDto> {
     return this.adminTagsService.create(dto);
+  }
+
+  @Patch(':id')
+  @UseGuards(SessionAuthGuard, AdminRequiredGuard)
+  @ApiOperation({
+    summary: 'ADMIN USER: Updates a tag',
+    description:
+      'Updates a tag. Body: name, label, parentId, description, and/or facet (domain|doctype) - all optional, only the given fields are changed.',
+  })
+  async update(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: UpdateTagDto,
+  ): Promise<TagAdminResponseDto> {
+    return this.adminTagsService.update(id, dto);
   }
 }
