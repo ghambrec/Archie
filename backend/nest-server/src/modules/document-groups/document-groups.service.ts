@@ -21,4 +21,14 @@ export class DocumentGroupsService {
 
     await this.documentGroupsRepository.insert({ documentId, groupId });
   }
+
+  async removeGroup(documentId: string, groupId: string): Promise<void> {
+    const existing = await this.documentGroupsRepository.findOneBy({ documentId, groupId });
+
+    if (!existing) {
+      throw new ApplicationException(ErrorCode.DocumentNotInGroup);
+    }
+
+    await this.documentGroupsRepository.delete({ documentId, groupId });
+  }
 }
