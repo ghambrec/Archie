@@ -1,4 +1,4 @@
-import { Body, Controller, Param, ParseUUIDPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminTagsService } from './admin-tags.service';
 import { CreateTagDto } from './dto/create-tag.dto';
@@ -35,5 +35,17 @@ export class AdminTagsController {
     @Body() dto: UpdateTagDto,
   ): Promise<TagAdminResponseDto> {
     return this.adminTagsService.update(id, dto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(SessionAuthGuard, AdminRequiredGuard)
+  @ApiOperation({
+    summary: 'ADMIN USER: Deletes a tag',
+    description:
+      'Deletes a tag. Fails with 409 if the tag still has child tags or is assigned to any document.',
+  })
+  async remove(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
+    await this.adminTagsService.remove(id);
   }
 }

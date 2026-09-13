@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Logger } from 'nestjs-pino';
 import { Tag } from './entities/tag.entity';
+import { DocumentTag } from './entities/document-tag.entity';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { TagAdminResponseDto } from './dto/tag-admin-response.dto';
@@ -14,6 +15,8 @@ export class AdminTagsService {
   constructor(
     @InjectRepository(Tag)
     private readonly tagsRepository: Repository<Tag>,
+    @InjectRepository(DocumentTag)
+    private readonly documentTagsRepository: Repository<DocumentTag>,
     private readonly logger: Logger,
   ) {}
 
@@ -90,5 +93,31 @@ export class AdminTagsService {
 
     this.logger.log({ tagId: id }, 'Admin updated tag successfully');
     return new TagAdminResponseDto(updatedTag!);
+  }
+
+  async remove(id: string): Promise<void> {
+    this.logger.log({ tagId: id }, 'Admin trying to delete tag');
+
+    const tag = await this.tagsRepository.findOneBy({ id });
+    if (!tag) {
+      this.logger.warn({ tagId: id }, 'Tag not found');
+      throw new ApplicationException(ErrorCode.TagNotFound);
+    }
+
+    const childTagCount = await this.tagsRepository.countBy({ parentId: id });
+    if (childTagCount > 0) {
+      this.logger.warn({ tagId: id, childTagCount }, 'Tag still has child tags');
+      throw new ApplicationException(ErrorCode.TagHasDependents);
+    }
+
+    const documentCount = await this.documentTagsRepository.countBy({ tagId: id });
+    if (documentCount > 0) {
+      this.logger.warn({ tagId: id, documentCount }, 'Tag is still assigned to documents');
+      throw new ApplicationException(ErrorCode.TagHasDependents);
+    }
+
+    await this.tagsRepository.remove(tag);
+
+    this.logger.log({ tagId: id }, 'Admin deleted tag successfully');
   }
 }
