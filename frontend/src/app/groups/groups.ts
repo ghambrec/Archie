@@ -32,11 +32,17 @@ export interface GroupMembersResponse {
 	members: GroupMember[];
 }
 
+export interface UserPermission {
+	userId: string;
+	permKey: string;
+}
+
 @Service()
 export class Groups {
 	private readonly http = inject(HttpClient);
 	private readonly adminGroupsUrl = `${environment.apiUrl}/admin/groups`;
 	private readonly userGroupsUrl = `${environment.apiUrl}/user-groups`;
+	private readonly userPermissionsUrl = `${environment.apiUrl}/user-permission`;
 	
 	readonly groupsList = signal<GroupResponseAdmin[]>([]);
 	
@@ -100,4 +106,11 @@ export class Groups {
 		);
 	}
 
+	getGroupPermissions(groupId: string) {
+		return this.http.get<UserPermission[]>(`${this.userPermissionsUrl}/${groupId}/permissions`,
+			{
+				withCredentials: true,
+			},
+		);
+	}
 }
