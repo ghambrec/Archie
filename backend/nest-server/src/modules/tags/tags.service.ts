@@ -24,27 +24,69 @@ export class TagsService {
   async findAll(userId: string): Promise<TagResponseDto[]> {
     this.logger.log({ userId }, 'Listing tags visible to user');
 
-    const rows = await this.tagsRepository
-      .createQueryBuilder('tag')
-      .innerJoin('document_tags', 'dt', 'dt.tag_id = tag.id')
-      .innerJoin(
-        'documents',
-        'd',
-        'd.id = dt.document_id AND d.deleted_at IS NULL AND (d.uploaded_by = :userId OR EXISTS (' +
-          'SELECT 1 FROM document_groups dg ' +
-          'INNER JOIN user_groups ug ON ug.group_id = dg.group_id ' +
-          'WHERE dg.document_id = d.id AND ug.user_id = :userId' +
-          '))',
-        { userId },
+    const rows = await this.tagsRepository.query<TagRawRow[]>(
+      `
+      WITH accessible_docs AS (
+          SELECT
+              DISTINCT d.id
+          FROM documents AS d
+          INNER JOIN document_groups AS dg
+              ON dg.document_id = d.id
+          INNER JOIN user_groups AS ug
+              ON ug.group_id = dg.group_id
+          INNER JOIN user_permission AS up
+              ON up.user_id = ug.user_id
+              AND up.group_id = ug.group_id
+          INNER JOIN permissions AS p
+              ON p.id = up.permission_id
+          WHERE
+              d.deleted_at IS NULL
+              AND ug.user_id = $1
+              AND p.perm_key = 'documents.read'
+      ),
+      matched_tags AS (
+          SELECT DISTINCT t.*
+          FROM tags AS t
+          INNER JOIN document_tags AS dt
+              ON dt.tag_id = t.id
+          INNER JOIN accessible_docs AS ad
+              ON ad.id = dt.document_id
+      ),
+      all_tags AS (
+          SELECT * FROM matched_tags
+          UNION
+          SELECT
+              pt.*
+          FROM matched_tags AS mt
+          INNER JOIN tags AS pt
+              ON pt.id = mt.parent_id
+      ),
+      tag_counts AS (
+          SELECT
+              t.id AS tag_id,
+              count(DISTINCT dt.document_id) AS document_count
+          FROM all_tags AS t
+          INNER JOIN tags AS x
+              ON x.id = t.id OR x.parent_id = t.id
+          INNER JOIN document_tags AS dt
+              ON dt.tag_id = x.id
+          INNER JOIN accessible_docs AS ad
+              ON ad.id = dt.document_id
+          GROUP BY t.id
       )
-      .select('tag.id', 'id')
-      .addSelect('tag.name', 'name')
-      .addSelect('tag.label', 'label')
-      .addSelect('tag.parent_id', 'parentId')
-      .addSelect('COUNT(DISTINCT dt.document_id)', 'documentCount')
-      .groupBy('tag.id')
-      .orderBy('tag.name', 'ASC')
-      .getRawMany<TagRawRow>();
+      SELECT
+          t.id AS "id",
+          t.name AS "name",
+          t.label AS "label",
+          t.parent_id AS "parentId",
+          coalesce(tc.document_count, 0) AS "documentCount"
+      FROM all_tags AS t
+      LEFT JOIN tag_counts AS tc
+          ON tc.tag_id = t.id
+      ORDER BY t.name ASC
+      `,
+      [userId],
+    );
 
     this.logger.log({ userId, count: rows.length }, 'Tags listed successfully');
 
