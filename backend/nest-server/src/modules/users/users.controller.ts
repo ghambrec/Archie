@@ -26,7 +26,7 @@ import { GetUsersResponseDto } from './dto/get-users-response.dto';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PatchAvatarResponseDto } from './dto/patch-avatar-response.dto';
-import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
+import { SelfOrAdminGuard } from '../permissions/guards/self-or-admin.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -56,7 +56,7 @@ export class UsersController {
     return this.usersService.getAllUsers(request);
   }
  
-  @UseGuards(SessionAuthGuard, AdminRequiredGuard)
+  @UseGuards(SessionAuthGuard, SelfOrAdminGuard)
   @ApiConsumes('multipart/form-data')
   @ApiBody({
 	schema: {
