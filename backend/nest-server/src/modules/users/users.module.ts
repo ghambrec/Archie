@@ -8,10 +8,11 @@ import { UsersService } from './users.service';
 import { UsersFileService } from './users-file.service';
 import { SessionModule } from '../auth/session/session.module';
 import { StorageModule } from '../storage/storage.module';
+import { PermissionsModule } from '../permissions/permissions.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Group, UserGroup]), SessionModule, StorageModule],
-  exports: [TypeOrmModule, UsersService],
+  imports: [TypeOrmModule.forFeature([User, Group, UserGroup]), SessionModule, StorageModule, PermissionsModule],
+  exports: [TypeOrmModule, UsersService, UsersFileService],
   controllers: [UsersController],
   providers: [UsersService, UsersFileService],
 })

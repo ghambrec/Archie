@@ -14,6 +14,7 @@ import { ErrorCode } from 'src/common/errors/error-code';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { GetUsersResponseDto } from './dto/get-users-response.dto';
 import { Logger } from 'nestjs-pino';
+import { UsersFileService } from './users-file.service';
 
 
 const PASSWORD_SALT_ROUNDS = 10;
@@ -25,6 +26,7 @@ export class UsersService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     private readonly dataSource: DataSource,
+	private readonly usersFileService: UsersFileService
   ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
@@ -47,7 +49,7 @@ export class UsersService {
       )
     }
 
-    return this.dataSource.transaction(async (manager) => {
+    const user = await this.dataSource.transaction(async (manager) => {
       const userInsert = await manager.insert(User, {
         email: dto.email.trim().toLowerCase(),
         passwordHash,
@@ -70,6 +72,15 @@ export class UsersService {
 
       return manager.findOneByOrFail(User, { id: userId });
     });
+
+	// set default avatar
+	try {
+		await this.usersFileService.setDefaultAvatar(user.id, user.displayName);
+	} catch (error) {
+		this.logger.warn(`Default avatar generation failed for user ${user.id}`, error);
+	}
+
+	return user;
   };
 
   async updateProfile(userID: string, dto: UpdateUserDto): Promise<UpdateUserResponseDto> {

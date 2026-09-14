@@ -9,9 +9,10 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
+  Param,
 } from '@nestjs/common';
 
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { UsersService } from './users.service';
 import { UsersFileService } from './users-file.service';
@@ -25,6 +26,7 @@ import { GetUsersResponseDto } from './dto/get-users-response.dto';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PatchAvatarResponseDto } from './dto/patch-avatar-response.dto';
+import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -54,14 +56,23 @@ export class UsersController {
     return this.usersService.getAllUsers(request);
   }
  
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, AdminRequiredGuard)
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+	schema: {
+		type: 'object',
+		properties: {
+			file: {type: 'string', format: 'binary'}
+		}
+	}
+  })
   @UseInterceptors(FileInterceptor('file'))
-  @Patch('me/avatar')
+  @Patch(':userId/avatar')
   async patchAvatar(
-    @Req() req: Request,
+	@Param('userId') userId: string,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<PatchAvatarResponseDto> {
-    return this.usersFileService.patchAvatarImage(req.userId!, file);
+    return this.usersFileService.patchAvatarImage(userId, file);
   }
   
   @ApiOperation({
