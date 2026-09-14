@@ -56,6 +56,9 @@ export class UsersController {
     return this.usersService.getAllUsers(request);
   }
  
+  @ApiOperation({
+	summary: 'Update user avatar'
+  })
   @UseGuards(SessionAuthGuard, SelfOrAdminGuard)
   @ApiConsumes('multipart/form-data')
   @ApiBody({
