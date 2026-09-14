@@ -6,6 +6,7 @@ from enum import Enum, auto
 import magic
 import pymupdf
 import pymupdf4llm
+import xlrd
 
 from io import BytesIO
 from PIL import Image
@@ -14,7 +15,6 @@ from openpyxl import load_workbook
 
 import pytesseract 
 import pylibheif
-
 
 
 
@@ -54,33 +54,36 @@ def extract_text(raw: bytes) -> str:
 
 
 
-    dectected_type = dectect_file_type(raw)
-    logging.info("FileType %s", dectected_type.name )
+    detected_file_type = detect_file_type(raw)
+    logging.info("FileType %s", detected_file_type.name )
 
-    if dectected_type == FileType.TEXT:
+    if detected_file_type == FileType.TEXT:
         return text_parser(raw)
 
-    if dectected_type == FileType.PDF:
+    if detected_file_type == FileType.PDF:
         return pdf_parser(raw)
 
-    if dectected_type in (FileType.PNG, FileType.JPEG):
+    if detected_file_type in (FileType.PNG, FileType.JPEG):
         return ocr_image(raw)
 
-    if dectected_type in ( FileType.HEIC):
+    if detected_file_type ==  FileType.HEIC:
         return heic_image(raw)
 
-    if dectected_type == FileType.DOCX:
+    if detected_file_type == FileType.DOCX:
         return docx_parser(raw)
 
 
-    if dectected_type == FileType.XLSX:
+    if detected_file_type  == FileType.XLSX:
         return xlsx_parser(raw)
+
+    if detect_file_type == FileType.XLX:
+        return xls_parser(raw)
     
-    raise Exception("Document type not supported")
+    raise Exception("Document type: %s not supported", detected_file_type.name)
 
 
 
-def dectect_file_type(raw:bytes) -> FileType:
+def detect_file_type(raw:bytes) -> FileType:
     """
     inspect magic bytes with magic libary and return a enum fileType
     """
@@ -126,132 +129,209 @@ def dectect_file_type(raw:bytes) -> FileType:
     return detected_type
 
 
-def xlsx_parser(raw)-> str:
+def xls_parser(document_bytes:bytes ) -> str:
     """
-    reads XLS files 
+    extracts XLX files
     """
+
     results = []
 
-    with BytesIO(raw) as stream:
-        workbook = load_workbook(
-            stream,
-            read_only=True, 
-            date_only=True,
-        )
-        try:
-            for sheet in workbook.worksheets:
-                results.append(f"Sheet: {sheet.title}")
-                for row in sheet.iter_rows(values_only=True):
-                      cells = []
+    try:
+        book = xlrd.open_workbook(file_contents=document_bytes)
+        try: 
+            for sheets in book.sheets():
+                results.append(f"Sheet headline: {sheets.name}")
+                for raw in range(sheets.nrows):
+                    values = sheets.row_values(raw)
 
-                      for value in row:
-                          text = "" if value is None else str(value)
-                          cells.append(text)
+                    
+                    results.append("\t".join(str(values)))
 
-                      if not any(text.strip() for text in cells):
-                          continue
 
-                      results.append("\t".join(cells))
-
-                results.append("")
         finally:
-            workbook.close()
+            book.release_resources()
+        
+
+    except Exception:
+        logging.exception(" XLX extration failed")
+        raise
+
+    return ("\n\n".join(results))
+
+
+def xlsx_parser(document_bytes:bytes )-> str:
+    """
+    extracts XLSX files 
+    """
+    results = []
+    try:
+        with BytesIO(document_bytes) as stream:
+            workbook = load_workbook(
+                stream,
+                read_only=True, 
+                data_only=True,
+            )
+            try:
+                for sheet in workbook.worksheets:
+                    results.append(f"Sheet: {sheet.title}")
+                    for row in sheet.iter_rows(values_only=True):
+                        cells = []
+
+                        for value in row:
+                            text = "" if value is None else str(value)
+                            cells.append(text)
+
+                        if not any(text.strip() for text in cells):
+                            continue
+
+                        results.append("\t".join(cells))
+
+                    results.append("")
+            finally:
+                workbook.close()
+    except Exception:
+        logging.exception("XLS extraction failed")
+        raise
 
     return "\n".join(results)
     
 
 
-def docx_parser(raw:bytes) -> str:
+def docx_parser(document_bytes:bytes) -> str:
     """
     read docx documents, screenshots will be missed,
       would require to create a pdf file with libreoffice and than only run the ocr modal  over it
     """
-    
-    results = []
-    logging.info("docx file gets read , but no screenshots will be missed")
-    with BytesIO(raw) as stream:
-        document = Document(stream)
-        paragraphs = document.paragraphs
+    try:
+        results = []
+        logging.info("docx file gets read , but no screenshots will be missed")
+        with BytesIO(document_bytes) as stream:
+            document = Document(stream)
+            paragraphs = document.paragraphs
 
-        logging.info("DOCX: found %d body paragraphs", len(paragraphs))
+            logging.info("DOCX: found %d body paragraphs", len(paragraphs))
 
-        results.append(paragraphs)
-        return "\n\n".join(results)
+            results.append(paragraphs)
+
+    except Exception:
+        logging.exception("docx extraction failed")
+        raise
+
+    return "\n\n".join(results)
 
 
-def pdf_parser(raw:bytes) -> str:
+def pdf_parser(document_bytes:bytes) -> str:
     """
-    dispatch pdfs 
-    check each page and call the ocr model if less less then 20 chars get read
+    Dispatches the pdf in pages.
+    extracts the words from each page
+    and runs a ocr modal over each page
+    extracted words get appended as native pdf extraction text and
+    ocr extraction text as native ocr extraction text 
     """
     results = []
+    try:
+        with pymupdf.open(stream=document_bytes, filetype="pdf") as document:
+            logging.info("PDF opend: byetes= %d",  len(document_bytes))
+            for page in document:
+                logging.info("PDF opend: byetes= %d, page_number: %d\ %d" ,
+                    len(document_bytes),
+                    page.number + 1,
+                    document.page_count,
+                    )
+                text = page.get_text("text")
+                word_count = len(text.split())
+                logging.debug("chars detected: %d " , word_count)
 
-    with pymupdf.open(stream=raw, filetype="pdf") as document:
-        for page in document:
-            text = page.get_text("text")
-            word_count = len(text.split())
-            logging.info("chars dectected: %d " , word_count)
-
-            if word_count < settings.ocr_min_chars:
+                logging.info("Pdf extration as markdown")
+                text = pymupdf4llm.to_markdown(
+                    document,
+                    pages=[page.number], # without the braces
+                ) 
+                
                 image = page.get_pixmap(
                     dpi = settings.ocr_image_resultion_dpi,
                     colorspace = COLOR_REPRESENTATION,
                     alpha = INCLUDE_TRANSPARENCY,
                 )
-                text_extracted = ocr_image(image.tobytes("png"))
-                char_count_image = sum( char.isalnum() for char in text_extracted )
-                if char_count_image < settings.ocr_min_chars:
-                    logging.error("Nearly no chars extracted form image by OCR")
+                ocr_text = ocr_image(image.tobytes("png"))
 
+                if(text.strip()):
+                    native_pdf = f"Native pdf extraction text: \n:, {text}"
+                    results.append(native_pdf)    
+                if (ocr_text.strip()):
+                    native_ocr = f"OCR extraction text: \n, {ocr_text}"
+                    results.append(native_ocr)
 
-            else:
-                logging.info("Pdf extration as markdown")
-                text_extracted = pymupdf4llm.to_markdown(page)
-
-            results.append(text_extracted)
-
+    except Exception:
+        logging.error("PDF extraction failed")
+        raise
     return "\n\n".join(results)
 
 
-def text_parser(raw: bytes) -> str:
-    if not raw:
-        return ""
 
-    match = from_bytes(raw, cp_isolation=["utf_8", "cp1252"]).best()
-    if match is None:
-        raise RuntimeError("Could not decode text as UTF-8 or Windows-1252")
+def text_parser(document_bytes: bytes) -> str:
 
-    logging.info("Estimated text encoding: %s", match.encoding)
-    return str(match)
+    try:
+        if not document_bytes:
+            return ""
 
+        match = from_bytes(document_bytes, cp_isolation=["utf_8", "cp1252"]).best()
+        if match is None:
+            raise RuntimeError("Could not decode text as UTF-8 or Windows-1252")
+
+        logging.info("Estimated text encoding: %s", match.encoding)
+        result = str(match)
+    except Exception:
+        logging.exception("extraction docx failed")
+        raise
+    return result
 
 
 def heic_image(heic_bytes: bytes ) -> str:
-    with pylibheif.HeifContext() as ctx:
-        ctx.read_from_memory('heic_bytes')
 
-        handle = ctx.get_primary_image_handle()
-        img = handle.decode(
-            pylibheif.HeifColorspace.RGB, 
-            pylibheif.HeifChroma.InterleavedRGB
+    try: 
+        with pylibheif.HeifContext() as ctx:
+            ctx.read_from_memory(heic_bytes)
+
+            handle = ctx.get_primary_image_handle()
+            img = handle.decode(
+                pylibheif.HeifColorspace.RGB, 
+                pylibheif.HeifChroma.InterleavedRGB
+            )
+        pixels = img.get_plane(pylibheif.HeifChannel.Interleaved, False)
+
+        text = pytesseract.image_to_string(
+            pixels,
+            lang="eng+deu+spa",
         )
-    pixels = img.get_plane(pylibheif.HeifChannel.Interleaved, False)
-
-    text = pytesseract.image_to_string(
-        pixels,
-        lang="eng+deu+spa",
-    )
-    logging.info("OCR input type: %s", type(pixels))
-    logging.info("OCR extracted characters: %d", len(text))
+        logging.info("OCR input type: %s", type(pixels))
+        logging.info("OCR extracted characters: %d", len(text))
+    except Exception:
+        logging.exception("heic extraction failed")
+        raise
     return text
 
+
+#def image_parser(png_byte: bytes ) -> str:
+
+
+
 def ocr_image(png_bytes: bytes) -> str:
-    with Image.open(BytesIO(png_bytes)) as image:
-        text = pytesseract.image_to_string(
-            image,
-            lang="eng+deu+spa",
-            )
-        logging.info("OCR input type: %s", type(image))
-        logging.info("OCR extracted characters: %d", len(text))
-        return text
+
+    logging.info("OCR received %d bytes", len(png_bytes))
+
+    try:
+        with Image.open(BytesIO(png_bytes)) as image:
+            logging.debug("Image format=%s ",
+              image.format,)
+            text = pytesseract.image_to_string(
+                image,
+                lang="eng+deu+spa",
+                )
+            logging.info("OCR input type: %s", type(image))
+            logging.info("OCR extracted characters: %d", len(text))
+    except Exception:
+        logging.exception("Image OCR failed")
+        raise
+    return text
     
