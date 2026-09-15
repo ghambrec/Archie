@@ -107,13 +107,4 @@ export class UsersController {
   async getCurrentUser( @Req() req: Request): Promise<Omit<UserSummaryDto, 'isAdmin'>> {
     return this.usersService.findProfileById(req.userId!);
   }
-
-  @UseGuards(SessionAuthGuard)
-  @Post('whoami')
-  whoami(@Req() req: Request): { userId: string } {
-    return { userId: req.userId! };
-  }
-
 }
-
-
