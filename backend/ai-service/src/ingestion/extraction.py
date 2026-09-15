@@ -72,14 +72,13 @@ def extract_text(raw: bytes) -> str:
     if detected_file_type == FileType.DOCX:
         return docx_parser(raw)
 
-
     if detected_file_type  == FileType.XLSX:
         return xlsx_parser(raw)
 
-    if detect_file_type == FileType.XLX:
+    if detected_file_type == FileType.XLS:
         return xls_parser(raw)
     
-    raise Exception("Document type: %s not supported", detected_file_type.name)
+    raise Exception(f"Document type: {detected_file_type.name} not supported")
 
 
 
@@ -139,14 +138,21 @@ def xls_parser(document_bytes:bytes ) -> str:
     try:
         book = xlrd.open_workbook(file_contents=document_bytes)
         try: 
-            for sheets in book.sheets():
-                results.append(f"Sheet headline: {sheets.name}")
-                for raw in range(sheets.nrows):
-                    values = sheets.row_values(raw)
+            for sheet in book.sheets():
+                results.append(f"Sheet headline: {sheet.name}")
+                for row_index in range(sheet.nrows):
+                    cells = []
+                    values = sheet.row_values(row_index)
+                    for value in values:
+                        
+                        text= "" if value is None else str(value)
+                        cells.append(text)
 
-                    
-                    results.append("\t".join(str(values)))
+                    if not any(text.strip() for text in cells):
+                        continue
+                    results.append("\t".join(cells))
 
+                results.append("")
 
         finally:
             book.release_resources()
@@ -270,6 +276,10 @@ def pdf_parser(document_bytes:bytes) -> str:
 
 
 def text_parser(document_bytes: bytes) -> str:
+    """
+    dispatches Text out of otc documents
+    pictures do not get extracted of the document 
+    """
 
     try:
         if not document_bytes:
@@ -317,6 +327,9 @@ def heic_image(heic_bytes: bytes ) -> str:
 
 
 def ocr_image(png_bytes: bytes) -> str:
+    """
+    OCR image suports german, english and spanisch character recognition 
+    """
 
     logging.info("OCR received %d bytes", len(png_bytes))
 
