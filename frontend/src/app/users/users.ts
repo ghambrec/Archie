@@ -96,11 +96,8 @@ export class Users {
 			},
 		);
 	}
-	//addToUserlist(user: UserInfo){
-	//	this.usersList.update((currentList)) =>
-	//		const newList = [...currentList]
-	//		newList.push(user);
-	//		return newList
-	//} 
 
+	getAvatarUrl(userId: string) {
+		return `${this.baseUrl}/${userId}/avatar`;
+	}
 }
