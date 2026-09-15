@@ -4,6 +4,7 @@ import { NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle } from
 import { TranslocoPipe } from '@jsverse/transloco';
 import { Auth } from '../auth/auth';
 import { firstValueFrom } from 'rxjs';
+import { Users } from '../users/users';
 
 @Component({
   selector: 'app-sidebar',
@@ -14,6 +15,7 @@ import { firstValueFrom } from 'rxjs';
 export class Sidebar {
 	protected readonly authService = inject(Auth);
 	private readonly router = inject(Router);
+	protected readonly usersService = inject(Users)
 
 	async logout () {
 		await firstValueFrom(this.authService.logout());

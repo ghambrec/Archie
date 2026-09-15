@@ -15,12 +15,8 @@
 		@for (user of filteredUserList(); track user.id) {
 			<tr>
 				<td class="pe-0"> 
-					<!--<img [src]="user.avatar"-->
-					<img src ="/images/default-avatar.svg"
-					 alt="Default user avatar"
-					 width="32" 
-					 height="32" 
-					 class="rounded-circle"> </td>
+					<img [src]="usersService.getAvatarUrl(user.id)" alt="Avatar" width="32" height="32" class="rounded-circle"> 
+				</td>
 				<td class="ps-0">{{ user.email }}</td>
 				<td>{{ user.displayName }}</td>
 				<td>{{ user.lastLoginAt?? "-" }}</td>
