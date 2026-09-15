@@ -12,10 +12,10 @@ from io import BytesIO
 from PIL import Image
 from docx import Document
 from openpyxl import load_workbook
+from pptx import Presentation
 
 import pytesseract 
 import pylibheif
-
 
 
 from charset_normalizer import from_bytes
@@ -77,6 +77,9 @@ def extract_text(raw: bytes) -> str:
 
     if detected_file_type == FileType.XLS:
         return xls_parser(raw)
+
+    #if detected_file_type == FileType.PPTX
+    #    return pptx_parser(raw)
     
     raise Exception(f"Document type: {detected_file_type.name} not supported")
 
@@ -126,6 +129,24 @@ def detect_file_type(raw:bytes) -> FileType:
     else:
         detected_type = FileType.UNKNOWN
     return detected_type
+
+
+#def pptx_parser(document_bytes:bytes ) -> str:
+#    """
+#    extract pptx file
+#    """
+#    results = []
+#    try:
+#        with BytesIO(document_bytes) as byte_stream:
+
+#            presStream = Presentation(byte_stream)
+#            for  slide_index, slide in enumerate(presStream.slides):
+#                results.append(f"Slide {slide_index}")
+#                for shape in slide.shapes:
+#                    if not shape.has_text_frame:
+#                        continue:
+
+
 
 
 def xls_parser(document_bytes:bytes ) -> str:
