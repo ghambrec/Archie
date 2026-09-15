@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -20,7 +20,7 @@ import { UsersFileService } from './users-file.service';
 const PASSWORD_SALT_ROUNDS = 10;
 
 @Injectable()
-export class UsersService {
+export class UsersService implements OnApplicationBootstrap {
   constructor(
     private readonly logger: Logger,
     @InjectRepository(User)
@@ -28,6 +28,24 @@ export class UsersService {
     private readonly dataSource: DataSource,
 	private readonly usersFileService: UsersFileService
   ) {}
+
+  // check on app start if theres a user without avatar, if yes create it
+  async onApplicationBootstrap(): Promise<void> {
+	const usersWithoutAvatar: Array<{ id: string; display_name: string }> = 
+		await this.usersRepository.query(`SELECT id, display_name FROM users WHERE avatar_object_key IS NULL AND deleted_at IS NULL`);
+
+	for (const user of usersWithoutAvatar) {
+		try {
+			let seed = user.display_name;
+			if (seed === 'Admin') {
+				seed = 'Administrator';
+			}
+			await this.usersFileService.setDefaultAvatar(user.id, seed);
+		} catch (error) {
+			this.logger.warn(`Default avatar creation on app start failed for user ${user.id}`, error);
+		}
+	}
+  }
 
   async create(dto: CreateUserDto): Promise<User> {
     this.logger.log('Execute create', dto.email);
