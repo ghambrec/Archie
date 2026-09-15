@@ -79,16 +79,13 @@ export class UsersController {
   }
   
   @ApiOperation({
-    summary: 'Get current user avatar',
-    description: 'Streams the raw image contents of the current user\'s avatar.',
+    summary: 'Get avatar from a user',
+    description: 'Streams the raw image contents of the given user\'s avatar.',
   })
   @UseGuards(SessionAuthGuard)
-  @Get('me/avatar')
-  async getAvatar(
-    @Req() req: Request,
-    @Res() res: Response,
-  ): Promise<void> {
-    const avatar = await this.usersFileService.getAvatarImage(req.userId!);
+  @Get(':userId/avatar')
+  async getUserAvatar(@Param('userId') userId: string, @Res() res: Response): Promise<void> {
+	const avatar = await this.usersFileService.getAvatarImage(userId);
 
     res.setHeader('Content-Type', avatar.mimeType);
     res.setHeader('Content-Length', avatar.sizeBytes.toString());
