@@ -27,6 +27,7 @@ import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PatchAvatarResponseDto } from './dto/patch-avatar-response.dto';
 import { SelfOrAdminGuard } from '../permissions/guards/self-or-admin.guard';
+import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -36,6 +37,7 @@ export class UsersController {
     private readonly usersFileService: UsersFileService,
   ) {}
 
+  @UseGuards(SessionAuthGuard, AdminRequiredGuard)
   @Post('create')
   async create(@Body() dto: CreateUserDto): Promise<CreateUserResponseDto> {
     const userEntity = await this.usersService.create(dto);
