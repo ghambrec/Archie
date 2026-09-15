@@ -70,7 +70,7 @@ export class Users {
 	create(body: CreateUserRequest) {
 		const url = `${this.baseUrl}/create`;
 
-		return this.http.post<CreateUserResponse>(url, body);
+		return this.http.post<CreateUserResponse>(url, body, { withCredentials: true });
 
 	}
 	//this.usersList.set();
@@ -96,11 +96,11 @@ export class Users {
 			},
 		);
 	}
-	//addToUserlist(user: UserInfo){
-	//	this.usersList.update((currentList)) =>
-	//		const newList = [...currentList]
-	//		newList.push(user);
-	//		return newList
-	//} 
 
+	getAvatarUrl(userId?: string | null) {
+		if (!userId) {
+			return '/avatar';
+		}
+		return `${this.baseUrl}/${userId}/avatar`;
+	}
 }
