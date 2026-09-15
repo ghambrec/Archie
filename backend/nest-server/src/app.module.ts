@@ -15,6 +15,7 @@ import { AppLoggerModule } from './logger/app-logger.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { UserPermissionModule } from './modules/user_permission/user_permission.module';
+import { TagsModule } from './modules/tags/tags.module';
 import authConfig from './config/auth.config';
 import redisConfig from './config/redis.config';
 import storageConfig from './config/storage.config';
@@ -63,6 +64,7 @@ import aiServiceConfig from './config/ai-service.config';
     AppLoggerModule,
     StorageModule,
     UserPermissionModule,
+    TagsModule,
   ],
   controllers: [AppController, GroupsController],
   providers: [AppService],

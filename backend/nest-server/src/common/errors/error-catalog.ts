@@ -57,6 +57,18 @@ export const ERROR_CATALOG ={
   [ErrorCode.DocumentAlreadyInGroup]: {
     status: HttpStatus.CONFLICT,
     message: 'Document is already assigned to a group.'
+  },
+  [ErrorCode.TagNotFound]: {
+    status: HttpStatus.NOT_FOUND,
+    message: 'Tag was not found.'
+  },
+  [ErrorCode.TagNameAlreadyRegistered]: {
+    status: HttpStatus.CONFLICT,
+    message: 'Tag name is already taken.'
+  },
+  [ErrorCode.TagHasDependents]: {
+    status: HttpStatus.CONFLICT,
+    message: 'Tag still has child tags or documents assigned to it.'
   }
 
   } satisfies Record<ErrorCode, ErrorDefinition>;

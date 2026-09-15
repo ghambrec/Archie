@@ -58,6 +58,4 @@ export class CreateTags1788784804408 implements MigrationInterface {
         `);
 
     }
-    
-
 }
