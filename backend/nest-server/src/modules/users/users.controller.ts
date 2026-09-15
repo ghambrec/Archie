@@ -38,6 +38,7 @@ export class UsersController {
   ) {}
 
   @UseGuards(SessionAuthGuard, AdminRequiredGuard)
+  @ApiOperation({ summary: 'Create new user' })
   @Post('create')
   async create(@Body() dto: CreateUserDto): Promise<CreateUserResponseDto> {
     const userEntity = await this.usersService.create(dto);
@@ -45,6 +46,10 @@ export class UsersController {
   }
 
   @UseGuards(SessionAuthGuard)
+  @ApiOperation({
+    summary: 'TODO: Update user',
+    description: 'For Admin: Update a specific user.<br>For User: User can only update his own user'
+  })
   @Patch('me')
   async updateCurrentUser (
     @Req() req: Request, 
@@ -53,13 +58,15 @@ export class UsersController {
   }
 
   @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Get list of all active users' })
   @Get()
   async getAllUsers(@Query() request: GetUsersQueryDto): Promise<GetUsersResponseDto>{
     return this.usersService.getAllUsers(request);
   }
  
   @ApiOperation({
-	summary: 'Update user avatar'
+	summary: 'Update user avatar',
+	description: 'For Admin: Update a specific user avatar.<br>For User: User can only update his own avatar'
   })
   @UseGuards(SessionAuthGuard, SelfOrAdminGuard)
   @ApiConsumes('multipart/form-data')
@@ -103,6 +110,7 @@ export class UsersController {
   }
 
   @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Get infos about current logged in user' })
   @Get('me')
   async getCurrentUser( @Req() req: Request): Promise<Omit<UserSummaryDto, 'isAdmin'>> {
     return this.usersService.findProfileById(req.userId!);
