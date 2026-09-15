@@ -2,7 +2,7 @@ import { Service, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
-export interface GroupResponseAdmin {
+export interface GroupResponse {
 	id: string;
 	name: string;
 	description: string | null;
@@ -40,23 +40,23 @@ export interface UserPermission {
 @Service()
 export class Groups {
 	private readonly http = inject(HttpClient);
-	private readonly adminGroupsUrl = `${environment.apiUrl}/admin/groups`;
+	private readonly groupsUrl = `${environment.apiUrl}/groups`;
 	private readonly userGroupsUrl = `${environment.apiUrl}/user-groups`;
 	private readonly userPermissionsUrl = `${environment.apiUrl}/user-permission`;
 	
-	readonly groupsList = signal<GroupResponseAdmin[]>([]);
+	readonly groupsList = signal<GroupResponse[]>([]);
 	
-	getGroupsAdmin() {
-		return this.http.get<GroupResponseAdmin[]>(
-			this.adminGroupsUrl,
+	getGroups() {
+		return this.http.get<GroupResponse[]>(
+			this.groupsUrl,
 			{
 				withCredentials: true,
 			}
 		);
 	}
 
-	createGroupAdmin(dto: CreateGroupDto) {
-		return this.http.post<GroupResponseAdmin>(`${this.adminGroupsUrl}/create`,
+	createGroup(dto: CreateGroupDto) {
+		return this.http.post<GroupResponse>(`${this.groupsUrl}/create`,
 			dto,
 			{
 				withCredentials: true
@@ -64,16 +64,16 @@ export class Groups {
 		);
 	}
 
-	deleteGroupAdmin(id: string) {
-		return this.http.delete<void>(`${this.adminGroupsUrl}/${id}`,
+	deleteGroup(id: string) {
+		return this.http.delete<void>(`${this.groupsUrl}/${id}`,
 			{
 				withCredentials: true,
 			}
 		);
 	}
 
-	editGroupAdmin(id: string, dto: UpdateGroupDto) {
-		return this.http.patch<void>(`${this.adminGroupsUrl}/${id}`,
+	editGroup(id: string, dto: UpdateGroupDto) {
+		return this.http.patch<void>(`${this.groupsUrl}/${id}`,
 			dto,
 			{
 				withCredentials: true,

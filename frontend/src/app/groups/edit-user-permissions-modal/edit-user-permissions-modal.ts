@@ -1,6 +1,6 @@
 import { Component, inject, signal } from "@angular/core";
 import { TranslocoPipe } from "@jsverse/transloco";
-import { GroupMember, GroupMembersResponse, GroupResponseAdmin, UserPermission } from "../groups";
+import { GroupMember, GroupMembersResponse, GroupResponse, UserPermission } from "../groups";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -10,7 +10,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
   styleUrl: "./edit-user-permissions-modal.scss",
 })
 export class EditUserPermissionsModal {
-  selectedGroup!: GroupResponseAdmin;
+  selectedGroup!: GroupResponse;
   selectedUser!: GroupMember;
   userPermissions!: UserPermission[];
 

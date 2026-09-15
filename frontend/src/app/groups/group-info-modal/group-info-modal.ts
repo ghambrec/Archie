@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from "@angular/core";
 import { TranslocoPipe } from "@jsverse/transloco";
 import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { GroupMember, GroupResponseAdmin, Groups, UserPermission } from "../groups";
+import { GroupMember, GroupResponse, Groups, UserPermission } from "../groups";
 import { Users } from "../../users/users";
 import { EditUserPermissionsModal } from "../edit-user-permissions-modal/edit-user-permissions-modal";
 
@@ -12,7 +12,7 @@ import { EditUserPermissionsModal } from "../edit-user-permissions-modal/edit-us
   styleUrl: './group-info-modal.scss',
 })
 export class InfoGroupModal {
-  selectedGroup!: GroupResponseAdmin // Define Assignment Assertion
+  selectedGroup!: GroupResponse // Define Assignment Assertion
 
   readonly members = signal<GroupMember[]>([]);
   
