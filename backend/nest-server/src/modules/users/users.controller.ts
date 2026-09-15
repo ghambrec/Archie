@@ -112,7 +112,7 @@ export class UsersController {
   @UseGuards(SessionAuthGuard)
   @ApiOperation({ summary: 'Get infos about current logged in user' })
   @Get('me')
-  async getCurrentUser( @Req() req: Request): Promise<Omit<UserSummaryDto, 'isAdmin'>> {
+  async getCurrentUser( @Req() req: Request): Promise<UserSummaryDto> {
     return this.usersService.findProfileById(req.userId!);
   }
 }
