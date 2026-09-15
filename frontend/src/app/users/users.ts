@@ -97,7 +97,10 @@ export class Users {
 		);
 	}
 
-	getAvatarUrl(userId: string) {
+	getAvatarUrl(userId?: string | null) {
+		if (!userId) {
+			return '/avatar';
+		}
 		return `${this.baseUrl}/${userId}/avatar`;
 	}
 }
