@@ -9,9 +9,10 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
+  Param,
 } from '@nestjs/common';
 
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { UsersService } from './users.service';
 import { UsersFileService } from './users-file.service';
@@ -25,6 +26,8 @@ import { GetUsersResponseDto } from './dto/get-users-response.dto';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PatchAvatarResponseDto } from './dto/patch-avatar-response.dto';
+import { SelfOrAdminGuard } from '../permissions/guards/self-or-admin.guard';
+import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -34,6 +37,7 @@ export class UsersController {
     private readonly usersFileService: UsersFileService,
   ) {}
 
+  @UseGuards(SessionAuthGuard, AdminRequiredGuard)
   @Post('create')
   async create(@Body() dto: CreateUserDto): Promise<CreateUserResponseDto> {
     const userEntity = await this.usersService.create(dto);
@@ -54,27 +58,36 @@ export class UsersController {
     return this.usersService.getAllUsers(request);
   }
  
-  @UseGuards(SessionAuthGuard)
+  @ApiOperation({
+	summary: 'Update user avatar'
+  })
+  @UseGuards(SessionAuthGuard, SelfOrAdminGuard)
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+	schema: {
+		type: 'object',
+		properties: {
+			file: {type: 'string', format: 'binary'}
+		}
+	}
+  })
   @UseInterceptors(FileInterceptor('file'))
-  @Patch('me/avatar')
+  @Patch(':userId/avatar')
   async patchAvatar(
-    @Req() req: Request,
+	@Param('userId') userId: string,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<PatchAvatarResponseDto> {
-    return this.usersFileService.patchAvatarImage(req.userId!, file);
+    return this.usersFileService.patchAvatarImage(userId, file);
   }
   
   @ApiOperation({
-    summary: 'Get current user avatar',
-    description: 'Streams the raw image contents of the current user\'s avatar.',
+    summary: 'Get avatar from a user',
+    description: 'Streams the raw image contents of the given user\'s avatar.',
   })
   @UseGuards(SessionAuthGuard)
-  @Get('me/avatar')
-  async getAvatar(
-    @Req() req: Request,
-    @Res() res: Response,
-  ): Promise<void> {
-    const avatar = await this.usersFileService.getAvatarImage(req.userId!);
+  @Get(':userId/avatar')
+  async getUserAvatar(@Param('userId') userId: string, @Res() res: Response): Promise<void> {
+	const avatar = await this.usersFileService.getAvatarImage(userId);
 
     res.setHeader('Content-Type', avatar.mimeType);
     res.setHeader('Content-Length', avatar.sizeBytes.toString());

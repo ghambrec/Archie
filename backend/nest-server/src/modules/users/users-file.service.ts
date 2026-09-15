@@ -24,6 +24,21 @@ export class UsersFileService {
     private readonly storageService: StorageService,
   ) {}
 
+  async setDefaultAvatar(userId: string, displayName: string): Promise<void> {
+	const seed = encodeURIComponent(displayName);
+	const response = await fetch(`https://api.dicebear.com/10.x/big-smile/svg?backgroundColor=ff5d8f,ffb703,43aa8b,4d96ff,b57bff&seed=${seed}`);
+	if (!response.ok) {
+		throw new Error(`Dicebar request failed: ${response.status}`);
+	}
+	const svg = Buffer.from(await response.text(), 'utf-8');
+	const key = `avatar-${randomUUID()}`;
+
+	await this.storageService.putObject('avatars', key, svg, svg.length, {
+		'Content-Type': 'image/svg+xml'
+	});
+	await this.usersRepository.update(userId, { avatarObjectKey: key });
+  }
+
   async patchAvatarImage(userId: string, file: Express.Multer.File): Promise<PatchAvatarResponseDto> {
     if (!file) {
       throw new ApplicationException(ErrorCode.ValidationFailed);
