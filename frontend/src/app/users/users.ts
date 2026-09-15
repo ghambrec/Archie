@@ -70,7 +70,7 @@ export class Users {
 	create(body: CreateUserRequest) {
 		const url = `${this.baseUrl}/create`;
 
-		return this.http.post<CreateUserResponse>(url, body);
+		return this.http.post<CreateUserResponse>(url, body, { withCredentials: true });
 
 	}
 	//this.usersList.set();
