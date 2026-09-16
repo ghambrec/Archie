@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import asyncpg
+from src.retrieval .retrieval import retrieval
 from asyncpg.exceptions import ForeignKeyViolationError
 
 from uuid import UUID
@@ -38,7 +39,11 @@ async def ask_question(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, questio
         raise UserNotFoundError(str(user_id)) from e
 
     # TODO: hier weiter mit retrieval pipeline (embedding etc)
+    try:
         await retrieval(conv_id, question, pool)
+    except Exception:
+        logger.exception("retriev answer failed ")
+        raise
 
 
 # TODO: wenn retriaval fertig hier noch quelle hinzufuegen etc damit im frontend auf die quell datei verwiesen werden kann
