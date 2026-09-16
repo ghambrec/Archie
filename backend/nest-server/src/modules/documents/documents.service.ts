@@ -190,7 +190,7 @@ export class DocumentsService {
     }
 
     // TODO: We need check this implementation of get
-    await this.groupsService.get(groupId);
+    await this.groupsService.get(groupId, userId);
 
     await this.documentGroupsService.setGroup(id, groupId);
 

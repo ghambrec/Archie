@@ -1,7 +1,7 @@
 import { Group } from './entities/group.entity';
 import { Injectable, ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateGroupsDto } from './dto/create-groups.dto';
 import { UpdateGroupsDto } from './dto/update-groups.dto';
 import { GroupsAdminResponseDto } from './dto/groups-admin-response';
@@ -10,6 +10,7 @@ import { Logger } from 'nestjs-pino';
 import { isUserMemberOfGroup } from './groups.helper';
 import { findGroupByName } from './groups.helper';
 import { DocumentGroup } from '../document-groups/entities/document-group.entity';
+import { PermissionsService } from '../permissions/permissions.service';
 
 @Injectable()
 export class GroupsService {
@@ -21,6 +22,7 @@ export class GroupsService {
 		@InjectRepository(DocumentGroup)
 		private readonly documentGroupsRepository: Repository<DocumentGroup>,
 		private readonly logger: Logger,
+		private readonly permissionsService: PermissionsService
 	) { }
 
 	async create(dto: CreateGroupsDto): Promise<GroupsAdminResponseDto> {
@@ -43,8 +45,8 @@ export class GroupsService {
 		return new GroupsAdminResponseDto(groupEntity);
 	}
 
-	async get(id: string): Promise<GroupsAdminResponseDto> {
-		this.logger.log({ groupId: id }, 'Admin is fetching group by id');
+	async get(id: string, userId: string): Promise<GroupsAdminResponseDto> {
+		this.logger.log({ groupId: id }, 'Fetching group by id');
 
 		const group = await this.groupsRepository.findOneBy({ id });
 		if (!group) {
@@ -52,23 +54,46 @@ export class GroupsService {
 			throw new NotFoundException(`Group with id ${id} not found`);
 		}
 
-		this.logger.log({ groupId: group.id, groupName: group.name }, 'Admin fetching group successful');
+		// if user is no admin check whether he is a member of the group
+		const isAdmin = await this.permissionsService.isUserAdmin(userId);
+		if (!isAdmin) {
+			const isMember = await isUserMemberOfGroup(this.userGroupsRepository, userId, id);
+			if (!isMember) {
+				this.logger.warn({ groupId: id }, 'Group found but user is not a member of it');
+				throw new NotFoundException(`Group with id ${id} not found`);
+			}
+		}
+
+		this.logger.log({ groupId: group.id, groupName: group.name }, 'Fetching group successful');
 		return new GroupsAdminResponseDto(group);
 	}
 
-	async findAll(name?: string): Promise<GroupsAdminResponseDto[]> {
+	async findAll(userId: string, name?: string): Promise<GroupsAdminResponseDto[]> {
 		this.logger.log(name ? { name } : {}, 'Fetching groups');
+		const isAdmin = await this.permissionsService.isUserAdmin(userId);
 
-		const groups = await this.groupsRepository.find(
-			name ? {where: { name } } : {},
-		);
-		return groups.map(group => new GroupsAdminResponseDto(group));
+		// if admin: return all groups
+		if (isAdmin) {
+			const groups = await this.groupsRepository.find(name ? {where: { name } } : {});
+			return groups.map(group => new GroupsAdminResponseDto(group));
+		}
+
+		// is normal user: return only groups user is assigned to
+		const memberships = await this.userGroupsRepository.find({ where: { userId } });
+		const groupIds = memberships.map(m => m.groupId);
+		if (groupIds.length === 0) {
+			return [];
+		}
+		const groups = await this.groupsRepository.find({
+			where: name ? { id: In(groupIds), name } : { id: In(groupIds)}
+		});
+		return groups.map(group => new GroupsAdminResponseDto(group));		
 	}
 
-	async update(id: string, dto: UpdateGroupsDto): Promise<GroupsAdminResponseDto> {
+	async update(id: string, dto: UpdateGroupsDto, userId: string): Promise<GroupsAdminResponseDto> {
 		this.logger.log({ groupId: id }, 'Admin is updating group');
 
-		const group = await this.get(id);
+		const group = await this.get(id, userId);
 
 		if (dto.name && dto.name !== group.name) {
 			const nameTaken = await findGroupByName(this.groupsRepository, dto.name);
@@ -81,7 +106,7 @@ export class GroupsService {
 		if (result.affected === 0) {
 			throw new NotFoundException(`Group ${id} not found`)
 		}
-		const updatedGroup = await this.get(id);
+		const updatedGroup = await this.get(id, userId);
 
 		this.logger.log({ groupId: updatedGroup.id, groupName: updatedGroup.name }, 'Admin updating group successful');
 		return updatedGroup;

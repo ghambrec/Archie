@@ -30,18 +30,18 @@ export class GroupsController {
 	@ApiOperation({
 		summary: 'Get group by id',
 	})
-	async get(@Param('id', new ParseUUIDPipe()) id: string): Promise<GroupsAdminResponseDto> {
-		return this.groupsService.get(id);
+	async get(@Param('id', new ParseUUIDPipe()) id: string, @Req() req: Request): Promise<GroupsAdminResponseDto> {
+		return this.groupsService.get(id, req.userId!);
 	}
 
 	@Get()
 	@UseGuards(SessionAuthGuard)
 	@ApiOperation({
 		summary: 'Get groups, optional name filter',
-		description: 'Query is optional'
+		description: 'Query is optional<br>Admin will get all groups<br>User will get only the groups he is assigned to'
 	})
-	async findAll(@Query() query: GetGroupsQueryDto): Promise<GroupsAdminResponseDto[]> {
-		return this.groupsService.findAll(query.name);
+	async findAll(@Query() query: GetGroupsQueryDto, @Req() req: Request): Promise<GroupsAdminResponseDto[]> {
+		return this.groupsService.findAll(req.userId!, query.name);
 	}
 
 	@Patch(':id')
@@ -50,10 +50,8 @@ export class GroupsController {
 		summary: 'Modifies a group',
 		description: 'Admin only'
 	})
-	async update(
-		@Param('id') id: string,
-		@Body() dto: UpdateGroupsDto): Promise<GroupsAdminResponseDto> {
-		return this.groupsService.update(id, dto);
+	async update(@Param('id') id: string, @Body() dto: UpdateGroupsDto, @Req() req: Request): Promise<GroupsAdminResponseDto> {
+		return this.groupsService.update(id, dto, req.userId!);
 	}
 
 	@Delete(':id')
