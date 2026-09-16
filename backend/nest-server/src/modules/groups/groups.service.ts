@@ -7,8 +7,6 @@ import { UpdateGroupsDto } from './dto/update-groups.dto';
 import { GroupsAdminResponseDto } from './dto/groups-admin-response';
 import { UserGroup } from '../user-groups/entities/user-group.entity';
 import { Logger } from 'nestjs-pino';
-import { isUserMemberOfGroup } from './groups.helper';
-import { findGroupByName } from './groups.helper';
 import { DocumentGroup } from '../document-groups/entities/document-group.entity';
 import { PermissionsService } from '../permissions/permissions.service';
 
@@ -28,7 +26,7 @@ export class GroupsService {
 	async create(dto: CreateGroupsDto): Promise<GroupsAdminResponseDto> {
 		this.logger.log({ groupName: dto.name }, 'Admin is creating group');
 
-		const nameTaken = await findGroupByName(this.groupsRepository, dto.name)
+		const nameTaken = await this.findGroupByName(this.groupsRepository, dto.name)
 		if (nameTaken) {
 			this.logger.warn({ groupName: dto.name }, 'Group name is already taken');
 			throw new ConflictException('Name is already taken');
@@ -57,7 +55,7 @@ export class GroupsService {
 		// if user is no admin check whether he is a member of the group
 		const isAdmin = await this.permissionsService.isUserAdmin(userId);
 		if (!isAdmin) {
-			const isMember = await isUserMemberOfGroup(this.userGroupsRepository, userId, id);
+			const isMember = await this.isUserMemberOfGroup(this.userGroupsRepository, userId, id);
 			if (!isMember) {
 				this.logger.warn({ groupId: id }, 'Group found but user is not a member of it');
 				throw new NotFoundException(`Group with id ${id} not found`);
@@ -96,7 +94,7 @@ export class GroupsService {
 		const group = await this.get(id, userId);
 
 		if (dto.name && dto.name !== group.name) {
-			const nameTaken = await findGroupByName(this.groupsRepository, dto.name);
+			const nameTaken = await this.findGroupByName(this.groupsRepository, dto.name);
 			if (nameTaken) {
 				this.logger.warn({ groupName: dto.name }, 'Group name is already taken');
 				throw new ConflictException('Name is already taken');
@@ -127,7 +125,7 @@ export class GroupsService {
 		}
 
 		if (!skipMembershipCheck) {
-			const isMember = await isUserMemberOfGroup(this.userGroupsRepository, userId, group.id);
+			const isMember = await this.isUserMemberOfGroup(this.userGroupsRepository, userId, group.id);
 			if (isMember == false) {
 				throw new ForbiddenException('You are not a member of this group');
 			}
@@ -143,5 +141,14 @@ export class GroupsService {
 		await this.groupsRepository.remove(group);
 
 		this.logger.log({ groupId: group.id, userId: userId }, 'Admin successfully deleted group');
+	}
+
+	async isUserMemberOfGroup(userGroupsRepository: Repository<UserGroup>, userId: string, groupId: string): Promise<boolean> {
+		const membership = await userGroupsRepository.findOneBy({userId, groupId});
+		return !!membership;
+	}
+
+	async findGroupByName(groupsRepository: Repository<Group>, name: string): Promise<Group | null> {
+		return groupsRepository.findOneBy({name: name});
 	}
 }
