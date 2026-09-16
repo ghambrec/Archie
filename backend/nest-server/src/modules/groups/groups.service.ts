@@ -110,7 +110,7 @@ export class GroupsService {
 		return updatedGroup;
 	}
 
-	async deleteGroup(id: string, userId: string, skipMembershipCheck: boolean): Promise<void> {
+	async deleteGroup(id: string, userId: string): Promise<void> {
 		this.logger.log({ groupId: id, userId: userId }, 'Admin trying to delete group');
 
 		const group = await this.groupsRepository.findOneBy({ id });
@@ -122,13 +122,6 @@ export class GroupsService {
 		if (group.isSystem == true) {
 			this.logger.warn({ groupId: group.id }, 'Group is system group');
 			throw new ForbiddenException('System groups cannot be deleted');
-		}
-
-		if (!skipMembershipCheck) {
-			const isMember = await this.isUserMemberOfGroup(this.userGroupsRepository, userId, group.id);
-			if (isMember == false) {
-				throw new ForbiddenException('You are not a member of this group');
-			}
 		}
 
 		const documentCount = await this.documentGroupsRepository.countBy({

@@ -61,7 +61,7 @@ export class GroupsController {
 		description: 'Admin only'
 	})
 	async remove(@Param('id') id: string, @Req() req: Request): Promise<void> {
-		await this.groupsService.deleteGroup(id, req.userId!, true);
+		await this.groupsService.deleteGroup(id, req.userId!);
 		return;
 	}
 }
