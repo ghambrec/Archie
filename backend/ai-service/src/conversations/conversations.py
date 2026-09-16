@@ -40,7 +40,7 @@ async def ask_question(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, questio
 
     # TODO: hier weiter mit retrieval pipeline (embedding etc)
     try:
-        await retrieval(conv_id, question, pool)
+        await retrieval(user_id, conv_id, question, pool)
     except Exception:
         logger.exception("retriev answer failed ")
         raise

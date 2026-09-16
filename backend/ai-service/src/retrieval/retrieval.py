@@ -6,10 +6,10 @@ import asyncpg
 
 import logging
 
-async def retrieval(conv_id: UUID, question: str, pool: asyncpg.Pool ) -> str :
+async def retrieval(user_id: UUID, conv_id: UUID, question: str, pool: asyncpg.Pool ) -> str :
 	question_embedding = await embed(question)
 
-	logging.debug( f"tokens: {len(question_embedding)}")
+	logging.info( f"tokens: {len(question_embedding)}")
 	#user_doc = await 
 
 
