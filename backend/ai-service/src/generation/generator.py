@@ -14,15 +14,18 @@ model = build_model()
 agent = Agent(model, system_prompt=SYSTEM_PROMPT)
 
 
-async def generate(question: str) -> str:
-    result = await agent.run(question)
+
+async def generate(question: str, context: str) -> str:
+    prompt = "context"
+    result = await agent.run(prompt)
+
     return result.output
 
 
-if __name__ == "__main__":
-    import asyncio
+#if __name__ == "__main__":
+#    import asyncio
 
-    answer = asyncio.run(generate("Do you know the 42 ecole?"))
-    print(answer)
+#    answer = asyncio.run(generate("Do you know the 42 ecole?"))
+#    print(answer)
 
 # uv run python -m src.generation.generator
