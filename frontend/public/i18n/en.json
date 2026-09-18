@@ -9,6 +9,11 @@
 			"logOut": "Log out"
 		}
 	},
+	"documents": {
+		"upload": {
+			"upload": "Upload Documents"
+		}
+	},
 	"login": {
 		"title": "Archie - Login",
 		"email": "E-Mail",

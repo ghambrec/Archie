@@ -1,10 +1,11 @@
 import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { Documents } from '../documents';
 import { HttpEventType } from '@angular/common/http';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
 	selector: 'app-doc-upload',
-	imports: [],
+	imports: [TranslocoPipe],
 	templateUrl: './doc-upload.html',
 	styleUrl: './doc-upload.scss',
 })
