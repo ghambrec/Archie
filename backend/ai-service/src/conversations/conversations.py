@@ -40,10 +40,12 @@ async def ask_question(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, questio
 
     # TODO: hier weiter mit retrieval pipeline (embedding etc)
     try:
-        await retrieval(user_id, conv_id, question, pool)
+        answer = await retrieval(user_id, conv_id, question, pool)
     except Exception:
         logger.exception("retriev answer failed ")
         raise
+    logger.info("model answer: ", {answer})
+    return answer
 
 
 # TODO: wenn retriaval fertig hier noch quelle hinzufuegen etc damit im frontend auf die quell datei verwiesen werden kann

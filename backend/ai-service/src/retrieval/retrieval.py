@@ -64,10 +64,17 @@ async def retrieval(user_id: UUID, conv_id: UUID, question: str, pool: asyncpg.P
 	context ="\n\n".join(selected)
 
 
-	#answer = await generate(question, context)
-	#return answer
+	# to Do:
+	# conv_id -> context der Vorherigen fragen zusammenfassen , mitgeben 
 
-	return context 
+	answer = await generate(question,
+						  context)
+
+	
+	return answer
+	
+
+
 
 
 
