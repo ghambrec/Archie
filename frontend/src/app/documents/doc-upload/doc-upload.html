@@ -1,1 +1,24 @@
-<p>doc-upload works!</p>
+<div
+	class="upload-zone"
+	[class.dragging]="isInDragZone()"
+	(dragover)="onDragIn($event)"
+	(dragleave)="onDragOut($event)"
+	(drop)="onDrop($event)"
+>
+	<button 
+		type="button" 
+		class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 mb-3 p-3" 
+		(click)="openFilePicker()"
+	>
+	<i class="bi bi-plus-lg"></i>
+	Upload Document
+	</button>
+
+	<input
+		#fileInput
+		type="file"
+		multiple
+		class="visually-hidden"
+		(change)="onFilesSelected($event)"
+	>
+</div>
