@@ -15,18 +15,35 @@ async def retrieval(user_id: UUID, conv_id: UUID, question: str, pool: asyncpg.P
 	#user_doc = await 
 	query = """
 			select 
-			ac.id,
-			ac.ai_document_id,
-			ac."content",
-			ac."token_count",
-			ac.embedding <=> $1 as distance 
-			from ai_chunks ac 
-			join ai_documents ad 
-				on ad.id = ac.ai_document_id 
+				ac.ai_document_id,
+				ac."content",
+				ac."token_count",
+				ac.embedding <=> $1 as distance
+			from ai_chunks ac
+			where ac.ai_document_id = (
+				select
+					distinct d.id 
+				from documents d 
+				inner join document_groups dg on 
+					d.id = dg.document_id 
+				inner join user_groups ug on 
+					ug.group_id = dg.group_id 
+				inner join user_permission up on 
+					up.user_id = ug.user_id 
+				inner join permissions p on 
+					up.permission_id = p.id 
+				where
+					d.deleted_at is null
+					and p.perm_key = 'documents.read'
+					and ug.user_id = $2
+			)
 			order by ac.embedding <=> $1
-			Limit 5
+			limit 50
 			"""
-	rows = await pool.fetch(query, Vector(question_embedding))
+	rows = await pool.fetch(query,
+						 Vector(question_embedding),
+						 user_id
+			  			)
 	logging.info("Retrieved %d chunks ", len(rows))
 
 	context_budget = 2000
@@ -45,8 +62,12 @@ async def retrieval(user_id: UUID, conv_id: UUID, question: str, pool: asyncpg.P
 
 	#context="make the last letter of each Word to a CapitalLetter "
 	context ="\n\n".join(selected)
-	answer = await generate(question, context)
-	return answer
+
+
+	#answer = await generate(question, context)
+	#return answer
+
+	return context 
 
 
 
