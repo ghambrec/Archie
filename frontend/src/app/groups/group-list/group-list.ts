@@ -1,5 +1,5 @@
 import { TranslocoPipe } from '@jsverse/transloco';
-import { GroupMember, GroupResponseAdmin, Groups } from '../groups';
+import { GroupMember, GroupResponse, Groups } from '../groups';
 import { computed, OnInit, inject, Component, signal } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CreateGroupModal } from '../create-group-modal/create-group-modal';
@@ -28,7 +28,7 @@ export class GroupList implements OnInit {
   private loadGroups(): void {
     this.hasLoadError.set(false);
 
-    this.groupsService.getGroupsAdmin().subscribe({
+    this.groupsService.getGroups().subscribe({
       next: groups => {
         this.groupsService.groupsList.set(groups)
       },
@@ -68,7 +68,7 @@ export class GroupList implements OnInit {
     });
   };
   
-  openDeleteGroupModal(group: GroupResponseAdmin): void {
+  openDeleteGroupModal(group: GroupResponse): void {
     const modal = this.modalService.open(
       DeleteGroupModal,
       {
@@ -83,7 +83,7 @@ export class GroupList implements OnInit {
     });
   };
   
-  openEditGroupModal(group: GroupResponseAdmin): void {
+  openEditGroupModal(group: GroupResponse): void {
     const modal = this.modalService.open(
       EditGroupModal,
       {
@@ -98,7 +98,7 @@ export class GroupList implements OnInit {
     });
   };
 
-  openInforGroupModal(group: GroupResponseAdmin): void {
+  openInforGroupModal(group: GroupResponse): void {
     const modal = this.modalService.open(
       InfoGroupModal,
       {

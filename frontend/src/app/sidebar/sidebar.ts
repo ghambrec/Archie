@@ -19,7 +19,7 @@ export class Sidebar {
 
 	async logout () {
 		await firstValueFrom(this.authService.logout());
-		this.authService.currentUser.set(null);
+		this.usersService.currentUser.set(null);
 		this.router.navigateByUrl('/login');
 	}
 }

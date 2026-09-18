@@ -39,7 +39,7 @@ export class CreateGroupModal {
 							description: formValues.description?.trim() ? formValues.description.trim() : null,
 						};
 						
-						await firstValueFrom(this.groupsService.createGroupAdmin(input));
+						await firstValueFrom(this.groupsService.createGroup(input));
 
 						this.feedbackMsg.set('groups.createGroupAdmin.feedbackMsg');
 						await firstValueFrom(timer(500));

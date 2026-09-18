@@ -1,8 +1,7 @@
 import { Component, inject, signal } from "@angular/core";
-import { FormField, FormRoot } from "@angular/forms/signals";
 import { TranslocoPipe } from "@jsverse/transloco";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { GroupResponseAdmin, Groups } from "../groups";
+import { GroupResponse, Groups } from "../groups";
 
 @Component({
   selector: 'app-delete-group-modal',
@@ -11,7 +10,7 @@ import { GroupResponseAdmin, Groups } from "../groups";
 	styleUrl: './delete-group-modal.scss',
 })
 export class DeleteGroupModal {
-  selectedGroup!: GroupResponseAdmin;
+  selectedGroup!: GroupResponse;
 
   protected readonly activeModal = inject(NgbActiveModal);
   private readonly groupsService = inject(Groups);
@@ -19,7 +18,7 @@ export class DeleteGroupModal {
   readonly errorMsg = signal<string | null>(null);
 
   confirmDelete(): void {
-    this.groupsService.deleteGroupAdmin(this.selectedGroup.id).subscribe({
+    this.groupsService.deleteGroup(this.selectedGroup.id).subscribe({
       next: () => {
         this.activeModal.close();
       },

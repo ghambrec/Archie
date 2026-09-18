@@ -9,8 +9,6 @@ import { AuthModule } from '../auth/auth.module';
 import { Group } from '../groups/entities/group.entity';
 import { User } from '../users/entities/user.entity';
 import { PermissionsModule } from '../permissions/permissions.module';
-import { AdminUserGroupsController } from './admin-user-groups.controller';
-import { AdminUserGroupsService } from './admin-user-groups.service';
 
 @Module({
   imports: [
@@ -20,17 +18,8 @@ import { AdminUserGroupsService } from './admin-user-groups.service';
     AuthModule,
     PermissionsModule,
   ],
-  providers: [
-    UserGroupsService,
-    AdminUserGroupsService,
-  ],
-  controllers: [
-    UserGroupsController,
-    AdminUserGroupsController,
-  ],
-  exports: [
-    UserGroupsService,
-    AdminUserGroupsService
-  ],
+  providers: [UserGroupsService],
+  controllers: [UserGroupsController],
+  exports: [UserGroupsService],
 })
 export class UserGroupsModule {}
