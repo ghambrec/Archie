@@ -1,18 +1,20 @@
 import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { Documents } from '../documents';
-import { HttpEventType } from '@angular/common/http';
+import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
 interface UploadTask {
 	id: string;
 	filename: string;
 	progress: number;
 	status: 'uploading' | 'done' | 'error';
+	errorMessage?: string;
 }
 
 @Component({
 	selector: 'app-doc-upload',
-	imports: [TranslocoPipe],
+	imports: [TranslocoPipe, NgbTooltip],
 	templateUrl: './doc-upload.html',
 	styleUrl: './doc-upload.scss',
 })
@@ -81,11 +83,13 @@ export class DocUpload {
 					}
 					if (event.type === HttpEventType.Response) {
 						this.updateTask(task.id, { status: 'done', progress: 100 });
-						setTimeout(() => this.removeTask(task.id), 2000);
+						setTimeout(() => this.removeTask(task.id), 3000);
 					}
 				},
-				error: () => {
-					this.updateTask(task.id, { status: 'error' });
+				error: (err: HttpErrorResponse) => {
+					const backendMessage = err.error?.message;
+					const message = Array.isArray(backendMessage) ? backendMessage.join(', ') : backendMessage ?? 'Error';
+					this.updateTask(task.id, { status: 'error', errorMessage: message });
 				}
 			});
 		}
