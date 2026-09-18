@@ -3,6 +3,13 @@ import { Documents } from '../documents';
 import { HttpEventType } from '@angular/common/http';
 import { TranslocoPipe } from '@jsverse/transloco';
 
+interface UploadTask {
+	id: string;
+	filename: string;
+	progress: number;
+	status: 'uploading' | 'done' | 'error';
+}
+
 @Component({
 	selector: 'app-doc-upload',
 	imports: [TranslocoPipe],
@@ -14,7 +21,7 @@ export class DocUpload {
 	private readonly fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
 
 	protected readonly isInDragZone = signal(false); // bool for visual feedback
-	protected readonly uploadProgress = signal<number | null>(null);
+	protected readonly uploads = signal<UploadTask[]>([]);
 
 	// open file picker <input>
 	openFilePicker() {
@@ -57,19 +64,40 @@ export class DocUpload {
 	// files uploaden ueber documentsService
 	private handleFiles(files: FileList) {
 		for (const file of files) {
-			this.documentsService.upload(file).subscribe((event) => {
-				switch (event.type) {
-					case HttpEventType.UploadProgress:
-						if (event.total) {
-							this.uploadProgress.set(Math.round((100 * event.loaded) / event.total));
-						}
-						break;
-					case HttpEventType.Response:
-						console.log('upload finished: ', event.body);
-						this.uploadProgress.set(null);
-						break;
+
+			const task: UploadTask = {
+				id: crypto.randomUUID(),
+				filename: file.name,
+				progress: 0,
+				status: 'uploading'
+			};
+			this.uploads.update((tasks) => [...tasks, task]);
+
+			this.documentsService.upload(file).subscribe({
+				next: (event) => {
+					if (event.type === HttpEventType.UploadProgress && event.total) {
+						const progress = Math.round((100 * event.loaded) / event.total);
+						this.updateTask(task.id, { progress });
+					}
+					if (event.type === HttpEventType.Response) {
+						this.updateTask(task.id, { status: 'done', progress: 100 });
+						setTimeout(() => this.removeTask(task.id), 2000);
+					}
+				},
+				error: () => {
+					this.updateTask(task.id, { status: 'error' });
 				}
 			});
 		}
+	}
+
+	private updateTask(id: string, changes: Partial<UploadTask>) {
+		this.uploads.update((tasks) => 
+			tasks.map((t) => ( t.id === id ? {...t, ...changes } : t))
+		);
+	}
+
+	private removeTask(id: string) {
+		this.uploads.update((tasks) => tasks.filter((t) => t.id !== id));
 	}
 }
