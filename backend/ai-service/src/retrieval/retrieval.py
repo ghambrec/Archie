@@ -52,8 +52,8 @@ async def retrieval(user_id: UUID, conv_id: UUID, question: str, pool: asyncpg.P
 
 	for row in rows:
 		chunked_tokens = row["token_count"]
-		logging.info("chunked tokens =%d", chunked_tokens)
-		logging.info("row=%s", row["content"])
+		logging.debug("chunked tokens =%d", chunked_tokens)
+		logging.debug("row=%s", row["content"])
 
 
 		if used_tokens + chunked_tokens <= context_budget:

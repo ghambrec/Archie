@@ -44,7 +44,13 @@ async def ask_question(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, questio
     except Exception:
         logger.exception("retriev answer failed ")
         raise
-    logger.info("model answer: ", {answer})
+    try: 
+        await save_conversation(pool, user_id, conv_id, question, answer)
+    except Exception:
+        logger.exception("saving answer failed ")
+        raise
+
+    logger.info("model answer: %s", answer)
     return answer
 
 
@@ -100,3 +106,19 @@ async def del_conversation(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID):
                 DELETE FROM ai_conversations WHERE user_id = $1 AND id = $2
             """
     await pool.execute(delete, user_id, conv_id)
+
+
+async def save_conversation(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, question: str, content:str):
+
+
+    insert = """
+            INSERT INTO ai_messages (conv_id, user_id, content)
+            Values ($1, $2, $3)
+            """
+    try:
+        save_status = await pool.execute(insert, conv_id, content )
+        logger.info(f"Status saved Conv: {save_status}")
+        logger.debug(" conversiation: %s, saved content: %s ", conv_id, content)
+    except Exception:
+        logger.exception("saving conversation content failed")
+        raise
