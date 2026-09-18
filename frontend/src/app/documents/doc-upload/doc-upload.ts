@@ -1,4 +1,6 @@
-import { Component, ElementRef, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Documents } from '../documents';
+import { HttpEventType } from '@angular/common/http';
 
 @Component({
 	selector: 'app-doc-upload',
@@ -7,9 +9,11 @@ import { Component, ElementRef, signal, viewChild } from '@angular/core';
 	styleUrl: './doc-upload.scss',
 })
 export class DocUpload {
+	private readonly documentsService = inject(Documents);
 	private readonly fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
 
 	protected readonly isInDragZone = signal(false); // bool for visual feedback
+	protected readonly uploadProgress = signal<number | null>(null);
 
 	// open file picker <input>
 	openFilePicker() {
@@ -49,7 +53,22 @@ export class DocUpload {
 		this.handleFiles(files);
 	}
 
+	// files uploaden ueber documentsService
 	private handleFiles(files: FileList) {
-		console.log([...files]);
+		for (const file of files) {
+			this.documentsService.upload(file).subscribe((event) => {
+				switch (event.type) {
+					case HttpEventType.UploadProgress:
+						if (event.total) {
+							this.uploadProgress.set(Math.round((100 * event.loaded) / event.total));
+						}
+						break;
+					case HttpEventType.Response:
+						console.log('upload finished: ', event.body);
+						this.uploadProgress.set(null);
+						break;
+				}
+			});
+		}
 	}
 }
