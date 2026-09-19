@@ -231,7 +231,7 @@ describe('AuthController (e2e)', () => {
         .expect(statusCodeOk);
 
       await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/users/me')
         .set('Cookie', sessionCookie)
         .expect(statusCodeUnauthorized);
     });

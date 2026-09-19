@@ -1,11 +1,11 @@
 import { TranslocoPipe } from '@jsverse/transloco';
-import { GroupResponseAdmin, Groups } from '../groups';
+import { GroupMember, GroupResponse, Groups } from '../groups';
 import { computed, OnInit, inject, Component, signal } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CreateGroupModal } from '../create-group-modal/create-group-modal';
 import { DeleteGroupModal } from '../delete-group-modal/delete-group-modal';
 import { EditGroupModal } from '../edit-group-modal/edit-group-modal';
-import { InfoGroupModal } from '../info-groups-modal/info-group-modal';
+import { InfoGroupModal } from '../group-info-modal/group-info-modal';
 
 
 @Component({
@@ -28,7 +28,7 @@ export class GroupList implements OnInit {
   private loadGroups(): void {
     this.hasLoadError.set(false);
 
-    this.groupsService.getGroupsAdmin().subscribe({
+    this.groupsService.getGroups().subscribe({
       next: groups => {
         this.groupsService.groupsList.set(groups)
       },
@@ -68,7 +68,7 @@ export class GroupList implements OnInit {
     });
   };
   
-  openDeleteGroupModal(group: GroupResponseAdmin): void {
+  openDeleteGroupModal(group: GroupResponse): void {
     const modal = this.modalService.open(
       DeleteGroupModal,
       {
@@ -83,7 +83,7 @@ export class GroupList implements OnInit {
     });
   };
   
-  openEditGroupModal(group: GroupResponseAdmin): void {
+  openEditGroupModal(group: GroupResponse): void {
     const modal = this.modalService.open(
       EditGroupModal,
       {
@@ -91,14 +91,14 @@ export class GroupList implements OnInit {
       },
     );
 
-    modal.componentInstance.selectedGroup = group;
+    modal.componentInstance.initialize(group);
 
     modal.closed.subscribe(() => {
       this.loadGroups();
     });
   };
 
-  openInforGroupModal(group: GroupResponseAdmin): void {
+  openInforGroupModal(group: GroupResponse): void {
     const modal = this.modalService.open(
       InfoGroupModal,
       {
@@ -108,6 +108,8 @@ export class GroupList implements OnInit {
     );
     modal.componentInstance.selectedGroup = group;
     modal.componentInstance.loadMembers();
-    // no subsrcibe - list doesnt change...
+    modal.componentInstance.loadUsers();
+    modal.componentInstance.loadPermissions();
   }
+
 }

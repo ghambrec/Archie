@@ -2,7 +2,7 @@ import { Component, inject, signal } from "@angular/core";
 import { form, FormField, FormRoot, required } from "@angular/forms/signals";
 import { TranslocoPipe } from "@jsverse/transloco";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { GroupResponseAdmin, Groups, UpdateGroupDto } from "../groups";
+import { GroupResponse, Groups, UpdateGroupDto } from "../groups";
 import { first, firstValueFrom, timer } from "rxjs";
 
 @Component({
@@ -12,7 +12,7 @@ import { first, firstValueFrom, timer } from "rxjs";
 	styleUrl: './edit-group-modal.scss',
 })
 export class EditGroupModal {
-  selectedGroup!: GroupResponseAdmin;
+  selectedGroup!: GroupResponse;
 
   protected readonly activeModal = inject(NgbActiveModal);
   private readonly groupsService = inject(Groups);
@@ -24,9 +24,22 @@ export class EditGroupModal {
     description: '',
   });
 
+  initialize(group: GroupResponse): void {
+    this.selectedGroup = group;
+
+    this.editGroupModal.set({
+      name: group.name,
+      description: group.description ?? '',
+    });
+  }
+
   editGroupAdminForm = form(
     this.editGroupModal,
-    (p) => {},
+    (p) => {
+      required(p.name, {
+        message: "groups.editGroupAdmin.errorNameRequired",
+      });
+    },
     {
       submission: {
         action: async (field) => {
@@ -40,16 +53,19 @@ export class EditGroupModal {
               input.name = formValues.name.trim();
             }
 
-            if (formValues.description.trim() !== '') {
-              input.description = formValues.description.trim();
-            }
+            // if (formValues.description.trim() !== '') {
+            //   input.description = formValues.description.trim();
+            // }
+            input.description = formValues.description.trim();
 
+
+              // error message einbauen wenn name leer ist!!
             if (Object.keys(input).length === 0) {
               this.activeModal.close();
               return;
             }
 
-            await firstValueFrom(this.groupsService.editGroupAdmin(this.selectedGroup.id, input));
+            await firstValueFrom(this.groupsService.editGroup(this.selectedGroup.id, input));
 
             this.feedbackMsg.set('groups.editGroupAdmin.feedbackMsg');
             await firstValueFrom(timer(500));

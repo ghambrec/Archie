@@ -1,0 +1,71 @@
+<div class="modal-header">
+  <div>
+    <h5 class="modal-title">
+      {{ "users.userInfo.heading" | transloco}}
+    </h5>
+
+    <p class="modal-subtitle mb-0">
+      {{ "users.userInfo.description" | transloco }}
+    </p>
+  </div>
+
+  <span class="member-count">
+    {{ "users.userInfo.groupCount" | transloco: {
+      count: userGroups()?.groups?.length ?? 0
+    } }}
+  </span>
+
+  <button
+    type="button"
+    class="btn-close"
+    [attr.aria-label]="'users.userInfo.btnClose'  | transloco"
+    (click)="closeModal()">
+  </button>
+</div>
+
+<div class="modal-body">
+  @if (isLoading()) {
+    <p>{{ "users.userInfo.loading" | transloco }}</p>
+  } @else if (hasLoadError()) {
+    <p class="text-danger">
+      {{ "users.userInfo.errorLoading" | transloco }}
+    </p>
+  } @else {
+    <div class="group-list">
+      <table class="table table-sm align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col">
+              {{ "users.userInfo.groupName" | transloco }}
+            </th>
+          </tr>
+        </thead>
+        
+        <tbody>
+          @for (group of userGroups()?.groups; track group.groupId) {
+            <tr>
+              <td>{{ group.name }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td>
+                <p class="text-danger">
+                  {{ "users.userInfo.empty" | transloco }}
+                </p>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<div class="modal-footer">
+  <button
+    type="button"
+    class="btn btn-secondary"
+    (click)="closeModal()">
+    {{ "users.userInfo.btnClose" | transloco }}
+  </button>
+</div>

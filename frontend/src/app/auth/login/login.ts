@@ -4,6 +4,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { Auth } from '../auth';
 import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
+import { Users } from '../../users/users';
 
 @Component({
 	selector: 'app-login',
@@ -14,7 +15,8 @@ import { Router } from '@angular/router';
 export class Login {
 	private readonly authService = inject(Auth);
 	private readonly router = inject(Router);
-	private readonly translocoService = inject(TranslocoService); 
+	private readonly translocoService = inject(TranslocoService);
+	private readonly usersService = inject(Users)
 
 	loginModel = signal({
 		email: '',
@@ -33,16 +35,12 @@ export class Login {
 			submission: {
 				action: async (field) => {
 					try {
-						await firstValueFrom(this.authService.login(field().value()),
-						);
-						const user = await firstValueFrom(this.authService.getCurrentUser(),
-						);
-						this.authService.checkSession();
-						// this.authService.currentUser.set(user);
-						this.translocoService.setActiveLang(user.preferredLanguage);
+						await firstValueFrom(this.authService.login(field().value()));
+						await this.authService.checkSession();
+						const user = this.usersService.currentUser();
+						this.translocoService.setActiveLang(user!.preferredLanguage);
 						this.router.navigateByUrl('/home');
 						return
-
 					} catch (error : any) {
 						const translocoKey = error.status == 401 ? 'login.errorInvalidCred' : 'login.errorGeneral';
 						return { kind: 'serverError', message: translocoKey };

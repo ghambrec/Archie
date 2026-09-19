@@ -1,9 +1,10 @@
 import { Component, computed, inject, OnInit, signal} from '@angular/core';
-import { Users } from '../users';
+import { UserInfo, Users } from '../users';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CreateUserModal } from '../create-user-modal/create-user-modal';
 import { EditUserModal } from '../edit-user-modal/edit-user-modal';
+import { UserInfoModal } from '../user-info-modal/user-info-modal';
 
 @Component({
 	selector: 'app-user-list',
@@ -59,5 +60,16 @@ export class UserList implements OnInit {
 	openEditUserModal() {
 		this.modalService.open(EditUserModal, 
 			{ centered: true });
+	}
+
+	openUserInfoModal(user: UserInfo): void {
+		const modal = this.modalService.open(
+			UserInfoModal,
+			{
+				centered: true,
+				size: 'lg',
+			});
+		modal.componentInstance.selectedUser = user;
+		modal.componentInstance.loadUserGroups();
 	}
 }

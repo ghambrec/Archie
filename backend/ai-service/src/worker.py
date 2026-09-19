@@ -16,8 +16,6 @@ from arq.connections import RedisSettings
 from src.config import settings
 from src.langfuse_client import setup_langfuse_client
 
-setup_langfuse_client()
-
 from src.db import create_pool
 from src.ingestion import ingestor
 from src.storage.minio import MinioDocumentStore
@@ -33,6 +31,7 @@ async def ingest_job(ctx: dict, doc_id: UUID) -> None:
 
 async def on_startup(ctx: dict) -> None:
     logger.info("AI Service Worker starting up")
+    setup_langfuse_client()
     ctx["db_pool"] = await create_pool()
     ctx["minio"] = MinioDocumentStore(
         minio_endpoint=f"{settings.minio_endpoint}:{settings.minio_port}",
@@ -51,5 +50,4 @@ class WorkerSettings:
     functions = [func(ingest_job, max_tries=1)]
     on_startup = on_startup
     on_shutdown = on_shutdown
-    redis_settings = RedisSettings(
-        host=settings.redis_host, port=settings.redis_port)
+    redis_settings = RedisSettings.from_dsn(settings.redis_dsn)

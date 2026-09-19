@@ -1,5 +1,6 @@
 import {
   Req,
+  Res,
   Body,Get,
   Controller,
   Patch,
@@ -8,10 +9,11 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
+  Param,
 } from '@nestjs/common';
 
-import { ApiTags } from '@nestjs/swagger';
-import type { Request } from 'express';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { Request, Response } from 'express';
 import { UsersService } from './users.service';
 import { UsersFileService } from './users-file.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -24,6 +26,8 @@ import { GetUsersResponseDto } from './dto/get-users-response.dto';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PatchAvatarResponseDto } from './dto/patch-avatar-response.dto';
+import { SelfOrAdminGuard } from '../permissions/guards/self-or-admin.guard';
+import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -33,6 +37,8 @@ export class UsersController {
     private readonly usersFileService: UsersFileService,
   ) {}
 
+  @UseGuards(SessionAuthGuard, AdminRequiredGuard)
+  @ApiOperation({ summary: 'Create new user' })
   @Post('create')
   async create(@Body() dto: CreateUserDto): Promise<CreateUserResponseDto> {
     const userEntity = await this.usersService.create(dto);
@@ -40,6 +46,10 @@ export class UsersController {
   }
 
   @UseGuards(SessionAuthGuard)
+  @ApiOperation({
+    summary: 'TODO: Update user',
+    description: 'For Admin: Update a specific user.<br>For User: User can only update his own user'
+  })
   @Patch('me')
   async updateCurrentUser (
     @Req() req: Request, 
@@ -48,33 +58,61 @@ export class UsersController {
   }
 
   @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Get list of all active users' })
   @Get()
   async getAllUsers(@Query() request: GetUsersQueryDto): Promise<GetUsersResponseDto>{
     return this.usersService.getAllUsers(request);
   }
  
-  @UseGuards(SessionAuthGuard)
+  @ApiOperation({
+	summary: 'Update user avatar',
+	description: 'For Admin: Update a specific user avatar.<br>For User: User can only update his own avatar'
+  })
+  @UseGuards(SessionAuthGuard, SelfOrAdminGuard)
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+	schema: {
+		type: 'object',
+		properties: {
+			file: {type: 'string', format: 'binary'}
+		}
+	}
+  })
   @UseInterceptors(FileInterceptor('file'))
-  @Patch('me/avatar')
+  @Patch(':userId/avatar')
   async patchAvatar(
-    @Req() req: Request,
+	@Param('userId') userId: string,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<PatchAvatarResponseDto> {
-    return this.usersFileService.patchAvatarImage(req.userId!, file);
+    return this.usersFileService.patchAvatarImage(userId, file);
   }
   
+  @ApiOperation({
+    summary: 'Get avatar from a user',
+    description: 'Streams the raw image contents of the given user\'s avatar.',
+  })
   @UseGuards(SessionAuthGuard)
+  @Get(':userId/avatar')
+  async getUserAvatar(@Param('userId') userId: string, @Res() res: Response): Promise<void> {
+	const avatar = await this.usersFileService.getAvatarImage(userId);
+
+    res.setHeader('Content-Type', avatar.mimeType);
+    res.setHeader('Content-Length', avatar.sizeBytes.toString());
+
+    avatar.stream.on('error', () => {
+      if (!res.headersSent) {
+        res.status(500);
+      }
+      res.end();
+    });
+
+    avatar.stream.pipe(res);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @ApiOperation({ summary: 'Get infos about current logged in user' })
   @Get('me')
-  async getCurrentUser( @Req() req: Request): Promise<Omit<UserSummaryDto, 'isAdmin'>> {
+  async getCurrentUser( @Req() req: Request): Promise<UserSummaryDto> {
     return this.usersService.findProfileById(req.userId!);
   }
-
-  @UseGuards(SessionAuthGuard)
-  @Post('whoami')
-  whoami(@Req() req: Request): { userId: string } {
-    return { userId: req.userId! };
-  }
-
 }
-
-

@@ -1,6 +1,20 @@
-import { Service, inject, signal } from '@angular/core';
+import { Service, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { SupportedLanguage } from '../core/i18n/supported-language';
+
+export interface UserGroupMembership {
+	groupId: string;
+	name: string;
+	joinedAt: string;
+}
+
+export interface UserGroupsResponse {
+	userId: string;
+	displayName: string;
+	email: string;
+	groups: UserGroupMembership[];
+}
 
 export interface CreateUserRequest {
 	email: string;
@@ -16,17 +30,17 @@ export interface CreateUserResponse {
 }
 
 export interface UserInfo {
-		id: 	string;
-		email:	string;
-		displayName: string;
-		preferredLanguage: string;
-		isActive: boolean;
-		lastLoginAt: string | null;
-		//avatar: string;
+	id: string;
+	email: string;
+	displayName: string;
+	preferredLanguage: string;
+	isActive: boolean;
+	lastLoginAt: string | null;
+	//avatar: string;
 
-	}
+}
 
-export interface GetUsersResponse{
+export interface GetUsersResponse {
 	data: UserInfo[];
 	page: number;
 	limit: number;
@@ -35,34 +49,38 @@ export interface GetUsersResponse{
 
 }
 
-//export interface UsersList {
-//	id: string;
-//	email: string;
-//	displayName: string;
-//	preferredLanguage: string;
-//	lastLogin: string;
-//	isActive: boolean;
-//	avatar: string;
-//}
+export interface CurrentUser {
+	id: string;
+	email: string;
+	displayName: string;
+	preferredLanguage: SupportedLanguage;
+	isAdmin: boolean;
+}
 
 @Service()
 export class Users {
 	private readonly http = inject(HttpClient);
 	private readonly baseUrl = `${environment.apiUrl}/users`;
 
+	readonly currentUser = signal<CurrentUser | null>(null);
+	readonly isAdminUser = computed(() => this.currentUser()?.isAdmin === true);
 
 	readonly usersList = signal<UserInfo[]>([]);
-	
+
+
+	getCurrentUser() {
+		const url = `${this.baseUrl}/me`;
+		return this.http.get<CurrentUser>(url, { withCredentials: true });
+	}
 
 	create(body: CreateUserRequest) {
 		const url = `${this.baseUrl}/create`;
 
-		return this.http.post<CreateUserResponse>(url, body);
+		return this.http.post<CreateUserResponse>(url, body, { withCredentials: true });
 
 	}
-	//this.usersList.set();
 
-	getUsersList(page =1, limit = 20){
+	getUsersList(page = 1, limit = 20) {
 		return this.http.get<GetUsersResponse>(
 			this.baseUrl,
 			{
@@ -70,15 +88,24 @@ export class Users {
 					page: page.toString(),
 					limit: limit.toString(),
 				},
-				withCredentials: true, 
+				withCredentials: true,
 			}
 		)
 	}
-	//addToUserlist(user: UserInfo){
-	//	this.usersList.update((currentList)) =>
-	//		const newList = [...currentList]
-	//		newList.push(user);
-	//		return newList
-	//} 
 
+	getGroupsByUserId(userId: string) {
+		return this.http.get<UserGroupsResponse>(
+			`${environment.apiUrl}/user-groups/userId/${userId}/groups`,
+			{
+				withCredentials: true,
+			},
+		);
+	}
+
+	getAvatarUrl(userId?: string | null) {
+		if (!userId) {
+			return '/avatar';
+		}
+		return `${this.baseUrl}/${userId}/avatar`;
+	}
 }

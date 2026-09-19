@@ -2,7 +2,7 @@ import { Service, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
-export interface GroupResponseAdmin {
+export interface GroupResponse {
 	id: string;
 	name: string;
 	description: string | null;
@@ -32,24 +32,31 @@ export interface GroupMembersResponse {
 	members: GroupMember[];
 }
 
+export interface UserPermission {
+	userId: string;
+	permKey: string;
+}
+
 @Service()
 export class Groups {
 	private readonly http = inject(HttpClient);
-	private readonly baseUrl = `${environment.apiUrl}/admin/groups`;
+	private readonly groupsUrl = `${environment.apiUrl}/groups`;
+	private readonly userGroupsUrl = `${environment.apiUrl}/user-groups`;
+	private readonly userPermissionsUrl = `${environment.apiUrl}/user-permission`;
 	
-	readonly groupsList = signal<GroupResponseAdmin[]>([]);
+	readonly groupsList = signal<GroupResponse[]>([]);
 	
-	getGroupsAdmin() {
-		return this.http.get<GroupResponseAdmin[]>(
-			this.baseUrl,
+	getGroups() {
+		return this.http.get<GroupResponse[]>(
+			this.groupsUrl,
 			{
 				withCredentials: true,
 			}
 		);
 	}
 
-	createGroupAdmin(dto: CreateGroupDto) {
-		return this.http.post<GroupResponseAdmin>(`${this.baseUrl}/create`,
+	createGroup(dto: CreateGroupDto) {
+		return this.http.post<GroupResponse>(`${this.groupsUrl}/create`,
 			dto,
 			{
 				withCredentials: true
@@ -57,16 +64,16 @@ export class Groups {
 		);
 	}
 
-	deleteGroupAdmin(id: string) {
-		return this.http.delete<void>(`${this.baseUrl}/${id}`,
+	deleteGroup(id: string) {
+		return this.http.delete<void>(`${this.groupsUrl}/${id}`,
 			{
 				withCredentials: true,
 			}
 		);
 	}
 
-	editGroupAdmin(id: string, dto: UpdateGroupDto) {
-		return this.http.patch<void>(`${this.baseUrl}/${id}`,
+	editGroup(id: string, dto: UpdateGroupDto) {
+		return this.http.patch<void>(`${this.groupsUrl}/${id}`,
 			dto,
 			{
 				withCredentials: true,
@@ -75,7 +82,32 @@ export class Groups {
 	}
 
 	infoGroups(id: string) {
-		return this.http.get<GroupMembersResponse>(`${environment.apiUrl}/user-groups/groups/${id}/members`,
+		return this.http.get<GroupMembersResponse>(`${this.userGroupsUrl}/groups/${id}/members`,
+			{
+				withCredentials: true,
+			},
+		);
+	}
+
+	addUserToGroup(groupId: string, userId: string) {
+		return this.http.post(`${this.userGroupsUrl}/groups/${groupId}/members`,
+			{ userId },
+			{
+				withCredentials: true,
+			},
+		);
+	}
+
+	removeUserFromGroup(groupId: string, userId: string) {
+		return this.http.delete(`${this.userGroupsUrl}/groups/${groupId}/members/${userId}`,
+			{
+				withCredentials: true
+			},
+		);
+	}
+
+	getGroupPermissions(groupId: string) {
+		return this.http.get<UserPermission[]>(`${this.userPermissionsUrl}/${groupId}/permissions`,
 			{
 				withCredentials: true,
 			},

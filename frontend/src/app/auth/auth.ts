@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { firstValueFrom } from 'rxjs';
 import type { SupportedLanguage } from '../core/i18n/supported-language'
+import { Users } from '../users/users';
 
 export interface LoginRequest {
 	email: string;
@@ -16,26 +17,13 @@ export interface LoginResponse {
 	preferredLanguage: SupportedLanguage;
 }
 
-export interface CurrentUser {
-	id: string;
-	email: string;
-	displayName: string;
-	preferredLanguage: SupportedLanguage;
-	isAdmin: boolean; 
-}
 
 @Service()
 export class Auth {
 	private readonly http = inject(HttpClient);
 	private readonly baseUrl = `${environment.apiUrl}/auth`;
+	private readonly usersService = inject(Users)
 
-	readonly currentUser = signal<CurrentUser | null>(null);
-
-	readonly isAdminUser = computed(() => this.currentUser()?.isAdmin === true);
-
-	isAdmin(): boolean {
-		return this.currentUser()?.isAdmin === true;
-	}
 
 	login(body: LoginRequest) {
 		const url = `${this.baseUrl}/login`;
@@ -48,21 +36,14 @@ export class Auth {
 
 		return this.http.get<void>(url, { withCredentials: true });
 	}
-	getCurrentUser(){
-		const url = `${environment.apiUrl}/users/me`;
-
-		return this.http.get<CurrentUser>(url, { withCredentials: true })
-	}
 
 	async checkSession(): Promise<boolean> {
-		const url = `${this.baseUrl}/me`;
-
 		try {
-			const user = await firstValueFrom(this.http.get<CurrentUser>(url, { withCredentials: true }));
-			this.currentUser.set(user);
+			const user = await firstValueFrom(this.usersService.getCurrentUser());
+			this.usersService.currentUser.set(user);
 			return true;
 		} catch {
-			this.currentUser.set(null);
+			this.usersService.currentUser.set(null);
 			return false;
 		}
 	}
