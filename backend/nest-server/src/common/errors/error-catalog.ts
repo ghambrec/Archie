@@ -73,6 +73,10 @@ export const ERROR_CATALOG ={
   [ErrorCode.TagHasDependents]: {
     status: HttpStatus.CONFLICT,
     message: 'Tag still has child tags or documents assigned to it.'
+  },
+  [ErrorCode.DocumentTagAlreadyAssigned]: {
+    status: HttpStatus.CONFLICT,
+    message: 'Document already has this tag assigned.'
   }
 
   } satisfies Record<ErrorCode, ErrorDefinition>;
