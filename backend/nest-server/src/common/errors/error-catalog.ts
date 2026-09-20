@@ -77,6 +77,10 @@ export const ERROR_CATALOG ={
   [ErrorCode.DocumentTagAlreadyAssigned]: {
     status: HttpStatus.CONFLICT,
     message: 'Document already has this tag assigned.'
+  },
+  [ErrorCode.DocumentTagNotAssigned]: {
+    status: HttpStatus.NOT_FOUND,
+    message: 'Document does not have the given tag assigned.'
   }
 
   } satisfies Record<ErrorCode, ErrorDefinition>;
