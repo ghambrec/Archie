@@ -8,6 +8,8 @@ import { Document } from './entities/document.entity';
 import { User } from '../users/entities/user.entity';
 import { Group } from '../groups/entities/group.entity';
 import { DocumentGroup } from '../document-groups/entities/document-group.entity';
+import { Tag } from '../tags/entities/tag.entity';
+import { DocumentTag } from '../tags/entities/document-tag.entity';
 import { DocumentAiStatus } from './dto/document-ai-status.enum';
 import { UploadResponseDto } from './dto/upload-response.dto';
 import { GetDocumentsQueryDto } from './dto/get-documents-query.dto';
@@ -89,6 +91,8 @@ export class DocumentsService {
       .innerJoin(User, 'uploader', 'uploader.id = document.uploadedBy')
       .leftJoin(DocumentGroup, 'documentGroup', 'documentGroup.documentId = document.id')
       .leftJoin(Group, 'group', 'group.id = documentGroup.groupId')
+      .leftJoin(DocumentTag, 'documentTag', 'documentTag.documentId = document.id')
+      .leftJoin(Tag, 'tag', 'tag.id = documentTag.tagId')
       .select([
         'document.id AS "id"',
         'document.filename AS "filename"',
@@ -101,11 +105,19 @@ export class DocumentsService {
       ])
       .addSelect(
         `COALESCE(
-          json_agg(json_build_object('id', "group"."id", 'name', "group"."name"))
+          json_agg(DISTINCT jsonb_build_object('id', "group"."id", 'name', "group"."name"))
             FILTER (WHERE "group"."id" IS NOT NULL),
           '[]'
         )`,
         'groups',
+      )
+      .addSelect(
+        `COALESCE(
+          json_agg(DISTINCT jsonb_build_object('id', "tag"."id", 'name', "tag"."name", 'label', "tag"."label"))
+            FILTER (WHERE "tag"."id" IS NOT NULL),
+          '[]'
+        )`,
+        'tags',
       )
       .groupBy('document.id')
       .addGroupBy('uploader.id')
@@ -123,7 +135,7 @@ export class DocumentsService {
       updatedAt: row.updatedAt,
       uploadedBy: { id: row.uploaderId, name: row.uploaderName },
       groups: row.groups,
-      tags: [],
+      tags: row.tags,
       aiStatus: DocumentAiStatus.PENDING,
       language: '',
     }));
@@ -148,6 +160,8 @@ export class DocumentsService {
       .innerJoin(User, 'uploader', 'uploader.id = document.uploadedBy')
       .leftJoin(DocumentGroup, 'documentGroup', 'documentGroup.documentId = document.id')
       .leftJoin(Group, 'group', 'group.id = documentGroup.groupId')
+      .leftJoin(DocumentTag, 'documentTag', 'documentTag.documentId = document.id')
+      .leftJoin(Tag, 'tag', 'tag.id = documentTag.tagId')
       .where('document.id = :id', { id })
       .andWhere('document.uploadedBy = :userId', { userId })
       .select([
@@ -162,11 +176,19 @@ export class DocumentsService {
       ])
       .addSelect(
         `COALESCE(
-          json_agg(json_build_object('id', "group"."id", 'name', "group"."name"))
+          json_agg(DISTINCT jsonb_build_object('id', "group"."id", 'name', "group"."name"))
             FILTER (WHERE "group"."id" IS NOT NULL),
           '[]'
         )`,
         'groups',
+      )
+      .addSelect(
+        `COALESCE(
+          json_agg(DISTINCT jsonb_build_object('id', "tag"."id", 'name', "tag"."name", 'label', "tag"."label"))
+            FILTER (WHERE "tag"."id" IS NOT NULL),
+          '[]'
+        )`,
+        'tags',
       )
       .groupBy('document.id')
       .addGroupBy('uploader.id')
@@ -187,7 +209,7 @@ export class DocumentsService {
       updatedAt: raw.updatedAt,
       uploadedBy: { id: raw.uploaderId, name: raw.uploaderName },
       groups: raw.groups,
-      tags: [],
+      tags: raw.tags,
       aiStatus: DocumentAiStatus.PENDING,
       language: '',
     };
