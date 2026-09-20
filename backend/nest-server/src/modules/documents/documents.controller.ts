@@ -167,6 +167,21 @@ export class DocumentsController {
   }
 
   @ApiOperation({
+    summary: 'Remove a tag from a document',
+    description: 'Removes the given tag from the specified document.',
+  })
+  @UseGuards(SessionAuthGuard)
+  @Delete(':id/tags/:tagId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeTag(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Param('tagId') tagId: string,
+  ): Promise<void> {
+    return this.documentsService.removeTag(req.userId!, id, tagId);
+  }
+
+  @ApiOperation({
     summary: 'Delete a document',
     description: 'Soft-deletes the document by its ID.',
   })

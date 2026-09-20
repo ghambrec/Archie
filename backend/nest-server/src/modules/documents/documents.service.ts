@@ -293,6 +293,28 @@ export class DocumentsService {
     return { documentId: id, tagId };
   }
 
+  async removeTag(
+    userId: string,
+    id: string,
+    tagId: string,
+  ): Promise<void> {
+
+    this.logger.log({ userId, id, tagId }, 'Remove tag from document');
+
+    const document = await this.documentsRepository.findOne({
+      where: { id, uploadedBy: userId },
+      select: { id: true },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    await this.tagsService.removeFromDocument(id, tagId);
+
+    this.logger.log({ userId, id, tagId }, 'Tag removed from document');
+  }
+
   async removeGroup(
     userId: string,
     id: string,

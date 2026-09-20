@@ -46,6 +46,20 @@ export class TagsService {
     this.logger.log({ documentId, tagId }, 'Tag assigned to document');
   }
 
+  async removeFromDocument(documentId: string, tagId: string): Promise<void> {
+    this.logger.log({ documentId, tagId }, 'Removing tag from document');
+
+    const existing = await this.documentTagsRepository.findOneBy({ documentId, tagId });
+    if (!existing) {
+      this.logger.warn({ documentId, tagId }, 'Document does not have this tag assigned');
+      throw new ApplicationException(ErrorCode.DocumentTagNotAssigned);
+    }
+
+    await this.documentTagsRepository.delete({ documentId, tagId });
+
+    this.logger.log({ documentId, tagId }, 'Tag removed from document');
+  }
+
   async findAll(userId: string): Promise<TagResponseDto[]> {
     this.logger.log({ userId }, 'Listing tags visible to user');
 
