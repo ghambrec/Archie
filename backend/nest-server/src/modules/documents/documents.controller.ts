@@ -26,6 +26,8 @@ import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
 import { DocumentSummaryDto } from './dto/document-summary.dto';
 import { SetDocumentGroupDto } from './dto/set-document-group.dto';
 import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
+import { SetDocumentTagDto } from './dto/set-document-tag.dto';
+import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
 
 @ApiTags('documents')
 @Controller('documents')
@@ -97,6 +99,20 @@ export class DocumentsController {
     @Body() dto: SetDocumentGroupDto,
   ): Promise<DocumentGroupResponseDto> {
     return this.documentsService.setGroup(req.userId!, documentId, dto.groupId);
+  }
+
+  @ApiOperation({
+    summary: 'Assign a tag to a document',
+    description: 'Adds the given tag to the document.',
+  })
+  @UseGuards(SessionAuthGuard)
+  @Post(':id/tags')
+  async setTag(
+    @Req() req: Request,
+    @Param('id') documentId: string,
+    @Body() dto: SetDocumentTagDto,
+  ): Promise<DocumentTagResponseDto> {
+    return this.documentsService.setTag(req.userId!, documentId, dto.tagId);
   }
 
   @UseGuards(SessionAuthGuard)

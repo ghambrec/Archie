@@ -22,6 +22,8 @@ import { ErrorCode } from 'src/common/errors/error-code';
 import { GroupsService } from '../groups/groups.service';
 import { DocumentGroupsService } from '../document-groups/document-groups.service';
 import { AiIngestionService } from '../ai-service/ai-ingestion.service';
+import { TagsService } from '../tags/tags.service';
+import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
 
 const DOCUMENTS_BUCKET = 'documents';
 
@@ -34,6 +36,7 @@ export class DocumentsService {
     private readonly groupsService: GroupsService,
     private readonly documentGroupsService: DocumentGroupsService,
     private readonly aiIngestionService: AiIngestionService,
+    private readonly tagsService: TagsService,
     private readonly logger: Logger,
   ) {}
 
@@ -264,6 +267,30 @@ export class DocumentsService {
     this.logger.log({ userId, id, groupId }, 'Document assigned to group');
 
     return { documentId: id, groupId };
+  }
+
+  async setTag(
+    userId: string,
+    id: string,
+    tagId: string,
+  ): Promise<DocumentTagResponseDto> {
+
+    this.logger.log({ userId, id, tagId }, 'Assign tag to document');
+
+    const document = await this.documentsRepository.findOne({
+      where: { id, uploadedBy: userId },
+      select: { id: true },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    await this.tagsService.assignToDocument(id, tagId);
+
+    this.logger.log({ userId, id, tagId }, 'Tag assigned to document');
+
+    return { documentId: id, tagId };
   }
 
   async removeGroup(
