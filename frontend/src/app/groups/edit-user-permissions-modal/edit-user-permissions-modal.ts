@@ -1,6 +1,6 @@
 import { Component, inject, signal } from "@angular/core";
 import { TranslocoPipe } from "@jsverse/transloco";
-import { GroupMember, GroupMembersResponse, GroupResponse, UserPermission } from "../groups";
+import { GroupMember, GroupMembersResponse, GroupResponse, Groups, UserPermission } from "../groups";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -19,16 +19,22 @@ export class EditUserPermissionsModal {
 
   readonly selectedPermissions = signal<Set<string>>(new Set());
 
+  private readonly groupsService = inject(Groups);
+
   ngOnInit(): void {
     this.selectedPermissions.set(
       new Set(this.userPermissions.map(permission => permission.permKey))
     );
   }
 
-  hasPermission(permissionKey: string): boolean {
-    return this.userPermissions.some(
-      permission =>  permission.permKey === permissionKey
-    );
+  // hasPermission(permissionKey: string): boolean {
+  //   return this.userPermissions.some(
+  //     permission =>  permission.permKey === permissionKey
+  //   );
+  // }
+
+  hasPermission(permissionsKey: string): boolean {
+    return this.selectedPermissions().has(permissionsKey);
   }
 
   setPermission(permissionKey: string, event: Event): void {
