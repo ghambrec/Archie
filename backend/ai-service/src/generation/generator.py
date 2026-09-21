@@ -1,10 +1,9 @@
 """Answer generation service."""
 
 from __future__ import annotations
-
-from pydantic_ai import Agent
-from src.generation.model import get_output_type, get_max_input_chars
-
+import logging
+from pydantic_ai import Agent, UsageLimitExceeded, UsageLimits, RunContext
+from src.generation.model import get_max_input_chars
 from src.generation.model import build_model
 
 # SYSTEM_PROMPT = "You are Archie AI. Answer strictly using the provided authorized context. If the context does not contain the answer, say you do not have enough authorized information."
@@ -35,15 +34,34 @@ agent = Agent(
 async def generate(question: str, context: str) -> str:
     #prompt = "context"
     #result = await agent.run(prompt)
-
+    try: 
     #return result.output
-    prompt = f""" Question of user:
+        prompt = f""" Question of user:
                 {question},
                 matching Document snippets:
                 {context} """
 
-    result = await agent.run(prompt)
-    
-    
-    return result.output
+        result = await agent.run(
+            prompt,
+             usage_limits=UsageLimits(
+                output_tokens_limit=get_max_input_chars(),
+                count_tokens_before_request=True),
+            )
 
+    except UsageLimitExceeded:
+        logging.exception("usage limit exceeds")
+    
+        return result.output
+
+# tool calling? Query abfrage 
+
+# page Count noch in database by text extraction ergaenzen
+
+@agent.tool
+def database_query() -> str:
+    """
+    Retrieve information of the document, the chunks are comming from. 
+    Such as Filename, created_at, updated_at , pages, document type and  
+    """
+    # every snippet connect to ai_document 
+    #try: 

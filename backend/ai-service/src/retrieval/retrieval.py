@@ -2,6 +2,7 @@ from src.config import settings
 from src.embedding.embedder import embed
 from pgvector import Vector
 from src.generation.generator import generate
+import exception
 
 from uuid import UUID
 import asyncpg
@@ -9,67 +10,69 @@ import asyncpg
 import logging
 
 async def retrieval(user_id: UUID, conv_id: UUID, question: str, pool: asyncpg.Pool ) -> str :
-	question_embedding = await embed(question)
+	try: 
+		question_embedding = await embed(question)
 
-	logging.info( f"embedding dimensions: {len(question_embedding)}")
-	#user_doc = await 
-	query = """
-			select 
-				ac.ai_document_id,
-				ac."content",
-				ac."token_count",
-				ac.embedding <=> $1 as distance
-			from ai_chunks ac
-			where ac.ai_document_id = (
-				select
-					distinct d.id 
-				from documents d 
-				inner join document_groups dg on 
-					d.id = dg.document_id 
-				inner join user_groups ug on 
-					ug.group_id = dg.group_id 
-				inner join user_permission up on 
-					up.user_id = ug.user_id 
-				inner join permissions p on 
-					up.permission_id = p.id 
-				where
-					d.deleted_at is null
-					and p.perm_key = 'documents.read'
-					and ug.user_id = $2
-			)
-			order by ac.embedding <=> $1
-			limit 50
-			"""
-	rows = await pool.fetch(query,
-						 Vector(question_embedding),
-						 user_id
-			  			)
-	logging.info("Retrieved %d chunks ", len(rows))
+		logging.info( f"embedding dimensions: {len(question_embedding)}")
+		#user_doc = await 
+		query = """
+				select 
+					ac.ai_document_id,
+					ac."content",
+					ac."token_count",
+					ac.embedding <=> $1 as distance
+				from ai_chunks ac
+				where ac.ai_document_id = (
+					select
+						distinct d.id 
+					from documents d 
+					inner join document_groups dg on 
+						d.id = dg.document_id 
+					inner join user_groups ug on 
+						ug.group_id = dg.group_id 
+					inner join user_permission up on 
+						up.user_id = ug.user_id 
+					inner join permissions p on 
+						up.permission_id = p.id 
+					where
+						d.deleted_at is null
+						and p.perm_key = 'documents.read'
+						and ug.user_id = $2
+				)
+				order by ac.embedding <=> $1
+				limit 50
+				"""
+		rows = await pool.fetch(query,
+							Vector(question_embedding),
+							user_id
+							)
+		logging.info("Retrieved %d chunks ", len(rows))
 
-	context_budget = 2000
-	used_tokens = 0
-	selected =[]
+		context_budget = 2000
+		used_tokens = 0
+		selected =[]
 
-	for row in rows:
-		chunked_tokens = row["token_count"]
-		logging.debug("chunked tokens =%d", chunked_tokens)
-		logging.debug("row=%s", row["content"])
-
-
-		if used_tokens + chunked_tokens <= context_budget:
-			used_tokens += chunked_tokens
-			selected.append(row["content"])
-
-	#context="make the last letter of each Word to a CapitalLetter "
-	context ="\n\n".join(selected)
+		for row in rows:
+			chunked_tokens = row["token_count"]
+			logging.debug("chunked tokens =%d", chunked_tokens)
+			logging.debug("row=%s", row["content"])
 
 
-	# to Do:
-	# conv_id -> context der Vorherigen fragen zusammenfassen , mitgeben 
+			if used_tokens + chunked_tokens <= context_budget:
+				used_tokens += chunked_tokens
+				selected.append(row["content"])
 
-	answer = await generate(question,
-						  context)
+		#context="make the last letter of each Word to a CapitalLetter "
+		context ="\n\n".join(selected)
 
+
+		# to Do:
+		# conv_id -> context der Vorherigen fragen zusammenfassen , mitgeben 
+
+		answer = await generate(question,
+							context)
+	except Exception:
+		logging.exception("embedding, question, and context failed")
 	
 	return answer
 	

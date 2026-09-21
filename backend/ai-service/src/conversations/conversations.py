@@ -112,11 +112,11 @@ async def save_conversation(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, qu
 
 
     insert = """
-            INSERT INTO ai_messages (conv_id, user_id, content)
+            INSERT INTO ai_messages (conv_id, sender, content)
             Values ($1, $2, $3)
             """
     try:
-        save_status = await pool.execute(insert, conv_id, content )
+        save_status = await pool.execute(insert, conv_id, "llm", content )
         logger.info(f"Status saved Conv: {save_status}")
         logger.debug(" conversiation: %s, saved content: %s ", conv_id, content)
     except Exception:
