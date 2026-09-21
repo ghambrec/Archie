@@ -76,9 +76,10 @@ export class UsersService implements OnApplicationBootstrap {
         displayName: dto.displayName,
       });
       const userId = userInsert.identifiers[0].id as string;
+	  const personalGroupSuffix = dto.displayName.trim().toLowerCase();
 
       const groupInsert = await manager.insert(Group, {
-        name: `personal-${userId}`,
+        name: `personal-${personalGroupSuffix}`,
         isSystem: false,
       });
       const groupId = groupInsert.identifiers[0].id as string;

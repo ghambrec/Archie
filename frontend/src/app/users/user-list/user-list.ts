@@ -5,6 +5,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CreateUserModal } from '../create-user-modal/create-user-modal';
 import { EditUserModal } from '../edit-user-modal/edit-user-modal';
 import { UserInfoModal } from '../user-info-modal/user-info-modal';
+import { Groups } from '../../groups/groups';
 
 @Component({
 	selector: 'app-user-list',
@@ -15,6 +16,7 @@ import { UserInfoModal } from '../user-info-modal/user-info-modal';
 export class UserList implements OnInit {
 	protected readonly usersService = inject(Users);
 	private readonly modalService = inject(NgbModal);
+	private readonly groupsService = inject(Groups);
 
 	protected readonly searchString = signal("");
 
@@ -54,6 +56,7 @@ export class UserList implements OnInit {
 
 		modal.closed.subscribe(() => {
 			this.loadUsers();
+			this.groupsService.groups.reload();
 		});
 	}
 
