@@ -91,7 +91,9 @@ export class Groups {
 
 	addUserToGroup(groupId: string, userId: string) {
 		return this.http.post(`${this.userGroupsUrl}/groups/${groupId}/members`,
-			{ userId },
+			{
+				userId
+			},
 			{
 				withCredentials: true,
 			},
@@ -110,6 +112,28 @@ export class Groups {
 		return this.http.get<UserPermission[]>(`${this.userPermissionsUrl}/${groupId}/permissions`,
 			{
 				withCredentials: true,
+			},
+		);
+	}
+
+	addUserPermission(groupId: string, userId: string, permKey: string) {
+		return this.http.post(
+			`${this.userPermissionsUrl}/${groupId}/permissions`,
+			{
+				userId,
+				permKey
+			},
+			{ 
+				withCredentials: true
+			},
+		);
+	}
+
+	removeUserPermissions(groupId: string, userId: string, permKey: string) {
+		return this.http.delete(
+			`${this.userPermissionsUrl}/${groupId}/permissions/${userId}/${encodeURIComponent(permKey)}`,
+			{
+				withCredentials: true
 			},
 		);
 	}

@@ -1,7 +1,8 @@
 import { Component, inject, signal } from "@angular/core";
 import { TranslocoPipe } from "@jsverse/transloco";
-import { GroupMember, GroupMembersResponse, GroupResponse, UserPermission } from "../groups";
+import { GroupMember, GroupMembersResponse, GroupResponse, Groups, UserPermission } from "../groups";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { forkJoin, Observable } from "rxjs";
 
 @Component({
   selector: "app-edit-user-permissions-modal",
@@ -19,16 +20,22 @@ export class EditUserPermissionsModal {
 
   readonly selectedPermissions = signal<Set<string>>(new Set());
 
+  private readonly groupsService = inject(Groups);
+
   ngOnInit(): void {
     this.selectedPermissions.set(
       new Set(this.userPermissions.map(permission => permission.permKey))
     );
   }
 
-  hasPermission(permissionKey: string): boolean {
-    return this.userPermissions.some(
-      permission =>  permission.permKey === permissionKey
-    );
+  // hasPermission(permissionKey: string): boolean {
+  //   return this.userPermissions.some(
+  //     permission =>  permission.permKey === permissionKey
+  //   );
+  // }
+
+  hasPermission(permissionsKey: string): boolean {
+    return this.selectedPermissions().has(permissionsKey);
   }
 
   setPermission(permissionKey: string, event: Event): void {
@@ -58,5 +65,32 @@ export class EditUserPermissionsModal {
     const permissionsToRemove = [...initialPermissions].filter(
       permission => !currentPermissions.has(permission),
     );
+    
+    const requests: Observable<unknown>[] = [
+      ...permissionsToAdd.map(permission =>
+        this.groupsService.addUserPermission(this.selectedGroup.id,
+          this.selectedUser.userId,
+          permission,
+        )
+      ),
+      ...permissionsToRemove.map(permission =>
+        this.groupsService.removeUserPermissions(this.selectedGroup.id,
+          this.selectedUser.userId,
+          permission,
+        )
+      ),
+    ];
+
+    if (requests.length === 0) {
+      this.activeModal.close();
+      return;
+    }
+
+    forkJoin(requests).subscribe({
+      next: () => this.activeModal.close(true),
+      error: error => {
+        console.error("Unable to update user permissions", error);
+      },
+    });
   }
 }
