@@ -128,20 +128,24 @@ export class InfoGroupModal {
   private readonly modalService = inject(NgbModal);
 
   openUserPermissions(member: GroupMember): void {
-  const modal = this.modalService.open(EditUserPermissionsModal,
+    const modal = this.modalService.open(EditUserPermissionsModal,
     {
       centered: true,
-  });
+    });
 
-  const userPermissions = this.permissions().filter(
-    permission => permission.userId === member.userId
-  );
+    const userPermissions = this.permissions().filter(
+      permission => permission.userId === member.userId,
+    );
 
-  modal.componentInstance.selectedGroup = this.selectedGroup;
-  modal.componentInstance.selectedUser = member;
-  modal.componentInstance.userPermissions = userPermissions;
-  // const groupId = this.selectedGroup.id;
-  // const userId = member.userId;
+    modal.componentInstance.selectedGroup = this.selectedGroup;
+    modal.componentInstance.selectedUser = member;
+    modal.componentInstance.userPermissions = userPermissions;
+    // const groupId = this.selectedGroup.id;
+    // const userId = member.userId;
+
+    modal.closed.subscribe(() => {
+      this.loadPermissions();
+    });
   }
 
   //load permissions for all user
@@ -168,4 +172,5 @@ export class InfoGroupModal {
   closeModal(): void {
     this.activeModal.dismiss();
   }
+
 }
