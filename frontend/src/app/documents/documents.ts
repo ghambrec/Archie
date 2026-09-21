@@ -24,4 +24,11 @@ export class Documents {
 			reportProgress: true
 		});
 	}
+
+	// TODO: set group wird abgeloest sobald POST upload korrigiert wurde und gruppe pflicht ist
+	setGroup(documentId: string, groupId: string) {
+		return this.http.post<void>(`${this.baseUrl}/${documentId}/group`, { groupId }, {
+			withCredentials: true
+		});
+	}
 }

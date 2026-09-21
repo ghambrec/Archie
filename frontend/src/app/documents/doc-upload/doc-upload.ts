@@ -3,6 +3,7 @@ import { Documents } from '../documents';
 import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { Groups } from '../../groups/groups';
 
 interface UploadTask {
 	id: string;
@@ -20,10 +21,19 @@ interface UploadTask {
 })
 export class DocUpload {
 	private readonly documentsService = inject(Documents);
+	protected readonly groupsService = inject(Groups);
+
 	private readonly fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
 
 	protected readonly isInDragZone = signal(false); // bool for visual feedback
 	protected readonly uploads = signal<UploadTask[]>([]);
+	protected readonly selectedGroupId = signal<string | null>(null);
+
+	// gruppe selektieren
+	onGroupChange(event: Event) {
+		const select = event.target as HTMLSelectElement;
+		this.selectedGroupId.set(select.value || null);
+	}
 
 	// open file picker <input>
 	openFilePicker() {
@@ -65,6 +75,10 @@ export class DocUpload {
 
 	// files uploaden ueber documentsService
 	private handleFiles(files: FileList) {
+		if (!this.selectedGroupId()) {
+			return;
+		}
+
 		for (const file of files) {
 
 			const task: UploadTask = {
@@ -82,6 +96,12 @@ export class DocUpload {
 						this.updateTask(task.id, { progress });
 					}
 					if (event.type === HttpEventType.Response) {
+						// TODO: set group direkt uber upload
+						const groupId = this.selectedGroupId();
+						if (groupId && event.body) {
+							this.documentsService.setGroup(event.body.id, groupId).subscribe();
+						}
+						// TODO ENDE
 						this.updateTask(task.id, { status: 'done', progress: 100 });
 						setTimeout(() => this.removeTask(task.id), 3000);
 					}
