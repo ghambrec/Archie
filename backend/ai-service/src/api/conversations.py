@@ -7,6 +7,8 @@ from pydantic import BaseModel, Field
 from src.api.auth import check_api_key, get_user_id
 from src.conversations import conversations
 
+from pydantic_ai import UsageLimitExceeded
+
 
 class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=100, examples=["ask your question here"])
@@ -37,6 +39,8 @@ async def ask(request: Request, body: AskRequest, conv_id: UUID, user_id: UUID =
     pool = request.app.state.db_pool
     try:
         content = await conversations.ask_question(pool, user_id, conv_id, body.question)
+    except UsageLimitExceeded:
+        raise HTTPException(status_code=422, detail="Token limit exceeded, delete Conversation history ")
     except conversations.UserNotFoundError:
         raise HTTPException(status_code=400, detail="user does not exist")
     except conversations.ConversationNotFoundError:

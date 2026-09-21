@@ -9,7 +9,6 @@ from src.generation.model import build_model
 
 from src.config import settings 
 
-# SYSTEM_PROMPT = "You are Archie AI. Answer strictly using the provided authorized context. If the context does not contain the answer, say you do not have enough authorized information."
 SYSTEM_PROMPT = """ You analyze documents for a document management system"
                     you get a question by a user and possible matching document snippets
                     
