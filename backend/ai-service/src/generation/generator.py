@@ -57,11 +57,11 @@ async def generate(question: str, context: str) -> str:
 
 # page Count noch in database by text extraction ergaenzen
 
-@agent.tool
-def database_query() -> str:
-    """
-    Retrieve information of the document, the chunks are comming from. 
-    Such as Filename, created_at, updated_at , pages, document type and  
-    """
-    # every snippet connect to ai_document 
-    #try: 
+#@agent.tool
+#def database_query() -> str:
+#    """
+#    Retrieve information of the document, the chunks are comming from. 
+#    Such as Filename, created_at, updated_at , pages, document type and  
+#    """
+#    # every snippet connect to ai_document 
+#    #try: 
