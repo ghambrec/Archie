@@ -5,11 +5,16 @@ import { randomUUID, createHash } from 'crypto';
 import { Logger } from 'nestjs-pino';
 import { StorageService, DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS } from '../storage/storage.service';
 import { Document } from './entities/document.entity';
+import { User } from '../users/entities/user.entity';
+import { Group } from '../groups/entities/group.entity';
+import { DocumentGroup } from '../document-groups/entities/document-group.entity';
+import { Tag } from '../tags/entities/tag.entity';
+import { DocumentTag } from '../tags/entities/document-tag.entity';
+import { DocumentAiStatus } from './dto/document-ai-status.enum';
 import { UploadResponseDto } from './dto/upload-response.dto';
 import { GetDocumentsQueryDto } from './dto/get-documents-query.dto';
 import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
 import { DocumentSummaryDto } from './dto/document-summary.dto';
-import { DownloadUrlResponseDto } from './dto/download-url-response.dto';
 import { DocumentDownloadStreamDto } from './dto/document-download-stream.dto';
 import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 import { ApplicationException } from 'src/common/errors/application.exception';
@@ -17,6 +22,8 @@ import { ErrorCode } from 'src/common/errors/error-code';
 import { GroupsService } from '../groups/groups.service';
 import { DocumentGroupsService } from '../document-groups/document-groups.service';
 import { AiIngestionService } from '../ai-service/ai-ingestion.service';
+import { TagsService } from '../tags/tags.service';
+import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
 
 const DOCUMENTS_BUCKET = 'documents';
 
@@ -29,6 +36,7 @@ export class DocumentsService {
     private readonly groupsService: GroupsService,
     private readonly documentGroupsService: DocumentGroupsService,
     private readonly aiIngestionService: AiIngestionService,
+    private readonly tagsService: TagsService,
     private readonly logger: Logger,
   ) {}
 
@@ -75,19 +83,65 @@ export class DocumentsService {
 
     this.logger.log({ userId, page, limit }, 'Listing documents');
 
-    const [documents, total] = await this.documentsRepository.findAndCount({
-      where: { uploadedBy: userId },
-      select: {
-        id: true,
-        filename: true,
-        mimeType: true,
-        sizeBytes: true,
-        createdAt: true,
-      },
-      skip: (page - 1) * limit,
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
+    const baseQuery = this.documentsRepository
+      .createQueryBuilder('document')
+      .where('document.uploadedBy = :userId', { userId });
+
+    const total = await baseQuery.getCount();
+
+    const raw = await baseQuery
+      .clone()
+      .innerJoin(User, 'uploader', 'uploader.id = document.uploadedBy')
+      .leftJoin(DocumentGroup, 'documentGroup', 'documentGroup.documentId = document.id')
+      .leftJoin(Group, 'group', 'group.id = documentGroup.groupId')
+      .leftJoin(DocumentTag, 'documentTag', 'documentTag.documentId = document.id')
+      .leftJoin(Tag, 'tag', 'tag.id = documentTag.tagId')
+      .select([
+        'document.id AS "id"',
+        'document.filename AS "filename"',
+        'document.mimeType AS "mimeType"',
+        'document.sizeBytes AS "sizeBytes"',
+        'document.createdAt AS "createdAt"',
+        'document.updatedAt AS "updatedAt"',
+        'uploader.id AS "uploaderId"',
+        'uploader.displayName AS "uploaderName"',
+      ])
+      .addSelect(
+        `COALESCE(
+          json_agg(DISTINCT jsonb_build_object('id', "group"."id", 'name', "group"."name"))
+            FILTER (WHERE "group"."id" IS NOT NULL),
+          '[]'
+        )`,
+        'groups',
+      )
+      .addSelect(
+        `COALESCE(
+          json_agg(DISTINCT jsonb_build_object('id', "tag"."id", 'name', "tag"."name", 'label', "tag"."label"))
+            FILTER (WHERE "tag"."id" IS NOT NULL),
+          '[]'
+        )`,
+        'tags',
+      )
+      .groupBy('document.id')
+      .addGroupBy('uploader.id')
+      .orderBy('document.createdAt', 'DESC')
+      .offset((page - 1) * limit)
+      .limit(limit)
+      .getRawMany();
+
+    const documents = raw.map((row) => ({
+      id: row.id,
+      filename: row.filename,
+      mimeType: row.mimeType,
+      sizeBytes: Number(row.sizeBytes),
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      uploadedBy: { id: row.uploaderId, name: row.uploaderName },
+      groups: row.groups,
+      tags: row.tags,
+      aiStatus: DocumentAiStatus.PENDING,
+      language: '',
+    }));
 
     this.logger.log({ userId, total }, 'Documents listed successfully');
 
@@ -104,47 +158,64 @@ export class DocumentsService {
 
     this.logger.log({ userId, id }, 'Find one document');
 
-    const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
-      select: {
-        id: true,
-        filename: true,
-        mimeType: true,
-        sizeBytes: true,
-        createdAt: true,
-      },
-    });
+    const raw = await this.documentsRepository
+      .createQueryBuilder('document')
+      .innerJoin(User, 'uploader', 'uploader.id = document.uploadedBy')
+      .leftJoin(DocumentGroup, 'documentGroup', 'documentGroup.documentId = document.id')
+      .leftJoin(Group, 'group', 'group.id = documentGroup.groupId')
+      .leftJoin(DocumentTag, 'documentTag', 'documentTag.documentId = document.id')
+      .leftJoin(Tag, 'tag', 'tag.id = documentTag.tagId')
+      .where('document.id = :id', { id })
+      .andWhere('document.uploadedBy = :userId', { userId })
+      .select([
+        'document.id AS "id"',
+        'document.filename AS "filename"',
+        'document.mimeType AS "mimeType"',
+        'document.sizeBytes AS "sizeBytes"',
+        'document.createdAt AS "createdAt"',
+        'document.updatedAt AS "updatedAt"',
+        'uploader.id AS "uploaderId"',
+        'uploader.displayName AS "uploaderName"',
+      ])
+      .addSelect(
+        `COALESCE(
+          json_agg(DISTINCT jsonb_build_object('id', "group"."id", 'name', "group"."name"))
+            FILTER (WHERE "group"."id" IS NOT NULL),
+          '[]'
+        )`,
+        'groups',
+      )
+      .addSelect(
+        `COALESCE(
+          json_agg(DISTINCT jsonb_build_object('id', "tag"."id", 'name', "tag"."name", 'label', "tag"."label"))
+            FILTER (WHERE "tag"."id" IS NOT NULL),
+          '[]'
+        )`,
+        'tags',
+      )
+      .groupBy('document.id')
+      .addGroupBy('uploader.id')
+      .getRawOne();
 
-    if (!document) {
+    if (!raw) {
       throw new ApplicationException(ErrorCode.DocumentNotFound);
     }
 
     this.logger.log({ userId, id }, 'One document found');
 
-    return document;
-  }
-
-  async getDownloadUrl(userId: string, id: string): Promise<DownloadUrlResponseDto> {
-
-    this.logger.log({ userId, id }, 'Create Download Url');
-
-    const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
-      select: { objectKey: true },
-    });
-
-    if (!document) {
-      throw new ApplicationException(ErrorCode.DocumentNotFound);
-    }
-
-    const url = await this.storageService.getPresignedDownloadUrl(
-      DOCUMENTS_BUCKET,
-      document.objectKey,
-    );
-
-    this.logger.log({ userId, id }, 'Download Url is created');
-
-    return { url, expiresInSeconds: DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS };
+    return {
+      id: raw.id,
+      filename: raw.filename,
+      mimeType: raw.mimeType,
+      sizeBytes: Number(raw.sizeBytes),
+      createdAt: raw.createdAt,
+      updatedAt: raw.updatedAt,
+      uploadedBy: { id: raw.uploaderId, name: raw.uploaderName },
+      groups: raw.groups,
+      tags: raw.tags,
+      aiStatus: DocumentAiStatus.PENDING,
+      language: '',
+    };
   }
 
   async downloadStream(userId: string, id: string): Promise<DocumentDownloadStreamDto> {
@@ -196,5 +267,91 @@ export class DocumentsService {
     this.logger.log({ userId, id, groupId }, 'Document assigned to group');
 
     return { documentId: id, groupId };
+  }
+
+  async setTag(
+    userId: string,
+    id: string,
+    tagId: string,
+  ): Promise<DocumentTagResponseDto> {
+
+    this.logger.log({ userId, id, tagId }, 'Assign tag to document');
+
+    const document = await this.documentsRepository.findOne({
+      where: { id, uploadedBy: userId },
+      select: { id: true },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    await this.tagsService.assignToDocument(id, tagId);
+
+    this.logger.log({ userId, id, tagId }, 'Tag assigned to document');
+
+    return { documentId: id, tagId };
+  }
+
+  async removeTag(
+    userId: string,
+    id: string,
+    tagId: string,
+  ): Promise<void> {
+
+    this.logger.log({ userId, id, tagId }, 'Remove tag from document');
+
+    const document = await this.documentsRepository.findOne({
+      where: { id, uploadedBy: userId },
+      select: { id: true },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    await this.tagsService.removeFromDocument(id, tagId);
+
+    this.logger.log({ userId, id, tagId }, 'Tag removed from document');
+  }
+
+  async removeGroup(
+    userId: string,
+    id: string,
+    groupId: string,
+  ): Promise<void> {
+
+    this.logger.log({ userId, id, groupId }, 'Remove document from group');
+
+    const document = await this.documentsRepository.findOne({
+      where: { id, uploadedBy: userId },
+      select: { id: true },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    await this.documentGroupsService.removeGroup(id, groupId);
+
+    this.logger.log({ userId, id, groupId }, 'Document removed from group');
+  }
+
+  async remove(userId: string, id: string): Promise<void> {
+
+    this.logger.log({ userId, id }, 'Delete document');
+
+    const document = await this.documentsRepository.findOne({
+      where: { id, uploadedBy: userId },
+      select: { id: true },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    await this.documentsRepository.softDelete(id);
+
+    this.logger.log({ userId, id }, 'Document deleted');
   }
 }

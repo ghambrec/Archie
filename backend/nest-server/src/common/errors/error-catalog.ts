@@ -58,6 +58,10 @@ export const ERROR_CATALOG ={
     status: HttpStatus.CONFLICT,
     message: 'Document is already assigned to a group.'
   },
+  [ErrorCode.DocumentNotInGroup]: {
+    status: HttpStatus.NOT_FOUND,
+    message: 'Document is not assigned to the given group.'
+  },
   [ErrorCode.TagNotFound]: {
     status: HttpStatus.NOT_FOUND,
     message: 'Tag was not found.'
@@ -69,6 +73,14 @@ export const ERROR_CATALOG ={
   [ErrorCode.TagHasDependents]: {
     status: HttpStatus.CONFLICT,
     message: 'Tag still has child tags or documents assigned to it.'
+  },
+  [ErrorCode.DocumentTagAlreadyAssigned]: {
+    status: HttpStatus.CONFLICT,
+    message: 'Document already has this tag assigned.'
+  },
+  [ErrorCode.DocumentTagNotAssigned]: {
+    status: HttpStatus.NOT_FOUND,
+    message: 'Document does not have the given tag assigned.'
   }
 
   } satisfies Record<ErrorCode, ErrorDefinition>;

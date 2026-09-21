@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Param,
   Query,
   Body,
@@ -9,6 +10,8 @@ import {
   UseInterceptors,
   UploadedFile as UploadedFileDecorator,
   BadRequestException,
+  HttpCode,
+  HttpStatus,
   Req,
   Res,
 } from '@nestjs/common';
@@ -21,9 +24,10 @@ import { UploadResponseDto } from './dto/upload-response.dto';
 import { GetDocumentsQueryDto } from './dto/get-documents-query.dto';
 import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
 import { DocumentSummaryDto } from './dto/document-summary.dto';
-import { DownloadUrlResponseDto } from './dto/download-url-response.dto';
 import { SetDocumentGroupDto } from './dto/set-document-group.dto';
 import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
+import { SetDocumentTagDto } from './dto/set-document-tag.dto';
+import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
 
 @ApiTags('documents')
 @Controller('documents')
@@ -98,16 +102,17 @@ export class DocumentsController {
   }
 
   @ApiOperation({
-    summary: '[Don\'t use it] Get a document download URL',
-    description: 'Returns a short-lived, pre-signed URL for downloading the document directly.',
+    summary: 'Assign a tag to a document',
+    description: 'Adds the given tag to the document.',
   })
   @UseGuards(SessionAuthGuard)
-  @Get(':id/download-url')
-  async getDownloadUrl(
+  @Post(':id/tags')
+  async setTag(
     @Req() req: Request,
-    @Param('id') id: string,
-  ): Promise<DownloadUrlResponseDto> {
-    return this.documentsService.getDownloadUrl(req.userId!, id);
+    @Param('id') documentId: string,
+    @Body() dto: SetDocumentTagDto,
+  ): Promise<DocumentTagResponseDto> {
+    return this.documentsService.setTag(req.userId!, documentId, dto.tagId);
   }
 
   @UseGuards(SessionAuthGuard)
@@ -142,5 +147,48 @@ export class DocumentsController {
     });
 
     documentDownloadStream.stream.pipe(res);
+  }
+
+
+  @ApiOperation({
+    summary: 'Remove a document from a group',
+    description: 'Removes the given document from the specified group.',
+  })
+  @UseGuards(SessionAuthGuard)
+  @Delete(':id/groups/:groupId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  // There is no check on permision for user. If user can delete it.
+  async removeGroup(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Param('groupId') groupId: string,
+  ): Promise<void> {
+    return this.documentsService.removeGroup(req.userId!, id, groupId);
+  }
+
+  @ApiOperation({
+    summary: 'Remove a tag from a document',
+    description: 'Removes the given tag from the specified document.',
+  })
+  @UseGuards(SessionAuthGuard)
+  @Delete(':id/tags/:tagId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeTag(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Param('tagId') tagId: string,
+  ): Promise<void> {
+    return this.documentsService.removeTag(req.userId!, id, tagId);
+  }
+
+  @ApiOperation({
+    summary: 'Delete a document',
+    description: 'Soft-deletes the document by its ID.',
+  })
+  @UseGuards(SessionAuthGuard)
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Req() req: Request, @Param('id') id: string): Promise<void> {
+    return this.documentsService.remove(req.userId!, id);
   }
 }
