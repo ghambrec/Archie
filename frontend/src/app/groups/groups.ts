@@ -1,5 +1,5 @@
 import { Service, signal, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
 export interface GroupResponse {
@@ -43,17 +43,11 @@ export class Groups {
 	private readonly groupsUrl = `${environment.apiUrl}/groups`;
 	private readonly userGroupsUrl = `${environment.apiUrl}/user-groups`;
 	private readonly userPermissionsUrl = `${environment.apiUrl}/user-permission`;
-	
-	readonly groupsList = signal<GroupResponse[]>([]);
-	
-	getGroups() {
-		return this.http.get<GroupResponse[]>(
-			this.groupsUrl,
-			{
-				withCredentials: true,
-			}
-		);
-	}
+
+	readonly groups = httpResource<GroupResponse[]>(
+		() => ({ url: this.groupsUrl, withCredentials: true}),
+		{ defaultValue: [] }
+	);
 
 	createGroup(dto: CreateGroupDto) {
 		return this.http.post<GroupResponse>(`${this.groupsUrl}/create`,

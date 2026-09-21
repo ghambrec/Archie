@@ -1,6 +1,6 @@
 import { TranslocoPipe } from '@jsverse/transloco';
 import { GroupMember, GroupResponse, Groups } from '../groups';
-import { computed, OnInit, inject, Component, signal } from '@angular/core';
+import { computed, inject, Component, signal } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CreateGroupModal } from '../create-group-modal/create-group-modal';
 import { DeleteGroupModal } from '../delete-group-modal/delete-group-modal';
@@ -9,107 +9,58 @@ import { InfoGroupModal } from '../group-info-modal/group-info-modal';
 
 
 @Component({
-  selector: 'app-group-list',
-  imports: [TranslocoPipe],
-  templateUrl: './group-list.html',
-  styleUrl: './group-list.scss',
+	selector: 'app-group-list',
+	imports: [TranslocoPipe],
+	templateUrl: './group-list.html',
+	styleUrl: './group-list.scss',
 })
-export class GroupList implements OnInit {
+export class GroupList {
 
-  protected readonly groupsService = inject(Groups);
-  protected readonly hasLoadError = signal(false);
-  protected readonly searchString = signal("");
-  protected readonly modalService = inject(NgbModal);
+	protected readonly groupsService = inject(Groups);
+	protected readonly searchString = signal("");
+	protected readonly modalService = inject(NgbModal);
 
-  ngOnInit():void {
-    this.loadGroups();
-  }
+	protected readonly hasLoadError = computed(() => !!this.groupsService.groups.error());
 
-  private loadGroups(): void {
-    this.hasLoadError.set(false);
+	protected readonly filteredGroupList = computed(() => {
+		const searchStringGroups = this.searchString().trim().toLowerCase();
+		const groups = this.groupsService.groups.value();
 
-    this.groupsService.getGroups().subscribe({
-      next: groups => {
-        this.groupsService.groupsList.set(groups)
-      },
-      //logger?
-      error: (error) => {
-		    console.error('Unable to load groups', error);
-	    	this.hasLoadError.set(true);
-	    },
-    });
-  }
+		if (!searchStringGroups) {
+			return groups;
+		}
 
-  protected readonly filteredGroupList = computed(() => {
-    const searchStringGroups = this.searchString().trim().toLowerCase();
-    
-    if (!searchStringGroups) {
-      return this.groupsService.groupsList();
-    }
+		return groups.filter((group) => group.name.trim().toLowerCase().includes(searchStringGroups));
+	});
 
-    return this.groupsService.groupsList().filter((group) => 
-        group.name
-        .trim()
-        .toLowerCase()
-        .includes(searchStringGroups)
-    );
-  });
+	openCreateGroupModal(): void {
+		const modal = this.modalService.open(CreateGroupModal, { centered: true });
+		modal.closed.subscribe(() => this.groupsService.groups.reload());
+	};
 
-  openCreateGroupModal(): void {
-    const modal = this.modalService.open(
-      CreateGroupModal,
-      {
-        centered: true
-      },
-    )
-    
-    modal.closed.subscribe(() => {
-      this.loadGroups();
-    });
-  };
-  
-  openDeleteGroupModal(group: GroupResponse): void {
-    const modal = this.modalService.open(
-      DeleteGroupModal,
-      {
-        centered: true,
-      },
-    );
-    
-    modal.componentInstance.selectedGroup = group;
-    
-    modal.closed.subscribe(() => {
-      this.loadGroups();
-    });
-  };
-  
-  openEditGroupModal(group: GroupResponse): void {
-    const modal = this.modalService.open(
-      EditGroupModal,
-      {
-        centered: true
-      },
-    );
+	openDeleteGroupModal(group: GroupResponse): void {
+		const modal = this.modalService.open(DeleteGroupModal, { centered: true });
+		modal.componentInstance.selectedGroup = group;
+		modal.closed.subscribe(() => this.groupsService.groups.reload());
+	};
 
-    modal.componentInstance.initialize(group);
+	openEditGroupModal(group: GroupResponse): void {
+		const modal = this.modalService.open(EditGroupModal, { centered: true });
+		modal.componentInstance.initialize(group);
+		modal.closed.subscribe(() => this.groupsService.groups.reload());
+	};
 
-    modal.closed.subscribe(() => {
-      this.loadGroups();
-    });
-  };
-
-  openInforGroupModal(group: GroupResponse): void {
-    const modal = this.modalService.open(
-      InfoGroupModal,
-      {
-        centered: true,
-        size: 'lg',
-      },
-    );
-    modal.componentInstance.selectedGroup = group;
-    modal.componentInstance.loadMembers();
-    modal.componentInstance.loadUsers();
-    modal.componentInstance.loadPermissions();
-  }
-
+	openInforGroupModal(group: GroupResponse): void {
+		const modal = this.modalService.open(
+			InfoGroupModal,
+			{
+				centered: true,
+				size: 'lg',
+			}
+		);
+		modal.componentInstance.selectedGroup = group;
+		modal.componentInstance.loadMembers();
+		modal.componentInstance.loadUsers();
+		modal.componentInstance.loadPermissions();
+	}
 }
