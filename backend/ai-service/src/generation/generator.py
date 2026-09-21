@@ -62,7 +62,7 @@ async def generate(question: str, context: str, previous_messages: str) -> str:
             )
 
     except UsageLimitExceeded:
-        logging.exception("usage limit exceeds")
+        logging.exception("usage limit exceeds, delete conversation and restart chatting")
         raise
     except Exception:
         logging.exception("generate answer failed ")
