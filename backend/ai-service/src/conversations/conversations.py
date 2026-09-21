@@ -129,4 +129,3 @@ async def save_conversation(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, qu
     except Exception:
         logger.exception("saving conversation content failed")
         raise
-

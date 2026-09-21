@@ -65,4 +65,3 @@ async def del_conversations(request: Request, user_id: UUID = Depends(get_user_i
 async def del_conversation(request: Request, conv_id: UUID, user_id: UUID = Depends(get_user_id)):
     pool = request.app.state.db_pool
     await conversations.del_conversation(pool, user_id, conv_id)
-

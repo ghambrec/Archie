@@ -24,17 +24,12 @@ SYSTEM_PROMPT = """ You analyze documents for a document management system"
                     it with a low confidence score. 
 """
 
-
-
-
 model = build_model()
 agent = Agent(
             model, 
             system_prompt=SYSTEM_PROMPT,
             retries={"output": 3},
             )
-
-
 
 async def generate(question: str, context: str, previous_messages: str) -> str:
     history = []

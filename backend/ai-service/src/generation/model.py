@@ -46,4 +46,3 @@ def get_max_input_chars() -> int:
     if settings.llm_provider == "ollama":
         return settings.analyzer_max_chars_ollama
     return settings.analyzer_max_chars_openrouter
-

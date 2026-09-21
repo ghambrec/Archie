@@ -1,8 +1,4 @@
 import logging
-from enum import Enum, auto 
-#import filetype 
-
-#import libmagic
 import magic
 import pymupdf
 import pymupdf4llm
@@ -14,6 +10,7 @@ from docx import Document
 from openpyxl import load_workbook
 from pptx import Presentation
 
+from enum import Enum, auto 
 import pytesseract 
 import pylibheif
 
@@ -44,16 +41,12 @@ class FileType(Enum):
     ODP = auto()
 
 
-
 def extract_text(raw: bytes) -> str:
     """
     bytes come as a bytesobject, always needs to be converted in a bytes stream
     extracts TEXT, PDF, PNG, JPEG, HEIC, DOCX and XLSX, 
     and uses for pdfs, png, heic images an OCR Modasl
     """
-
-
-
     detected_file_type = detect_file_type(raw)
     logging.info("FileType %s", detected_file_type.name )
 
@@ -78,9 +71,6 @@ def extract_text(raw: bytes) -> str:
     if detected_file_type == FileType.XLS:
         return xls_parser(raw)
 
-    #if detected_file_type == FileType.PPTX
-    #    return pptx_parser(raw)
-    
     raise Exception(f"Document type: {detected_file_type.name} not supported")
 
 
@@ -89,7 +79,6 @@ def detect_file_type(raw:bytes) -> FileType:
     """
     inspect magic bytes with magic libary and return a enum fileType
     """
-
 
     mime_type = magic.from_buffer(raw, mime=True)
     
@@ -145,8 +134,6 @@ def detect_file_type(raw:bytes) -> FileType:
 #                for shape in slide.shapes:
 #                    if not shape.has_text_frame:
 #                        continue:
-
-
 
 
 def xls_parser(document_bytes:bytes ) -> str:
@@ -221,8 +208,6 @@ def xlsx_parser(document_bytes:bytes )-> str:
         raise
 
     return "\n".join(results)
-    
-
 
 def docx_parser(document_bytes:bytes) -> str:
     """
@@ -342,11 +327,6 @@ def heic_image(heic_bytes: bytes ) -> str:
         raise
     return text
 
-
-#def image_parser(png_byte: bytes ) -> str:
-
-
-
 def ocr_image(png_bytes: bytes) -> str:
     """
     OCR image suports german, english and spanisch character recognition 
@@ -368,4 +348,3 @@ def ocr_image(png_bytes: bytes) -> str:
         logging.exception("Image OCR failed")
         raise
     return text
-    
