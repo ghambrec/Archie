@@ -9,7 +9,7 @@ import asyncpg
 
 import logging
 
-async def retrieval(user_id: UUID, conv_id: UUID, question: str, pool: asyncpg.Pool ) -> str :
+async def retrieval(user_id: UUID, conv_id: UUID, question: str, pool: asyncpg.Pool, previous_messages: str ) -> str :
 	try: 
 		question_embedding = await embed(question)
 
@@ -22,7 +22,7 @@ async def retrieval(user_id: UUID, conv_id: UUID, question: str, pool: asyncpg.P
 					ac."token_count",
 					ac.embedding <=> $1 as distance
 				from ai_chunks ac
-				where ac.ai_document_id = (
+				where ac.ai_document_id in (
 					select
 						distinct d.id 
 					from documents d 
@@ -62,17 +62,14 @@ async def retrieval(user_id: UUID, conv_id: UUID, question: str, pool: asyncpg.P
 				used_tokens += chunked_tokens
 				selected.append(row["content"])
 
-		#context="make the last letter of each Word to a CapitalLetter "
 		context ="\n\n".join(selected)
 
-
-		# to Do:
-		# conv_id -> context der Vorherigen fragen zusammenfassen , mitgeben 
-
 		answer = await generate(question,
-							context)
+							context,
+							previous_messages)
 	except Exception:
 		logging.exception("embedding, question, and context failed")
+		raise
 	
 	return answer
 	

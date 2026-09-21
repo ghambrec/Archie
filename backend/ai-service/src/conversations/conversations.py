@@ -40,7 +40,14 @@ async def ask_question(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, questio
 
     # TODO: hier weiter mit retrieval pipeline (embedding etc)
     try:
-        answer = await retrieval(user_id, conv_id, question, pool)
+        previous_messages = await pool.fetch(
+                    """select am.sender , am."content" 
+                    from ai_messages am 
+                    where am.conv_id=$1
+                    order by am.created_at
+                    """, conv_id,
+                )
+        answer = await retrieval(user_id, conv_id, question, pool, previous_messages)
     except Exception:
         logger.exception("retriev answer failed ")
         raise
@@ -122,3 +129,6 @@ async def save_conversation(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, qu
     except Exception:
         logger.exception("saving conversation content failed")
         raise
+
+## delete conversation endpoint
+

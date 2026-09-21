@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 import logging
-from pydantic_ai import Agent, UsageLimitExceeded, UsageLimits, RunContext
+from pydantic_ai import Agent, UsageLimitExceeded, UsageLimits
+from pydantic_ai.messages import ModelRequest, ModelResponse, TextPart, UserPromptPart
 from src.generation.model import get_max_input_chars
 from src.generation.model import build_model
+
+from src.config import settings 
 
 # SYSTEM_PROMPT = "You are Archie AI. Answer strictly using the provided authorized context. If the context does not contain the answer, say you do not have enough authorized information."
 SYSTEM_PROMPT = """ You analyze documents for a document management system"
@@ -22,6 +25,9 @@ SYSTEM_PROMPT = """ You analyze documents for a document management system"
                     it with a low confidence score. 
 """
 
+
+
+
 model = build_model()
 agent = Agent(
             model, 
@@ -31,27 +37,38 @@ agent = Agent(
 
 
 
-async def generate(question: str, context: str) -> str:
-    #prompt = "context"
-    #result = await agent.run(prompt)
+async def generate(question: str, context: str, previous_messages: str) -> str:
+    history = []
     try: 
-    #return result.output
+        for row in previous_messages:
+            if row["sender"] == "user":
+                history.append(ModelRequest(parts=[UserPromptPart(content=row["content"])]))
+            elif row [ "sender"] == "llm":
+                history.append(ModelResponse(parts=[TextPart(content=row["content"])]))
+  
         prompt = f""" Question of user:
                 {question},
                 matching Document snippets:
-                {context} """
+                {context}, 
+                """
 
         result = await agent.run(
             prompt,
+            message_history=history,
              usage_limits=UsageLimits(
-                output_tokens_limit=get_max_input_chars(),
-                count_tokens_before_request=True),
+                output_tokens_limit=settings.output_token_limit,
+                #count_tokens_before_request=True),
+             )
             )
 
     except UsageLimitExceeded:
         logging.exception("usage limit exceeds")
+        raise
+    except Exception:
+        logging.exception("generate answer failed ")
+        raise
     
-        return result.output
+    return result.output
 
 # tool calling? Query abfrage 
 
