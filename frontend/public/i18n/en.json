@@ -9,6 +9,12 @@
 			"logOut": "Log out"
 		}
 	},
+	"documents": {
+		"upload": {
+			"upload": "Upload Documents",
+			"selectGroup": "select upload group"
+		}
+	},
 	"login": {
 		"title": "Archie - Login",
 		"email": "E-Mail",

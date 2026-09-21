@@ -1,0 +1,14 @@
+:host {
+	display: block;
+	width: 100%;
+	min-width: 0;
+}
+
+.upload-zone.dragging {
+	outline: 2px dashed var(--bs-primary);
+	border-radius: 8px;
+}
+
+.upload-task-name {
+	min-width: 0;
+}
