@@ -68,16 +68,3 @@ async def generate(question: str, context: str, previous_messages: str) -> str:
         raise
     
     return result.output
-
-# tool calling? Query abfrage 
-
-# page Count noch in database by text extraction ergaenzen
-
-#@agent.tool
-#def database_query() -> str:
-#    """
-#    Retrieve information of the document, the chunks are comming from. 
-#    Such as Filename, created_at, updated_at , pages, document type and  
-#    """
-#    # every snippet connect to ai_document 
-#    #try: 

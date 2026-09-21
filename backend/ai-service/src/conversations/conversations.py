@@ -130,5 +130,3 @@ async def save_conversation(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, qu
         logger.exception("saving conversation content failed")
         raise
 
-## delete conversation endpoint
-
