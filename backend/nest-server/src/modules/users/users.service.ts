@@ -125,8 +125,7 @@ export class UsersService implements OnApplicationBootstrap {
         )
       }
       user.email = newEmail;
-    };
-
+    }
     if(dto.displayName !== undefined)
     {
       const newName = dto.displayName.trim();
@@ -151,6 +150,9 @@ export class UsersService implements OnApplicationBootstrap {
       id: updatedUser.id}
 
   };
+  
+
+  
 
   //async updatePasswd(userID: stringify, dto )
 
@@ -212,4 +214,3 @@ export class UsersService implements OnApplicationBootstrap {
     };
   }
 }
-

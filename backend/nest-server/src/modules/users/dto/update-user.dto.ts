@@ -1,9 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { SupportedLanguage } from '../enums/supported-language.enum';
-import { IsEmail, IsEnum, isEnum,  IsOptional, IsString, Length,MinLength } from 'class-validator';
+import { IsEmail, IsEnum,  IsOptional, IsString, Length,MinLength } from 'class-validator';
 
 export class UpdateUserDto {
-	@ApiPropertyOptional()
+	@ApiPropertyOptional({
+        example: 'gabriel'
+    })
     @IsOptional()
     @IsString()
     @MinLength(1)
@@ -28,5 +30,16 @@ export class UpdateUserDto {
     @IsEmail()
     @MinLength(4)
     email?: string;
+
+    
+
+    @ApiPropertyOptional({
+        example: 'password123456'
+    })
+    @IsOptional()
+    @IsString()
+    @MinLength(8)
+    password?: string
+
 
 }

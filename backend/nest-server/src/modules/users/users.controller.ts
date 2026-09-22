@@ -28,6 +28,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { PatchAvatarResponseDto } from './dto/patch-avatar-response.dto';
 import { SelfOrAdminGuard } from '../permissions/guards/self-or-admin.guard';
 import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
+import { UpdateUserPasswordDto } from './dto/update-user-pwd.dto';
+
 
 @ApiTags('users')
 @Controller('users')
@@ -45,17 +47,30 @@ export class UsersController {
     return {id: userEntity.id};
   }
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, SelfOrAdminGuard)
   @ApiOperation({
-    summary: 'TODO: Update user',
+    summary: 'Update user',
     description: 'For Admin: Update a specific user.<br>For User: User can only update his own user'
   })
-  @Patch('me')
+  @Patch(':userId')
   async updateCurrentUser (
     @Req() req: Request, 
     @Body() dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
     return this.usersService.updateProfile(req.userId!, dto);
   }
+
+  @UseGuards(SelfOrAdminGuard, SessionAuthGuard,)
+  @ApiOperation({
+    summary: 'Update user password',
+    description: 'For logged in user: enter the old password, and then new password twice'
+  })
+  @Patch ('/users/me/password')
+  async updateUserPassword (
+    @Reg() reg: Request,
+    @Body() dto: UpdateUserPasswordDto): Promise<UpdateUserResponseDto>{
+      return this.usersService.updateProfile(req.userId!, dto);
+  }
+  
 
   @UseGuards(SessionAuthGuard)
   @ApiOperation({ summary: 'Get list of all active users' })
