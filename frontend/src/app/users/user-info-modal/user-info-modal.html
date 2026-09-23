@@ -11,7 +11,7 @@
 
   <span class="member-count">
     {{ "users.userInfo.groupCount" | transloco: {
-      count: userGroups()?.groups?.length ?? 0
+      count: memberships.value()?.groups?.length ?? 0
     } }}
   </span>
 
@@ -24,9 +24,9 @@
 </div>
 
 <div class="modal-body">
-  @if (isLoading()) {
+  @if (memberships.isLoading()) {
     <p>{{ "users.userInfo.loading" | transloco }}</p>
-  } @else if (hasLoadError()) {
+  } @else if (memberships.error()) {
     <p class="text-danger">
       {{ "users.userInfo.errorLoading" | transloco }}
     </p>
@@ -42,7 +42,7 @@
         </thead>
         
         <tbody>
-          @for (group of userGroups()?.groups; track group.groupId) {
+          @for (group of memberships.value()?.groups; track group.groupId) {
             <tr>
               <td>{{ group.name }}</td>
             </tr>

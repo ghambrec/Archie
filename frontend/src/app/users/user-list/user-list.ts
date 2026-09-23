@@ -13,40 +13,23 @@ import { Groups } from '../../groups/groups';
 	templateUrl: './user-list.html',
 	styleUrl: './user-list.scss',
 })
-export class UserList implements OnInit {
+export class UserList {
 	protected readonly usersService = inject(Users);
 	private readonly modalService = inject(NgbModal);
 	private readonly groupsService = inject(Groups);
 
 	protected readonly searchString = signal("");
 
-	private loadUsers(): void {
-		this.usersService.getUsersList().subscribe({
-			next: (response) => {
-				this.usersService.usersList.set(
-					response.data,
-				);
-			},
-
-			error: (error) => {
-				console.error (
-					'Unable to load users', error
-				);
-			}
-		});
-	}
-
 	protected readonly filteredUserList = computed(() => {
+		if (!this.usersService.users.hasValue()) {
+			return [];
+		}
 		const searchStringLowercased = this.searchString().toLowerCase();
-		return this.usersService.usersList().filter((user) => 
+		return this.usersService.users.value().filter((user) => 
 			user.displayName.toLowerCase().includes(searchStringLowercased) ||
 			user.email.toLowerCase().includes(searchStringLowercased)
 		)
 	});
-	ngOnInit(): void {
-		this.loadUsers();
-	}
-
 
 	openCreateUserModal(): void{ 
 		const modal = this.modalService.open(
@@ -55,7 +38,7 @@ export class UserList implements OnInit {
 		);
 
 		modal.closed.subscribe(() => {
-			this.loadUsers();
+			this.usersService.users.reload();
 			this.groupsService.groups.reload();
 		});
 	}
@@ -72,7 +55,6 @@ export class UserList implements OnInit {
 				centered: true,
 				size: 'lg',
 			});
-		modal.componentInstance.selectedUser = user;
-		modal.componentInstance.loadUserGroups();
+		modal.componentInstance.selectedUser.set(user);
 	}
 }
