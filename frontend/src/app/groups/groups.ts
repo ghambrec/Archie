@@ -75,14 +75,6 @@ export class Groups {
 		);
 	}
 
-	infoGroups(id: string) {
-		return this.http.get<GroupMembersResponse>(`${this.userGroupsUrl}/groups/${id}/members`,
-			{
-				withCredentials: true,
-			},
-		);
-	}
-
 	addUserToGroup(groupId: string, userId: string) {
 		return this.http.post(`${this.userGroupsUrl}/groups/${groupId}/members`,
 			{

@@ -21,6 +21,9 @@ export class UserList {
 	protected readonly searchString = signal("");
 
 	protected readonly filteredUserList = computed(() => {
+		if (!this.usersService.users.hasValue()) {
+			return [];
+		}
 		const searchStringLowercased = this.searchString().toLowerCase();
 		return this.usersService.users.value().filter((user) => 
 			user.displayName.toLowerCase().includes(searchStringLowercased) ||
