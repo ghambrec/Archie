@@ -109,3 +109,28 @@ INSERT INTO tags (name, label, description, facet, is_system) VALUES
 	('correspondence','Correspondence',     'Other correspondence with no clear form',							'doctype', true)
 ON CONFLICT (name) DO UPDATE
 SET label = EXCLUDED.label, description = EXCLUDED.description, facet = EXCLUDED.facet;
+
+CREATE TABLE IF NOT EXISTS ai_conversations (
+	id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	title varchar(255),
+	updated_at timestamptz NOT NULL DEFAULT now(),
+	created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS ai_conversations_user_id_idx ON ai_conversations (user_id);
+
+CREATE TABLE IF NOT EXISTS ai_messages (
+	id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	conv_id uuid NOT NULL REFERENCES ai_conversations(id) ON DELETE CASCADE,
+	sender varchar(10) NOT NULL CHECK (sender IN ('user', 'llm')),
+	"content" text NOT NULL,
+	created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS ai_messages_conversation_id_idx ON ai_messages(conv_id);
+
+CREATE TABLE IF NOT EXISTS ai_message_sources (
+	message_id uuid NOT NULL REFERENCES ai_messages(id) ON DELETE CASCADE,
+	chunk_id uuid NOT NULL REFERENCES ai_chunks(id) ON DELETE CASCADE,
+	similiary_score REAL NOT NULL,
+	PRIMARY KEY(message_id, chunk_id)
+);

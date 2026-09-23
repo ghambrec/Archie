@@ -47,6 +47,8 @@ class Settings(BaseSettings):
     # --- OPENROUTER
     openrouter_api_key: str | None = None
     openrouter_generation_model: str | None = None
+    output_token_limit: int 
+
 
     # --- MINIO
     minio_endpoint: str
