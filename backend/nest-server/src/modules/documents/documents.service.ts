@@ -53,6 +53,18 @@ export class DocumentsService {
 
     const sha256 = createHash('sha256').update(file.buffer).digest('hex');
 
+    const duplicateExists = await this.documentsRepository
+      .createQueryBuilder('document')
+      .innerJoin(DocumentGroup, 'documentGroup', 'documentGroup.documentId = document.id')
+      .where('documentGroup.groupId = :groupId', { groupId })
+      .andWhere('document.sha256 = :sha256', { sha256 })
+      .getExists();
+
+    if (duplicateExists) {
+      this.logger.warn({ userId, groupId, sha256 }, 'Document already exists in group');
+      throw new ApplicationException(ErrorCode.DocumentAlreadyExistsInGroup);
+    }
+
     const key = `${DOCUMENTS_BUCKET}-${randomUUID()}`;
 
     await this.storageService.putObject(
@@ -293,7 +305,7 @@ export class DocumentsService {
 
     await this.tagsService.removeFromDocument(id, tagId);
 
-    thisbackend/nest-server/src/modules/documents/dto/set-document-group.dto.ts.logger.log({ userId, id, tagId }, 'Tag removed from document');
+    this.logger.log({ userId, id, tagId }, 'Tag removed from document');
   }
 
   async removeGroup(
