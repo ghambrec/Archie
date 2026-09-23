@@ -38,6 +38,18 @@ export class InfoGroupModal {
 	readonly actionError = signal<string | null>(null);
 	readonly feedbackMsg = signal<string | null>(null);
 
+	readonly permissions = httpResource<UserPermission[]>(
+		() => {
+			const group = this.selectedGroup();
+			return group
+			? { url: `${environment.apiUrl}/user-permission/${group.id}/permissions`, withCredentials: true}
+			: undefined
+		},
+		{
+			defaultValue: []
+		}
+	);
+
 	protected readonly filteredUserList = computed(() => {
 		if (!this.members.hasValue() || !this.userService.users.hasValue()) {
 			return [];
@@ -99,13 +111,6 @@ export class InfoGroupModal {
 		});
 	}
 
-	// readonly selectedUserId = signal<string | null>(null);
-
-	// selectUser(userId: string): void {
-	//   this.selectedUserId.set(userId);
-	// }
-
-	readonly permissions = signal<UserPermission[]>([]);
 	private readonly modalService = inject(NgbModal);
 
 	openUserPermissions(member: GroupMember): void {
@@ -114,7 +119,7 @@ export class InfoGroupModal {
 				centered: true,
 			});
 
-		const userPermissions = this.permissions().filter(
+		const userPermissions = this.permissions.value().filter(
 			permission => permission.userId === member.userId,
 		);
 
@@ -125,27 +130,17 @@ export class InfoGroupModal {
 		// const userId = member.userId;
 
 		modal.closed.subscribe(() => {
-			this.loadPermissions();
-		});
-	}
-
-	//load permissions for all user
-	loadPermissions(): void {
-		const request = this.groupsService.getGroupPermissions(this.selectedGroup()!.id);
-
-		request.subscribe({
-			next: returnedPermissions => {
-				this.permissions.set(returnedPermissions);
-			},
-			error: () => {
-				this.actionError.set("groups.infoGroup.errorLoadingPermissions");
-			},
+			this.permissions.reload();
 		});
 	}
 
 	//filter userPermissions for each user
 	getPermissionsForUser(userId: string): string[] {
-		const filteredPermissions = this.permissions().filter(permission => permission.userId === userId);
+		if (!this.permissions.hasValue()) {
+			return [];
+		}
+
+		const filteredPermissions = this.permissions.value().filter(permission => permission.userId === userId);
 
 		return filteredPermissions.map(permission => permission.permKey);
 	}

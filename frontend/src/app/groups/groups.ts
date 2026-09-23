@@ -94,14 +94,6 @@ export class Groups {
 		);
 	}
 
-	getGroupPermissions(groupId: string) {
-		return this.http.get<UserPermission[]>(`${this.userPermissionsUrl}/${groupId}/permissions`,
-			{
-				withCredentials: true,
-			},
-		);
-	}
-
 	addUserPermission(groupId: string, userId: string, permKey: string) {
 		return this.http.post(
 			`${this.userPermissionsUrl}/${groupId}/permissions`,

@@ -59,6 +59,5 @@ export class GroupList {
 			}
 		);
 		modal.componentInstance.selectedGroup.set(group);
-		modal.componentInstance.loadPermissions();
 	}
 }

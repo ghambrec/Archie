@@ -61,6 +61,12 @@
       }
   </div>
 
+  @if (permissions.error()) {
+	<div class="text-danger mb-2">
+		{{ "groups.infoGroup.errorLoadingPermissions" | transloco }}
+	</div>
+  }
+
   @if (actionError()) {
     <div class="text-danger mb-2">
       {{ actionError() | transloco }}
@@ -115,6 +121,7 @@
               <button
                 type="button"
                 class="btn btn-secondary btn-sm me-2"
+				[disabled]="!permissions.hasValue()"
                 (click)="openUserPermissions(member)"> 
                 {{ "groups.infoGroup.editUserPermission" | transloco }}
               </button>
