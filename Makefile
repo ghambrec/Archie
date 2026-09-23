@@ -37,6 +37,9 @@ test:
 	${COMPOSE_TEST} down -v; \
 	exit $$status
 
+test-clean:
+	${COMPOSE_TEST} down -v --rmi all 
+
 # Github actions
 deps-nest:
 	cd $(NEST_DIR) && $(PNPM) install --frozen-lockfile
@@ -49,4 +52,4 @@ build-front:
 	cd $(FRONT_DIR) && $(PNPM) run build
 
 
-.PHONY: re clean fclean down up deps-nest deps-front build-nest build-front
+.PHONY: re clean fclean down up deps-nest deps-front build-nest build-front test-clean
