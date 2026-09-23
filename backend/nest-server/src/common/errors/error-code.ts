@@ -13,6 +13,7 @@ export enum ErrorCode {
     DocumentNotFound = 'DOCUMENT_NOT_FOUND',
     DocumentAlreadyInGroup = 'DOCUMENT_ALREADY_IN_GROUP',
     DocumentNotInGroup = 'DOCUMENT_NOT_IN_GROUP',
+    DocumentAlreadyExistsInGroup = 'DOCUMENT_ALREADY_EXISTS_IN_GROUP',
     TagNotFound = 'TAG_NOT_FOUND',
     TagNameAlreadyRegistered = 'TAG_NAME_ALREADY_REGISTERED',
     TagHasDependents = 'TAG_HAS_DEPENDENTS',
