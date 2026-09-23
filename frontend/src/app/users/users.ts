@@ -1,5 +1,5 @@
 import { Service, computed, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { SupportedLanguage } from '../core/i18n/supported-language';
 
@@ -65,8 +65,19 @@ export class Users {
 	readonly currentUser = signal<CurrentUser | null>(null);
 	readonly isAdminUser = computed(() => this.currentUser()?.isAdmin === true);
 
-	readonly usersList = signal<UserInfo[]>([]);
-
+	readonly users = httpResource<UserInfo[]>(
+		() => this.currentUser()
+		? {
+			url: this.baseUrl,
+			params: {limit: 100},
+			withCredentials: true 
+		}
+		: undefined,
+		{
+			defaultValue: [],
+			parse: (raw: unknown) => (raw as GetUsersResponse).data
+		}
+	)
 
 	getCurrentUser() {
 		const url = `${this.baseUrl}/me`;
@@ -78,19 +89,6 @@ export class Users {
 
 		return this.http.post<CreateUserResponse>(url, body, { withCredentials: true });
 
-	}
-
-	getUsersList(page = 1, limit = 20) {
-		return this.http.get<GetUsersResponse>(
-			this.baseUrl,
-			{
-				params: {
-					page: page.toString(),
-					limit: limit.toString(),
-				},
-				withCredentials: true,
-			}
-		)
 	}
 
 	getGroupsByUserId(userId: string) {

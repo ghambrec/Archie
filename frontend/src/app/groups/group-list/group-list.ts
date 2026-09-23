@@ -60,7 +60,6 @@ export class GroupList {
 		);
 		modal.componentInstance.selectedGroup = group;
 		modal.componentInstance.loadMembers();
-		modal.componentInstance.loadUsers();
 		modal.componentInstance.loadPermissions();
 	}
 }
