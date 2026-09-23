@@ -40,7 +40,11 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, documentFactory);
+  SwaggerModule.setup('api', app, documentFactory, {
+	swaggerOptions: {
+		defaultModelsExpandDepth: -1
+	}
+  });
 
   const port = process.env.NEST_SERVER_PORT;
   if (!port) {
