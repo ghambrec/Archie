@@ -66,7 +66,7 @@ class Settings(BaseSettings):
     chunk_overlap_chars: int
 
     # --- Retrieval
-    context_budget=5000
+    context_budget: int = 5000
     limit: int = 50
 
     # --- REDIS
