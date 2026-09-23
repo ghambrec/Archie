@@ -9,6 +9,7 @@ import { AppModule } from '../src/app.module';
 import { ApplicationExceptionFilter } from '../src/common/errors/application-exception.filter';
 import { User } from '../src/modules/users/entities/user.entity';
 import { Group } from '../src/modules/groups/entities/group.entity';
+import { UserGroup } from '../src/modules/user-groups/entities/user-group.entity';
 import { Document } from '../src/modules/documents/entities/document.entity';
 import { Tag } from '../src/modules/tags/entities/tag.entity';
 import { AiIngestionService } from '../src/modules/ai-service/ai-ingestion.service';
@@ -21,6 +22,7 @@ describe('DocumentsController (e2e)', () => {
   let app: INestApplication<App>;
   let dataSource: DataSource;
   let usedEmails: string[];
+  let createdGroupIds: string[];
 
   const testPassword = 'password1234';
   const statusCodeOk = 200;
@@ -58,6 +60,7 @@ describe('DocumentsController (e2e)', () => {
 
   beforeEach(() => {
     usedEmails = [];
+    createdGroupIds = [];
     aiIngestionServiceMock.triggerIngestion.mockClear();
   });
 
@@ -69,6 +72,9 @@ describe('DocumentsController (e2e)', () => {
         await dataSource.manager.delete(User, { id: user.id });
         await dataSource.manager.delete(Group, { name: `personal-${user.id}` });
       }
+    }
+    for (const groupId of createdGroupIds) {
+      await dataSource.manager.delete(Group, { id: groupId });
     }
   });
 
@@ -84,6 +90,19 @@ describe('DocumentsController (e2e)', () => {
     const user = await dataSource.manager.findOneByOrFail(User, { email });
 
     return { sessionCookie: response.headers['set-cookie'], userId: user.id };
+  };
+
+  const createGroupForUser = async (userId: string): Promise<Group> => {
+    const groupInsert = await dataSource.manager.insert(Group, {
+      name: `e2e-group-${randomUUID()}`,
+      isSystem: false,
+    });
+    const groupId = groupInsert.identifiers[0].id as string;
+    createdGroupIds.push(groupId);
+
+    await dataSource.manager.insert(UserGroup, { userId, groupId });
+
+    return dataSource.manager.findOneByOrFail(Group, { id: groupId });
   };
 
   const uploadDocument = async (sessionCookie: string): Promise<string> => {
@@ -229,31 +248,27 @@ describe('DocumentsController (e2e)', () => {
     it('assigns the document to a group the user belongs to', async () => {
       const { sessionCookie, userId } = await registerUser();
       const documentId = await uploadDocument(sessionCookie);
-      const personalGroup = await dataSource.manager.findOneByOrFail(Group, {
-        name: `personal-${userId}`,
-      });
+      const group = await createGroupForUser(userId);
 
       const response = await request(app.getHttpServer())
         .post(`/documents/${documentId}/group`)
         .set('Cookie', sessionCookie)
-        .send({ groupId: personalGroup.id })
+        .send({ groupId: group.id })
         .expect(statusCodeCreated);
 
-      expect(response.body).toMatchObject({ documentId, groupId: personalGroup.id });
+      expect(response.body).toMatchObject({ documentId, groupId: group.id });
     });
 
     it('returns not found for a group the user does not belong to', async () => {
       const owner = await registerUser();
       const otherUser = await registerUser();
       const documentId = await uploadDocument(owner.sessionCookie);
-      const otherPersonalGroup = await dataSource.manager.findOneByOrFail(Group, {
-        name: `personal-${otherUser.userId}`,
-      });
+      const otherGroup = await createGroupForUser(otherUser.userId);
 
       await request(app.getHttpServer())
         .post(`/documents/${documentId}/group`)
         .set('Cookie', owner.sessionCookie)
-        .send({ groupId: otherPersonalGroup.id })
+        .send({ groupId: otherGroup.id })
         .expect(statusCodeNotFound);
     });
   });
