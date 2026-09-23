@@ -4,7 +4,7 @@ import { Logger } from 'nestjs-pino';
 import aiServiceConfig from 'src/config/ai-service.config';
 
 @Injectable()
-export class AiIngestionService {
+export class IngestionService {
   constructor(
     @Inject(aiServiceConfig.KEY)
     private readonly config: ConfigType<typeof aiServiceConfig>,

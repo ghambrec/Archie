@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import aiServiceConfig from 'src/config/ai-service.config';
-import { AiIngestionService } from './ai-ingestion.service';
+import { IngestionModule } from './ingestion/ingestion.module';
+import { ConversationsModule } from './conversations/conversations.module';
 
 @Module({
-  imports: [ConfigModule.forFeature(aiServiceConfig)],
-  providers: [AiIngestionService],
-  exports: [AiIngestionService],
+  imports: [IngestionModule, ConversationsModule],
+  exports: [IngestionModule, ConversationsModule],
 })
 export class AiServiceModule {}

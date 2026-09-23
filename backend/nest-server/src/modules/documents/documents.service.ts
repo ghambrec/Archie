@@ -21,7 +21,7 @@ import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
 import { GroupsService } from '../groups/groups.service';
 import { DocumentGroupsService } from '../document-groups/document-groups.service';
-import { AiIngestionService } from '../ai-service/ai-ingestion.service';
+import { IngestionService } from '../ai-service/ingestion/ingestion.service';
 import { TagsService } from '../tags/tags.service';
 import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
 
@@ -35,7 +35,7 @@ export class DocumentsService {
     private readonly documentsRepository: Repository<Document>,
     private readonly groupsService: GroupsService,
     private readonly documentGroupsService: DocumentGroupsService,
-    private readonly aiIngestionService: AiIngestionService,
+    private readonly aiIngestionService: IngestionService,
     private readonly tagsService: TagsService,
     private readonly logger: Logger,
   ) {}
