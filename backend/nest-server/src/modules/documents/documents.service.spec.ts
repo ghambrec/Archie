@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Logger } from 'nestjs-pino';
 import { DocumentsService } from './documents.service';
@@ -92,6 +93,7 @@ describe('DocumentsService', () => {
   });
 
   describe('upload', () => {
+    const groupId = 'group-1';
     const file = {
       originalname: 'hello.txt',
       mimetype: 'text/plain',
@@ -99,14 +101,17 @@ describe('DocumentsService', () => {
       buffer: Buffer.from('hello world'),
     } as Express.Multer.File;
 
-    it('stores the file, persists the document and triggers AI ingestion', async () => {
+    it('stores the file, persists the document, assigns the group and triggers AI ingestion', async () => {
+      groupsService.get.mockResolvedValue(undefined);
       storageService.putObject.mockResolvedValue(undefined);
       documentsRepository.insert.mockResolvedValue({
         identifiers: [{ id: documentId }],
       });
+      documentGroupsService.setGroup.mockResolvedValue(undefined);
 
-      const result = await service.upload(userId, file);
+      const result = await service.upload(userId, groupId, file);
 
+      expect(groupsService.get).toHaveBeenCalledWith(groupId, userId);
       expect(storageService.putObject).toHaveBeenCalledWith(
         'documents',
         expect.any(String),
@@ -122,8 +127,21 @@ describe('DocumentsService', () => {
           sizeBytes: file.size,
         }),
       );
+      expect(documentGroupsService.setGroup).toHaveBeenCalledWith(documentId, groupId);
       expect(aiIngestionService.triggerIngestion).toHaveBeenCalledWith(documentId);
       expect(result).toEqual({ id: documentId, objectKey: expect.any(String) });
+    });
+
+    it('does not store anything when the user has no access to the group', async () => {
+      groupsService.get.mockRejectedValue(new NotFoundException());
+
+      await expect(service.upload(userId, groupId, file)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(storageService.putObject).not.toHaveBeenCalled();
+      expect(documentsRepository.insert).not.toHaveBeenCalled();
+      expect(documentGroupsService.setGroup).not.toHaveBeenCalled();
+      expect(aiIngestionService.triggerIngestion).not.toHaveBeenCalled();
     });
   });
 
@@ -215,43 +233,6 @@ describe('DocumentsService', () => {
 
       await expect(service.downloadStream(userId, documentId)).rejects.toMatchObject({
         code: ErrorCode.DocumentNotFound,
-      });
-    });
-  });
-
-  describe('setGroup', () => {
-    const groupId = 'group-1';
-
-    it('assigns the document to the group', async () => {
-      documentsRepository.findOne.mockResolvedValue({ id: documentId });
-      groupsService.get.mockResolvedValue(undefined);
-      documentGroupsService.setGroup.mockResolvedValue(undefined);
-
-      const result = await service.setGroup(userId, documentId, groupId);
-
-      expect(groupsService.get).toHaveBeenCalledWith(groupId, userId);
-      expect(documentGroupsService.setGroup).toHaveBeenCalledWith(documentId, groupId);
-      expect(result).toEqual({ documentId, groupId });
-    });
-
-    it('throws DocumentNotFound when the document does not exist', async () => {
-      documentsRepository.findOne.mockResolvedValue(null);
-
-      await expect(service.setGroup(userId, documentId, groupId)).rejects.toMatchObject({
-        code: ErrorCode.DocumentNotFound,
-      });
-      expect(documentGroupsService.setGroup).not.toHaveBeenCalled();
-    });
-
-    it('throws DocumentAlreadyInGroup when the document is already assigned to a group', async () => {
-      documentsRepository.findOne.mockResolvedValue({ id: documentId });
-      groupsService.get.mockResolvedValue(undefined);
-      documentGroupsService.setGroup.mockRejectedValue(
-        new ApplicationException(ErrorCode.DocumentAlreadyInGroup),
-      );
-
-      await expect(service.setGroup(userId, documentId, groupId)).rejects.toMatchObject({
-        code: ErrorCode.DocumentAlreadyInGroup,
       });
     });
   });

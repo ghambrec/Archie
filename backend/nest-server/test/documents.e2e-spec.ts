@@ -105,9 +105,17 @@ describe('DocumentsController (e2e)', () => {
     return dataSource.manager.findOneByOrFail(Group, { id: groupId });
   };
 
-  const uploadDocument = async (sessionCookie: string): Promise<string> => {
+  const uploadDocument = async ({
+    sessionCookie,
+    userId,
+  }: {
+    sessionCookie: string;
+    userId: string;
+  }): Promise<string> => {
+    const group = await createGroupForUser(userId);
+
     const response = await request(app.getHttpServer())
-      .post('/documents/upload')
+      .post(`/documents/upload/${group.id}`)
       .set('Cookie', sessionCookie)
       .attach('file', Buffer.from('hello world'), 'hello.txt')
       .expect(statusCodeCreated);
@@ -115,12 +123,13 @@ describe('DocumentsController (e2e)', () => {
     return response.body.id;
   };
 
-  describe('POST /documents/upload', () => {
-    it('stores the document and triggers AI ingestion without calling the real AI service', async () => {
-      const { sessionCookie } = await registerUser();
+  describe('POST /documents/upload/:groupId', () => {
+    it('stores the document, assigns it to the group and triggers AI ingestion', async () => {
+      const { sessionCookie, userId } = await registerUser();
+      const group = await createGroupForUser(userId);
 
       const response = await request(app.getHttpServer())
-        .post('/documents/upload')
+        .post(`/documents/upload/${group.id}`)
         .set('Cookie', sessionCookie)
         .attach('file', Buffer.from('hello world'), 'hello.txt')
         .expect(statusCodeCreated);
@@ -128,22 +137,63 @@ describe('DocumentsController (e2e)', () => {
       expect(response.body.id).toBeDefined();
       expect(aiIngestionServiceMock.triggerIngestion).toHaveBeenCalledTimes(1);
       expect(aiIngestionServiceMock.triggerIngestion).toHaveBeenCalledWith(response.body.id);
+
+      const documentResponse = await request(app.getHttpServer())
+        .get(`/documents/${response.body.id}`)
+        .set('Cookie', sessionCookie)
+        .expect(statusCodeOk);
+
+      expect(documentResponse.body.groups).toEqual([{ id: group.id, name: group.name }]);
     });
 
     it('rejects the request when no file is attached', async () => {
-      const { sessionCookie } = await registerUser();
+      const { sessionCookie, userId } = await registerUser();
+      const group = await createGroupForUser(userId);
 
       await request(app.getHttpServer())
-        .post('/documents/upload')
+        .post(`/documents/upload/${group.id}`)
         .set('Cookie', sessionCookie)
         .expect(statusCodeBadRequest);
 
       expect(aiIngestionServiceMock.triggerIngestion).not.toHaveBeenCalled();
     });
 
+    it('rejects the request when the group id is not a valid UUID', async () => {
+      const { sessionCookie } = await registerUser();
+
+      await request(app.getHttpServer())
+        .post('/documents/upload/not-a-uuid')
+        .set('Cookie', sessionCookie)
+        .attach('file', Buffer.from('hello world'), 'hello.txt')
+        .expect(statusCodeBadRequest);
+
+      expect(aiIngestionServiceMock.triggerIngestion).not.toHaveBeenCalled();
+    });
+
+    it('returns not found for a group the user does not belong to', async () => {
+      const owner = await registerUser();
+      const otherUser = await registerUser();
+      const otherGroup = await createGroupForUser(otherUser.userId);
+
+      await request(app.getHttpServer())
+        .post(`/documents/upload/${otherGroup.id}`)
+        .set('Cookie', owner.sessionCookie)
+        .attach('file', Buffer.from('hello world'), 'hello.txt')
+        .expect(statusCodeNotFound);
+
+      expect(aiIngestionServiceMock.triggerIngestion).not.toHaveBeenCalled();
+
+      const listResponse = await request(app.getHttpServer())
+        .get('/documents')
+        .set('Cookie', owner.sessionCookie)
+        .expect(statusCodeOk);
+
+      expect(listResponse.body.total).toBe(0);
+    });
+
     it('rejects the request when there is no session cookie', async () => {
       await request(app.getHttpServer())
-        .post('/documents/upload')
+        .post(`/documents/upload/${randomUUID()}`)
         .attach('file', Buffer.from('hello world'), 'hello.txt')
         .expect(statusCodeUnauthorized);
 
@@ -156,8 +206,8 @@ describe('DocumentsController (e2e)', () => {
       const owner = await registerUser();
       const otherUser = await registerUser();
 
-      const documentId = await uploadDocument(owner.sessionCookie);
-      await uploadDocument(otherUser.sessionCookie);
+      const documentId = await uploadDocument(owner);
+      await uploadDocument(otherUser);
 
       const response = await request(app.getHttpServer())
         .get('/documents')
@@ -172,8 +222,9 @@ describe('DocumentsController (e2e)', () => {
 
   describe('GET /documents/:id', () => {
     it('returns the document summary for its owner', async () => {
-      const { sessionCookie } = await registerUser();
-      const documentId = await uploadDocument(sessionCookie);
+      const user = await registerUser();
+      const { sessionCookie } = user;
+      const documentId = await uploadDocument(user);
 
       const response = await request(app.getHttpServer())
         .get(`/documents/${documentId}`)
@@ -186,7 +237,7 @@ describe('DocumentsController (e2e)', () => {
     it('returns not found for a document owned by another user', async () => {
       const owner = await registerUser();
       const otherUser = await registerUser();
-      const documentId = await uploadDocument(owner.sessionCookie);
+      const documentId = await uploadDocument(owner);
 
       const response = await request(app.getHttpServer())
         .get(`/documents/${documentId}`)
@@ -199,8 +250,9 @@ describe('DocumentsController (e2e)', () => {
 
   describe('GET /documents/:id/download', () => {
     it('streams the original file content back', async () => {
-      const { sessionCookie } = await registerUser();
-      const documentId = await uploadDocument(sessionCookie);
+      const user = await registerUser();
+      const { sessionCookie } = user;
+      const documentId = await uploadDocument(user);
 
       const response = await request(app.getHttpServer())
         .get(`/documents/${documentId}/download`)
@@ -214,8 +266,9 @@ describe('DocumentsController (e2e)', () => {
 
   describe('POST /documents/:id/tags and DELETE /documents/:id/tags/:tagId', () => {
     it('assigns and removes a tag from a document', async () => {
-      const { sessionCookie } = await registerUser();
-      const documentId = await uploadDocument(sessionCookie);
+      const user = await registerUser();
+      const { sessionCookie } = user;
+      const documentId = await uploadDocument(user);
       const tag = await dataSource.manager.findOneByOrFail(Tag, { name: 'contract' });
 
       const assignResponse = await request(app.getHttpServer())
@@ -244,39 +297,11 @@ describe('DocumentsController (e2e)', () => {
     });
   });
 
-  describe('POST /documents/:id/group', () => {
-    it('assigns the document to a group the user belongs to', async () => {
-      const { sessionCookie, userId } = await registerUser();
-      const documentId = await uploadDocument(sessionCookie);
-      const group = await createGroupForUser(userId);
-
-      const response = await request(app.getHttpServer())
-        .post(`/documents/${documentId}/group`)
-        .set('Cookie', sessionCookie)
-        .send({ groupId: group.id })
-        .expect(statusCodeCreated);
-
-      expect(response.body).toMatchObject({ documentId, groupId: group.id });
-    });
-
-    it('returns not found for a group the user does not belong to', async () => {
-      const owner = await registerUser();
-      const otherUser = await registerUser();
-      const documentId = await uploadDocument(owner.sessionCookie);
-      const otherGroup = await createGroupForUser(otherUser.userId);
-
-      await request(app.getHttpServer())
-        .post(`/documents/${documentId}/group`)
-        .set('Cookie', owner.sessionCookie)
-        .send({ groupId: otherGroup.id })
-        .expect(statusCodeNotFound);
-    });
-  });
-
   describe('DELETE /documents/:id', () => {
     it('soft-deletes the document so it can no longer be fetched', async () => {
-      const { sessionCookie } = await registerUser();
-      const documentId = await uploadDocument(sessionCookie);
+      const user = await registerUser();
+      const { sessionCookie } = user;
+      const documentId = await uploadDocument(user);
 
       await request(app.getHttpServer())
         .delete(`/documents/${documentId}`)
