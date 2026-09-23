@@ -52,7 +52,6 @@ export class UserList {
 				centered: true,
 				size: 'lg',
 			});
-		modal.componentInstance.selectedUser = user;
-		modal.componentInstance.loadUserGroups();
+		modal.componentInstance.selectedUser.set(user);
 	}
 }

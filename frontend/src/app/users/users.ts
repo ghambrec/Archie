@@ -91,15 +91,6 @@ export class Users {
 
 	}
 
-	getGroupsByUserId(userId: string) {
-		return this.http.get<UserGroupsResponse>(
-			`${environment.apiUrl}/user-groups/userId/${userId}/groups`,
-			{
-				withCredentials: true,
-			},
-		);
-	}
-
 	getAvatarUrl(userId?: string | null) {
 		if (!userId) {
 			return '/avatar';
