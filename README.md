@@ -196,11 +196,10 @@ The running NestJS Swagger UI at `/api` describes request and response DTOs. Sel
 
 | Method | Route | Purpose |
 | --- | --- | --- |
-| `POST` | `/documents/upload` | Upload a multipart `file` |
+| `POST` | `/documents/upload/:groupId` | Upload a multipart `file` and assign it to the group |
 | `GET` | `/documents` | List the current user's documents with `page` and `limit` |
 | `GET` | `/documents/:id` | Read document metadata |
 | `GET` | `/documents/:id/download` | Stream the original document |
-| `POST` | `/documents/:id/group` | Assign a document to a group |
 
 These routes require a session. The separate AI ingestion endpoint uses the `X-API-KEY` header and is intended for backend-to-service communication. Use streamed downloads; the existing pre-signed URL endpoint is marked “Don't use it” in the controller.
 
