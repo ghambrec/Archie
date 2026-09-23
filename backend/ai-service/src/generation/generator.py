@@ -9,7 +9,7 @@ from src.generation.model import build_model
 
 from src.config import settings 
 
-SYSTEM_PROMPT = """ You analyze documents for a document management system"
+SYSTEM_PROMPT = """ You analyze documents for a document management system
                     you get a question by a user and possible matching document snippets
                     
                     if the documents contains 

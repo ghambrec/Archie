@@ -38,16 +38,8 @@ async def ask_question(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, questio
         logger.debug("create message failed, no user found for given id")
         raise UserNotFoundError(str(user_id)) from e
 
-    # TODO: hier weiter mit retrieval pipeline (embedding etc)
     try:
-        previous_messages = await pool.fetch(
-                    """select am.sender , am."content" 
-                    from ai_messages am 
-                    where am.conv_id=$1
-                    order by am.created_at
-                    """, conv_id,
-                )
-        answer = await retrieval(user_id, conv_id, question, pool, previous_messages)
+        answer = await retrieval(user_id, conv_id, question, pool)
     except Exception:
         logger.exception("retriev answer failed ")
         raise

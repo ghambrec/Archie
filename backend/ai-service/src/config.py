@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     # --- OPENROUTER
     openrouter_api_key: str | None = None
     openrouter_generation_model: str | None = None
-    output_token_limit: int 
+    
 
 
     # --- MINIO
@@ -64,6 +64,10 @@ class Settings(BaseSettings):
     # --- CHUNKING
     chunk_size_chars: int
     chunk_overlap_chars: int
+
+    # --- Retrieval
+    context_budget=5000
+    limit: int = 50
 
     # --- REDIS
     redis_url: str
