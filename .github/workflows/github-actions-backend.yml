@@ -136,7 +136,9 @@ jobs:
           MINIO_APP_ACCESS_KEY: ${{ secrets.MINIO_APP_ACCESS_KEY }}
           MINIO_APP_SECRET_KEY: ${{ secrets.MINIO_APP_SECRET_KEY }}
         run: |
-          MC="docker run --rm --network host -e MC_HOST_local=http://$MINIO_ROOT_USER:$MINIO_ROOT_PASSWORD@localhost:9000 minio/mc"
+          go install github.com/minio/mc@latest
+          MC="$(go env GOPATH)/bin/mc"
+          $MC alias set local http://localhost:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
           $MC mb --ignore-existing local/documents
           $MC mb --ignore-existing local/avatars
           $MC admin user add local "$MINIO_APP_ACCESS_KEY" "$MINIO_APP_SECRET_KEY"
