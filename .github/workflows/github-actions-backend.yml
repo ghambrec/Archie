@@ -136,13 +136,11 @@ jobs:
           MINIO_APP_ACCESS_KEY: ${{ secrets.MINIO_APP_ACCESS_KEY }}
           MINIO_APP_SECRET_KEY: ${{ secrets.MINIO_APP_SECRET_KEY }}
         run: |
-          curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc
-          chmod +x /usr/local/bin/mc
-          mc alias set local http://localhost:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
-          mc mb --ignore-existing local/documents
-          mc mb --ignore-existing local/avatars
-          mc admin user add local "$MINIO_APP_ACCESS_KEY" "$MINIO_APP_SECRET_KEY"
-          mc admin policy attach local readwrite --user="$MINIO_APP_ACCESS_KEY"
+          MC="docker run --rm --network host -e MC_HOST_local=http://$MINIO_ROOT_USER:$MINIO_ROOT_PASSWORD@localhost:9000 minio/mc"
+          $MC mb --ignore-existing local/documents
+          $MC mb --ignore-existing local/avatars
+          $MC admin user add local "$MINIO_APP_ACCESS_KEY" "$MINIO_APP_SECRET_KEY"
+          $MC admin policy attach local readwrite --user="$MINIO_APP_ACCESS_KEY"
 
       - name: run nest-server integration/e2e tests
         env:
