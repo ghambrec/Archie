@@ -3,7 +3,7 @@
     {{ "groups.infoGroup.heading" | transloco }}
   </h5>
 
-  @if (!members.isLoading() && !members.error()) {
+  @if (members.status() !== 'loading' && !members.error()) {
     <span class="member-count">
       @if (members.value().length === 0) {
         {{ "groups.infoGroup.noMembers" | transloco }}
@@ -73,7 +73,7 @@
     </div>
   }
 
-  @if (members.isLoading()) {
+  @if (members.status() === 'loading') {
    <p>{{ "groups.infoGroup.loading" | transloco}}</p> 
   } @else if (members.error()) {
     <p class="text-danger">
