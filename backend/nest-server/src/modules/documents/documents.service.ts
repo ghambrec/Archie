@@ -16,7 +16,6 @@ import { GetDocumentsQueryDto } from './dto/get-documents-query.dto';
 import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
 import { DocumentSummaryDto } from './dto/document-summary.dto';
 import { DocumentDownloadStreamDto } from './dto/document-download-stream.dto';
-import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
 import { GroupsService } from '../groups/groups.service';
@@ -40,11 +39,17 @@ export class DocumentsService {
     private readonly logger: Logger,
   ) {}
 
-  async upload(userId: string, file: Express.Multer.File): Promise<UploadResponseDto> {
+  async upload(
+    userId: string,
+    groupId: string,
+    file: Express.Multer.File,
+  ): Promise<UploadResponseDto> {
     this.logger.log(
-      { userId, filename: file.originalname, mimeType: file.mimetype, sizeBytes: file.size },
+      { userId, groupId, filename: file.originalname, mimeType: file.mimetype, sizeBytes: file.size },
       'Uploading document',
     );
+
+    await this.groupsService.get(groupId, userId);
 
     const sha256 = createHash('sha256').update(file.buffer).digest('hex');
 
@@ -71,7 +76,9 @@ export class DocumentsService {
 
     const documentId = insertResult.identifiers[0].id as string;
 
-    this.logger.log({ documentId }, 'Document uploaded successfully');
+    await this.documentGroupsService.setGroup(documentId, groupId);
+
+    this.logger.log({ documentId, groupId }, 'Document uploaded successfully');
 
     await this.aiIngestionService.triggerIngestion(documentId);
 
@@ -243,32 +250,6 @@ export class DocumentsService {
     };
   }
 
-  async setGroup(
-    userId: string,
-    id: string,
-    groupId: string,
-  ): Promise<DocumentGroupResponseDto> {
-
-    this.logger.log({ userId, id, groupId }, 'Assign document to group');
-
-    const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
-      select: { id: true },
-    });
-
-    if (!document) {
-      throw new ApplicationException(ErrorCode.DocumentNotFound);
-    }
-
-    await this.groupsService.get(groupId, userId);
-
-    await this.documentGroupsService.setGroup(id, groupId);
-
-    this.logger.log({ userId, id, groupId }, 'Document assigned to group');
-
-    return { documentId: id, groupId };
-  }
-
   async setTag(
     userId: string,
     id: string,
@@ -312,7 +293,7 @@ export class DocumentsService {
 
     await this.tagsService.removeFromDocument(id, tagId);
 
-    this.logger.log({ userId, id, tagId }, 'Tag removed from document');
+    thisbackend/nest-server/src/modules/documents/dto/set-document-group.dto.ts.logger.log({ userId, id, tagId }, 'Tag removed from document');
   }
 
   async removeGroup(
