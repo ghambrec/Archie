@@ -39,7 +39,7 @@ export class InfoGroupModal {
 	readonly feedbackMsg = signal<string | null>(null);
 
 	protected readonly filteredUserList = computed(() => {
-		if (!this.members.hasValue()) {
+		if (!this.members.hasValue() || !this.userService.users.hasValue()) {
 			return [];
 		}
 
