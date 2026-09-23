@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
+import { createHash } from 'crypto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Logger } from 'nestjs-pino';
 import { DocumentsService } from './documents.service';
@@ -39,6 +40,7 @@ const createQueryBuilderMock = (): QueryBuilderMock => {
   qb.getCount = jest.fn();
   qb.getRawMany = jest.fn();
   qb.getRawOne = jest.fn();
+  qb.getExists = jest.fn();
 
   return qb;
 };
@@ -103,6 +105,7 @@ describe('DocumentsService', () => {
 
     it('stores the file, persists the document, assigns the group and triggers AI ingestion', async () => {
       groupsService.get.mockResolvedValue(undefined);
+      queryBuilder.getExists.mockResolvedValue(false);
       storageService.putObject.mockResolvedValue(undefined);
       documentsRepository.insert.mockResolvedValue({
         identifiers: [{ id: documentId }],
@@ -130,6 +133,25 @@ describe('DocumentsService', () => {
       expect(documentGroupsService.setGroup).toHaveBeenCalledWith(documentId, groupId);
       expect(aiIngestionService.triggerIngestion).toHaveBeenCalledWith(documentId);
       expect(result).toEqual({ id: documentId, objectKey: expect.any(String) });
+    });
+
+    it('throws DocumentAlreadyExistsInGroup when the same file already exists in the group', async () => {
+      groupsService.get.mockResolvedValue(undefined);
+      queryBuilder.getExists.mockResolvedValue(true);
+
+      await expect(service.upload(userId, groupId, file)).rejects.toMatchObject({
+        code: ErrorCode.DocumentAlreadyExistsInGroup,
+      });
+      expect(queryBuilder.where).toHaveBeenCalledWith('documentGroup.groupId = :groupId', {
+        groupId,
+      });
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith('document.sha256 = :sha256', {
+        sha256: createHash('sha256').update(file.buffer).digest('hex'),
+      });
+      expect(storageService.putObject).not.toHaveBeenCalled();
+      expect(documentsRepository.insert).not.toHaveBeenCalled();
+      expect(documentGroupsService.setGroup).not.toHaveBeenCalled();
+      expect(aiIngestionService.triggerIngestion).not.toHaveBeenCalled();
     });
 
     it('does not store anything when the user has no access to the group', async () => {

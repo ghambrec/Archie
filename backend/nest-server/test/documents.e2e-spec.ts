@@ -146,6 +146,56 @@ describe('DocumentsController (e2e)', () => {
       expect(documentResponse.body.groups).toEqual([{ id: group.id, name: group.name }]);
     });
 
+    it('rejects a duplicate file in the same group but accepts it in another group', async () => {
+      const { sessionCookie, userId } = await registerUser();
+      const group = await createGroupForUser(userId);
+      const otherGroup = await createGroupForUser(userId);
+
+      await request(app.getHttpServer())
+        .post(`/documents/upload/${group.id}`)
+        .set('Cookie', sessionCookie)
+        .attach('file', Buffer.from('hello world'), 'hello.txt')
+        .expect(statusCodeCreated);
+
+      const duplicateResponse = await request(app.getHttpServer())
+        .post(`/documents/upload/${group.id}`)
+        .set('Cookie', sessionCookie)
+        .attach('file', Buffer.from('hello world'), 'renamed.txt')
+        .expect(statusCodeConflict);
+
+      expect(duplicateResponse.body.code).toBe(ErrorCode.DocumentAlreadyExistsInGroup);
+
+      await request(app.getHttpServer())
+        .post(`/documents/upload/${otherGroup.id}`)
+        .set('Cookie', sessionCookie)
+        .attach('file', Buffer.from('hello world'), 'hello.txt')
+        .expect(statusCodeCreated);
+
+      expect(aiIngestionServiceMock.triggerIngestion).toHaveBeenCalledTimes(2);
+    });
+
+    it('accepts the same file again after the previous one was deleted', async () => {
+      const { sessionCookie, userId } = await registerUser();
+      const group = await createGroupForUser(userId);
+
+      const firstResponse = await request(app.getHttpServer())
+        .post(`/documents/upload/${group.id}`)
+        .set('Cookie', sessionCookie)
+        .attach('file', Buffer.from('hello world'), 'hello.txt')
+        .expect(statusCodeCreated);
+
+      await request(app.getHttpServer())
+        .delete(`/documents/${firstResponse.body.id}`)
+        .set('Cookie', sessionCookie)
+        .expect(statusCodeNoContent);
+
+      await request(app.getHttpServer())
+        .post(`/documents/upload/${group.id}`)
+        .set('Cookie', sessionCookie)
+        .attach('file', Buffer.from('hello world'), 'hello.txt')
+        .expect(statusCodeCreated);
+    });
+
     it('rejects the request when no file is attached', async () => {
       const { sessionCookie, userId } = await registerUser();
       const group = await createGroupForUser(userId);
