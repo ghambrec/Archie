@@ -15,6 +15,12 @@ export class EditUserPermissionsModal {
   selectedUser!: GroupMember;
   userPermissions!: UserPermission[];
 
+  protected readonly availablePermissions = [
+	{ key: "documents.read",	label: "groups.userPermissions.documentsRead" },
+	{ key: "documents.upload",	label: "groups.userPermissions.documentsUpload" },
+	{ key: "documents.update",	label: "groups.userPermissions.documentsUpdate" },
+	{ key: "documents.delete",	label: "groups.userPermissions.documentsDelete" },
+  ];
 
   protected readonly activeModal = inject(NgbActiveModal);
 

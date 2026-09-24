@@ -18,66 +18,20 @@
     } }}
   </p>
 
-  <div class="form-check">
-    <input
-      id="documents-read"
-      type="checkbox"
-      class="form-check-input"
-      [checked]="hasPermission('documents.read')"
-      (change)="setPermission('documents.read', $event)">
+  @for (permission of availablePermissions; track permission.key) {
+	<div class="form-check">
+	<input
+		[id]="permission.key"
+		type="checkbox"
+		class="form-check-input"
+		[checked]="hasPermission(permission.key)"
+		(change)="setPermission(permission.key, $event)">
 
-    <label
-      for="documents-read"
-      class="form-check-label">
-      {{ "groups.userPermissions.documentsRead" | transloco }}
-    </label>
-  </div>
-
-  <div class="form-check">
-    <input
-      id="documents-upload"
-      type="checkbox"
-      class="form-check-input"
-      [checked]="hasPermission('documents.upload')"
-      (change)="setPermission('documents.upload', $event)">
-      
-      <label
-        for="documents-upload"
-        class="form-check-label">
-        {{ "groups.userPermissions.documentsUpload" | transloco }}
-      </label>
-  </div>
-  
-  <div class="form-check">
-    <input
-      id="documents-update"
-      type="checkbox"
-      class="form-check-input"
-      [checked]="hasPermission('documents.update')"
-      (change)="setPermission('documents.update', $event)">
-
-    <label
-      for="documents-update"
-      class="form-check-label">
-      {{ "groups.userPermissions.documentsUpdate" | transloco }}
-    </label>
-  </div>
-
-  <div class="form-check">
-    <input
-      id="documents-delete"
-      type="checkbox"
-      class="form-check-input"
-      [checked]="hasPermission('documents.delete')"
-      (change)="setPermission('documents.delete', $event)">
-
-    <label
-      for="documents-delete"
-      class="form-check-label">
-      {{ "groups.userPermissions.documentsDelete" | transloco }}
-    </label>
-  </div>
-</div>
+	<label [for]="permission.key" class="form-check-label">
+		{{ permission.label| transloco }}
+	</label>
+	</div>
+  }
 
 <div class="modal-footer">
   <button
