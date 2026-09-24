@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Permission } from '../permissions/entities/permission.entity';
 import { UserPermission } from './entities/user_permission.entity';
+import { PermissionsService } from '../permissions/permissions.service';
 
 @Injectable()
 export class UserPermissionService {
@@ -11,6 +12,7 @@ export class UserPermissionService {
     private readonly userPermissionRepository: Repository<UserPermission>,
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
+	private readonly permissionsService: PermissionsService
   ) {}
 
   async hasPermission(
@@ -41,6 +43,8 @@ export class UserPermissionService {
       .values({ userId, groupId, permissionId: permission.id })
       .orIgnore()
       .execute();
+
+    await this.permissionsService.invalidateUserPermissions(userId);
   }
 
   async revoke(
@@ -55,6 +59,8 @@ export class UserPermissionService {
       groupId,
       permissionId: permission.id,
     });
+
+	await this.permissionsService.invalidateUserPermissions(userId);
   }
 
   async list(

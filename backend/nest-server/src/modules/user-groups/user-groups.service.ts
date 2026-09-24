@@ -49,6 +49,8 @@ export class UserGroupsService {
 		}
 
 		this.logger.log({ groupId: groupId, userId: userId }, 'Removed user from group');
+
+		await this.permissionsService.invalidateUserPermissions(userId);
 	}
 
 	async getMembers(groupId: string, callerUser: string): Promise<GetGroupsMembersResponseDto> {
