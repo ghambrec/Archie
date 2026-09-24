@@ -129,6 +129,7 @@
 			"userPermissions": {
 				"heading": "User Permissions",
 				"permissionsOf": "Permissions of user: {{userName}}",
+				"admin": "Admin",
 				"documentsRead": "Read documents",
 				"documentsUpload": "Upload documents",
 				"documentsUpdate": "Update documents",

@@ -16,11 +16,20 @@ export class EditUserPermissionsModal {
   userPermissions!: UserPermission[];
 
   protected readonly availablePermissions = [
+	{ key: "admin",				label: "groups.userPermissions.admin", adminGroupOnly: true },
 	{ key: "documents.read",	label: "groups.userPermissions.documentsRead" },
 	{ key: "documents.upload",	label: "groups.userPermissions.documentsUpload" },
 	{ key: "documents.update",	label: "groups.userPermissions.documentsUpdate" },
 	{ key: "documents.delete",	label: "groups.userPermissions.documentsDelete" },
   ];
+
+  protected get visiblePermissions() {
+	const isAdminGroup = this.selectedGroup.name === 'Admin';
+
+	return this.availablePermissions.filter(
+		permission => !!permission.adminGroupOnly === isAdminGroup
+	);
+  }
 
   protected readonly activeModal = inject(NgbActiveModal);
 

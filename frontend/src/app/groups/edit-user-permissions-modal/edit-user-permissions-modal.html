@@ -18,7 +18,7 @@
     } }}
   </p>
 
-  @for (permission of availablePermissions; track permission.key) {
+  @for (permission of visiblePermissions; track permission.key) {
 	<div class="form-check">
 	<input
 		[id]="permission.key"
