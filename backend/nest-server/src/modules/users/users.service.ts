@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Like, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { Group } from '../groups/entities/group.entity';
@@ -16,6 +16,8 @@ import { GetUsersResponseDto } from './dto/get-users-response.dto';
 import { Logger } from 'nestjs-pino';
 import { UsersFileService } from './users-file.service';
 import { PermissionsService } from '../permissions/permissions.service';
+import { Permission } from '../permissions/entities/permission.entity';
+import { UserPermission } from '../user_permission/entities/user_permission.entity';
 
 
 const PASSWORD_SALT_ROUNDS = 10;
@@ -88,6 +90,21 @@ export class UsersService implements OnApplicationBootstrap {
         userId,
         groupId,
       });
+
+	  // user get all documents. permissions for his personal group
+	  const documentPermissions = await manager.find(Permission, {
+		where: { permKey: Like('documents.%') }
+	  });
+	  if (documentPermissions.length > 0) {
+		await manager.insert(
+			UserPermission,
+			documentPermissions.map((permission) => ({
+				userId,
+				groupId,
+				permissionId: permission.id
+			}))
+		);
+	  }
 
       this.logger.log({ userId, groupId }, 'User created with default group');
 
