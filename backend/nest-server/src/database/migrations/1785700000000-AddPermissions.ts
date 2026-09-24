@@ -1,15 +1,11 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 const PERMISSION_KEYS: Array<{ permKey: string; description: string }> = [
+  { permKey: 'admin', description: 'Full administrative access' },
   { permKey: 'documents.read', description: 'Read documents in a group' },
   { permKey: 'documents.upload', description: 'Upload documents to a group' },
   { permKey: 'documents.update', description: 'Update documents in a group' },
   { permKey: 'documents.delete', description: 'Delete documents in a group' },
-  {
-    permKey: 'group.manage_users',
-    description: 'Add or remove members of a group',
-  },
-  { permKey: 'group.update', description: 'Rename or edit a group' },
 ];
 
 export class AddPermissions1785700000000 implements MigrationInterface {
@@ -23,6 +19,20 @@ export class AddPermissions1785700000000 implements MigrationInterface {
         [permKey, description],
       );
     }
+	await queryRunner.query(
+		`
+		insert into user_permission (user_id, group_id, permission_id)
+		select ug.user_id, ug.group_id, p.id
+		from user_groups as ug
+		inner join groups as g 
+			on g.id = ug.group_id
+		inner join permissions as p
+			on p.perm_key = 'admin'
+		where
+			g.name = 'Admin'
+		on conflict do nothing
+		`
+	);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
