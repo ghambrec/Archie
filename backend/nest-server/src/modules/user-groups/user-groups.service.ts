@@ -10,6 +10,7 @@ import { GroupMemberDto } from './dto/group-members.dto';
 import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
 import { PermissionsService } from '../permissions/permissions.service';
 import { GroupsService } from '../groups/groups.service';
+import { UserPermission } from '../user_permission/entities/user_permission.entity';
 
 @Injectable()
 export class UserGroupsService {
@@ -42,15 +43,18 @@ export class UserGroupsService {
 	async remove(userId: string, groupId: string) {
 		this.logger.log({ groupId: groupId, userId: userId }, 'Removing user from group');
 
-		const res = await this.userGroupRepository.delete({ userId, groupId });
-		if (!res.affected) {
-			this.logger.warn({ groupId: groupId }, 'Group was not found');
-			throw new NotFoundException('Relation not found');
-		}
+		await this.userGroupRepository.manager.transaction(async (manager) => {
+			const res = await manager.delete(UserGroup, { userId, groupId });
+			if (!res.affected) {
+				this.logger.warn({ groupId: groupId }, 'Group was not found');
+				throw new NotFoundException('Relation not found');
+			}
 
-		this.logger.log({ groupId: groupId, userId: userId }, 'Removed user from group');
+			await manager.delete(UserPermission, { userId, groupId });
+		});
 
 		await this.permissionsService.invalidateUserPermissions(userId);
+		this.logger.log({ groupId: groupId, userId: userId }, 'Removed user from group');
 	}
 
 	async getMembers(groupId: string, callerUser: string): Promise<GetGroupsMembersResponseDto> {
