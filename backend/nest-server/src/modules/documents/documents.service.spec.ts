@@ -57,7 +57,11 @@ describe('DocumentsService', () => {
   let groupsService: { get: jest.Mock };
   let documentGroupsService: { setGroup: jest.Mock; removeGroup: jest.Mock };
   let aiIngestionService: { triggerIngestion: jest.Mock };
-  let tagsService: { assignToDocument: jest.Mock; removeFromDocument: jest.Mock };
+  let tagsService: {
+    assignToDocument: jest.Mock;
+    removeFromDocument: jest.Mock;
+    confirmAiSuggestions: jest.Mock;
+  };
   let queryBuilder: QueryBuilderMock;
 
   const userId = 'user-1';
@@ -76,7 +80,11 @@ describe('DocumentsService', () => {
     groupsService = { get: jest.fn() };
     documentGroupsService = { setGroup: jest.fn(), removeGroup: jest.fn() };
     aiIngestionService = { triggerIngestion: jest.fn().mockResolvedValue(undefined) };
-    tagsService = { assignToDocument: jest.fn(), removeFromDocument: jest.fn() };
+    tagsService = {
+      assignToDocument: jest.fn(),
+      removeFromDocument: jest.fn(),
+      confirmAiSuggestions: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -301,6 +309,40 @@ describe('DocumentsService', () => {
       await expect(service.setTag(userId, documentId, tagId)).rejects.toMatchObject({
         code: ErrorCode.DocumentTagAlreadyAssigned,
       });
+    });
+  });
+
+  describe('confirmSuggestedTags', () => {
+    it('confirms the AI-suggested tags and returns the newly assigned tag ids', async () => {
+      documentsRepository.findOne.mockResolvedValue({ id: documentId });
+      tagsService.confirmAiSuggestions.mockResolvedValue(['tag-1', 'tag-2']);
+
+      const result = await service.confirmSuggestedTags(userId, documentId);
+
+      expect(documentsRepository.findOne).toHaveBeenCalledWith({
+        where: { id: documentId, uploadedBy: userId },
+        select: { id: true },
+      });
+      expect(tagsService.confirmAiSuggestions).toHaveBeenCalledWith(documentId);
+      expect(result).toEqual({ documentId, confirmedTagIds: ['tag-1', 'tag-2'] });
+    });
+
+    it('returns an empty list when there are no suggestions to confirm', async () => {
+      documentsRepository.findOne.mockResolvedValue({ id: documentId });
+      tagsService.confirmAiSuggestions.mockResolvedValue([]);
+
+      const result = await service.confirmSuggestedTags(userId, documentId);
+
+      expect(result).toEqual({ documentId, confirmedTagIds: [] });
+    });
+
+    it('throws DocumentNotFound when the document does not exist', async () => {
+      documentsRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.confirmSuggestedTags(userId, documentId)).rejects.toMatchObject({
+        code: ErrorCode.DocumentNotFound,
+      });
+      expect(tagsService.confirmAiSuggestions).not.toHaveBeenCalled();
     });
   });
 
