@@ -27,6 +27,7 @@ import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
 import { DocumentSummaryDto } from './dto/document-summary.dto';
 import { SetDocumentTagDto } from './dto/set-document-tag.dto';
 import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
+import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-response.dto';
 
 @ApiTags('documents')
 @Controller('documents')
@@ -100,6 +101,21 @@ export class DocumentsController {
     @Body() dto: SetDocumentTagDto,
   ): Promise<DocumentTagResponseDto> {
     return this.documentsService.setTag(req.userId!, documentId, dto.tagId);
+  }
+
+  @ApiOperation({
+    summary: 'Confirm AI-suggested tags',
+    description:
+      'Assigns all tags suggested by the AI to the document. Proposals for new tags are ignored.',
+  })
+  @UseGuards(SessionAuthGuard)
+  @Post(':id/tags/confirm-suggestions')
+  @HttpCode(HttpStatus.OK)
+  async confirmSuggestedTags(
+    @Req() req: Request,
+    @Param('id') documentId: string,
+  ): Promise<ConfirmSuggestedTagsResponseDto> {
+    return this.documentsService.confirmSuggestedTags(req.userId!, documentId);
   }
 
   @UseGuards(SessionAuthGuard)

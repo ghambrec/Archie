@@ -23,6 +23,7 @@ import { DocumentGroupsService } from '../document-groups/document-groups.servic
 import { AiIngestionService } from '../ai-service/ai-ingestion.service';
 import { TagsService } from '../tags/tags.service';
 import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
+import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-response.dto';
 
 const DOCUMENTS_BUCKET = 'documents';
 
@@ -284,6 +285,29 @@ export class DocumentsService {
     this.logger.log({ userId, id, tagId }, 'Tag assigned to document');
 
     return { documentId: id, tagId };
+  }
+
+  async confirmSuggestedTags(
+    userId: string,
+    id: string,
+  ): Promise<ConfirmSuggestedTagsResponseDto> {
+
+    this.logger.log({ userId, id }, 'Confirm suggested tags for document');
+
+    const document = await this.documentsRepository.findOne({
+      where: { id, uploadedBy: userId },
+      select: { id: true },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    const confirmedTagIds = await this.tagsService.confirmAiSuggestions(id);
+
+    this.logger.log({ userId, id, count: confirmedTagIds.length }, 'Suggested tags confirmed');
+
+    return { documentId: id, confirmedTagIds };
   }
 
   async removeTag(
