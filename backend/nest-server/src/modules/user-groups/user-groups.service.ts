@@ -44,6 +44,8 @@ export class UserGroupsService {
 		this.logger.log({ groupId: groupId, userId: userId }, 'Removing user from group');
 
 		await this.userGroupRepository.manager.transaction(async (manager) => {
+			await this.permissionsService.checkForLastAdmin(manager, userId, groupId);
+
 			const res = await manager.delete(UserGroup, { userId, groupId });
 			if (!res.affected) {
 				this.logger.warn({ groupId: groupId }, 'Group was not found');

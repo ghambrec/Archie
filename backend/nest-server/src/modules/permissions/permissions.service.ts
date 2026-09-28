@@ -1,14 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type Redis from 'ioredis';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { REDIS_CLIENT } from '../redis/redis.module';
 import { UserGroup } from '../user-groups/entities/user-group.entity';
 import { Permission } from './entities/permission.entity';
 
 const USER_PERMISSIONS_TTL_SECONDS = 3600;
 const USER_IS_ADMIN_TTL_SECONDS = 3600;
-const ADMIN_PERMISSION_KEY = 'admin';
+export const ADMIN_PERMISSION_KEY = 'admin';
 
 const userPermissionsKey = (userId: string) => `user:${userId}:permissions`;
 const userIsAdminKey = (userId: string) => `user:${userId}:isAdmin`;
@@ -99,5 +99,26 @@ export class PermissionsService {
       ...userIds.map(userPermissionsKey),
       ...userIds.map(userIsAdminKey),
     ]);
+  }
+
+  async checkForLastAdmin(manager: EntityManager, userId: string, groupId: string): Promise<void> {
+	const rows: Array<{ exists: boolean }> = await manager.query(
+		`
+		select exists (
+			select 1
+			from user_permission as up
+			inner join permissions as p
+				on p.id = up.permission_id
+			where
+				p.perm_key = $1
+				and not (up.user_id = $2 and up.group_id = $3)
+		) as "exists"
+		`,
+		[ADMIN_PERMISSION_KEY, userId, groupId]
+	);
+
+	if (!rows[0].exists) {
+		throw new ConflictException('cannot remove the last admin');
+	}
   }
 }

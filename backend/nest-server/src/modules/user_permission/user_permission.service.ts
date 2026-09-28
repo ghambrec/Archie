@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Permission } from '../permissions/entities/permission.entity';
 import { UserPermission } from './entities/user_permission.entity';
-import { PermissionsService } from '../permissions/permissions.service';
+import { ADMIN_PERMISSION_KEY, PermissionsService } from '../permissions/permissions.service';
 
 @Injectable()
 export class UserPermissionService {
@@ -54,11 +54,12 @@ export class UserPermissionService {
   ): Promise<void> {
     const permission = await this.findPermissionOrFail(permKey);
 
-    await this.userPermissionRepository.delete({
-      userId,
-      groupId,
-      permissionId: permission.id,
-    });
+	await this.userPermissionRepository.manager.transaction(async (manager) => {
+		if (permKey === ADMIN_PERMISSION_KEY) {
+			await this.permissionsService.checkForLastAdmin(manager, userId, groupId);
+		}
+		await manager.delete(UserPermission, { userId, groupId, permissionId: permission.id });
+	});
 
 	await this.permissionsService.invalidateUserPermissions(userId);
   }
