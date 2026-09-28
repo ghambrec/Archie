@@ -124,7 +124,8 @@
 				"errorLoadingUsers": "Unable to load users",
 				"editUserPermission": "Edit Permissions",
 				"userPermissions": "Permissions",
-				"errorLoadingPermissions": "Unable to load permissions"
+				"errorLoadingPermissions": "Unable to load permissions",
+				"errorRemovingLastAdmin": "The last admin cannot be removed."
 			},
 			"userPermissions": {
 				"heading": "User Permissions",
@@ -135,7 +136,9 @@
 				"documentsUpdate": "Update documents",
 				"documentsDelete": "Delete documents",
 				"btnCancel": "Cancel",
-				"btnSave": "Save"
+				"btnSave": "Save",
+				"errorGeneral": "Unable to update permissions.",
+				"errorLastAdmin": "The admin permission cannot be removed because this is the last admin."
 			}
 	},
 	"errors": {

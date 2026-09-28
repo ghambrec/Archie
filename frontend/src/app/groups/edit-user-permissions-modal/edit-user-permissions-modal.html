@@ -32,6 +32,12 @@
 	</label>
 	</div>
   }
+  @if (errorMsg()) {
+	<div class="text-danger mt-2">
+		{{ errorMsg() | transloco }}
+	</div>
+  }
+  </div>
 
 <div class="modal-footer">
   <button
