@@ -8,7 +8,6 @@ import { Permission } from './entities/permission.entity';
 
 const USER_PERMISSIONS_TTL_SECONDS = 3600;
 const USER_IS_ADMIN_TTL_SECONDS = 3600;
-const ADMIN_GROUP_NAME = 'Admin';
 const ADMIN_PERMISSION_KEY = 'admin';
 
 const userPermissionsKey = (userId: string) => `user:${userId}:permissions`;
@@ -64,21 +63,15 @@ export class PermissionsService {
 		`
 		select exists (
 			select 1
-			from user_groups as ug
-			inner join groups as g
-				on g.id = ug.group_id
-			inner join user_permission as up
-				on up.user_id = ug.user_id
-				and up.group_id = ug.group_id
+			from user_permission as up
 			inner join permissions as p
 				on p.id = up.permission_id
 			where
-				ug.user_id = $1
-				and g.name = $2
-				and p.perm_key = $3
+				up.user_id = $1
+				and p.perm_key = $2
 		) as "isAdmin"
 		`,
-		[userId, ADMIN_GROUP_NAME, ADMIN_PERMISSION_KEY]
+		[userId, ADMIN_PERMISSION_KEY]
 	);
 
 	const isAdmin = rows[0].isAdmin;
