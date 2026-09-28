@@ -90,19 +90,14 @@ export class DocUpload {
 			};
 			this.uploads.update((tasks) => [...tasks, task]);
 
-			this.documentsService.upload(file).subscribe({
+			const groupId = this.selectedGroupId();
+			this.documentsService.upload(file, groupId!).subscribe({
 				next: (event) => {
 					if (event.type === HttpEventType.UploadProgress && event.total) {
 						const progress = Math.round((100 * event.loaded) / event.total);
 						this.updateTask(task.id, { progress });
 					}
 					if (event.type === HttpEventType.Response) {
-						// TODO: set group direkt uber upload
-						const groupId = this.selectedGroupId();
-						if (groupId && event.body) {
-							this.documentsService.setGroup(event.body.id, groupId).subscribe();
-						}
-						// TODO ENDE
 						this.updateTask(task.id, { status: 'done', progress: 100 });
 						setTimeout(() => this.removeTask(task.id), 3000);
 					}
