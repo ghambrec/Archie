@@ -50,7 +50,7 @@ async def generate(question: str, context: str, previous_messages: str) -> str:
             prompt,
             message_history=history,
              usage_limits=UsageLimits(
-                output_tokens_limit=settings.output_token_limit,
+                output_tokens_limit=settings.context_budget ,
                 #count_tokens_before_request=True),
              )
             )

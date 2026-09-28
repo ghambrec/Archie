@@ -2,7 +2,7 @@ from src.config import settings
 from src.embedding.embedder import embed
 from pgvector import Vector
 from src.generation.generator import generate
-import exception
+
 
 from uuid import UUID
 import asyncpg
@@ -13,7 +13,6 @@ async def retrieval(user_id: UUID,
 					conv_id: UUID, 
 					question: str, 
 					pool: asyncpg.Pool, 
-					document_id: UUID | None = None,
 					result_limit: int = settings.limit,
 					context_budget: int = settings.context_budget 
 					) -> str :
@@ -27,8 +26,8 @@ async def retrieval(user_id: UUID,
 		chunks = await search_chunks(pool,
 							   user_id=user_id,
 							   question_embedding=question_embedding,
-							   document_id= document_id,
-							   result_limit= result_limit)
+	
+							   limit= result_limit)
 		
 		context = build_context(chunks, context_budget)
 
@@ -44,10 +43,10 @@ async def retrieval(user_id: UUID,
 
 
 
-def load_conversation_messages(pool: asyncpg.Pool, conv_id: UUID) -> str:
+async def load_conversation_messages(pool: asyncpg.Pool, conv_id: UUID) -> list[asyncpg.Record]:
 
 
-	previous_messages = pool.fetch(
+	previous_messages = await pool.fetch(
                     """select am.sender , am."content" 
                     from ai_messages am 
                     where am.conv_id=$1
@@ -57,7 +56,7 @@ def load_conversation_messages(pool: asyncpg.Pool, conv_id: UUID) -> str:
 	return previous_messages
 
 
-def search_chunks(pool: asyncpg.Pool ,user_id: UUID, question_embedding: str, document_id: str, limit:int) -> str:
+async def search_chunks(pool: asyncpg.Pool ,user_id: UUID, question_embedding: str, limit:int) -> list[asyncpg.Record]:
 
 	query = """
 				select 
@@ -84,11 +83,12 @@ def search_chunks(pool: asyncpg.Pool ,user_id: UUID, question_embedding: str, do
 						and ug.user_id = $2
 				)
 				order by ac.embedding <=> $1
-				limit 50
+				limit $3
 				"""
 	
-	rows = pool.fetch(query, Vector(question_embedding), user_id)
-	logging.debug("Retrieved %d chunks ", len(rows))
+	rows = await pool.fetch(query, Vector(question_embedding), user_id, limit)
+	return rows
+	#logging.debug("Retrieved %d chunks ", len(rows))
 
 def build_context(chunks: str , context_budget: int)-> str:
 	context_budget = 2000
