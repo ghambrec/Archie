@@ -24,7 +24,7 @@ export class EditUserPermissionsModal {
   ];
 
   protected get visiblePermissions() {
-	const isAdminGroup = this.selectedGroup.name === 'Admin';
+	const isAdminGroup = this.selectedGroup.isSystem;
 
 	return this.availablePermissions.filter(
 		permission => !!permission.adminGroupOnly === isAdminGroup
