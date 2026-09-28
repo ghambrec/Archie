@@ -1,12 +1,14 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { Auth } from './auth';
 import { inject } from '@angular/core';
+import { Users } from '../users/users';
 
 export const authGuard: CanActivateFn = async () => {
 	const auth = inject(Auth);
 	const router = inject(Router);
+	const usersService = inject(Users)
 
-	if (auth.currentUser() || (await auth.checkSession())) {
+	if (usersService.currentUser() || (await auth.checkSession())) {
 		return true;
 	}
 	return router.parseUrl('/login');
@@ -15,8 +17,9 @@ export const authGuard: CanActivateFn = async () => {
 export const guestGuard: CanActivateFn = async () => {
 	const auth = inject(Auth);
 	const router = inject(Router);
+	const usersService = inject(Users);
 
-	if (!auth.currentUser() && !(await auth.checkSession())) {
+	if (!usersService.currentUser() && !(await auth.checkSession())) {
 		return true;
 	}
 	return router.parseUrl('/home');
@@ -25,10 +28,11 @@ export const guestGuard: CanActivateFn = async () => {
 export const adminGuard: CanActivateFn = async () => {
 	const auth = inject(Auth);
 	const router = inject(Router);
+	const usersService = inject(Users);
 
 	//check session, then role
-	if (auth.currentUser() || await auth.checkSession()) {
-		if (auth.isAdmin()) {
+	if (usersService.currentUser() || await auth.checkSession()) {
+		if (usersService.isAdminUser()) {
 			return true;
 		}
 		// User is logged in but not admin => regular UI 

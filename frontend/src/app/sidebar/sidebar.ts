@@ -5,10 +5,11 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { Auth } from '../auth/auth';
 import { firstValueFrom } from 'rxjs';
 import { Users } from '../users/users';
+import { DocUpload } from '../documents/doc-upload/doc-upload';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, RouterLinkActive, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, TranslocoPipe],
+  imports: [RouterLink, RouterLinkActive, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, TranslocoPipe, DocUpload],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
 })
@@ -19,7 +20,7 @@ export class Sidebar {
 
 	async logout () {
 		await firstValueFrom(this.authService.logout());
-		this.authService.currentUser.set(null);
+		this.usersService.currentUser.set(null);
 		this.router.navigateByUrl('/login');
 	}
 }

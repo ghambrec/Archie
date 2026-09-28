@@ -1,0 +1,54 @@
+<div
+	class="upload-zone"
+	[class.dragging]="isInDragZone()"
+	(dragover)="onDragIn($event)"
+	(dragleave)="onDragOut($event)"
+	(drop)="onDrop($event)"
+>
+	<button 
+		type="button" 
+		class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 mb-1 p-3" 
+		[disabled]="!selectedGroupId()"
+		(click)="openFilePicker()"
+	>
+	<i class="bi bi-plus-lg"></i>
+	{{ "documents.upload.upload" | transloco }}
+	</button>
+
+	<input
+		#fileInput
+		type="file"
+		multiple
+		class="visually-hidden"
+		(change)="onFilesSelected($event)"
+	>
+
+	<select class="form-select mb-3" (change)="onGroupChange($event)">
+		<option value="" disabled selected>
+			{{ "documents.upload.selectGroup" | transloco }}
+		</option>
+		@for (group of groupsService.groups.value(); track group.id) {
+			<option [value]="group.id">{{ group.name }}</option>
+		}
+	</select>
+
+<!-- progress for uploading docs -->
+@for (task of uploads(); track task.id) {
+	<div
+		class="d-flex align-items-center gap-2 mt-2 px-2 py-1 rounded bg-white border w-100 p-3 mb-3"
+		[ngbTooltip]="task.status === 'error' ? task.errorMessage : task.filename"
+		placement="bottom"
+	>
+		@if (task.status === 'uploading') {
+			<div class="progress flex-grow-1" style="height: 4px;">
+				<div class="progress-bar" [style.width.%]="task.progress"></div>
+			</div>
+		} @else if (task.status === 'done') {
+			<i class="bi bi-check-circle-fill text-success"></i>
+		} @else if (task.status === 'error') {
+			<i class="bi bi-exclamation-circle-fill text-danger"></i>
+		}
+		<span class="upload-task-name text-truncate">{{ task.filename }}</span>
+	</div>
+}
+</div>

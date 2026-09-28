@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class DownloadUrlResponseDto {
+export class DocumentTagResponseDto {
   @ApiProperty()
-  url!: string;
+  documentId!: string;
 
   @ApiProperty()
-  expiresInSeconds!: number;
+  tagId!: string;
 }

@@ -15,6 +15,7 @@ import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { GetUsersResponseDto } from './dto/get-users-response.dto';
 import { Logger } from 'nestjs-pino';
 import { UsersFileService } from './users-file.service';
+import { PermissionsService } from '../permissions/permissions.service';
 
 
 const PASSWORD_SALT_ROUNDS = 10;
@@ -26,7 +27,8 @@ export class UsersService implements OnApplicationBootstrap {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     private readonly dataSource: DataSource,
-	private readonly usersFileService: UsersFileService
+	private readonly usersFileService: UsersFileService,
+	private readonly permissionsService: PermissionsService
   ) {}
 
   // check on app start if theres a user without avatar, if yes create it
@@ -74,9 +76,10 @@ export class UsersService implements OnApplicationBootstrap {
         displayName: dto.displayName,
       });
       const userId = userInsert.identifiers[0].id as string;
+	  const personalGroupSuffix = dto.displayName.trim().toLowerCase();
 
       const groupInsert = await manager.insert(Group, {
-        name: `personal-${userId}`,
+        name: `personal-${personalGroupSuffix}`,
         isSystem: false,
       });
       const groupId = groupInsert.identifiers[0].id as string;
@@ -159,7 +162,7 @@ export class UsersService implements OnApplicationBootstrap {
     return this.usersRepository.findOneBy({displayName: name})
   }
 
-  async findProfileById(userId: string): Promise<Omit<UserSummaryDto, 'isAdmin'>> {
+  async findProfileById(userId: string): Promise<UserSummaryDto> {
     this.logger.log('Execute findProfileById', userId);
     const user = await this.usersRepository.findOne({
       where: { id: userId},
@@ -175,9 +178,10 @@ export class UsersService implements OnApplicationBootstrap {
       this.logger.warn(`FindProfileById failed, user ${userId} not found`);
       throw new ApplicationException(
       ErrorCode.UserNotFound,
-    )
-    }
-    return user;
+    )}
+
+	const isAdmin = await this.permissionsService.isUserAdmin(userId);
+    return {...user, isAdmin};
   }
 
   async getAllUsers(request: GetUsersQueryDto): Promise<GetUsersResponseDto> {

@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from "@angular/core";
 import { TranslocoPipe } from "@jsverse/transloco";
 import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { GroupMember, GroupResponseAdmin, Groups, UserPermission } from "../groups";
+import { GroupMember, GroupResponse, Groups, UserPermission } from "../groups";
 import { Users } from "../../users/users";
 import { EditUserPermissionsModal } from "../edit-user-permissions-modal/edit-user-permissions-modal";
 
@@ -12,7 +12,7 @@ import { EditUserPermissionsModal } from "../edit-user-permissions-modal/edit-us
   styleUrl: './group-info-modal.scss',
 })
 export class InfoGroupModal {
-  selectedGroup!: GroupResponseAdmin // Define Assignment Assertion
+  selectedGroup!: GroupResponse // Define Assignment Assertion
 
   readonly members = signal<GroupMember[]>([]);
   
@@ -128,20 +128,24 @@ export class InfoGroupModal {
   private readonly modalService = inject(NgbModal);
 
   openUserPermissions(member: GroupMember): void {
-  const modal = this.modalService.open(EditUserPermissionsModal,
+    const modal = this.modalService.open(EditUserPermissionsModal,
     {
       centered: true,
-  });
+    });
 
-  const userPermissions = this.permissions().filter(
-    permission => permission.userId === member.userId
-  );
+    const userPermissions = this.permissions().filter(
+      permission => permission.userId === member.userId,
+    );
 
-  modal.componentInstance.selectedGroup = this.selectedGroup;
-  modal.componentInstance.selectedUser = member;
-  modal.componentInstance.userPermissions = userPermissions;
-  // const groupId = this.selectedGroup.id;
-  // const userId = member.userId;
+    modal.componentInstance.selectedGroup = this.selectedGroup;
+    modal.componentInstance.selectedUser = member;
+    modal.componentInstance.userPermissions = userPermissions;
+    // const groupId = this.selectedGroup.id;
+    // const userId = member.userId;
+
+    modal.closed.subscribe(() => {
+      this.loadPermissions();
+    });
   }
 
   //load permissions for all user
@@ -168,4 +172,5 @@ export class InfoGroupModal {
   closeModal(): void {
     this.activeModal.dismiss();
   }
+
 }

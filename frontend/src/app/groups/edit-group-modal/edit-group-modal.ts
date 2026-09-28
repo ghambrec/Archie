@@ -2,7 +2,7 @@ import { Component, inject, signal } from "@angular/core";
 import { form, FormField, FormRoot, required } from "@angular/forms/signals";
 import { TranslocoPipe } from "@jsverse/transloco";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { GroupResponseAdmin, Groups, UpdateGroupDto } from "../groups";
+import { GroupResponse, Groups, UpdateGroupDto } from "../groups";
 import { first, firstValueFrom, timer } from "rxjs";
 
 @Component({
@@ -12,7 +12,7 @@ import { first, firstValueFrom, timer } from "rxjs";
 	styleUrl: './edit-group-modal.scss',
 })
 export class EditGroupModal {
-  selectedGroup!: GroupResponseAdmin;
+  selectedGroup!: GroupResponse;
 
   protected readonly activeModal = inject(NgbActiveModal);
   private readonly groupsService = inject(Groups);
@@ -24,7 +24,7 @@ export class EditGroupModal {
     description: '',
   });
 
-  initialize(group: GroupResponseAdmin): void {
+  initialize(group: GroupResponse): void {
     this.selectedGroup = group;
 
     this.editGroupModal.set({
@@ -65,7 +65,7 @@ export class EditGroupModal {
               return;
             }
 
-            await firstValueFrom(this.groupsService.editGroupAdmin(this.selectedGroup.id, input));
+            await firstValueFrom(this.groupsService.editGroup(this.selectedGroup.id, input));
 
             this.feedbackMsg.set('groups.editGroupAdmin.feedbackMsg');
             await firstValueFrom(timer(500));

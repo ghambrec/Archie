@@ -12,9 +12,11 @@ export enum ErrorCode {
     AvatarNotExisted = 'AVATAR_NOT_EXIST',
     DocumentNotFound = 'DOCUMENT_NOT_FOUND',
     DocumentAlreadyInGroup = 'DOCUMENT_ALREADY_IN_GROUP',
+    DocumentNotInGroup = 'DOCUMENT_NOT_IN_GROUP',
     TagNotFound = 'TAG_NOT_FOUND',
     TagNameAlreadyRegistered = 'TAG_NAME_ALREADY_REGISTERED',
     TagHasDependents = 'TAG_HAS_DEPENDENTS',
-
+    DocumentTagAlreadyAssigned = 'DOCUMENT_TAG_ALREADY_ASSIGNED',
+    DocumentTagNotAssigned = 'DOCUMENT_TAG_NOT_ASSIGNED',
     //LanguageNotAvailable ='LANGUAGE_NOT_AVAILABLE',
   }

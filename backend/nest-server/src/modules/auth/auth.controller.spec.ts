@@ -5,7 +5,6 @@ import { AuthService } from './auth.service';
 import { SessionCookieService } from './session/session-cookie.service';
 import { SessionAuthGuard } from './guards/session-auth.guard';
 import { User } from '../users/entities/user.entity';
-import { UserSummaryDto } from '../users/dto/user-summary.dto';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -37,7 +36,6 @@ describe('AuthController', () => {
             login: jest.fn(),
             register: jest.fn(),
             logout: jest.fn(),
-            getCurrentUser: jest.fn(),
           },
         },
         {
@@ -117,25 +115,6 @@ describe('AuthController', () => {
       expect(sessionCookieService.extract).toHaveBeenCalledWith(req);
       expect(authService.logout).toHaveBeenCalledWith(testSession);
       expect(sessionCookieService.clear).toHaveBeenCalledWith(res);
-    });
-  });
-
-  describe('me', () => {
-    it('returns the current user profile', async () => {
-      const profile: UserSummaryDto = {
-        id: user.id,
-        email: user.email,
-        displayName: user.displayName,
-        preferredLanguage: 'EN',
-        isActive: true,
-      };
-      authService.getCurrentUser.mockResolvedValue(profile);
-      const req = { userId: user.id } as Request;
-
-      const result = await controller.me(req);
-
-      expect(authService.getCurrentUser).toHaveBeenCalledWith(user.id);
-      expect(result).toEqual(profile);
     });
   });
 });

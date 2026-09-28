@@ -5,7 +5,7 @@ import { Shell } from './shell/shell';
 import { Login } from './auth/login/login';
 import { adminGuard, authGuard, guestGuard } from './auth/auth-guard';
 import { Profile } from './profile/profile';
-import { Documents } from './documents/documents';
+import { DocPage } from './documents/doc-page/doc-page';
 // import { AdminShell } from './admin/admin-shell/admin-shell';
 // // import { AdminUsers } from './admin/admin-users.ts/admin-user'; 
 // import { AdminGroups } from './admin/admin-groups/admin-groups';
@@ -36,7 +36,7 @@ export const routes: Routes = [
 			},
 			{
 				path: 'documents',
-				component: Documents,
+				component: DocPage,
 				title: 'Documents',
 			},
 			{

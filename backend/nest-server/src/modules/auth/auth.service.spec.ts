@@ -166,24 +166,4 @@ describe('AuthService', () => {
       expect(sessionService.destroy).toHaveBeenCalledWith('session-1');
     });
   });
-
-  describe('getCurrentUser', () => {
-    it('returns the user profile', async () => {
-      const profile: Omit<UserSummaryDto, 'isAdmin'> = {
-        id: user.id,
-        email: user.email,
-        displayName: 'Test User',
-        preferredLanguage: user.preferredLanguage,
-        isActive: user.isActive};
-
-      userService.findProfileById.mockResolvedValue(profile);
-      permissionsService.isUserAdmin.mockResolvedValue(false);
-
-      const result = await service.getCurrentUser(user.id);
-
-      expect(userService.findProfileById).toHaveBeenCalledWith(user.id);
-      expect(permissionsService.isUserAdmin).toHaveBeenCalledWith(user.id);
-      expect(result).toEqual({...profile, isAdmin: false});
-    });
-  });
 });
