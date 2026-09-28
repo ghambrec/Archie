@@ -1,180 +1,156 @@
 import { Component, computed, inject, signal } from "@angular/core";
 import { TranslocoPipe } from "@jsverse/transloco";
 import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { GroupMember, GroupResponse, Groups, UserPermission } from "../groups";
+import { GroupMember, GroupMembersResponse, GroupResponse, Groups, UserPermission } from "../groups";
 import { Users } from "../../users/users";
 import { EditUserPermissionsModal } from "../edit-user-permissions-modal/edit-user-permissions-modal";
+import { httpResource } from "@angular/common/http";
+import { environment } from "../../../environments/environment";
 
 @Component({
-  selector: 'app-info-group-modal',
-  imports: [TranslocoPipe],
-  templateUrl: './group-info-modal.html',
-  styleUrl: './group-info-modal.scss',
+	selector: 'app-info-group-modal',
+	imports: [TranslocoPipe],
+	templateUrl: './group-info-modal.html',
+	styleUrl: './group-info-modal.scss',
 })
 export class InfoGroupModal {
-  selectedGroup!: GroupResponse // Define Assignment Assertion
+	readonly selectedGroup = signal<GroupResponse | null>(null);
 
-  readonly members = signal<GroupMember[]>([]);
-  
-  readonly isLoading = signal(false);
-  readonly hasLoadError = signal(false);
-
-  protected readonly activeModal = inject(NgbActiveModal);
-  private readonly groupsService = inject(Groups);
-
-  loadMembers(): void {
-    this.isLoading.set(true);
-    this.hasLoadError.set(false);
-
-    const request = this.groupsService.infoGroups(this.selectedGroup.id);
-    
-    request.subscribe({
-      next: response => {
-        this.members.set(response.members);
-        this.isLoading.set(false);
-      },
-      error: () => {
-        this.hasLoadError.set(true);
-        this.isLoading.set(false);
-      },
-    });
-  }
-
-  ////
-
-  private readonly userService = inject(Users);
-  protected readonly searchString = signal("");
-
-  readonly actionError = signal<string | null>(null);
-  readonly feedbackMsg = signal<string | null>(null);
-
-  loadUsers(): void {
-    const request = this.userService.getUsersList(1, 100);
-    
-    request.subscribe({
-      next: response => {
-        this.userService.usersList.set(response.data);
-      },
-      error: () => {
-        this.actionError.set("groups.infoGroup.errorLoadingUsers");
-      },
-    });
-  }
-
-  protected readonly filteredUserList = computed(() => {
-    const  search = this.searchString().trim().toLowerCase();
-
-    if (!search) {
-      return [];
-    }
-
-    return this.userService.usersList().filter(user =>
-      !this.members().some(member => member.userId === user.id) &&
-      (
-      user.displayName.toLowerCase().includes(search) ||
-      user.email.toLowerCase().includes(search)
-      )
-    );
-  });
-
-  addUserToGroup(userId: string): void {
-    this.actionError.set(null);
-    this.feedbackMsg.set(null);
-    
-    const request = this.groupsService.addUserToGroup(this.selectedGroup.id, userId);
-
-    request.subscribe({
-      next: () => {
-        this.feedbackMsg.set("groups.infoGroup.userAdded");
-        this.searchString.set("");
-        this.loadMembers();
-      },
-      error: error => {
-        let translocoKey = "groups.infoGroup.errorAddingUser";
-
-        if (error.status === 409) {
-          translocoKey = "groups.infoGroup.userAlreadyMember";
-        }
-
-        this.actionError.set(translocoKey);
-      },
-    });
-  }
-
-  removeUserFromGroup(userId: string): void {
-    this.actionError.set(null);
-    this.feedbackMsg.set(null);
-
-    const request = this.groupsService.removeUserFromGroup(this.selectedGroup.id, userId);
-
-    request.subscribe({
-      next: () => {
-        this.feedbackMsg.set("groups.infoGroup.userRemoved");
-        this.loadMembers();
-      },
-      error: (error) => {
-		if (error.status === 409) {
-			this.actionError.set("groups.infoGroup.errorRemovingLastAdmin");
-		} else {
-			this.actionError.set("groups.infoGroup.errorRemovingUser");
+	readonly members = httpResource<GroupMember[]>(
+		() => {
+			const group = this.selectedGroup();
+			return group
+			? { url: `${environment.apiUrl}/user-groups/groups/${group.id}/members`, withCredentials: true}
+			: undefined
+		},
+		{
+			defaultValue: [],
+			parse: (raw: unknown) => (raw as GroupMembersResponse).members
 		}
-      },
-    });
-  }
+  );
 
-  // readonly selectedUserId = signal<string | null>(null);
+	protected readonly activeModal = inject(NgbActiveModal);
+	private readonly groupsService = inject(Groups);
 
-  // selectUser(userId: string): void {
-  //   this.selectedUserId.set(userId);
-  // }
+	private readonly userService = inject(Users);
+	protected readonly searchString = signal("");
 
-  readonly permissions = signal<UserPermission[]>([]);
-  private readonly modalService = inject(NgbModal);
+	readonly actionError = signal<string | null>(null);
+	readonly feedbackMsg = signal<string | null>(null);
 
-  openUserPermissions(member: GroupMember): void {
-    const modal = this.modalService.open(EditUserPermissionsModal,
-    {
-      centered: true,
-    });
+	readonly permissions = httpResource<UserPermission[]>(
+		() => {
+			const group = this.selectedGroup();
+			return group
+			? { url: `${environment.apiUrl}/user-permission/${group.id}/permissions`, withCredentials: true}
+			: undefined
+		},
+		{
+			defaultValue: []
+		}
+	);
 
-    const userPermissions = this.permissions().filter(
-      permission => permission.userId === member.userId,
-    );
+	protected readonly filteredUserList = computed(() => {
+		if (!this.members.hasValue() || !this.userService.users.hasValue()) {
+			return [];
+		}
 
-    modal.componentInstance.selectedGroup = this.selectedGroup;
-    modal.componentInstance.selectedUser = member;
-    modal.componentInstance.userPermissions = userPermissions;
-    // const groupId = this.selectedGroup.id;
-    // const userId = member.userId;
+		const search = this.searchString().trim().toLowerCase();
 
-    modal.closed.subscribe(() => {
-      this.loadPermissions();
-    });
-  }
+		if (!search) {
+			return [];
+		}
 
-  //load permissions for all user
-  loadPermissions(): void {
-    const request = this.groupsService.getGroupPermissions(this.selectedGroup.id);
+		return this.userService.users.value().filter(user =>
+			!this.members.value().some(member => member.userId === user.id) &&
+			(
+				user.displayName.toLowerCase().includes(search) ||
+				user.email.toLowerCase().includes(search)
+			)
+		);
+	});
 
-    request.subscribe({
-      next: returnedPermissions => {
-        this.permissions.set(returnedPermissions);
-      },
-      error: () => {
-        this.actionError.set("groups.infoGroup.errorLoadingPermissions");
-      },
-    });
-  }
+	addUserToGroup(userId: string): void {
+		this.actionError.set(null);
+		this.feedbackMsg.set(null);
 
-  //filter userPermissions for each user
-  getPermissionsForUser(userId: string): string[] {
-    const filteredPermissions = this.permissions().filter(permission => permission.userId === userId);
+		const request = this.groupsService.addUserToGroup(this.selectedGroup()!.id, userId);
 
-    return filteredPermissions.map(permission => permission.permKey);
-  }
+		request.subscribe({
+			next: () => {
+				this.feedbackMsg.set("groups.infoGroup.userAdded");
+				this.searchString.set("");
+				this.members.reload();
+			},
+			error: error => {
+				let translocoKey = "groups.infoGroup.errorAddingUser";
 
-  closeModal(): void {
-    this.activeModal.dismiss();
-  }
+				if (error.status === 409) {
+					translocoKey = "groups.infoGroup.userAlreadyMember";
+				}
+
+				this.actionError.set(translocoKey);
+			},
+		});
+	}
+
+	removeUserFromGroup(userId: string): void {
+		this.actionError.set(null);
+		this.feedbackMsg.set(null);
+
+		const request = this.groupsService.removeUserFromGroup(this.selectedGroup()!.id, userId);
+
+		request.subscribe({
+			next: () => {
+				this.feedbackMsg.set("groups.infoGroup.userRemoved");
+				this.members.reload();
+			},
+			error: (error) => {
+        if (error.status === 409) {
+          this.actionError.set("groups.infoGroup.errorRemovingLastAdmin");
+        } else {
+				  this.actionError.set("groups.infoGroup.errorRemovingUser");
+        }
+			},
+		});
+	}
+
+	private readonly modalService = inject(NgbModal);
+
+	openUserPermissions(member: GroupMember): void {
+		const modal = this.modalService.open(EditUserPermissionsModal,
+			{
+				centered: true,
+			});
+
+		const userPermissions = this.permissions.value().filter(
+			permission => permission.userId === member.userId,
+		);
+
+		modal.componentInstance.selectedGroup = this.selectedGroup();
+		modal.componentInstance.selectedUser = member;
+		modal.componentInstance.userPermissions = userPermissions;
+		// const groupId = this.selectedGroup.id;
+		// const userId = member.userId;
+
+		modal.closed.subscribe(() => {
+			this.permissions.reload();
+		});
+	}
+
+	//filter userPermissions for each user
+	getPermissionsForUser(userId: string): string[] {
+		if (!this.permissions.hasValue()) {
+			return [];
+		}
+
+		const filteredPermissions = this.permissions.value().filter(permission => permission.userId === userId);
+
+		return filteredPermissions.map(permission => permission.permKey);
+	}
+
+	closeModal(): void {
+		this.activeModal.dismiss();
+	}
 
 }
