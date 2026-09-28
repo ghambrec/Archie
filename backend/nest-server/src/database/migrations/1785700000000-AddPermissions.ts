@@ -29,7 +29,7 @@ export class AddPermissions1785700000000 implements MigrationInterface {
 		inner join permissions as p
 			on p.perm_key = 'admin'
 		where
-			g.name = 'Admin'
+			g.is_system = true
 		on conflict do nothing
 		`
 	);
