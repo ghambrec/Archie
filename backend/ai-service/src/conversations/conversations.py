@@ -26,7 +26,6 @@ async def ask_question(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, questio
                 INSERT INTO ai_messages (conv_id, sender, content)
                 VALUES ($1, $2, $3)
             """
-
     conv_exist = await pool.fetchval(select, user_id, conv_id)
     if conv_exist is None:
         logger.debug("conversation %s not found for user %s", conv_id, user_id)
@@ -44,16 +43,14 @@ async def ask_question(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, questio
         logger.exception("retriev answer failed ")
         raise
     try: 
-        await save_conversation(pool, user_id, conv_id, question, answer)
+        await save_conversation(pool, question, answer, conv_id)
     except Exception:
-        logger.exception("saving answer failed ")
+        logger.exception("saving question and answer failed ")
         raise
 
     logger.info("model answer: %s", answer)
     return answer
 
-
-# TODO: wenn retriaval fertig hier noch quelle hinzufuegen etc damit im frontend auf die quell datei verwiesen werden kann
 async def get_messages(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID):
     select = """
                 SELECT 
@@ -106,18 +103,19 @@ async def del_conversation(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID):
             """
     await pool.execute(delete, user_id, conv_id)
 
-
-async def save_conversation(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, question: str, content:str):
-
-
-    insert = """
+async def save_conversation(pool: asyncpg.Pool, question: str , content:str, conv_id: UUID) -> None:
+    query = """
             INSERT INTO ai_messages (conv_id, sender, content)
-            Values ($1, $2, $3)
+            Values 
+                ($1, 'user', $2),
+                ($1, 'llm', $3)
             """
     try:
-        save_status = await pool.execute(insert, conv_id, "llm", content )
-        logger.info(f"Status saved Conv: {save_status}")
+        save_status_user = await pool.execute(query, conv_id, question, content )
+
+        logger.info(f"Status saved Conv: {save_status_user} ")
         logger.debug(" conversiation: %s, saved content: %s ", conv_id, content)
     except Exception:
         logger.exception("saving conversation content failed")
         raise
+
