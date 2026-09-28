@@ -20,6 +20,7 @@ async def retrieval(user_id: UUID,
 		message_history = await load_conversation_messages(pool, conv_id)
 
 		question_embedding = await embed(question)
+		#logging.debug(f"vector: {question_embedding}")
 
 		logging.debug( f"embedding dimensions: {len(question_embedding)}")
 		
@@ -41,8 +42,6 @@ async def retrieval(user_id: UUID,
 	return answer
 	
 
-
-
 async def load_conversation_messages(pool: asyncpg.Pool, conv_id: UUID) -> list[asyncpg.Record]:
 
 
@@ -53,18 +52,24 @@ async def load_conversation_messages(pool: asyncpg.Pool, conv_id: UUID) -> list[
                     order by am.created_at
                     """, conv_id,
                 )
+	
+	for record in previous_messages:
+		logging.debug(dict(record))
 	return previous_messages
 
 
-async def search_chunks(pool: asyncpg.Pool ,user_id: UUID, question_embedding: str, limit:int) -> list[asyncpg.Record]:
+async def search_chunks(pool: asyncpg.Pool ,user_id: UUID, question_embedding: list[asyncpg.Record], limit:int) -> list[asyncpg.Record]:
 
 	query = """
 				select 
 					ac.ai_document_id,
+					d.filename as document_name,
 					ac."content",
 					ac."token_count",
 					ac.embedding <=> $1 as distance
 				from ai_chunks ac
+				join documents d on 
+					d.id = ac.ai_document_id
 				where ac.ai_document_id in (
 					select
 						distinct d.id 
@@ -87,11 +92,14 @@ async def search_chunks(pool: asyncpg.Pool ,user_id: UUID, question_embedding: s
 				"""
 	
 	rows = await pool.fetch(query, Vector(question_embedding), user_id, limit)
+	logging.debug("Retrieved %d chunks ", len(rows))
 	return rows
-	#logging.debug("Retrieved %d chunks ", len(rows))
 
-def build_context(chunks: str , context_budget: int)-> str:
-	context_budget = 2000
+def build_context(chunks: list[asyncpg.Record] , context_budget: int)-> str:
+	"""
+	build context appends the content of the found chunks the filneame of the origin. 
+
+	"""
 	used_tokens = 0
 	selected =[]
 
@@ -101,7 +109,10 @@ def build_context(chunks: str , context_budget: int)-> str:
 		logging.debug("row=%s", row["content"])
 		if used_tokens + chunked_tokens <= context_budget:
 			used_tokens += chunked_tokens
-			selected.append(row["content"])
+			selected.append(
+				f"Document: { row ['document_name']}\n"
+				f"Content: {row['content']}"
+				)
 
 	context ="\n\n".join(selected)
 

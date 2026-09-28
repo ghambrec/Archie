@@ -7,6 +7,7 @@ from pydantic_ai.messages import ModelRequest, ModelResponse, TextPart, UserProm
 from src.generation.model import get_max_input_chars
 from src.generation.model import build_model
 
+import asyncpg
 from src.config import settings 
 
 SYSTEM_PROMPT = """ You analyze documents for a document management system
@@ -31,10 +32,10 @@ agent = Agent(
             retries={"output": 3},
             )
 
-async def generate(question: str, context: str, previous_messages: str) -> str:
+async def generate(question: str, context: str, previous_messages: list[asyncpg.Record]) -> str:
     history = []
     try: 
-        for row in previous_messages:
+        for row in previous_messages[-10:]:
             if row["sender"] == "user":
                 history.append(ModelRequest(parts=[UserPromptPart(content=row["content"])]))
             elif row [ "sender"] == "llm":
