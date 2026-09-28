@@ -23,11 +23,12 @@ export class DocUpload {
 	private readonly documentsService = inject(Documents);
 	protected readonly groupsService = inject(Groups);
 
-	private readonly fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
+	private readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
 	protected readonly isInDragZone = signal(false); // bool for visual feedback
 	protected readonly uploads = signal<UploadTask[]>([]);
 	protected readonly selectedGroupId = signal<string | null>(null);
+	protected readonly uploadGroups = this.groupsService.groupsWithPermission('documents.upload');
 
 	// gruppe selektieren
 	onGroupChange(event: Event) {
@@ -37,7 +38,7 @@ export class DocUpload {
 
 	// open file picker <input>
 	openFilePicker() {
-		this.fileInput().nativeElement.click();
+		this.fileInput()?.nativeElement.click();
 	}
 
 	// file picker change event

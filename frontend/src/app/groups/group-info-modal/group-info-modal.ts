@@ -105,8 +105,12 @@ export class InfoGroupModal {
 				this.feedbackMsg.set("groups.infoGroup.userRemoved");
 				this.members.reload();
 			},
-			error: () => {
-				this.actionError.set("groups.infoGroup.errorRemovingUser");
+			error: (error) => {
+        if (error.status === 409) {
+          this.actionError.set("groups.infoGroup.errorRemovingLastAdmin");
+        } else {
+				  this.actionError.set("groups.infoGroup.errorRemovingUser");
+        }
 			},
 		});
 	}
