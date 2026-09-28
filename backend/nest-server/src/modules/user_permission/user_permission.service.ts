@@ -21,24 +21,6 @@ export class UserPermissionService {
 	private readonly userGroupRepository: Repository<UserGroup>
   ) {}
 
-  async hasPermission(
-    userId: string,
-    groupId: string,
-    permKey: string,
-  ): Promise<boolean> {
-    return this.userPermissionRepository
-      .createQueryBuilder('userPermission')
-      .innerJoin(
-        'permissions',
-        'permission',
-        'permission.id = userPermission.permission_id',
-      )
-      .where('userPermission.user_id = :userId', { userId })
-      .andWhere('userPermission.group_id = :groupId', { groupId })
-      .andWhere('permission.perm_key = :permKey', { permKey })
-      .getExists();
-  }
-
   async grant(userId: string, groupId: string, permKey: string): Promise<void> {
     const permission = await this.findPermissionOrFail(permKey);
 
