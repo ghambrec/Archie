@@ -75,14 +75,6 @@ export class Groups {
 		);
 	}
 
-	infoGroups(id: string) {
-		return this.http.get<GroupMembersResponse>(`${this.userGroupsUrl}/groups/${id}/members`,
-			{
-				withCredentials: true,
-			},
-		);
-	}
-
 	addUserToGroup(groupId: string, userId: string) {
 		return this.http.post(`${this.userGroupsUrl}/groups/${groupId}/members`,
 			{
@@ -98,14 +90,6 @@ export class Groups {
 		return this.http.delete(`${this.userGroupsUrl}/groups/${groupId}/members/${userId}`,
 			{
 				withCredentials: true
-			},
-		);
-	}
-
-	getGroupPermissions(groupId: string) {
-		return this.http.get<UserPermission[]>(`${this.userPermissionsUrl}/${groupId}/permissions`,
-			{
-				withCredentials: true,
 			},
 		);
 	}
