@@ -6,10 +6,12 @@ import { UserPermissionController } from './user_permission.controller';
 import { UserPermissionService } from './user_permission.service';
 import { SessionModule } from '../auth/session/session.module';
 import { PermissionsModule } from '../permissions/permissions.module';
+import { Group } from '../groups/entities/group.entity';
+import { UserGroup } from '../user-groups/entities/user-group.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserPermission, Permission]),
+    TypeOrmModule.forFeature([UserPermission, Permission, Group, UserGroup]),
     SessionModule,
     PermissionsModule,
   ],
