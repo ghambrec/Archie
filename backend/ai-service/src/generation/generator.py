@@ -7,6 +7,7 @@ from pydantic_ai import Agent, UsageLimitExceeded, UsageLimits
 from pydantic_ai.messages import ModelRequest, ModelResponse, TextPart, UserPromptPart
 from src.generation.model import get_output_type
 from src.generation.model import build_model
+from uuid import UUID
 
 import asyncpg
 from src.config import settings 
@@ -27,7 +28,8 @@ SYSTEM_PROMPT = """ You analyze documents for a document management system
 """
 
 class Citations(BaseModel):
-    document_id: str
+    chunk_Id: UUID
+    message_Id: UUID
     #explanation: str = Field(
     #    description="Brief explanation of how this chunk supports the answer"
     #)

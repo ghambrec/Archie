@@ -5,6 +5,8 @@ import asyncpg
 from src.retrieval .retrieval import retrieval
 from asyncpg.exceptions import ForeignKeyViolationError
 
+from src.generation.generator import GeneratedAnswer
+
 from uuid import UUID
 
 logger = logging.getLogger(__name__)
@@ -103,7 +105,7 @@ async def del_conversation(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID):
             """
     await pool.execute(delete, user_id, conv_id)
 
-async def save_conversation(pool: asyncpg.Pool, question: str , content:str, conv_id: UUID) -> None:
+async def save_conversation(pool: asyncpg.Pool, question: str , answer:GeneratedAnswer, conv_id: UUID) -> None:
     query = """
             INSERT INTO ai_messages (conv_id, sender, content)
             Values 
@@ -111,11 +113,22 @@ async def save_conversation(pool: asyncpg.Pool, question: str , content:str, con
                 ($1, 'llm', $3)
             """
     try:
-        save_status_user = await pool.execute(query, conv_id, question, content )
+        StatusSaveUser = await pool.execute(query, conv_id, question, answer.answer )
 
-        logger.info(f"Status saved Conv: {save_status_user} ")
-        logger.debug(" conversiation: %s, saved content: %s ", conv_id, content)
+        logger.info(f"Status saved Conv: {StatusSaveUser} ")
+        logger.debug(" conversaition: %s, saved content: %s ", conv_id, answer)
     except Exception:
         logger.exception("saving conversation content failed")
         raise
 
+    try:
+        query=  """
+                INSERT INTO ai_messages_sources (chunk_Id, message_Id, content)
+                Values 
+                ($1, $2),
+                """
+        StatusSaveSources  = await pool.execute(query, answer.sources, answer.sources.)
+    
+    except Exception:
+        logger.exception("saving answer sources failed")
+        raise

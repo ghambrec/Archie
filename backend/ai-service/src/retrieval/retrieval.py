@@ -66,6 +66,7 @@ async def search_chunks(pool: asyncpg.Pool,
 	query = """
 				select 
 					ac.ai_document_id,
+					ac.id,
 					d.filename as document_name,
 					ac."content",
 					ac."token_count",
@@ -114,6 +115,7 @@ def build_context(chunks: list[asyncpg.Record] , context_budget: int)-> str:
 			used_tokens += chunked_tokens
 			selected.append(
 				f"Document: { row ['ai_document_id']}\n"
+				#f"Chunk_Id: {row['content']}"
 				f"Content: {row['content']}"
 				)
 
