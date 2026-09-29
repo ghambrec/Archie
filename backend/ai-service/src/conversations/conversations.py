@@ -105,9 +105,8 @@ async def del_conversation(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID):
             """
     await pool.execute(delete, user_id, conv_id)
 
-async def save_conversation(pool: asyncpg.Pool, question: str , answer:GeneratedAnswer, conv_id: UUID) -> None:
-    
-    
+
+async def save_conversation(pool: asyncpg.Pool, question: str , answer:GeneratedAnswer, conv_id: UUID) -> None:   
     query = """
             INSERT INTO ai_messages (conv_id, sender, content)
             Values 
@@ -115,7 +114,6 @@ async def save_conversation(pool: asyncpg.Pool, question: str , answer:Generated
                 ($1, 'llm', $3)
             Returning id
             """
-
     try: 
     
         message_id = await pool.fetchval(query, conv_id, question, answer.answer )
@@ -125,8 +123,6 @@ async def save_conversation(pool: asyncpg.Pool, question: str , answer:Generated
     except Exception:
         logger.exception("saving conversation content failed")
         raise
-
-
     
     query=  """
             INSERT INTO ai_message_sources (chunk_Id, message_Id)
