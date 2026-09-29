@@ -6,4 +6,9 @@ export class GetGroupsQueryDto {
 	@IsOptional()
 	@IsString()
 	name?: string;
+
+	@ApiPropertyOptional({ description: 'Only return groups where the user has this permission', example: 'documents.read' })
+	@IsOptional()
+	@IsString()
+	permission?: string;
 }

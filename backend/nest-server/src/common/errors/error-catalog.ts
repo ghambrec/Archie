@@ -62,6 +62,10 @@ export const ERROR_CATALOG ={
     status: HttpStatus.NOT_FOUND,
     message: 'Document is not assigned to the given group.'
   },
+  [ErrorCode.DocumentAlreadyExistsInGroup]: {
+    status: HttpStatus.CONFLICT,
+    message: 'Document already exists in this group.'
+  },
   [ErrorCode.TagNotFound]: {
     status: HttpStatus.NOT_FOUND,
     message: 'Tag was not found.'

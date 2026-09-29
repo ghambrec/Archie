@@ -12,8 +12,8 @@ export class Documents {
 	private readonly http = inject(HttpClient);
 	private readonly baseUrl = `${environment.apiUrl}/documents`;
 
-	upload(file: File) {
-		const url = `${this.baseUrl}/upload`;
+	upload(file: File, groupId: string) {
+		const url = `${this.baseUrl}/upload/${groupId}`;
 
 		const formData = new FormData();
 		formData.append('file', file);
@@ -25,10 +25,10 @@ export class Documents {
 		});
 	}
 
-	// TODO: set group wird abgeloest sobald POST upload korrigiert wurde und gruppe pflicht ist
-	setGroup(documentId: string, groupId: string) {
-		return this.http.post<void>(`${this.baseUrl}/${documentId}/group`, { groupId }, {
-			withCredentials: true
-		});
-	}
+	// drin lassen, vielleicht noch mal benoetigt?
+	// setGroup(documentId: string, groupId: string) {
+	// 	return this.http.post<void>(`${this.baseUrl}/${documentId}/group`, { groupId }, {
+	// 		withCredentials: true
+	// 	});
+	// }
 }

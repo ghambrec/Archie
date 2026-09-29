@@ -58,9 +58,6 @@ export class GroupList {
 				size: 'lg',
 			}
 		);
-		modal.componentInstance.selectedGroup = group;
-		modal.componentInstance.loadMembers();
-		modal.componentInstance.loadUsers();
-		modal.componentInstance.loadPermissions();
+		modal.componentInstance.selectedGroup.set(group);
 	}
 }

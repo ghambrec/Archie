@@ -131,6 +131,6 @@ CREATE INDEX IF NOT EXISTS ai_messages_conversation_id_idx ON ai_messages(conv_i
 CREATE TABLE IF NOT EXISTS ai_message_sources (
 	message_id uuid NOT NULL REFERENCES ai_messages(id) ON DELETE CASCADE,
 	chunk_id uuid NOT NULL REFERENCES ai_chunks(id) ON DELETE CASCADE,
-	similiary_score REAL NOT NULL,
+	similiary_score REAL,
 	PRIMARY KEY(message_id, chunk_id)
 );

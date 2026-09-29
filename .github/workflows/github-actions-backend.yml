@@ -64,6 +64,8 @@ jobs:
       postgres-test:
         image: pgvector/pgvector:pg18
         env:
+          MINIO_APP_ACCESS_KEY: ${{ secrets.MINIO_APP_ACCESS_KEY }}
+          MINIO_APP_SECRET_KEY: ${{ secrets.MINIO_APP_SECRET_KEY }}
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgresdb_test
@@ -126,6 +128,21 @@ jobs:
           ADMIN_USER: ${{ secrets.ADMIN_USER }}
           ADMIN_USER_PASSWORD: ${{ secrets.ADMIN_USER_PASSWORD }}
         run: cd backend/nest-server && pnpm run migration:run
+
+      - name: provision MinIO app user and buckets
+        env:
+          MINIO_ROOT_USER: ${{ secrets.MINIO_ROOT_USER }}
+          MINIO_ROOT_PASSWORD: ${{ secrets.MINIO_ROOT_PASSWORD }}
+          MINIO_APP_ACCESS_KEY: ${{ secrets.MINIO_APP_ACCESS_KEY }}
+          MINIO_APP_SECRET_KEY: ${{ secrets.MINIO_APP_SECRET_KEY }}
+        run: |
+          go install github.com/minio/mc@latest
+          MC="$(go env GOPATH)/bin/mc"
+          $MC alias set local http://localhost:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
+          $MC mb --ignore-existing local/documents
+          $MC mb --ignore-existing local/avatars
+          $MC admin user add local "$MINIO_APP_ACCESS_KEY" "$MINIO_APP_SECRET_KEY"
+          $MC admin policy attach local readwrite --user="$MINIO_APP_ACCESS_KEY"
 
       - name: run nest-server integration/e2e tests
         env:
