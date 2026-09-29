@@ -58,7 +58,10 @@ async def load_conversation_messages(pool: asyncpg.Pool, conv_id: UUID) -> list[
 	return previous_messages
 
 
-async def search_chunks(pool: asyncpg.Pool ,user_id: UUID, question_embedding: list[asyncpg.Record], limit:int) -> list[asyncpg.Record]:
+async def search_chunks(pool: asyncpg.Pool,
+                        user_id: UUID, 
+                        question_embedding: list[asyncpg.Record], 
+						limit:int) ->list[asyncpg.Record]:
 
 	query = """
 				select 
@@ -110,7 +113,7 @@ def build_context(chunks: list[asyncpg.Record] , context_budget: int)-> str:
 		if used_tokens + chunked_tokens <= context_budget:
 			used_tokens += chunked_tokens
 			selected.append(
-				f"Document: { row ['document_name']}\n"
+				f"Document: { row ['ai_document_id']}\n"
 				f"Content: {row['content']}"
 				)
 

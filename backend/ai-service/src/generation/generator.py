@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 import logging
+from pydantic import BaseModel, Field
 from pydantic_ai import Agent, UsageLimitExceeded, UsageLimits
 from pydantic_ai.messages import ModelRequest, ModelResponse, TextPart, UserPromptPart
-from src.generation.model import get_max_input_chars
+from src.generation.model import get_output_type
 from src.generation.model import build_model
 
 import asyncpg
@@ -25,10 +26,23 @@ SYSTEM_PROMPT = """ You analyze documents for a document management system
                     it with a low confidence score. 
 """
 
+class Citations(BaseModel):
+    document_id: str
+    #explanation: str = Field(
+    #    description="Brief explanation of how this chunk supports the answer"
+    #)
+
+class GeneratedAnswer(BaseModel):
+    answer: str
+    confidence_score: float = Field(ge=0, le = 1)
+    sources: list[Citations]
+   
+
 model = build_model()
 agent = Agent(
             model, 
             system_prompt=SYSTEM_PROMPT,
+            output_type=get_output_type(GeneratedAnswer),
             retries={"output": 3},
             )
 
