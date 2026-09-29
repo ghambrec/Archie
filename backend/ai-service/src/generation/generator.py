@@ -29,10 +29,7 @@ SYSTEM_PROMPT = """ You analyze documents for a document management system
 
 class Citations(BaseModel):
     chunk_Id: UUID
-    message_Id: UUID
-    #explanation: str = Field(
-    #    description="Brief explanation of how this chunk supports the answer"
-    #)
+    #similary_score
 
 class GeneratedAnswer(BaseModel):
     answer: str

@@ -114,8 +114,7 @@ def build_context(chunks: list[asyncpg.Record] , context_budget: int)-> str:
 		if used_tokens + chunked_tokens <= context_budget:
 			used_tokens += chunked_tokens
 			selected.append(
-				f"Document: { row ['ai_document_id']}\n"
-				#f"Chunk_Id: {row['content']}"
+				f"Chunk_Id: {row['id']}\n"
 				f"Content: {row['content']}"
 				)
 

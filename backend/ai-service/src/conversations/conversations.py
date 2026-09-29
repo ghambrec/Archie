@@ -106,29 +106,41 @@ async def del_conversation(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID):
     await pool.execute(delete, user_id, conv_id)
 
 async def save_conversation(pool: asyncpg.Pool, question: str , answer:GeneratedAnswer, conv_id: UUID) -> None:
+    
+    
     query = """
             INSERT INTO ai_messages (conv_id, sender, content)
             Values 
                 ($1, 'user', $2),
                 ($1, 'llm', $3)
+            Returning id
             """
-    try:
-        StatusSaveUser = await pool.execute(query, conv_id, question, answer.answer )
 
-        logger.info(f"Status saved Conv: {StatusSaveUser} ")
+    try: 
+    
+        message_id = await pool.fetchval(query, conv_id, question, answer.answer )
+
+        logger.info(f"Status saved Conv: {message_id} ")
         logger.debug(" conversaition: %s, saved content: %s ", conv_id, answer)
     except Exception:
         logger.exception("saving conversation content failed")
         raise
 
-    try:
-        query=  """
-                INSERT INTO ai_messages_sources (chunk_Id, message_Id, content)
-                Values 
-                ($1, $2),
-                """
-        StatusSaveSources  = await pool.execute(query, answer.sources, answer.sources.)
+
     
-    except Exception:
-        logger.exception("saving answer sources failed")
-        raise
+    query=  """
+            INSERT INTO ai_message_sources (chunk_Id, message_Id)
+            Values 
+            ($1, $2)
+     """
+    
+    for row in answer.sources:
+        if(row.chunk_Id):
+            try:
+                StatusSaveSources  = await pool.execute(query, row.chunk_Id, message_id)
+      
+    
+                logger.debug(f"ai_sources {StatusSaveSources} saved")
+            except Exception:
+                logger.exception("saving answer sources failed")
+                raise
