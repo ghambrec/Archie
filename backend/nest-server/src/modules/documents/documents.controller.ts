@@ -4,6 +4,7 @@ import {
   Post,
   Delete,
   Param,
+  ParseUUIDPipe,
   Query,
   Body,
   UseGuards,
@@ -24,10 +25,9 @@ import { UploadResponseDto } from './dto/upload-response.dto';
 import { GetDocumentsQueryDto } from './dto/get-documents-query.dto';
 import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
 import { DocumentSummaryDto } from './dto/document-summary.dto';
-import { SetDocumentGroupDto } from './dto/set-document-group.dto';
-import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 import { SetDocumentTagDto } from './dto/set-document-tag.dto';
 import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
+import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-response.dto';
 
 @ApiTags('documents')
 @Controller('documents')
@@ -36,10 +36,11 @@ export class DocumentsController {
 
   @ApiOperation({
     summary: 'Upload a document',
-    description: 'Uploads a file and stores it as a new document owned by the current user.',
+    description:
+      'Uploads a file, stores it as a new document owned by the current user and assigns it to the given group.',
   })
   @UseGuards(SessionAuthGuard)
-  @Post('upload')
+  @Post('upload/:groupId')
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -55,13 +56,14 @@ export class DocumentsController {
   })
   async upload(
     @Req() req: Request,
+    @Param('groupId', new ParseUUIDPipe()) groupId: string,
     @UploadedFileDecorator() file: Express.Multer.File,
   ): Promise<UploadResponseDto> {
     if (!file) {
       throw new BadRequestException('No file was provided.');
     }
 
-    return this.documentsService.upload(req.userId!, file);
+    return this.documentsService.upload(req.userId!, groupId, file);
   }
 
   @ApiOperation({
@@ -88,20 +90,6 @@ export class DocumentsController {
   }
 
   @ApiOperation({
-    summary: 'Assign a document to a group',
-    description: 'Sets or changes the group that owns the given document.',
-  })
-  @UseGuards(SessionAuthGuard)
-  @Post(':id/group')
-  async setGroup(
-    @Req() req: Request,
-    @Param('id') documentId: string,
-    @Body() dto: SetDocumentGroupDto,
-  ): Promise<DocumentGroupResponseDto> {
-    return this.documentsService.setGroup(req.userId!, documentId, dto.groupId);
-  }
-
-  @ApiOperation({
     summary: 'Assign a tag to a document',
     description: 'Adds the given tag to the document.',
   })
@@ -113,6 +101,21 @@ export class DocumentsController {
     @Body() dto: SetDocumentTagDto,
   ): Promise<DocumentTagResponseDto> {
     return this.documentsService.setTag(req.userId!, documentId, dto.tagId);
+  }
+
+  @ApiOperation({
+    summary: 'Confirm AI-suggested tags',
+    description:
+      'Assigns all tags suggested by the AI to the document. Proposals for new tags are ignored.',
+  })
+  @UseGuards(SessionAuthGuard)
+  @Post(':id/tags/confirm-suggestions')
+  @HttpCode(HttpStatus.OK)
+  async confirmSuggestedTags(
+    @Req() req: Request,
+    @Param('id') documentId: string,
+  ): Promise<ConfirmSuggestedTagsResponseDto> {
+    return this.documentsService.confirmSuggestedTags(req.userId!, documentId);
   }
 
   @UseGuards(SessionAuthGuard)

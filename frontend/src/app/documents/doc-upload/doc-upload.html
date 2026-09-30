@@ -1,3 +1,4 @@
+@if (uploadGroups.hasValue() && uploadGroups.value().length > 0) {
 <div
 	class="upload-zone"
 	[class.dragging]="isInDragZone()"
@@ -27,7 +28,7 @@
 		<option value="" disabled selected>
 			{{ "documents.upload.selectGroup" | transloco }}
 		</option>
-		@for (group of groupsService.groups.value(); track group.id) {
+		@for (group of uploadGroups.value(); track group.id) {
 			<option [value]="group.id">{{ group.name }}</option>
 		}
 	</select>
@@ -52,3 +53,4 @@
 	</div>
 }
 </div>
+}

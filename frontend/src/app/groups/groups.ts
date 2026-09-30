@@ -49,6 +49,13 @@ export class Groups {
 		{ defaultValue: [] }
 	);
 
+	groupsWithPermission(permission: string) {
+		return httpResource<GroupResponse[]>(
+			() => ({ url: this.groupsUrl, params: { permission }, withCredentials: true }),
+			{ defaultValue: [] }
+		);
+	}
+
 	createGroup(dto: CreateGroupDto) {
 		return this.http.post<GroupResponse>(`${this.groupsUrl}/create`,
 			dto,

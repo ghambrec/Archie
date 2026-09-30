@@ -46,6 +46,35 @@ export class TagsService {
     this.logger.log({ documentId, tagId }, 'Tag assigned to document');
   }
 
+  async confirmAiSuggestions(documentId: string): Promise<string[]> {
+    this.logger.log({ documentId }, 'Confirming AI-suggested tags for document');
+
+    // Copies every AI suggestion that references an existing tag. Proposals for new tags
+    // (ai_tag_id IS NULL) are skipped, already assigned tags are left untouched.
+    // assigned_by stays NULL to mark the tag as originating from the LLM.
+    const rows = await this.documentTagsRepository.query<{ tagId: string }[]>(
+      `
+      INSERT INTO document_tags (document_id, tag_id)
+      SELECT
+          adt.ai_document_id,
+          adt.ai_tag_id
+      FROM ai_document_tags AS adt
+      WHERE
+          adt.ai_document_id = $1
+          AND adt.ai_tag_id IS NOT NULL
+      ON CONFLICT (document_id, tag_id) DO NOTHING
+      RETURNING tag_id AS "tagId"
+      `,
+      [documentId],
+    );
+
+    const tagIds = rows.map((row) => row.tagId);
+
+    this.logger.log({ documentId, count: tagIds.length }, 'AI-suggested tags confirmed');
+
+    return tagIds;
+  }
+
   async removeFromDocument(documentId: string, tagId: string): Promise<void> {
     this.logger.log({ documentId, tagId }, 'Removing tag from document');
 

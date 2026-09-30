@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
+import { createHash } from 'crypto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Logger } from 'nestjs-pino';
 import { DocumentsService } from './documents.service';
@@ -38,6 +40,7 @@ const createQueryBuilderMock = (): QueryBuilderMock => {
   qb.getCount = jest.fn();
   qb.getRawMany = jest.fn();
   qb.getRawOne = jest.fn();
+  qb.getExists = jest.fn();
 
   return qb;
 };
@@ -54,7 +57,11 @@ describe('DocumentsService', () => {
   let groupsService: { get: jest.Mock };
   let documentGroupsService: { setGroup: jest.Mock; removeGroup: jest.Mock };
   let aiIngestionService: { triggerIngestion: jest.Mock };
-  let tagsService: { assignToDocument: jest.Mock; removeFromDocument: jest.Mock };
+  let tagsService: {
+    assignToDocument: jest.Mock;
+    removeFromDocument: jest.Mock;
+    confirmAiSuggestions: jest.Mock;
+  };
   let queryBuilder: QueryBuilderMock;
 
   const userId = 'user-1';
@@ -73,7 +80,11 @@ describe('DocumentsService', () => {
     groupsService = { get: jest.fn() };
     documentGroupsService = { setGroup: jest.fn(), removeGroup: jest.fn() };
     aiIngestionService = { triggerIngestion: jest.fn().mockResolvedValue(undefined) };
-    tagsService = { assignToDocument: jest.fn(), removeFromDocument: jest.fn() };
+    tagsService = {
+      assignToDocument: jest.fn(),
+      removeFromDocument: jest.fn(),
+      confirmAiSuggestions: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -92,6 +103,7 @@ describe('DocumentsService', () => {
   });
 
   describe('upload', () => {
+    const groupId = 'group-1';
     const file = {
       originalname: 'hello.txt',
       mimetype: 'text/plain',
@@ -99,14 +111,18 @@ describe('DocumentsService', () => {
       buffer: Buffer.from('hello world'),
     } as Express.Multer.File;
 
-    it('stores the file, persists the document and triggers AI ingestion', async () => {
+    it('stores the file, persists the document, assigns the group and triggers AI ingestion', async () => {
+      groupsService.get.mockResolvedValue(undefined);
+      queryBuilder.getExists.mockResolvedValue(false);
       storageService.putObject.mockResolvedValue(undefined);
       documentsRepository.insert.mockResolvedValue({
         identifiers: [{ id: documentId }],
       });
+      documentGroupsService.setGroup.mockResolvedValue(undefined);
 
-      const result = await service.upload(userId, file);
+      const result = await service.upload(userId, groupId, file);
 
+      expect(groupsService.get).toHaveBeenCalledWith(groupId, userId);
       expect(storageService.putObject).toHaveBeenCalledWith(
         'documents',
         expect.any(String),
@@ -122,8 +138,40 @@ describe('DocumentsService', () => {
           sizeBytes: file.size,
         }),
       );
+      expect(documentGroupsService.setGroup).toHaveBeenCalledWith(documentId, groupId);
       expect(aiIngestionService.triggerIngestion).toHaveBeenCalledWith(documentId);
       expect(result).toEqual({ id: documentId, objectKey: expect.any(String) });
+    });
+
+    it('throws DocumentAlreadyExistsInGroup when the same file already exists in the group', async () => {
+      groupsService.get.mockResolvedValue(undefined);
+      queryBuilder.getExists.mockResolvedValue(true);
+
+      await expect(service.upload(userId, groupId, file)).rejects.toMatchObject({
+        code: ErrorCode.DocumentAlreadyExistsInGroup,
+      });
+      expect(queryBuilder.where).toHaveBeenCalledWith('documentGroup.groupId = :groupId', {
+        groupId,
+      });
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith('document.sha256 = :sha256', {
+        sha256: createHash('sha256').update(file.buffer).digest('hex'),
+      });
+      expect(storageService.putObject).not.toHaveBeenCalled();
+      expect(documentsRepository.insert).not.toHaveBeenCalled();
+      expect(documentGroupsService.setGroup).not.toHaveBeenCalled();
+      expect(aiIngestionService.triggerIngestion).not.toHaveBeenCalled();
+    });
+
+    it('does not store anything when the user has no access to the group', async () => {
+      groupsService.get.mockRejectedValue(new NotFoundException());
+
+      await expect(service.upload(userId, groupId, file)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(storageService.putObject).not.toHaveBeenCalled();
+      expect(documentsRepository.insert).not.toHaveBeenCalled();
+      expect(documentGroupsService.setGroup).not.toHaveBeenCalled();
+      expect(aiIngestionService.triggerIngestion).not.toHaveBeenCalled();
     });
   });
 
@@ -219,43 +267,6 @@ describe('DocumentsService', () => {
     });
   });
 
-  describe('setGroup', () => {
-    const groupId = 'group-1';
-
-    it('assigns the document to the group', async () => {
-      documentsRepository.findOne.mockResolvedValue({ id: documentId });
-      groupsService.get.mockResolvedValue(undefined);
-      documentGroupsService.setGroup.mockResolvedValue(undefined);
-
-      const result = await service.setGroup(userId, documentId, groupId);
-
-      expect(groupsService.get).toHaveBeenCalledWith(groupId, userId);
-      expect(documentGroupsService.setGroup).toHaveBeenCalledWith(documentId, groupId);
-      expect(result).toEqual({ documentId, groupId });
-    });
-
-    it('throws DocumentNotFound when the document does not exist', async () => {
-      documentsRepository.findOne.mockResolvedValue(null);
-
-      await expect(service.setGroup(userId, documentId, groupId)).rejects.toMatchObject({
-        code: ErrorCode.DocumentNotFound,
-      });
-      expect(documentGroupsService.setGroup).not.toHaveBeenCalled();
-    });
-
-    it('throws DocumentAlreadyInGroup when the document is already assigned to a group', async () => {
-      documentsRepository.findOne.mockResolvedValue({ id: documentId });
-      groupsService.get.mockResolvedValue(undefined);
-      documentGroupsService.setGroup.mockRejectedValue(
-        new ApplicationException(ErrorCode.DocumentAlreadyInGroup),
-      );
-
-      await expect(service.setGroup(userId, documentId, groupId)).rejects.toMatchObject({
-        code: ErrorCode.DocumentAlreadyInGroup,
-      });
-    });
-  });
-
   describe('setTag', () => {
     const tagId = 'tag-1';
 
@@ -298,6 +309,40 @@ describe('DocumentsService', () => {
       await expect(service.setTag(userId, documentId, tagId)).rejects.toMatchObject({
         code: ErrorCode.DocumentTagAlreadyAssigned,
       });
+    });
+  });
+
+  describe('confirmSuggestedTags', () => {
+    it('confirms the AI-suggested tags and returns the newly assigned tag ids', async () => {
+      documentsRepository.findOne.mockResolvedValue({ id: documentId });
+      tagsService.confirmAiSuggestions.mockResolvedValue(['tag-1', 'tag-2']);
+
+      const result = await service.confirmSuggestedTags(userId, documentId);
+
+      expect(documentsRepository.findOne).toHaveBeenCalledWith({
+        where: { id: documentId, uploadedBy: userId },
+        select: { id: true },
+      });
+      expect(tagsService.confirmAiSuggestions).toHaveBeenCalledWith(documentId);
+      expect(result).toEqual({ documentId, confirmedTagIds: ['tag-1', 'tag-2'] });
+    });
+
+    it('returns an empty list when there are no suggestions to confirm', async () => {
+      documentsRepository.findOne.mockResolvedValue({ id: documentId });
+      tagsService.confirmAiSuggestions.mockResolvedValue([]);
+
+      const result = await service.confirmSuggestedTags(userId, documentId);
+
+      expect(result).toEqual({ documentId, confirmedTagIds: [] });
+    });
+
+    it('throws DocumentNotFound when the document does not exist', async () => {
+      documentsRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.confirmSuggestedTags(userId, documentId)).rejects.toMatchObject({
+        code: ErrorCode.DocumentNotFound,
+      });
+      expect(tagsService.confirmAiSuggestions).not.toHaveBeenCalled();
     });
   });
 
