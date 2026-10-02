@@ -54,7 +54,21 @@
 			"btnClose": "Close",
 			"description": "User is assigned to following groups:",
 			"groupCount": "{{count}} groups."
+		},
+		"updateUser": {
+			"heading": "User",
+			"displayName": "Name",
+			"email": "E-Mail",
+			"preferredLanguage": "Preffered Language",
+			"password": "Password",
+			"errors": {
+				"displayNameError": "Name already given, not available",
+				"emailError": "Email already in use, not available",
+				"preferredlangaugeError": "en, de or es are available, only",
+				"passwordError": "Password not strong enough, please retry"
+			}
 		}
+
 
 	}, 
 	"groups": {

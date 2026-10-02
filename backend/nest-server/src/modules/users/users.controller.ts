@@ -45,9 +45,9 @@ export class UsersController {
     return {id: userEntity.id};
   }
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, SelfOrAdminGuard)
   @ApiOperation({
-    summary: 'TODO: Update user',
+    summary: 'Update user',
     description: 'For Admin: Update a specific user.<br>For User: User can only update his own user'
   })
   @Patch('me')
