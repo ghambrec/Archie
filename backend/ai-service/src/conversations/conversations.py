@@ -110,14 +110,11 @@ async def save_conversation(pool: asyncpg.Pool, question: str , answer:Generated
     query = """
             INSERT INTO ai_messages (conv_id, sender, content)
             Values 
-                ($1, 'user', $2),
-                ($1, 'llm', $3)
+                ($1, 'llm', $2)
             Returning id
             """
     try: 
-    
-        message_id = await pool.fetchval(query, conv_id, question, answer.answer )
-
+        message_id = await pool.fetchval(query, conv_id, answer.answer)
         logger.info(f"Status saved Conv: {message_id} ")
         logger.debug(" conversaition: %s, saved content: %s ", conv_id, answer)
     except Exception:
