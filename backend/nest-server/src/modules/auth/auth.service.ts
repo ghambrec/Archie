@@ -36,8 +36,11 @@ export class AuthService {
 		}
 
 		await this.loginAttemptService.clearAttempts(request.email);
+		
+		const hasToChangePassword = user.lastLoginAt === null;
+
 		const sessionId = await this.sessionService.create(user.id);
-		return { user, sessionId };
+		return { user, sessionId, hasToChangePassword };
 	}
 
 	async register(request: RegisterRequestDto): Promise<string> {
