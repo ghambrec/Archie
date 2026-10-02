@@ -9,4 +9,7 @@ export class LoginResponseDto {
 
   @ApiProperty()
   displayName!: string;
+
+  @ApiProperty()
+  hasToChangePassword!: boolean;
 }
