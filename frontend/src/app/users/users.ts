@@ -22,6 +22,8 @@ export interface CreateUserRequest {
 	displayName: string;
 }
 
+
+
 export interface CreateUserResponse {
 	id: string;
 	email: string;
@@ -29,11 +31,25 @@ export interface CreateUserResponse {
 
 }
 
+export interface PatchUser {
+	email?: string;
+	displayName?: string;
+	password?: string;
+	preferredLanguage?: SupportedLanguage;
+}
+
+export interface EditUserForm {
+	email: string;
+	displayName: string;
+	password: string;
+	preferredLanguage: SupportedLanguage;
+}
+
 export interface UserInfo {
 	id: string;
 	email: string;
 	displayName: string;
-	preferredLanguage: string;
+	preferredLanguage: SupportedLanguage;
 	isActive: boolean;
 	lastLoginAt: string | null;
 	//avatar: string;
