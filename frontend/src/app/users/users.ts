@@ -45,6 +45,10 @@ export interface EditUserForm {
 	preferredLanguage: SupportedLanguage;
 }
 
+export interface UpdateUserResponse {
+	id: string; 
+}
+
 export interface UserInfo {
 	id: string;
 	email: string;
@@ -112,5 +116,11 @@ export class Users {
 			return '/avatar';
 		}
 		return `${this.baseUrl}/${userId}/avatar`;
+	}
+
+	update(userId: string, changes: PatchUser) {
+		const url = `${this.baseUrl}/${userId}`;
+		
+		return this.http.patch<PatchUser>(url, changes, {withCredentials: true });
 	}
 }
