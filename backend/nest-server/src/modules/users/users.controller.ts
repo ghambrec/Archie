@@ -48,13 +48,26 @@ export class UsersController {
   @UseGuards(SessionAuthGuard, SelfOrAdminGuard)
   @ApiOperation({
     summary: 'Update user',
-    description: 'For Admin: Update a specific user.<br>For User: User can only update his own user'
+    description: 'User can only update his own user'
   })
   @Patch('me')
   async updateCurrentUser (
     @Req() req: Request, 
     @Body() dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
     return this.usersService.updateProfile(req.userId!, dto);
+  }
+
+
+  @UseGuards(SessionAuthGuard, SelfOrAdminGuard)
+  @ApiOperation({
+    summary: 'Update different users',
+    description: 'Admin can updae other users'
+  })
+  @Patch(':userId')
+  async updatetUser (
+    @Param('userId') userId: string,
+    @Body() dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
+    return this.usersService.updateProfile(userId, dto);
   }
 
   @UseGuards(SessionAuthGuard)
