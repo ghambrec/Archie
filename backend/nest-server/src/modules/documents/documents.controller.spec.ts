@@ -7,14 +7,14 @@ import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 
 describe('DocumentsController', () => {
   let controller: DocumentsController;
-  let documentsService: { upload: jest.Mock };
+  let documentsService: { upload: jest.Mock; moveToGroup: jest.Mock };
 
   const userId = 'user-1';
   const groupId = 'group-1';
   const req = { userId } as Request;
 
   beforeEach(async () => {
-    documentsService = { upload: jest.fn() };
+    documentsService = { upload: jest.fn(), moveToGroup: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [DocumentsController],
@@ -52,6 +52,16 @@ describe('DocumentsController', () => {
         controller.upload(req, groupId, undefined as unknown as Express.Multer.File),
       ).rejects.toBeInstanceOf(BadRequestException);
       expect(documentsService.upload).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('moveToGroup', () => {
+    it('moves the document to the group from the body', async () => {
+      const response = { documentId: 'document-1', groupId };
+      documentsService.moveToGroup.mockResolvedValue(response);
+
+      await expect(controller.moveToGroup(req, 'document-1', { groupId })).resolves.toEqual(response);
+      expect(documentsService.moveToGroup).toHaveBeenCalledWith(userId, 'document-1', groupId);
     });
   });
 });

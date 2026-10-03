@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Delete,
+  Put,
   Param,
   ParseUUIDPipe,
   Query,
@@ -27,6 +28,8 @@ import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
 import { DocumentSummaryDto } from './dto/document-summary.dto';
 import { SetDocumentTagDto } from './dto/set-document-tag.dto';
 import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
+import { SetDocumentGroupDto } from './dto/set-document-group.dto';
+import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-response.dto';
 
 @ApiTags('documents')
@@ -152,6 +155,21 @@ export class DocumentsController {
     documentDownloadStream.stream.pipe(res);
   }
 
+
+  @ApiOperation({
+    summary: 'Move a document to another group',
+    description:
+      'Removes the document from its current group and assigns it to the given group.',
+  })
+  @UseGuards(SessionAuthGuard)
+  @Put(':id/group')
+  async moveToGroup(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() dto: SetDocumentGroupDto,
+  ): Promise<DocumentGroupResponseDto> {
+    return this.documentsService.moveToGroup(req.userId!, id, dto.groupId);
+  }
 
   @ApiOperation({
     summary: 'Remove a document from a group',

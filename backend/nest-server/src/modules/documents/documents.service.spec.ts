@@ -55,7 +55,7 @@ describe('DocumentsService', () => {
   };
   let storageService: { putObject: jest.Mock; getObject: jest.Mock };
   let groupsService: { get: jest.Mock };
-  let documentGroupsService: { setGroup: jest.Mock; removeGroup: jest.Mock };
+  let documentGroupsService: { setGroup: jest.Mock; moveToGroup: jest.Mock; removeGroup: jest.Mock };
   let aiIngestionService: { triggerIngestion: jest.Mock };
   let tagsService: {
     assignToDocument: jest.Mock;
@@ -78,7 +78,7 @@ describe('DocumentsService', () => {
     };
     storageService = { putObject: jest.fn(), getObject: jest.fn() };
     groupsService = { get: jest.fn() };
-    documentGroupsService = { setGroup: jest.fn(), removeGroup: jest.fn() };
+    documentGroupsService = { setGroup: jest.fn(), moveToGroup: jest.fn(), removeGroup: jest.fn() };
     aiIngestionService = { triggerIngestion: jest.fn().mockResolvedValue(undefined) };
     tagsService = {
       assignToDocument: jest.fn(),
@@ -261,6 +261,55 @@ describe('DocumentsService', () => {
       await expect(service.findOne(userId, documentId)).rejects.toMatchObject({
         code: ErrorCode.DocumentNotFound,
       });
+    });
+  });
+
+  describe('moveToGroup', () => {
+    const groupId = 'group-2';
+
+    it('moves the document to the given group', async () => {
+      documentsRepository.findOne.mockResolvedValue({ id: documentId, sha256: 'hash' });
+      groupsService.get.mockResolvedValue(undefined);
+      queryBuilder.getExists.mockResolvedValue(false);
+
+      const result = await service.moveToGroup(userId, documentId, groupId);
+
+      expect(groupsService.get).toHaveBeenCalledWith(groupId, userId);
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith('document.id != :excludeDocumentId', {
+        excludeDocumentId: documentId,
+      });
+      expect(documentGroupsService.moveToGroup).toHaveBeenCalledWith(documentId, groupId);
+      expect(result).toEqual({ documentId, groupId });
+    });
+
+    it('throws DocumentNotFound when the document does not belong to the user', async () => {
+      documentsRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.moveToGroup(userId, documentId, groupId)).rejects.toMatchObject({
+        code: ErrorCode.DocumentNotFound,
+      });
+      expect(documentGroupsService.moveToGroup).not.toHaveBeenCalled();
+    });
+
+    it('does not move the document when the user has no access to the group', async () => {
+      documentsRepository.findOne.mockResolvedValue({ id: documentId, sha256: 'hash' });
+      groupsService.get.mockRejectedValue(new NotFoundException());
+
+      await expect(service.moveToGroup(userId, documentId, groupId)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(documentGroupsService.moveToGroup).not.toHaveBeenCalled();
+    });
+
+    it('throws DocumentAlreadyExistsInGroup when the same file already exists in the group', async () => {
+      documentsRepository.findOne.mockResolvedValue({ id: documentId, sha256: 'hash' });
+      groupsService.get.mockResolvedValue(undefined);
+      queryBuilder.getExists.mockResolvedValue(true);
+
+      await expect(service.moveToGroup(userId, documentId, groupId)).rejects.toMatchObject({
+        code: ErrorCode.DocumentAlreadyExistsInGroup,
+      });
+      expect(documentGroupsService.moveToGroup).not.toHaveBeenCalled();
     });
   });
 

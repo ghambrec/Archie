@@ -23,6 +23,7 @@ import { DocumentGroupsService } from '../document-groups/document-groups.servic
 import { AiIngestionService } from '../ai-service/ai-ingestion.service';
 import { TagsService } from '../tags/tags.service';
 import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
+import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-response.dto';
 
 const DOCUMENTS_BUCKET = 'documents';
@@ -54,14 +55,7 @@ export class DocumentsService {
 
     const sha256 = createHash('sha256').update(file.buffer).digest('hex');
 
-    const duplicateExists = await this.documentsRepository
-      .createQueryBuilder('document')
-      .innerJoin(DocumentGroup, 'documentGroup', 'documentGroup.documentId = document.id')
-      .where('documentGroup.groupId = :groupId', { groupId })
-      .andWhere('document.sha256 = :sha256', { sha256 })
-      .getExists();
-
-    if (duplicateExists) {
+    if (await this.existsInGroup(groupId, sha256)) {
       this.logger.warn({ userId, groupId, sha256 }, 'Document already exists in group');
       throw new ApplicationException(ErrorCode.DocumentAlreadyExistsInGroup);
     }
@@ -348,6 +342,38 @@ export class DocumentsService {
     this.logger.log({ userId, id, tagId }, 'Tag removed from document');
   }
 
+  async moveToGroup(
+    userId: string,
+    id: string,
+    groupId: string,
+  ): Promise<DocumentGroupResponseDto> {
+
+    this.logger.log({ userId, id, groupId }, 'Move document to group');
+
+    const document = await this.documentsRepository.findOne({
+      where: { id, uploadedBy: userId },
+      select: { id: true, sha256: true },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    // Check if group exists
+    await this.groupsService.get(groupId, userId);
+
+    if (await this.existsInGroup(groupId, document.sha256, id)) {
+      this.logger.warn({ userId, groupId, sha256: document.sha256 }, 'Document already exists in group');
+      throw new ApplicationException(ErrorCode.DocumentAlreadyExistsInGroup);
+    }
+
+    await this.documentGroupsService.moveToGroup(id, groupId);
+
+    this.logger.log({ userId, id, groupId }, 'Document moved to group');
+
+    return { documentId: id, groupId };
+  }
+
   async removeGroup(
     userId: string,
     id: string,
@@ -386,5 +412,19 @@ export class DocumentsService {
     await this.documentsRepository.softDelete(id);
 
     this.logger.log({ userId, id }, 'Document deleted');
+  }
+
+  private existsInGroup(groupId: string, sha256: string, excludeDocumentId?: string): Promise<boolean> {
+    const query = this.documentsRepository
+      .createQueryBuilder('document')
+      .innerJoin(DocumentGroup, 'documentGroup', 'documentGroup.documentId = document.id')
+      .where('documentGroup.groupId = :groupId', { groupId })
+      .andWhere('document.sha256 = :sha256', { sha256 });
+
+    if (excludeDocumentId) {
+      query.andWhere('document.id != :excludeDocumentId', { excludeDocumentId });
+    }
+
+    return query.getExists();
   }
 }
