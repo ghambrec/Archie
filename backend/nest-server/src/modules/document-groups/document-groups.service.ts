@@ -22,6 +22,19 @@ export class DocumentGroupsService {
     await this.documentGroupsRepository.insert({ documentId, groupId });
   }
 
+  async moveToGroup(documentId: string, groupId: string): Promise<void> {
+    await this.documentGroupsRepository.manager.transaction(async (manager) => {
+      const existing = await manager.findOneBy(DocumentGroup, { documentId, groupId });
+
+      if (existing) {
+        throw new ApplicationException(ErrorCode.DocumentAlreadyInGroup);
+      }
+
+      await manager.delete(DocumentGroup, { documentId });
+      await manager.insert(DocumentGroup, { documentId, groupId });
+    });
+  }
+
   async removeGroup(documentId: string, groupId: string): Promise<void> {
     const existing = await this.documentGroupsRepository.findOneBy({ documentId, groupId });
 
