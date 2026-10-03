@@ -116,6 +116,7 @@ export class DocumentsService {
       .leftJoin(Group, 'group', 'group.id = documentGroup.groupId')
       .leftJoin(DocumentTag, 'documentTag', 'documentTag.documentId = document.id')
       .leftJoin(Tag, 'tag', 'tag.id = documentTag.tagId')
+      .leftJoin('ai_documents', 'aiDocument', '"aiDocument"."id" = document.id')
       .select([
         'document.id AS "id"',
         'document.filename AS "filename"',
@@ -125,6 +126,10 @@ export class DocumentsService {
         'document.updatedAt AS "updatedAt"',
         'uploader.id AS "uploaderId"',
         'uploader.displayName AS "uploaderName"',
+        '"aiDocument"."status" AS "aiStatus"',
+        '"aiDocument"."ai_summary" AS "aiSummary"',
+        '"aiDocument"."language" AS "language"',
+        '"aiDocument"."error_key" AS "aiErrorKey"',
       ])
       .addSelect(
         `COALESCE(
@@ -144,6 +149,7 @@ export class DocumentsService {
       )
       .groupBy('document.id')
       .addGroupBy('uploader.id')
+      .addGroupBy('"aiDocument"."id"')
       .orderBy('document.createdAt', 'DESC')
       .offset((page - 1) * limit)
       .limit(limit)
@@ -159,8 +165,10 @@ export class DocumentsService {
       uploadedBy: { id: row.uploaderId, name: row.uploaderName },
       groups: row.groups,
       tags: row.tags,
-      aiStatus: DocumentAiStatus.PENDING,
-      language: '',
+      aiStatus: row.aiStatus ?? DocumentAiStatus.PENDING,
+      aiSummary: row.aiSummary ?? undefined,
+      language: row.language ?? '',
+      aiErrorKey: row.aiErrorKey ?? null,
     }));
 
     this.logger.log({ userId, total }, 'Documents listed successfully');
@@ -185,6 +193,7 @@ export class DocumentsService {
       .leftJoin(Group, 'group', 'group.id = documentGroup.groupId')
       .leftJoin(DocumentTag, 'documentTag', 'documentTag.documentId = document.id')
       .leftJoin(Tag, 'tag', 'tag.id = documentTag.tagId')
+      .leftJoin('ai_documents', 'aiDocument', '"aiDocument"."id" = document.id')
       .where('document.id = :id', { id })
       .andWhere('document.uploadedBy = :userId', { userId })
       .select([
@@ -196,6 +205,10 @@ export class DocumentsService {
         'document.updatedAt AS "updatedAt"',
         'uploader.id AS "uploaderId"',
         'uploader.displayName AS "uploaderName"',
+        '"aiDocument"."status" AS "aiStatus"',
+        '"aiDocument"."ai_summary" AS "aiSummary"',
+        '"aiDocument"."language" AS "language"',
+        '"aiDocument"."error_key" AS "aiErrorKey"',
       ])
       .addSelect(
         `COALESCE(
@@ -215,6 +228,7 @@ export class DocumentsService {
       )
       .groupBy('document.id')
       .addGroupBy('uploader.id')
+      .addGroupBy('"aiDocument"."id"')
       .getRawOne();
 
     if (!raw) {
@@ -233,8 +247,10 @@ export class DocumentsService {
       uploadedBy: { id: raw.uploaderId, name: raw.uploaderName },
       groups: raw.groups,
       tags: raw.tags,
-      aiStatus: DocumentAiStatus.PENDING,
-      language: '',
+      aiStatus: raw.aiStatus ?? DocumentAiStatus.PENDING,
+      aiSummary: raw.aiSummary ?? undefined,
+      language: raw.language ?? '',
+      aiErrorKey: raw.aiErrorKey ?? null,
     };
   }
 

@@ -227,6 +227,34 @@ describe('DocumentsService', () => {
       expect(result).toMatchObject({ id: documentId, filename: 'hello.txt', sizeBytes: 11 });
     });
 
+    it('returns the AI fields from ai_documents when present', async () => {
+      queryBuilder.getRawOne.mockResolvedValue({
+        id: documentId,
+        filename: 'hello.txt',
+        mimeType: 'text/plain',
+        sizeBytes: '11',
+        createdAt: new Date('2026-01-01'),
+        updatedAt: new Date('2026-01-01'),
+        uploaderId: userId,
+        uploaderName: 'John Doe',
+        groups: [],
+        tags: [],
+        aiStatus: DocumentAiStatus.FINISHED,
+        aiSummary: 'A summary',
+        language: 'de',
+        aiErrorKey: null,
+      });
+
+      const result = await service.findOne(userId, documentId);
+
+      expect(result).toMatchObject({
+        aiStatus: DocumentAiStatus.FINISHED,
+        aiSummary: 'A summary',
+        language: 'de',
+        aiErrorKey: null,
+      });
+    });
+
     it('throws DocumentNotFound when the document does not exist', async () => {
       queryBuilder.getRawOne.mockResolvedValue(undefined);
 
