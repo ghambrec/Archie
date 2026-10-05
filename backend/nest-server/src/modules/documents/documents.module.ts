@@ -20,6 +20,7 @@ import { DocumentFileValidationService } from './document-file-validation.servic
 		inject: [documentsConfig.KEY],
 		useFactory: (config: ConfigType<typeof documentsConfig>) => ({
 			limits: { fileSize: config.maxUploadSizeBytes, files: 1 },
+			defParamCharset: 'utf-8'
 		})
 	}),
     TypeOrmModule.forFeature([Document]),
