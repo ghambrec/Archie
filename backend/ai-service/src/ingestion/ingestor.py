@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import asyncpg
 import urllib3.exceptions
+import asyncio
 from minio.error import MinioException
 from pydantic_ai import UnexpectedModelBehavior
 
@@ -77,7 +78,7 @@ async def ingest_doc(
             raise ValueError(f"no object key found for doc_id {doc_id}")
 
         doc_raw = await minio.GetDocumentBytes(obj_key)
-        doc_text = extract_text(doc_raw)
+        doc_text = await asyncio.to_thread(extract_text, doc_raw)
         if not doc_text.strip():
             raise NoTextExtracedError()
 
@@ -127,6 +128,11 @@ async def ingest_doc(
     except UnexpectedModelBehavior as e:
         logger.exception("llm output validation failed for doc %s", doc_id)
         await status.write_error(pool, doc_id, "llm_error", str(e))
+
+    except asyncio.CancelledError:
+        logger.exception("job timeouted for doc: %s", doc_id)
+        await status.write_error(pool, doc_id, "timeout", "job cancelled timeouted")
+        raise
 
     except Exception as e:
         logger.exception("unexpected error during ingest for doc: %s [%s]: %s", doc_id, type(e).__name__, str(e))
