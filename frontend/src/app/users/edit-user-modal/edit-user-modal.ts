@@ -8,6 +8,7 @@ import { UserInfoModal } from '../user-info-modal/user-info-modal';
 import { environment } from '../../../environments/environment';
 import { PrefixNot } from '@angular/compiler';
 import { firstValueFrom } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 
 type EditUserFormInput = Omit<EditUserForm, 'preferredLanguage'> & {
@@ -22,7 +23,7 @@ type EditUserFormInput = Omit<EditUserForm, 'preferredLanguage'> & {
 })
 export class EditUserModal {
   selectedUser!: UserInfo;
-
+  readonly saveErrorKey = signal<string | null>(null);
   protected readonly activeModal = inject(NgbActiveModal);
 
   protected readonly user = inject(Users)
@@ -50,6 +51,7 @@ export class EditUserModal {
 
 
   async save(): Promise <void> {
+    this.saveErrorKey.set(null);
 
     const values = this.editUserModal();
     const language = values.preferredLanguage.trim().toLowerCase(); 
@@ -71,9 +73,29 @@ export class EditUserModal {
       )
     
     this.activeModal.close();
-    } catch (error : any) {
-      let tranlocoKey = error.status == 409;
+    } catch (error : unknown) {
+      let code: string | undefined; // why let and not const 
+      if (error instanceof HttpErrorResponse) 
+      {
+        code = error.error?.code;
+      }else {
+        code = undefined;
+
+      }
+
+      switch (code) {
+        case 'AUTH_EMAIL_ALREADY_REGISTERED':
+        case 'USER_NAME_ALREADY_REGISTERED':
+        case 'VALIDATION_FAILED':
+        case 'INTERNAL_SERVER_ERROR':
+          this.saveErrorKey.set(`errors.${code}`);
+          break;
+  
+        default:
+          this.saveErrorKey.set('error.UNKOWN');
+      }
     }
+
     }
 
 }
