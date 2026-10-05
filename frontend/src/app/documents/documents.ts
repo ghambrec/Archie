@@ -31,7 +31,7 @@ export class Documents {
 		return this.http.post<UploadResponse>(url, formData, {
 			withCredentials: true,
 			observe: 'events',
-			reportProgress: true
+			reportUploadProgress: true
 		});
 	}
 
