@@ -15,6 +15,11 @@
 	<i class="bi bi-plus-lg"></i>
 	{{ "documents.upload.upload" | transloco }}
 	</button>
+	@if (maxSizeMb(); as size) {
+		<div class="form-text mb-2">
+				{{ 'documents.upload.maxSize' | transloco: { size: size } }}
+		</div>
+	}
 
 	<input
 		#fileInput
@@ -36,22 +41,34 @@
 
 <!-- progress for uploading docs -->
 @for (task of uploads(); track task.id) {
-	<div
-		class="d-flex align-items-center gap-2 mt-2 px-2 py-1 rounded bg-white border w-100 p-3 mb-3"
-		[ngbTooltip]="task.status === 'error' ? (task.errorKey | transloco) : task.filename"
-		placement="bottom"
-	>
-		@if (task.status === 'uploading') {
-			<div class="progress flex-grow-1" style="height: 4px;">
-				<div class="progress-bar" [style.width.%]="task.progress"></div>
+	<div class="d-flex align-items-center gap-2 mt-2 rounded bg-white border w-100 p-3 mb-3">
+			<div class="flex-grow-1 upload-task-name">
+					<div class="text-truncate" [ngbTooltip]="task.filename" placement="bottom">
+							{{ task.filename }}
+					</div>
+
+					@if (task.status === 'uploading') {
+							<div class="progress mt-1" style="height: 4px;"
+									role="progressbar"
+									[attr.aria-valuenow]="task.progress"
+									aria-valuemin="0"
+									aria-valuemax="100"
+									[attr.aria-label]="task.filename">
+									<div class="progress-bar" [style.width.%]="task.progress"></div>
+							</div>
+					} @else if (task.status === 'error') {
+							<small class="text-danger">{{ task.errorKey! | transloco }}</small>
+					}
 			</div>
-		} @else if (task.status === 'done') {
-			<i class="bi bi-check-circle-fill text-success"></i>
-		} @else if (task.status === 'error') {
-			<i class="bi bi-exclamation-circle-fill text-danger"></i>
-		}
-		<span class="upload-task-name text-truncate">{{ task.filename }}</span>
+
+			@if (task.status === 'done') {
+					<i class="bi bi-check-circle-fill text-success"></i>
+			} @else {
+					<button type="button" class="btn-close"
+							(click)="cancelTask(task.id)"></button>
+			}
 	</div>
 }
+
 </div>
 }

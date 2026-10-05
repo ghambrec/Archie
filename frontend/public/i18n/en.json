@@ -13,6 +13,7 @@
 		"upload": {
 			"upload": "Upload Documents",
 			"selectGroup": "select upload group",
+			"maxSize": "max. {{ size }} MB per file",
 			"errors": {
 				"empty": "File is empty",
 				"tooBig": "File is too big",

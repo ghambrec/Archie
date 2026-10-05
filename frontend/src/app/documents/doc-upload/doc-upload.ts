@@ -1,9 +1,10 @@
-import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { Documents } from '../documents';
 import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { Groups } from '../../groups/groups';
+import { Subscription } from 'rxjs';
 
 interface UploadTask {
 	id: string;
@@ -31,12 +32,18 @@ export class DocUpload {
 	protected readonly groupsService = inject(Groups);
 
 	private readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
+	private readonly subscriptions = new Map<string, Subscription>();
 
 	protected readonly isInDragZone = signal(false); // bool for visual feedback
 	protected readonly uploads = signal<UploadTask[]>([]);
 	protected readonly selectedGroupId = signal<string | null>(null);
 	protected readonly uploadGroups = this.groupsService.groupsWithPermission('documents.upload');
 	protected readonly uploadConfig = this.documentsService.uploadConfig;
+
+	protected readonly maxSizeMb = computed(() => {
+		const bytes = this.uploadConfig.value()?.maxSizeBytes;
+		return bytes ? Math.round(bytes / 1024 / 1024) : null;
+	});
 
 	// gruppe selektieren
 	onGroupChange(event: Event) {
@@ -106,21 +113,24 @@ export class DocUpload {
 			}
 
 			const groupId = this.selectedGroupId();
-			this.documentsService.upload(file, groupId!).subscribe({
+			const subscription = this.documentsService.upload(file, groupId!).subscribe({
 				next: (event) => {
 					if (event.type === HttpEventType.UploadProgress && event.total) {
 						const progress = Math.round((100 * event.loaded) / event.total);
 						this.updateTask(task.id, { progress });
 					}
 					if (event.type === HttpEventType.Response) {
+						this.subscriptions.delete(task.id);
 						this.updateTask(task.id, { status: 'done', progress: 100 });
 						setTimeout(() => this.removeTask(task.id), 3000);
 					}
 				},
 				error: (err: HttpErrorResponse) => {
+					this.subscriptions.delete(task.id);
 					this.updateTask(task.id, { status: 'error', errorKey: this.toTranslocoErrorKey(err) });
 				}
 			});
+			this.subscriptions.set(task.id, subscription);
 		}
 	}
 
@@ -132,6 +142,12 @@ export class DocUpload {
 
 	private removeTask(id: string) {
 		this.uploads.update((tasks) => tasks.filter((t) => t.id !== id));
+	}
+
+	cancelTask(id: string) {
+		this.subscriptions.get(id)?.unsubscribe();
+		this.subscriptions.delete(id);
+		this.removeTask(id);
 	}
 
 	// null = file ok / else transloco key
