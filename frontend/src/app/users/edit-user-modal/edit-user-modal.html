@@ -1,5 +1,5 @@
 <div class="modal-header">
-	<h5 class="modal-title">{{ "users.updateUser.heading " | transloco }}</h5>
+	<h5 class="modal-title">{{ "users.updateUser.heading" | transloco }}</h5>
 	<button
 		type="button"
 		class="btn-close"
@@ -8,9 +8,54 @@
 	</button>
 </div>
 
-<div>
-	class="modal-body">
-	<!--<form [formRoot]="update"-->
+<div class="modal-body">
+  <form [formRoot]="editUserForm">
+
+	<div class="mb-3">
+		<label for="edit-email" class="form-label">Email</label>
+		<input
+		id="edit-email"
+		type="email"
+		class="form-control"
+		[formField]="editUserForm.email"
+		/>
+	</div>
+
+	<div class="mb-3">
+		<label for="edit-displayName" class="form-label">Username</label>
+		<input
+		id="edit-displayName"
+		type="displayName"
+		class="form-control"
+		[formField]="editUserForm.displayName"
+		/>
+	</div>
+
+	<div class="mb-3">
+		<label for="edit-language" class="form-label">Preferred Language</label>
+		<input
+		id="edit-language"
+		type="text"
+		class="form-control"
+		[formField]="editUserForm.preferredLanguage"
+		/>
+		<div
+			id="explaination-help" class="form-text">
+			supported languages are en, de and es 
+		</div>
+	</div>
+
+
+	<div class="mb-3">
+		<label for="edit-password" class="form-label">Password</label>
+		<input
+		id="edit-password"
+		type="password"
+		class="form-control"
+		[formField]="editUserForm.password"
+		/>
+	</div>
+  </form>
 </div>
 
 <p>edit-user-modal works!</p>

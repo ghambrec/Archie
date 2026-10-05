@@ -35,7 +35,7 @@ export interface PatchUser {
 	email?: string;
 	displayName?: string;
 	password?: string;
-	preferredLanguage?: SupportedLanguage;
+	preferredLanguage?: string;
 }
 
 export interface EditUserForm {
