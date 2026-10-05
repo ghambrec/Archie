@@ -63,6 +63,7 @@ export class DocUpload {
 			return;
 		}
 		this.handleFiles(input.files);
+		input.value = '';
 	}
 
 	// entered drag drop zone
@@ -144,7 +145,7 @@ export class DocUpload {
 		this.uploads.update((tasks) => tasks.filter((t) => t.id !== id));
 	}
 
-	cancelTask(id: string) {
+	protected cancelTask(id: string) {
 		this.subscriptions.get(id)?.unsubscribe();
 		this.subscriptions.delete(id);
 		this.removeTask(id);
@@ -177,7 +178,7 @@ export class DocUpload {
 	// translate backend error keys into transloco keys
 	private toTranslocoErrorKey(err: HttpErrorResponse): string {
 		if (err.status === 413) {
-			return "documents.upload.error.tooBig";
+			return "documents.upload.errors.tooBig";
 		}
 		return UPLOAD_ERROR_KEYS[err.error?.code] ?? "documents.upload.errors.unknown";
 	}
