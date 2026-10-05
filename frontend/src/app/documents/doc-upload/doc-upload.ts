@@ -11,6 +11,7 @@ interface UploadTask {
 	progress: number;
 	status: 'uploading' | 'done' | 'error';
 	errorMessage?: string;
+	errorKey?: string;
 }
 
 @Component({
@@ -29,6 +30,7 @@ export class DocUpload {
 	protected readonly uploads = signal<UploadTask[]>([]);
 	protected readonly selectedGroupId = signal<string | null>(null);
 	protected readonly uploadGroups = this.groupsService.groupsWithPermission('documents.upload');
+	protected readonly uploadConfig = this.documentsService.uploadConfig;
 
 	// gruppe selektieren
 	onGroupChange(event: Event) {
@@ -90,6 +92,13 @@ export class DocUpload {
 			};
 			this.uploads.update((tasks) => [...tasks, task]);
 
+			// file validation
+			const errorKey = this.validateFile(file);
+			if (errorKey) {
+				this.updateTask(task.id, { status: 'error', errorKey})
+				continue;
+			}
+
 			const groupId = this.selectedGroupId();
 			this.documentsService.upload(file, groupId!).subscribe({
 				next: (event) => {
@@ -119,5 +128,29 @@ export class DocUpload {
 
 	private removeTask(id: string) {
 		this.uploads.update((tasks) => tasks.filter((t) => t.id !== id));
+	}
+
+	// null = file ok / else transloco key
+	private validateFile(file: File): string | null {
+		const config = this.uploadConfig.value();
+		if (!config) {
+			return null; // config not ready yet or request failed, upload file anyway, backend will do validation
+		}
+
+		if (file.size === 0) {
+			return "documents.upload.errors.empty";
+		}
+		if (file.size > config.maxSizeBytes) {
+			return "documents.upload.errors.tooBig";
+		}
+		if (!config.allowedExtensions.includes(this.getExtension(file.name))) {
+			return "documents.upload.errors.filetypeNotAllowed";
+		}
+		return null;
+	}
+
+	private getExtension(filename: string): string {
+		const dot = filename.lastIndexOf('.');
+		return dot > 0 ? filename.slice(dot).toLowerCase() : '';
 	}
 }

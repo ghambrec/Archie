@@ -1,6 +1,12 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { environment } from '../../environments/environment';
+
+export interface UploadConfig {
+	maxSizeBytes: number;
+	allowedExtensions: string[]; // mit .
+	aiSupportedExtensions: string[];
+}
 
 export interface UploadResponse {
 	id: string;
@@ -11,6 +17,10 @@ export interface UploadResponse {
 export class Documents {
 	private readonly http = inject(HttpClient);
 	private readonly baseUrl = `${environment.apiUrl}/documents`;
+
+	readonly uploadConfig = httpResource<UploadConfig>(
+		() => ({ url: `${this.baseUrl}/upload-config`, withCredentials: true })
+	);
 
 	upload(file: File, groupId: string) {
 		const url = `${this.baseUrl}/upload/${groupId}`;

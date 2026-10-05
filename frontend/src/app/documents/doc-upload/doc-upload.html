@@ -21,6 +21,7 @@
 		type="file"
 		multiple
 		class="visually-hidden"
+		[attr.accept]="uploadConfig.value()?.allowedExtensions?.join(',')"
 		(change)="onFilesSelected($event)"
 	>
 
@@ -37,7 +38,7 @@
 @for (task of uploads(); track task.id) {
 	<div
 		class="d-flex align-items-center gap-2 mt-2 px-2 py-1 rounded bg-white border w-100 p-3 mb-3"
-		[ngbTooltip]="task.status === 'error' ? task.errorMessage : task.filename"
+		[ngbTooltip]="task.status === 'error' ? (task.errorKey | transloco) : task.filename"
 		placement="bottom"
 	>
 		@if (task.status === 'uploading') {

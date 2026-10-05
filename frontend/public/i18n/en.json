@@ -12,7 +12,12 @@
 	"documents": {
 		"upload": {
 			"upload": "Upload Documents",
-			"selectGroup": "select upload group"
+			"selectGroup": "select upload group",
+			"errors": {
+				"empty": "File is empty",
+				"tooBig": "File is too big",
+				"filetypeNotAllowed": "File type is not allowed"
+			}
 		}
 	},
 	"login": {
