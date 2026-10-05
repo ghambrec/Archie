@@ -1,11 +1,18 @@
 import { Component, inject, signal} from '@angular/core';
-import { FormField,FormRoot } from '@angular/forms/signals';
+import { form, FormField,FormRoot } from '@angular/forms/signals';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SupportedLanguage } from '../../core/i18n/supported-language';
 import { PatchUser, Users, UserInfo, EditUserForm } from '../users';
 import { UserInfoModal } from '../user-info-modal/user-info-modal';
 import { environment } from '../../../environments/environment';
+import { PrefixNot } from '@angular/compiler';
+import { firstValueFrom } from 'rxjs';
+
+
+type EditUserFormInput = Omit<EditUserForm, 'preferredLanguage'> & {
+  preferredLanguage: string;
+};
 
 @Component({
   selector: 'app-edit-user-modal',
@@ -18,12 +25,17 @@ export class EditUserModal {
 
   protected readonly activeModal = inject(NgbActiveModal);
 
-  editUserModal = signal<EditUserForm>({
+  protected readonly user = inject(Users)
+
+  editUserModal = signal<EditUserFormInput>({
     email: '',
 	  displayName: '',
 	  preferredLanguage: 'en',
     password: '',
   })
+
+  editUserForm = form(this.editUserModal)
+
   initialize(user: UserInfo): void {
     this.selectedUser = user;
 
@@ -35,37 +47,33 @@ export class EditUserModal {
 
     });
   };
-  save(): void {
 
-  try {
+
+  async save(): Promise <void> {
 
     const values = this.editUserModal();
-
+    const language = values.preferredLanguage.trim().toLowerCase(); 
+    
+    if((language !== 'en') && (language !== 'de') && (language !== 'es'))
+      throw new Error ("Unspported language")
     const changes: PatchUser = {
-      email: values.email,
-      displayName: values.displayName,
-      preferredLanguage: values.preferredLanguage,
+      email: values.email.trim(),
+      displayName: values.displayName.trim(),
+      preferredLanguage: language,
     }; 
-
-    if (values.password !==' ' ) 
+    if (values.password.trim() !== '' ) 
     {
       changes.password = values.password;
     }
-
-    //update(userId: string, changes: PatchUser) {
-    //  const url =`${this.baseUrl}/UserID`;
-
-    //  return this.http.patch<UserInfo> (
-    //    url,
-    //    changes, 
-    //    { withCredentials: true },
-    //)
-    //};
-
-
-  } catch (error : any) {
-    let tranlocoKey = error.status == 409;
-  }
-  }
+    try {
+      await firstValueFrom ( 
+        this.user.update(this.selectedUser.id, changes)
+      )
+    
+    this.activeModal.close();
+    } catch (error : any) {
+      let tranlocoKey = error.status == 409;
+    }
+    }
 
 }

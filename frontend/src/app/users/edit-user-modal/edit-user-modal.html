@@ -22,7 +22,7 @@
 	</div>
 
 	<div class="mb-3">
-		<label for="edit-displayName" class="form-label">Username</label>
+		<label for="edit-displayName" class="form-label">{{'users.updateUser.displayName' | transloco}}</label>
 		<input
 		id="edit-displayName"
 		type="displayName"
@@ -32,7 +32,7 @@
 	</div>
 
 	<div class="mb-3">
-		<label for="edit-language" class="form-label">Preferred Language</label>
+		<label for="edit-language" class="form-label">{{" users.updateUser.preferredLanguage" | transloco}}</label>
 		<input
 		id="edit-language"
 		type="text"
@@ -54,6 +54,23 @@
 		class="form-control"
 		[formField]="editUserForm.password"
 		/>
+	</div>
+
+	<div class="d-flex justify-content-between">
+		<button
+        type="button"
+        class="btn btn-secondary"
+        (click)="activeModal.dismiss()">
+        {{ "users.updateUser.btnClose" | transloco }}
+      </button>
+
+		<button
+        type="button"
+        class="btn btn-primary"
+        (click)="save()">
+        {{ 'users.updateUser.btnSubmit' | transloco }}
+      </button>
+
 	</div>
   </form>
 </div>
