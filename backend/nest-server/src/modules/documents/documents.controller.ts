@@ -30,11 +30,16 @@ import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
 import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-response.dto';
 import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
+import { DocumentFileValidationService } from './document-file-validation.service';
+import { UploadConfigResponseDto } from './dto/upload-config-response.dto';
 
 @ApiTags('documents')
 @Controller('documents')
 export class DocumentsController {
-  constructor(private readonly documentsService: DocumentsService) {}
+  constructor(
+	private readonly documentsService: DocumentsService,
+	private readonly documentFileValidationService: DocumentFileValidationService
+  ) {}
 
   @ApiOperation({
     summary: 'Upload a document',
@@ -79,6 +84,15 @@ export class DocumentsController {
     @Query() query: GetDocumentsQueryDto,
   ): Promise<GetDocumentsResponseDto> {
     return this.documentsService.findAll(req.userId!, query);
+  }
+
+  @ApiOperation({
+	summary: 'Get upload configuration'
+  })
+  @UseGuards(SessionAuthGuard)
+  @Get('upload-config')
+  getUploadConfig(): UploadConfigResponseDto {
+	return this.documentFileValidationService.getUploadConfig();
   }
 
   @ApiOperation({
