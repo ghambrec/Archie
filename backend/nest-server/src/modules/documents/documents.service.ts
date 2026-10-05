@@ -100,7 +100,11 @@ export class DocumentsService {
 
     this.logger.log({ documentId, groupId }, 'Document uploaded successfully');
 
-    await this.aiIngestionService.triggerIngestion(documentId);
+    try {
+		await this.aiIngestionService.triggerIngestion(documentId);
+	} catch (error) {
+		this.logger.error({ documentId, error }, 'could not trigger ingestion pipeline, is ai service running?');
+	}
 
     return { id: documentId, objectKey: key };
   }

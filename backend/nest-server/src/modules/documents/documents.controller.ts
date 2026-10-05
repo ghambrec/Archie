@@ -151,12 +151,10 @@ export class DocumentsController {
       id,
     );
 
-    res.setHeader(
-      'Content-Type',documentDownloadStream.mimeType);
-    res.setHeader(
-      'Content-Disposition', `attachment; filename="${documentDownloadStream.filename}"`);
-    res.setHeader(
-      'Content-Length', documentDownloadStream.sizeBytes.toString());
+    res.attachment(documentDownloadStream.filename);
+	res.setHeader('Content-Type', documentDownloadStream.mimeType);
+	res.setHeader('Content-Length', documentDownloadStream.sizeBytes.toString());
+	res.setHeader('X-Content-Type-Options', 'nosniff');
 
     documentDownloadStream.stream.on('error', () => {
       if (!res.headersSent) {
