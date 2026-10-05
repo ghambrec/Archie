@@ -47,8 +47,11 @@ export class DocumentsService {
     groupId: string,
     file: Express.Multer.File,
   ): Promise<UploadResponseDto> {
+
+	const filename = this.documentFileValidationService.normalizeFilename(file.originalname);
+
     this.logger.log(
-      { userId, groupId, filename: file.originalname, mimeType: file.mimetype, sizeBytes: file.size },
+      { userId, groupId, filename: filename, mimeType: file.mimetype, sizeBytes: file.size },
       'Uploading document',
     );
 
@@ -84,7 +87,7 @@ export class DocumentsService {
 
     const insertResult = await this.documentsRepository.insert({
       uploadedBy: userId,
-      filename: file.originalname,
+      filename: filename,
       mimeType: mimeType,
       objectKey: key,
       sizeBytes: file.size,

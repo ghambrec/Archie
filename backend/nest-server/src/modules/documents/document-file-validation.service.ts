@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { extname } from "path";
-import { ALLOWED_FILE_TYPES } from "./document-file.constants";
+import { ALLOWED_FILE_TYPES, FILENAME_CONTROL_CHARS, FILENAME_FALLBACK, FILENAME_MAX_LENGTH } from "./document-file.constants";
 import { ApplicationException } from "src/common/errors/application.exception";
 import { ErrorCode } from "src/common/errors/error-code";
 import { fileTypeFromBuffer } from "file-type";
@@ -41,5 +41,29 @@ export class DocumentFileValidationService {
 		}
 
 		return allowed.mimeType;
+	}
+
+	normalizeFilename(origname: string): string {
+		let filename = origname.normalize('NFC');
+
+		filename = filename.split(/[/\\]/).pop() ?? '';
+		filename = filename.replace(FILENAME_CONTROL_CHARS, '').trim();
+
+		if (filename === '' || filename === '.' || filename == '..') {
+			return FILENAME_FALLBACK;
+		}
+
+		return this.trimFilename(filename, FILENAME_MAX_LENGTH)
+	}
+
+	trimFilename(name: string, maxLength: number): string {
+		const chars = Array.from(name);
+		if (chars.length <= maxLength) {
+			return name;
+		}
+
+		const extenstion = Array.from(extname(name));
+		const filename = chars.slice(0, maxLength - extenstion.length);
+		return filename.join('') + extenstion.join('')
 	}
 }

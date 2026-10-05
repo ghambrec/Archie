@@ -23,3 +23,7 @@ export const ALLOWED_FILE_TYPES = new Map<string, AllowedFileType>([
 	['csv',		{ mimeType: 'text/csv',					detectedMimeType: null,					aiSupported: true }],
 	['zip',		{ mimeType: 'application/zip',			detectedMimeType: 'application/zip',	aiSupported: false }],
 ]);
+
+export const FILENAME_MAX_LENGTH = 255;
+export const FILENAME_FALLBACK = 'file';
+export const FILENAME_CONTROL_CHARS = /[\u0000-\u001f\u007f-\u009f]/g; // new lines, tabs, etc
