@@ -17,7 +17,7 @@ export class DocumentFileValidationService {
 
 		const detected = await fileTypeFromBuffer(file.buffer);
 		if ((detected?.mime ?? null) !== allowed.detectedMimeType) {
-			throw new ApplicationException(ErrorCode.DocumentFileTypeMissmatch);
+			throw new ApplicationException(ErrorCode.DocumentFileTypeMismatch);
 		}
 
 		return allowed.mimeType;
