@@ -24,6 +24,7 @@ import { IngestionService } from '../ai-service/ingestion/ingestion.service';
 import { TagsService } from '../tags/tags.service';
 import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
 import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-response.dto';
+import { DocumentFileValidationService } from './document-file-validation.service';
 
 const DOCUMENTS_BUCKET = 'documents';
 
@@ -38,6 +39,7 @@ export class DocumentsService {
     private readonly aiIngestionService: IngestionService,
     private readonly tagsService: TagsService,
     private readonly logger: Logger,
+	private readonly documentFileValidationService: DocumentFileValidationService,
   ) {}
 
   async upload(
@@ -49,6 +51,8 @@ export class DocumentsService {
       { userId, groupId, filename: file.originalname, mimeType: file.mimetype, sizeBytes: file.size },
       'Uploading document',
     );
+
+	const mimeType = await this.documentFileValidationService.validate(file);
 
     await this.groupsService.get(groupId, userId);
 
@@ -74,14 +78,14 @@ export class DocumentsService {
       file.buffer,
       file.size,
       {
-        'Content-Type': file.mimetype,
+        'Content-Type': mimeType,
       },
     );
 
     const insertResult = await this.documentsRepository.insert({
       uploadedBy: userId,
       filename: file.originalname,
-      mimeType: file.mimetype,
+      mimeType: mimeType,
       objectKey: key,
       sizeBytes: file.size,
       sha256,

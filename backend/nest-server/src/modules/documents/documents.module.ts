@@ -12,6 +12,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MulterModule } from '@nestjs/platform-express';
 import documentsConfig from 'src/config/documents.config';
 import { ConfigType } from '@nestjs/config';
+import { DocumentFileValidationService } from './document-file-validation.service';
 
 @Module({
   imports: [
@@ -27,9 +28,9 @@ import { ConfigType } from '@nestjs/config';
     GroupsModule,
     DocumentGroupsModule,
     AiServiceModule,
-    TagsModule,
+    TagsModule
   ],
   controllers: [DocumentsController],
-  providers: [DocumentsService],
+  providers: [DocumentsService, DocumentFileValidationService],
 })
 export class DocumentsModule {}

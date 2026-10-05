@@ -85,7 +85,18 @@ export const ERROR_CATALOG ={
   [ErrorCode.DocumentTagNotAssigned]: {
     status: HttpStatus.NOT_FOUND,
     message: 'Document does not have the given tag assigned.'
-  }
+  },
+  [ErrorCode.DocumentFileTypeNotAllowed] : {
+	status: HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+	message: 'Document file type is not whitelisted.'
+  },
+  [ErrorCode.DocumentFileTypeMismatch] : {
+	status: HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+	message: 'Document content does not match mime type.'
+  },
+  [ErrorCode.DocumentFileEmpty] : {
+	status: HttpStatus.BAD_REQUEST,
+	message: 'Document file is empty.'
+  },
 
   } satisfies Record<ErrorCode, ErrorDefinition>;
-

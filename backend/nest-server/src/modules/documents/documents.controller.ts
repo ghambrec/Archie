@@ -28,6 +28,8 @@ import { DocumentSummaryDto } from './dto/document-summary.dto';
 import { SetDocumentTagDto } from './dto/set-document-tag.dto';
 import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
 import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-response.dto';
+import { ApplicationException } from 'src/common/errors/application.exception';
+import { ErrorCode } from 'src/common/errors/error-code';
 
 @ApiTags('documents')
 @Controller('documents')
@@ -59,8 +61,8 @@ export class DocumentsController {
     @Param('groupId', new ParseUUIDPipe()) groupId: string,
     @UploadedFileDecorator() file: Express.Multer.File,
   ): Promise<UploadResponseDto> {
-    if (!file) {
-      throw new BadRequestException('No file was provided.');
+    if (!file || file.size === 0) {
+	  throw new ApplicationException(ErrorCode.DocumentFileEmpty);
     }
 
     return this.documentsService.upload(req.userId!, groupId, file);
