@@ -10,9 +10,15 @@ interface UploadTask {
 	filename: string;
 	progress: number;
 	status: 'uploading' | 'done' | 'error';
-	errorMessage?: string;
 	errorKey?: string;
 }
+
+const UPLOAD_ERROR_KEYS: Record<string, string> = {
+	DOCUMENT_FILE_EMPTY: "documents.upload.errors.empty",
+	DOCUMENT_FILE_TYPE_NOT_ALLOWED: "documents.upload.errors.filetypeNotAllowed",
+	DOCUMENT_FILE_TYPE_MISMATCH: "documents.upload.errors.filetypeMismatch",
+	DOCUMENT_ALREADY_EXISTS_IN_GROUP: "documents.upload.errors.alreadyExists",
+};
 
 @Component({
 	selector: 'app-doc-upload',
@@ -112,9 +118,7 @@ export class DocUpload {
 					}
 				},
 				error: (err: HttpErrorResponse) => {
-					const backendMessage = err.error?.message;
-					const message = Array.isArray(backendMessage) ? backendMessage.join(', ') : backendMessage ?? 'Error';
-					this.updateTask(task.id, { status: 'error', errorMessage: message });
+					this.updateTask(task.id, { status: 'error', errorKey: this.toTranslocoErrorKey(err) });
 				}
 			});
 		}
@@ -152,5 +156,13 @@ export class DocUpload {
 	private getExtension(filename: string): string {
 		const dot = filename.lastIndexOf('.');
 		return dot > 0 ? filename.slice(dot).toLowerCase() : '';
+	}
+
+	// translate backend error keys into transloco keys
+	private toTranslocoErrorKey(err: HttpErrorResponse): string {
+		if (err.status === 413) {
+			return "documents.upload.error.tooBig";
+		}
+		return UPLOAD_ERROR_KEYS[err.error?.code] ?? "documents.upload.errors.unknown";
 	}
 }

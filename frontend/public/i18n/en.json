@@ -16,7 +16,10 @@
 			"errors": {
 				"empty": "File is empty",
 				"tooBig": "File is too big",
-				"filetypeNotAllowed": "File type is not allowed"
+				"filetypeNotAllowed": "File type is not allowed",
+				"unknown": "Error on uploading file",
+				"filetypeMismatch": "File content does not match to file extension",
+				"alreadyExists": "Identical file already exist"
 			}
 		}
 	},
