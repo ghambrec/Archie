@@ -101,7 +101,7 @@ export class EditUserModal {
     
     this.activeModal.close();
     } catch (error : unknown) {
-      let code: string | undefined; // why let and not const 
+      let code: string | undefined;
       if (error instanceof HttpErrorResponse) 
       {
         code = error.error?.code;
@@ -120,7 +120,7 @@ export class EditUserModal {
           break;
   
         default:
-          this.saveErrorKey.set('errors.UNKOWN');
+          this.saveErrorKey.set('errors.UNKNOWN');
       }
       
       }

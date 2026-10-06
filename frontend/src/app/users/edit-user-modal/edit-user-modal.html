@@ -51,6 +51,7 @@
 		<input
 		id="edit-password"
 		type="password"
+		autocomplete="new-password"
 		class="form-control"
 		[formField]="editUserForm.password"
 		/>
@@ -64,6 +65,11 @@
 		  }
 		}
 	</div>
+		@if (saveErrorKey(); as errorKey) {
+  		<div class="alert alert-danger" role="alert">
+  	  	{{ errorKey | transloco }}
+  		</div>
+		}
 
 	<div class="d-flex justify-content-between">
 		<button
