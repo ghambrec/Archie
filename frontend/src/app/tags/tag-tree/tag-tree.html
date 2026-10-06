@@ -1,0 +1,13 @@
+<h6 class="text-uppercase text-body-secondary small fw-semibold">
+	{{ "sidebar.tags.header" | transloco }}
+</h6>
+
+<ul class="nav flex-column">
+	@for (tag of tagsService.tagTree(); track tag.id) {
+		<li class="nav-item">
+			<app-tag-tree-item [tagNode]="tag"></app-tag-tree-item>
+		</li>
+	} @empty {
+		<li class="px-3 text-body-secondary small">{{ "sidebar.tags.noData" | transloco }}</li>
+	}
+</ul>

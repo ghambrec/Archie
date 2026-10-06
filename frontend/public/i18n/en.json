@@ -7,6 +7,10 @@
 		"dropdown": {
 			"profile": "Profile",
 			"logOut": "Log out"
+		},
+		"tags": {
+			"header": "Tags",
+			"noData": "You have no readable documents."
 		}
 	},
 	"documents": {

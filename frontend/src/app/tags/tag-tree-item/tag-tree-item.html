@@ -1,0 +1,26 @@
+<div class="d-flex align-items-center gap-1 py-1">
+	@if (hasChilds()) {
+		<button type="button" class="btn btn-sm btn-link p-0 text-body-secondary" [attr.aria-expanded]="expanded()"
+			(click)="toggle()">
+			<i class="bi" [class.bi-chevron-down]="expanded()" [class.bi-chevron-right]="!expanded()"></i>
+		</button>
+	} @else {
+		<span class="d-inline-block" style="width: 1rem;"></span>
+	}
+
+	<i class="bi" [class.bi-folder2-open]="hasChilds() && expanded()" [class.bi-folder]="hasChilds() && !expanded()"
+		[class.bi-tag]="!hasChilds()"></i>
+
+	<span class="flex-grow-1 text-truncate">{{ tagNode().label }}</span>
+	<span class="text-body-secondary small">{{ tagNode().documentCount }}</span>
+</div>
+
+@if (expanded() && hasChilds()) {
+	<ul class="ps-3 list-unstyled mb-0">
+		@for (child of tagNode().children; track child.id) {
+			<li>
+				<app-tag-tree-item [tagNode]="child"></app-tag-tree-item>
+			</li>
+		}
+	</ul>
+}
