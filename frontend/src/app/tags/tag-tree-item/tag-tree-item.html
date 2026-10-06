@@ -1,4 +1,4 @@
-<div class="d-flex align-items-center gap-1 py-1 px-1 rounded" [class.bg-primary-subtle]="isSelected()">
+<div class="tag-row d-flex align-items-center gap-1 py-1 px-1 rounded" [class.bg-primary-subtle]="isSelected()">
 	@if (hasChilds()) {
 		<button type="button" class="btn btn-sm btn-link p-0 text-body-secondary" [attr.aria-expanded]="expanded()"
 			(click)="toggle()">
@@ -14,7 +14,7 @@
 			[queryParams]="{ tag: tagNode().id }"
 			[attr.aria-current]="isSelected() ? 'page' : null">
 
-			<i class="bi" [class.bi-folder2-open]="hasChilds() && expanded()" [class.bi-folder]="hasChilds() && !expanded()"
+			<i class="bi text-primary" [class.bi-folder2-open]="hasChilds() && expanded()" [class.bi-folder]="hasChilds() && !expanded()"
 				[class.bi-tag]="!hasChilds()"></i>
 
 			<span class="flex-grow-1 text-truncate">{{ tagNode().label }}</span>
