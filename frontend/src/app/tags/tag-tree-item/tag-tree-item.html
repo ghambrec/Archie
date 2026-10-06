@@ -17,7 +17,13 @@
 			<i class="bi text-primary" [class.bi-folder2-open]="hasChilds() && expanded()" [class.bi-folder]="hasChilds() && !expanded()"
 				[class.bi-tag]="!hasChilds()"></i>
 
-			<span class="flex-grow-1 text-truncate">{{ tagNode().label | transloco }}</span>
+			<span class="flex-grow-1 text-truncate">
+				@if (isTranslocoKey()) {
+					{{ tagNode().label | transloco }}
+				} @else {
+					{{ tagNode().label }}
+				}
+			</span>
 			<span class="text-body-secondary small">{{ tagNode().documentCount }}</span>
 	</a>
 </div>

@@ -27,4 +27,8 @@ export class TagTreeItem {
 	protected readonly isSelected = computed(
 		() => this.tagsService.selectedTagId() === this.tagNode().id
 	);
+
+	protected readonly isTranslocoKey = computed(
+		() => this.tagNode().label.startsWith('tag.label.')
+	);
 }
