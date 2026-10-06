@@ -24,6 +24,7 @@ import { IngestionService } from '../ai-service/ingestion/ingestion.service';
 import { TagsService } from '../tags/tags.service';
 import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
 import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-response.dto';
+import { DocumentFileValidationService } from './document-file-validation.service';
 
 const DOCUMENTS_BUCKET = 'documents';
 
@@ -38,6 +39,7 @@ export class DocumentsService {
     private readonly aiIngestionService: IngestionService,
     private readonly tagsService: TagsService,
     private readonly logger: Logger,
+	private readonly documentFileValidationService: DocumentFileValidationService,
   ) {}
 
   async upload(
@@ -45,10 +47,15 @@ export class DocumentsService {
     groupId: string,
     file: Express.Multer.File,
   ): Promise<UploadResponseDto> {
+
+	const filename = this.documentFileValidationService.normalizeFilename(file.originalname);
+
     this.logger.log(
-      { userId, groupId, filename: file.originalname, mimeType: file.mimetype, sizeBytes: file.size },
+      { userId, groupId, filename: filename, mimeType: file.mimetype, sizeBytes: file.size },
       'Uploading document',
     );
+
+	const mimeType = await this.documentFileValidationService.validate(file);
 
     await this.groupsService.get(groupId, userId);
 
@@ -74,14 +81,14 @@ export class DocumentsService {
       file.buffer,
       file.size,
       {
-        'Content-Type': file.mimetype,
+        'Content-Type': mimeType,
       },
     );
 
     const insertResult = await this.documentsRepository.insert({
       uploadedBy: userId,
-      filename: file.originalname,
-      mimeType: file.mimetype,
+      filename: filename,
+      mimeType: mimeType,
       objectKey: key,
       sizeBytes: file.size,
       sha256,
@@ -93,7 +100,11 @@ export class DocumentsService {
 
     this.logger.log({ documentId, groupId }, 'Document uploaded successfully');
 
-    await this.aiIngestionService.triggerIngestion(documentId);
+    try {
+		await this.aiIngestionService.triggerIngestion(documentId);
+	} catch (error) {
+		this.logger.error({ documentId, error }, 'could not trigger ingestion pipeline, is ai service running?');
+	}
 
     return { id: documentId, objectKey: key };
   }

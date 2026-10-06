@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import asyncpg
 import urllib3.exceptions
+import asyncio
 from minio.error import MinioException
 from pydantic_ai import UnexpectedModelBehavior
 
@@ -16,7 +17,7 @@ from src.ingestion import status
 from src.ingestion.language import detect_language
 from src.generation.analyzer import analyze_doc
 from src.generation.analyzer import DocumentInfos
-from src.ingestion.extraction import extract_text
+from src.ingestion.extraction import extract_text, UnsupportedFileTypeError, NoTextExtracedError
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +78,9 @@ async def ingest_doc(
             raise ValueError(f"no object key found for doc_id {doc_id}")
 
         doc_raw = await minio.GetDocumentBytes(obj_key)
-        doc_text = extract_text(doc_raw)
+        doc_text = await asyncio.to_thread(extract_text, doc_raw)
+        if not doc_text.strip():
+            raise NoTextExtracedError()
 
         language = detect_language(doc_text)
 
@@ -100,6 +103,16 @@ async def ingest_doc(
         await status.mark_as_finished(pool, doc_id, language)
         logger.info("ingestion finished for doc: %s", doc_id)
 
+    # SKIP AI PIPELINE
+    except UnsupportedFileTypeError as e:
+        logger.info("skipping ai processing for doc %s: unsupported mime type %s", doc_id, e.mime_type)
+        await status.mark_as_skipped(pool, doc_id, "unsupported_mime_type", str(e))
+
+    except NoTextExtracedError as e:
+        logger.info("skipping ai processing for doc %s: could not extract text", doc_id)
+        await status.mark_as_skipped(pool, doc_id, "no_text", str(e))
+
+    # ERRORS
     except ValueError as e:
         logger.exception(str(e))
         await status.write_error(pool, doc_id, "not_found", str(e))
@@ -115,6 +128,11 @@ async def ingest_doc(
     except UnexpectedModelBehavior as e:
         logger.exception("llm output validation failed for doc %s", doc_id)
         await status.write_error(pool, doc_id, "llm_error", str(e))
+
+    except asyncio.CancelledError:
+        logger.exception("job timeouted for doc: %s", doc_id)
+        await status.write_error(pool, doc_id, "timeout", "job cancelled timeouted")
+        raise
 
     except Exception as e:
         logger.exception("unexpected error during ingest for doc: %s [%s]: %s", doc_id, type(e).__name__, str(e))

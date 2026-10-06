@@ -21,6 +21,7 @@ import redisConfig from './config/redis.config';
 import storageConfig from './config/storage.config';
 import databaseConfig from './config/database.config';
 import aiServiceConfig from './config/ai-service.config';
+import documentsConfig from './config/documents.config';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import aiServiceConfig from './config/ai-service.config';
         databaseConfig,
         redisConfig,
         storageConfig,
-        aiServiceConfig
+        aiServiceConfig,
+		documentsConfig
         ],
     }),
     TypeOrmModule.forRootAsync({

@@ -12,7 +12,16 @@
 	"documents": {
 		"upload": {
 			"upload": "Upload Documents",
-			"selectGroup": "select upload group"
+			"selectGroupTooltip": "Select group for upload",
+			"maxSize": "max. {{ size }} MB per file",
+			"errors": {
+				"empty": "File is empty",
+				"tooBig": "File is too big",
+				"filetypeNotAllowed": "File type is not allowed",
+				"unknown": "Error on uploading file",
+				"filetypeMismatch": "File content does not match to file extension",
+				"alreadyExists": "Identical file already exist"
+			}
 		}
 	},
 	"login": {
