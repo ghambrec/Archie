@@ -1,5 +1,5 @@
 import { Component, inject, signal} from '@angular/core';
-import { form, FormField,FormRoot } from '@angular/forms/signals';
+import { minLength, form, FormField,FormRoot, maxLength, pattern, email } from '@angular/forms/signals';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SupportedLanguage } from '../../core/i18n/supported-language';
@@ -35,7 +35,15 @@ export class EditUserModal {
     password: '',
   })
 
-  editUserForm = form(this.editUserModal)
+  editUserForm = form(this.editUserModal, (schemaPath) =>{
+    minLength(schemaPath.password, 8), {  message: 'users.updateuser.errors.passwordError'}
+    maxLength(schemaPath.password, 25), { message: 'users.updateuser.errors.passwordError'}
+
+    email(schemaPath.email),   {message: 'users.updateUser.errors.emailFormat'}
+    pattern(schemaPath.password,  /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*]).*$/,), {
+       message: 'users.updateUser.errors.passwordPattern'
+    }
+  })
 
   initialize(user: UserInfo): void {
     this.selectedUser = user;
@@ -54,19 +62,32 @@ export class EditUserModal {
     this.saveErrorKey.set(null);
 
     const values = this.editUserModal();
-    const language = values.preferredLanguage.trim().toLowerCase(); 
-    
-    if((language !== 'en') && (language !== 'de') && (language !== 'es'))
-      throw new Error ("Unspported language")
-    const changes: PatchUser = {
-      email: values.email.trim(),
-      displayName: values.displayName.trim(),
-      preferredLanguage: language,
-    }; 
+  
+    const changes: PatchUser = {}
+
+    const newEmail =  values.email.trim().toLowerCase();
+    const origEmail = this.selectedUser.email.trim().toLocaleLowerCase();
+    if (newEmail !== origEmail)
+      changes.email = newEmail;
+
+    const newDisplayName =  values.displayName.trim();
+    const origDisplayName = this.selectedUser.displayName.trim();
+    if (newDisplayName !== origDisplayName)
+      changes.displayName = newDisplayName;
+
+    const newLanguage = values.preferredLanguage.trim().toLowerCase(); 
+    const origLanguage = this.selectedUser.preferredLanguage;
+    if((newLanguage !== 'en') && (newLanguage !== 'de') && (newLanguage !== 'es'))
+      throw new Error ("UNSUPPORTED_LANGUAGE")
+    if ( newLanguage !== origLanguage)
+        changes.preferredLanguage = newLanguage
+      
     if (values.password.trim() !== '' ) 
     {
+  
       changes.password = values.password;
     }
+
     try {
       await firstValueFrom ( 
         this.user.update(this.selectedUser.id, changes)
@@ -88,11 +109,16 @@ export class EditUserModal {
         case 'USER_NAME_ALREADY_REGISTERED':
         case 'VALIDATION_FAILED':
         case 'INTERNAL_SERVER_ERROR':
+        case 'UNSUPPORTED_LANGUAGE':
           this.saveErrorKey.set(`errors.${code}`);
           break;
   
         default:
           this.saveErrorKey.set('error.UNKOWN');
+      }
+      this.editUserForm.password().markAsTouched();
+      if (this.editUserForm().invalid()) {
+        return 
       }
     }
 
