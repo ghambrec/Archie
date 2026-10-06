@@ -1,4 +1,4 @@
-<div class="d-flex align-items-center gap-1 py-1">
+<div class="d-flex align-items-center gap-1 py-1 px-1 rounded" [class.bg-primary-subtle]="isSelected()">
 	@if (hasChilds()) {
 		<button type="button" class="btn btn-sm btn-link p-0 text-body-secondary" [attr.aria-expanded]="expanded()"
 			(click)="toggle()">
@@ -8,11 +8,18 @@
 		<span class="d-inline-block" style="width: 1rem;"></span>
 	}
 
-	<i class="bi" [class.bi-folder2-open]="hasChilds() && expanded()" [class.bi-folder]="hasChilds() && !expanded()"
-		[class.bi-tag]="!hasChilds()"></i>
+	<a class="d-flex align-items-center gap-1 flex-grow-1 overflow-hidden text-decoration-none"
+			[class.text-body]="!isSelected()" [class.fw-semibold]="isSelected()"
+			routerLink="/documents"
+			[queryParams]="{ tag: tagNode().id }"
+			[attr.aria-current]="isSelected() ? 'page' : null">
 
-	<span class="flex-grow-1 text-truncate">{{ tagNode().label }}</span>
-	<span class="text-body-secondary small">{{ tagNode().documentCount }}</span>
+			<i class="bi" [class.bi-folder2-open]="hasChilds() && expanded()" [class.bi-folder]="hasChilds() && !expanded()"
+				[class.bi-tag]="!hasChilds()"></i>
+
+			<span class="flex-grow-1 text-truncate">{{ tagNode().label }}</span>
+			<span class="text-body-secondary small">{{ tagNode().documentCount }}</span>
+	</a>
 </div>
 
 @if (expanded() && hasChilds()) {

@@ -1,19 +1,29 @@
-import { Component, computed, input, signal } from '@angular/core';
-import { TagNode } from '../tags';
+import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
+import { TagNode, Tags } from '../tags';
+import { RouterLink } from '@angular/router';
 
 @Component({
 	selector: 'app-tag-tree-item',
-	imports: [],
+	imports: [RouterLink],
 	templateUrl: './tag-tree-item.html',
 	styleUrl: './tag-tree-item.scss',
 })
 export class TagTreeItem {
 	readonly tagNode = input.required<TagNode>();
 
-	protected readonly expanded = signal(false);
+	private readonly tagsService = inject(Tags);
+
 	protected readonly hasChilds = computed(() => this.tagNode().children.length > 0);
+	protected readonly expanded = linkedSignal({
+		source: () => this.tagsService.selectedParentIds().has(this.tagNode().id),
+		computation: (isParent, previous) => isParent || (previous?.value ?? false)
+	});
 
 	protected toggle() {
 		this.expanded.update(value => !value);
 	}
+
+	protected readonly isSelected = computed(
+		() => this.tagsService.selectedTagId() === this.tagNode().id
+	);
 }

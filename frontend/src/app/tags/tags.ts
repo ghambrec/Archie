@@ -1,6 +1,9 @@
-import { computed, Service } from '@angular/core';
+import { computed, inject, Service } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { httpResource } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 
 export interface TagResponse {
 	id: string;
@@ -46,4 +49,33 @@ export class Tags {
 
 	// tag baum
 	readonly tagTree = computed(() => buildTagTree(this.tagDocsList.value()));
+
+	// aktuell ausgewaehlte tag id
+	private readonly route = inject(ActivatedRoute);
+	readonly selectedTagId = toSignal(
+		this.route.queryParamMap.pipe(map(params => params.get('tag'))),
+		{ initialValue: null }
+	)
+
+	// map mit id und TagResponse, zum nachschlagen fuer parents
+	private readonly tagsById = computed(
+		() => new Map<string, TagResponse>(this.tagDocsList.value().map(tag => [tag.id, tag]))
+	)
+
+	// return all parent ids from the current selected tag
+	readonly selectedParentIds = computed(() => {
+		const parentIds = new Set<string>();
+		const selectedId = this.selectedTagId();
+		if (!selectedId) {
+			return parentIds;
+		}
+
+		const tagsById = this.tagsById();
+		let current = tagsById.get(selectedId);
+		while (current?.parentId && !parentIds.has(current.parentId)) {
+			parentIds.add(current.parentId);
+			current = tagsById.get(current.parentId);
+		}
+		return parentIds;
+	});
 }
