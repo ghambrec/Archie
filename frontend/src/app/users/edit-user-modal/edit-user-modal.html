@@ -18,8 +18,14 @@
 		type="email"
 		class="form-control"
 		[formField]="editUserForm.email"
+		[class.is-invalid]="editUserForm.email().dirty() && editUserForm.email().invalid()"
 		/>
-	</div>
+		@if (editUserForm.email().dirty() && editUserForm.email().invalid()) {
+			<div class="invalid-feedback">
+				{{ editUserForm.email().errors()[0].message | transloco }}
+			</div>
+		}
+		</div>
 
 	<div class="mb-3">
 		<label for="edit-displayName" class="form-label">{{'users.updateUser.displayName' | transloco}}</label>

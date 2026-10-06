@@ -12,7 +12,7 @@
 				[class.is-invalid]="createUserForm.email().touched() && createUserForm.email().invalid()"
 				[formField]="createUserForm.email" />
 			@if (createUserForm.email().touched() && createUserForm.email().invalid()) {
-			<div class="invalid-feedback">{{ createUserForm.email().errors()[0].message }}</div>
+			<div class="invalid-feedback">{{ createUserForm.email().errors()[0].message | transloco }}</div>
 			}
 		</div>
 
@@ -22,7 +22,7 @@
 				[class.is-invalid]="createUserForm.password().touched() && createUserForm.password().invalid()"
 				[formField]="createUserForm.password" />
 			@if (createUserForm.password().touched() && createUserForm.password().invalid()) {
-			<div class="invalid-feedback">{{ createUserForm.password().errors()[0].message }}</div>
+			<div class="invalid-feedback">{{ createUserForm.password().errors()[0].message | transloco }}</div>
 			}
 		</div>
 
@@ -32,7 +32,7 @@
 				[class.is-invalid]="createUserForm.displayName().touched() && createUserForm.displayName().invalid()"
 				[formField]="createUserForm.displayName" />
 			@if (createUserForm.displayName().touched() && createUserForm.displayName().invalid()) {
-			<div class="invalid-feedback">{{ createUserForm.displayName().errors()[0].message }}</div>
+			<div class="invalid-feedback">{{ createUserForm.displayName().errors()[0].message | transloco}}</div>
 			}
 		</div>
 		@if (createUserForm().errors().length > 0) {
