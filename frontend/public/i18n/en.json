@@ -41,9 +41,18 @@
 			"btnSubmitPending": "Sending...",
 			"btnCancel": "Cancel",
 			"feedbackMsg": "User successfully created",
-			"errorGeneral": "Unable to create user",
-			"errorConflictMail": "E-Mail already registered",
-			"errorConflictName": "Name already registered"
+			"displayNameRequired":"Display name is mandatory",
+			"errors": {
+  				"emailRequired": "Email is required.",
+  				"emailFormat": "Please enter a valid email address.",
+  				"passwordRequired": "Password is required.",
+  				"passwordMinLength": "Password must contain at least 8 characters.",
+  				"displayNameRequired": "Name is required.",
+				"General": "Unable to create user",
+				"ConflictMail": "E-Mail already registered",
+				"ConflictName": "Name already registered",
+				"Conflict": "A user with these details already exists."
+			}
 		},
 		"userInfo": {
 			"heading": "User groups",
@@ -156,6 +165,9 @@
 				"btnSave": "Save",
 				"errorGeneral": "Unable to update permissions.",
 				"errorLastAdmin": "The admin permission cannot be removed because this is the last admin."
+			},
+			"errors": {
+				"nameRequired": "Name is requirred"
 			}
 	},
 	"errors": {
