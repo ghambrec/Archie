@@ -36,13 +36,13 @@ export class EditUserModal {
   })
 
   editUserForm = form(this.editUserModal, (schemaPath) =>{
-    minLength(schemaPath.password, 8), {  message: 'users.updateuser.errors.passwordError'}
-    maxLength(schemaPath.password, 25), { message: 'users.updateuser.errors.passwordError'}
+    minLength(schemaPath.password, 8, {  message: 'users.updateUser.errors.passwordError'})
+    maxLength(schemaPath.password, 25, { message: 'users.updateUser.errors.passwordError'})
 
-    email(schemaPath.email),   {message: 'users.updateUser.errors.emailFormat'}
-    pattern(schemaPath.password,  /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*]).*$/,), {
+    email(schemaPath.email,   {message: 'users.updateUser.errors.emailFormat'})
+    pattern(schemaPath.password,  /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*]).*$/, {
        message: 'users.updateUser.errors.passwordPattern'
-    }
+    })
   })
 
   initialize(user: UserInfo): void {
@@ -77,8 +77,10 @@ export class EditUserModal {
 
     const newLanguage = values.preferredLanguage.trim().toLowerCase(); 
     const origLanguage = this.selectedUser.preferredLanguage;
-    if((newLanguage !== 'en') && (newLanguage !== 'de') && (newLanguage !== 'es'))
-      throw new Error ("UNSUPPORTED_LANGUAGE")
+    if((newLanguage !== 'en') && (newLanguage !== 'de') && (newLanguage !== 'es')){
+      this.saveErrorKey.set('errors.UNSUPPORTED_LANGUAGE');
+      return;
+    }
     if ( newLanguage !== origLanguage)
         changes.preferredLanguage = newLanguage
       
@@ -88,6 +90,10 @@ export class EditUserModal {
       changes.password = values.password;
     }
 
+    this.editUserForm.password().markAsTouched();
+      if (this.editUserForm().invalid()) {
+        return 
+      }
     try {
       await firstValueFrom ( 
         this.user.update(this.selectedUser.id, changes)
@@ -114,14 +120,10 @@ export class EditUserModal {
           break;
   
         default:
-          this.saveErrorKey.set('error.UNKOWN');
+          this.saveErrorKey.set('errors.UNKOWN');
       }
-      this.editUserForm.password().markAsTouched();
-      if (this.editUserForm().invalid()) {
-        return 
+      
       }
     }
-
-    }
-
 }
+
