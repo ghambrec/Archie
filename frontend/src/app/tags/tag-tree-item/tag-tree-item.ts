@@ -1,10 +1,11 @@
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { TagNode, Tags } from '../tags';
 import { RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
 	selector: 'app-tag-tree-item',
-	imports: [RouterLink],
+	imports: [RouterLink, TranslocoPipe],
 	templateUrl: './tag-tree-item.html',
 	styleUrl: './tag-tree-item.scss',
 })
