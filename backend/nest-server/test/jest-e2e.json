@@ -4,8 +4,12 @@
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
+    "^.+\\.ts$": "ts-jest",
+    "^.+\\.js$": ["ts-jest", { "tsconfig": { "allowJs": true, "module": "commonjs", "moduleResolution": "node10", "isolatedModules": true } }]
   },
+  "transformIgnorePatterns": [
+    "/node_modules/(?!(\\.pnpm|file-type|strtok3|token-types|@tokenizer|uint8array-extras|@borewit))"
+  ],
   "moduleNameMapper": {
     "^src/(.*)$": "<rootDir>/../src/$1"
   }
