@@ -102,5 +102,13 @@ export const ERROR_CATALOG ={
 	status: HttpStatus.CONFLICT,
 	message: 'Document is still processing the ai pipeline.'
   },
+    [ErrorCode.DocumentIngestionNotRetryable] : {
+	status: HttpStatus.CONFLICT,
+	message: 'Document ingestion is not retryable, only possible if it was not started or has failed'
+  },
+    [ErrorCode.AiServiceUnavailable] : {
+	status: HttpStatus.SERVICE_UNAVAILABLE,
+	message: 'AI Service is currently unavailable.'
+  },
 
   } satisfies Record<ErrorCode, ErrorDefinition>;

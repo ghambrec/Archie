@@ -24,4 +24,6 @@ export enum ErrorCode {
 	DocumentFileTypeMismatch ='DOCUMENT_FILE_TYPE_MISMATCH',
 	DocumentFileEmpty = 'DOCUMENT_FILE_EMPTY',
 	DocumentStillProcessing = 'DOCUMENT_STILL_PROCESSING',
+	DocumentIngestionNotRetryable = 'DOCUMENT_INGESTION_NOT_RETRYABLE',
+	AiServiceUnavailable = 'AI_SERVICE_UNAVAILABLE',
   }

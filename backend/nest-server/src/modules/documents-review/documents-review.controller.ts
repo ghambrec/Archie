@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { DocumentsReviewService } from './documents-review.service';
@@ -32,5 +32,18 @@ export class DocumentsReviewController {
 		@Body() dto: ReviewDocumentTagsDto
 	): Promise<void> {
 		return this.documentsReviewService.reviewTags(req.userId!, docId, dto.tagIds);
+	}
+
+	@Post(':id/ingestion')
+	@HttpCode(HttpStatus.ACCEPTED)
+	@ApiOperation({
+		summary: 'Retry AI ingestion for a document',
+		description: 'Only allowed if the AI pipeline never started or failed.',
+	})
+	async retryIngestion(
+		@Req() req: Request,
+		@Param('id', new ParseUUIDPipe()) docId: string,
+	): Promise<void> {
+		return this.documentsReviewService.retryIngestion(req.userId!, docId);
 	}
 }

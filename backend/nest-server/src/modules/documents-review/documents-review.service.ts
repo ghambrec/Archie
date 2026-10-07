@@ -8,12 +8,13 @@ import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
 import { Tag } from '../tags/entities/tag.entity';
 import { DocumentTag } from '../tags/entities/document-tag.entity';
+import { IngestionService } from '../ai-service/ingestion/ingestion.service';
 
 interface DocumentReviewRawRow {
 	id: string;
 	filename: string;
 	mimeType: string;
-	sizeBytes: string;   // bigint → String vom pg-Treiber
+	sizeBytes: string;
 	createdAt: Date;
 	aiStatus: string;
 	aiErrorKey: string | null;
@@ -26,7 +27,8 @@ export class DocumentsReviewService {
 	constructor(
 		private readonly logger: Logger,
 		@InjectRepository(Document)
-		private readonly documentRepository: Repository<Document>
+		private readonly documentRepository: Repository<Document>,
+		private readonly ingestionService: IngestionService
 	) { }
 
 
@@ -78,6 +80,7 @@ export class DocumentsReviewService {
 			suggestions: row.suggestions
 		}));
 	}
+
 
 	async reviewTags(userId: string, docId: string, tagIds: string[]): Promise<void> {
 		this.logger.log({ userId, docId, tagIds }, 'reviewing document tags');
@@ -149,5 +152,38 @@ export class DocumentsReviewService {
 		});
 
 		this.logger.log({ userId, docId, count: tagIds.length }, 'document tags reviewed successfully');
+	}
+
+
+	async retryIngestion(userId: string, docId: string): Promise<void> {
+		this.logger.log({ userId, docId }, 'retrying ai ingestion for document');
+
+		// load doc ai status
+		const rows = await this.documentRepository.query<{ aiStatus: string }[]>(
+			`
+				SELECT COALESCE(ad.status, 'NOT_STARTED') AS "aiStatus"
+				FROM documents AS d
+				LEFT JOIN ai_documents AS ad
+						ON ad.id = d.id
+				WHERE
+						d.id = $1
+						AND d.uploaded_by = $2
+						AND d.deleted_at IS NULL
+			`,
+			[docId, userId]
+		);
+		const document = rows[0];
+		if (!document) {
+			throw new ApplicationException(ErrorCode.DocumentNotFound);
+		}
+
+		// only retry if pipeline didnt start or failed
+		if (document.aiStatus !== 'NOT_STARTED' && document.aiStatus !== 'FAILED') {
+			throw new ApplicationException(ErrorCode.DocumentIngestionNotRetryable);
+		}
+
+		await this.ingestionService.triggerIngestion(docId);
+
+		this.logger.log({ userId, docId }, 'ai ingestion retriggered successfully');
 	}
 }
