@@ -94,7 +94,7 @@ export class TagsService {
 
     const rows = await this.tagsRepository.query<TagResponseDto[]>(
       `
-		select id, name, label, facet, parent_id as parentId
+		select id, name, label, facet, parent_id as "parentId"
 		from tags
 		order by facet asc, name asc;
       `
