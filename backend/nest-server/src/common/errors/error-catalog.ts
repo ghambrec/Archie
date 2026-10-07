@@ -98,5 +98,9 @@ export const ERROR_CATALOG ={
 	status: HttpStatus.BAD_REQUEST,
 	message: 'Document file is empty.'
   },
+  [ErrorCode.DocumentStillProcessing] : {
+	status: HttpStatus.CONFLICT,
+	message: 'Document is still processing the ai pipeline.'
+  },
 
   } satisfies Record<ErrorCode, ErrorDefinition>;
