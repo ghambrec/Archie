@@ -7,17 +7,25 @@ import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 
 @ApiTags('tags')
 @Controller('tags')
+@UseGuards(SessionAuthGuard)
 export class TagsController {
   constructor(private readonly tagsService: TagsService) {}
 
+  @Get()
+  @ApiOperation({
+    summary: 'List all tags',
+  })
+  async findAll(@Req() req: Request): Promise<TagResponseDto[]> {
+    return this.tagsService.findAll(req.userId!);
+  }
+
   @Get('with-docs')
-  @UseGuards(SessionAuthGuard)
   @ApiOperation({
     summary: 'List tags scoped to documents the current user can read',
     description:
       "Returns a flat list of tags with a documentCount, scoped to documents the current user can see (own or shared via a group). Tags with no visible documents are omitted.",
   })
-  async findAll(@Req() req: Request): Promise<TagResponseDto[]> {
-    return this.tagsService.findAll(req.userId!);
+  async tagsWithDocs(@Req() req: Request): Promise<TagResponseDto[]> {
+    return this.tagsService.tagsWithDocs(req.userId!);
   }
 }
