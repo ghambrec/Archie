@@ -24,6 +24,47 @@
 			}
 		}
 	},
+	"tag": {
+		"header": "Tags",
+		"noData": "You have no readable documents.",
+		"label": {
+			"work": "Work",
+			"education": "Education",
+			"health": "Health",
+			"insurance": "Insurance",
+			"finance": "Finance",
+			"housing": "Housing",
+			"vehicles": "Vehicles",
+			"travel": "Travel",
+			"leisure": "Leisure",
+			"shopping": "Shopping",
+			"family": "Family & Personal",
+			"legal": "Legal & Authorities",
+			"pets": "Pets",
+			"other": "Other",
+			"loans": "Loans",
+			"investments": "Investments",
+			"retirement": "Retirement",
+			"taxes": "Taxes",
+			"banking": "Bank Account",
+			"property": "Property Ownership",
+			"rental": "Tenancy",
+			"telecom": "Phone & Internet",
+			"utilities": "Utilities",
+			"identity": "ID Documents",
+			"contract": "Contract",
+			"invoice": "Invoice & Receipt",
+			"statement": "Statement",
+			"notice": "Notice & Letter",
+			"id-document": "ID Document",
+			"certificate": "Certificate",
+			"report": "Report",
+			"ticket": "Ticket & Booking",
+			"application": "Application",
+			"correspondence": "Correspondence",
+			"manual": "Manual & Warranty"
+		}
+	},
 	"login": {
 		"title": "Archie - Login",
 		"email": "E-Mail",
@@ -151,13 +192,13 @@
 			}
 	},
 	"errors": {
-    "AUTH_EMAIL_ALREADY_REGISTERED": "This email address is already registered.",
-    "AUTH_INVALID_CREDENTIALS": "Invalid email or password.",
-    "USER_NOT_FOUND": "User was not found.",
-    "USER_NAME_ALREADY_REGISTERED": "This display name is already registered.",
-    "VALIDATION_FAILED": "The submitted data is invalid.",
-    "INTERNAL_SERVER_ERROR": "An unexpected error occurred.",
-    "UNKNOWN": "An unexpected error occurred."
-  }
+	"AUTH_EMAIL_ALREADY_REGISTERED": "This email address is already registered.",
+	"AUTH_INVALID_CREDENTIALS": "Invalid email or password.",
+	"USER_NOT_FOUND": "User was not found.",
+	"USER_NAME_ALREADY_REGISTERED": "This display name is already registered.",
+	"VALIDATION_FAILED": "The submitted data is invalid.",
+	"INTERNAL_SERVER_ERROR": "An unexpected error occurred.",
+	"UNKNOWN": "An unexpected error occurred."
+	}
 
 }

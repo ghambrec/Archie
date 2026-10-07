@@ -10,10 +10,10 @@ import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 export class TagsController {
   constructor(private readonly tagsService: TagsService) {}
 
-  @Get()
+  @Get('with-docs')
   @UseGuards(SessionAuthGuard)
   @ApiOperation({
-    summary: 'List tags',
+    summary: 'List tags scoped to documents the current user can read',
     description:
       "Returns a flat list of tags with a documentCount, scoped to documents the current user can see (own or shared via a group). Tags with no visible documents are omitted.",
   })
