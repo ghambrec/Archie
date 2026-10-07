@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class TagResponseDto {
   @ApiProperty()
@@ -10,12 +10,12 @@ export class TagResponseDto {
   @ApiProperty()
   label!: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   facet?: string;
 
   @ApiProperty({ nullable: true })
   parentId!: string | null;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   documentCount?: number;
 }
