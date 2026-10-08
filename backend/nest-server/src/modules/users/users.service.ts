@@ -246,5 +246,9 @@ export class UsersService implements OnApplicationBootstrap {
     await this.usersRepository.save(user);
     this.logger.log({ userId: user.id }, 'Admin reset user password successfully');
   }
+
+  async findById(userId: string): Promise<User | null> {
+    return this.usersRepository.findOneBy({ id: userId });
+  }
 }
 
