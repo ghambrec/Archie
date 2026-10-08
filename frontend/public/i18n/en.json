@@ -66,6 +66,19 @@
 			"manual": "Manual & Warranty"
 		}
 	},
+	"ai-chat": {
+		"message": {
+			"sender": {
+				"user": "User",
+				"llm" : "KI"
+			}
+		},
+		"botton": {
+			"send": "send", 
+			"Delete_chat": "Delete Chat",
+			"Delete_all_chats" : "Delete all Chats"
+		}
+	},
 	"login": {
 		"title": "Archie - Login",
 		"email": "E-Mail",

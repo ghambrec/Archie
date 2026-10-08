@@ -8,14 +8,19 @@
 
   <div class="chat-messages" role="log" aria-label="Chat messages">
     @for (message of messages(); track message.id) {
-      <article
+    <article
       class="message"
       [class.message-user]="message.sender === 'user'"
       [class.message-ai]="message.sender === 'llm'"
     >
-      <strong>{{ message.sender === 'user' ? 'You' : 'AI' }}</strong>
-      <p>{{ message.content | transloco }}</p>
-    </article>
+      <strong>
+        {{ (message.sender === 'user'
+          ? 'ai-chat.message.sender.user'
+          : 'ai-chat.message.sender.llm') | transloco }}
+      </strong>
+
+  <p>{{ message.content }}</p>
+</article>
     }
   </div>
 
@@ -39,22 +44,22 @@
       (input) = draft.set(questionInput.value)
     ></textarea>
     
-  <div class="d-flex gab-3">
+  <div class="d-flex gap-3">
     <button  
       type="button" 
       class="btn btn-primary"
       [disabled] = "!draft().trim()"
       (click)= "send()"
       >
-        Send
+        {{'ai-chat.botton.send' | transloco}}
     </button>
 
 	  <button type="button" class="btn btn-secondary" disabled>
-      Delete Chat 
+       {{'ai-chat.botton.Delete_chat' | transloco}}
     </button>
 
 	  <button type="button" class="btn btn-secondary" disabled>
-      Delete all Chats
+      {{'ai-chat.botton.Delete_all_chats' | transloco}}
     </button>
   </div>
 

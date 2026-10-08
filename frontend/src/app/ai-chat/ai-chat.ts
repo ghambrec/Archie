@@ -12,7 +12,7 @@ export class AIChat {
 
 	readonly messages = signal<ChatMessage[]> ([
 		{
-			id: 'demo-message',
+			id: 'demo-message0',
 			conv_id: 'demo',
 			sender: 'user',
 			content: 'Hallo! ich bin eine demooooooooooooooooooooooo frage',
@@ -21,7 +21,7 @@ export class AIChat {
 		},
 
 		{
-			id: 'demo-message',
+			id: 'demo-message1',
 			conv_id: 'demo',
 			sender: 'llm',
 			content: 'Hallo! ich bin eine demo antworttttttttttttttttttttttttttttttttttttt',
@@ -30,7 +30,7 @@ export class AIChat {
 		},
 		
 		{
-			id: 'demo-message',
+			id: 'demo-message2',
 			conv_id: 'demo',
 			sender: 'user',
 			content: 'Hallo! ich bin eine demo frage',
@@ -39,7 +39,7 @@ export class AIChat {
 		},
 
 		{
-			id: 'demo-message',
+			id: 'demo-message1',
 			conv_id: 'demo',
 			sender: 'llm',
 			content: 'Hallo! ich bin eine demo antwort',
@@ -66,6 +66,11 @@ export class AIChat {
 			created_at: new Date().toString(),
 
 		};
+		this.messages.update((previous) => {
+			const updateMessages = [...previous,newMessage];
+			return updateMessages;
+		})
+		this.draft.set('');
 
 	}
 }
