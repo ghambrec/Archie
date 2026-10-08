@@ -25,7 +25,7 @@ export class CreateGroupModal {
 	createGroupAdminForm = form(
 		this.createGroupModal,
 		(p) => {
-			required(p.name, { message: 'groups.groupList.errors.nameRequired' });
+			required(p.name, { message: 'groups.createGroupAdmin.errors.nameRequired' });
 		},
 		{
 			submission: {
