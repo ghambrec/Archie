@@ -2,9 +2,10 @@ import { Component, inject, signal } from '@angular/core'
 import { Auth } from '../auth'
 import { form, FormField, FormRoot, minLength, required } from '@angular/forms/signals';
 import { TranslocoPipe } from '@jsverse/transloco';
-// import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { Router } from '@angular/router';
+import { Users } from '../../users/users';
 
 @Component({
     selector: 'app-set-password',
@@ -15,7 +16,8 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 export class SetPassword {
     private readonly authService = inject(Auth);
     private readonly activeModal = inject(NgbActiveModal);
-    // public readonly router = inject(Router);
+    public readonly router = inject(Router);
+    private readonly userService = inject(Users);
 
     readonly feedbackMsg = signal<string | null>(null);
 
@@ -50,4 +52,14 @@ export class SetPassword {
             }
         }
     )
+
+    async cancel() {
+        try {
+            await firstValueFrom(this.authService.logout());
+        } finally {
+            this.userService.currentUser.set(null);
+            this.activeModal.dismiss('cancelled');
+            this.router.navigateByUrl('/login');
+        }
+    }
 }
