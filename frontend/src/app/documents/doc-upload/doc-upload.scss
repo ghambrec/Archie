@@ -12,3 +12,12 @@
 .upload-task-name {
 	min-width: 0;
 }
+
+.upload-hint {
+	font-size: 0.75rem;
+	opacity: 0.8;
+}
+
+.upload-zone.dragging.no-group {
+	outline-color: var(--bs-danger);
+}

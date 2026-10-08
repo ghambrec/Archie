@@ -7,20 +7,20 @@ export class SeedTags1788785000811 implements MigrationInterface {
             INSERT INTO tags (
                 name, label, description, facet, is_system) 
             VALUES
-                ('work',      'Work',            	'Employment, career, employer',              			'domain', true),
-                ('education', 'Education',       	'Schooling, studies, courses, training',     			'domain', true),
-                ('health',    'Health',          	'Medicine, doctors, therapy, medication',    			'domain', true),
-                ('insurance', 'Insurance',       	'Any kind of insurance, combine with the affected area','domain', true),
-                ('finance',   'Finance',         	'Banking, taxes, retirement, investments',   			'domain', true),
-                ('housing',   'Housing',         	'Rent, property, utilities, household',      			'domain', true),
-                ('vehicles',  'Vehicles',        	'Cars, motorcycles, bicycles and accessories', 			'domain', true),
-                ('travel',    'Travel',          	'Trips, bookings, stays abroad',             			'domain', true),
-                ('leisure',   'Leisure',         	'Events, hobbies, memberships',              			'domain', true),
-                ('shopping',  'Shopping',        	'Consumer purchases, orders, electronics, furniture',	'domain', true),
-                ('family',    'Family & Personal',	'Civil status, ID documents, children, relatives', 		'domain', true),
-                ('legal',     'Legal & Authorities','Government offices, notices, lawyers, disputes', 		'domain', true),
-                ('pets',      'Pets',            	'Veterinarian, ownership, registration',     			'domain', true),
-                ('other',     'Other',           	'Only if no other domain fits',              			'domain', true)
+                ('work',      'tag.label.work',            	'Employment, career, employer',              			'domain', true),
+                ('education', 'tag.label.education',       	'Schooling, studies, courses, training',     			'domain', true),
+                ('health',    'tag.label.health',          	'Medicine, doctors, therapy, medication',    			'domain', true),
+                ('insurance', 'tag.label.insurance',       	'Any kind of insurance, combine with the affected area','domain', true),
+                ('finance',   'tag.label.finance',         	'Banking, taxes, retirement, investments',   			'domain', true),
+                ('housing',   'tag.label.housing',         	'Rent, property, utilities, household',      			'domain', true),
+                ('vehicles',  'tag.label.vehicles',        	'Cars, motorcycles, bicycles and accessories', 			'domain', true),
+                ('travel',    'tag.label.travel',          	'Trips, bookings, stays abroad',             			'domain', true),
+                ('leisure',   'tag.label.leisure',         	'Events, hobbies, memberships',              			'domain', true),
+                ('shopping',  'tag.label.shopping',        	'Consumer purchases, orders, electronics, furniture',	'domain', true),
+                ('family',    'tag.label.family',	   		'Civil status, ID documents, children, relatives', 		'domain', true),
+                ('legal',     'tag.label.legal',       		'Government offices, notices, lawyers, disputes', 		'domain', true),
+                ('pets',      'tag.label.pets',            	'Veterinarian, ownership, registration',     			'domain', true),
+                ('other',     'tag.label.other',           	'Only if no other domain fits',              			'domain', true)
             ON CONFLICT (name) do Update
             SET
                 label = EXCLUDED.label,
@@ -34,16 +34,16 @@ export class SeedTags1788785000811 implements MigrationInterface {
             SELECT  v.name, v.label, v.description, 'domain', true, p.id
             FROM (
                 VALUES
-                ('banking',      'Bank Account',      'Checking account, credit card, payments', 		'finance'),
-                ('taxes',        'Taxes',             'Tax return, notices, tax office',         		'finance'),
-                ('retirement',   'Retirement',        'Pension, retirement provisions',          		'finance'),
-                ('investments',  'Investments',       'Securities, funds, brokerage account',    		'finance'),
-                ('loans',        'Loans',             'Loans, financing, leasing',               		'finance'),
-                ('utilities',    'Utilities',         'Electricity, gas, water, heating, waste', 		'housing'),
-                ('telecom',      'Phone & Internet',  'Mobile, landline, internet connection',   		'housing'),
-                ('rental',       'Tenancy',           'Rented apartment, landlord, utility costs',		'housing'),
-                ('property',     'Property Ownership','Ownership, property management, property tax',	'housing'),
-                ('identity',     'ID Documents',      'ID card, passport, driver''s license',    		'family')
+                ('banking',      'tag.label.banking',   	   'Checking account, credit card, payments', 		'finance'),
+                ('taxes',        'tag.label.taxes',             'Tax return, notices, tax office',         		'finance'),
+                ('retirement',   'tag.label.retirement',        'Pension, retirement provisions',          		'finance'),
+                ('investments',  'tag.label.investments',       'Securities, funds, brokerage account',    		'finance'),
+                ('loans',        'tag.label.loans',             'Loans, financing, leasing',               		'finance'),
+                ('utilities',    'tag.label.utilities',         'Electricity, gas, water, heating, waste', 		'housing'),
+                ('telecom',      'tag.label.telecom',  			'Mobile, landline, internet connection',   		'housing'),
+                ('rental',       'tag.label.rental',         	'Rented apartment, landlord, utility costs',		'housing'),
+                ('property',     'tag.label.property',			'Ownership, property management, property tax',	'housing'),
+                ('identity',     'tag.label.identity',     		'ID card, passport, driver''s license',    		'family')
                 ) AS v(name, label, description, parent_name)
             JOIN tags p ON p.name = v.parent_name
             ON CONFLICT (name) DO UPDATE
@@ -58,17 +58,17 @@ export class SeedTags1788785000811 implements MigrationInterface {
         await queryRunner.query(`
             INSERT INTO tags (name, label, description, facet, is_system) 
             VALUES
-                ('contract',      'Contract',           'Contracts, policies, agreements, terminations', 					'doctype', true),
-                ('invoice',       'Invoice & Receipt',  'Invoices, receipts, bills, reminders',          					'doctype', true),
-                ('statement',     'Statement',          'Bank statements, payslips, annual statements',  					'doctype', true),
-                ('notice',        'Notice & Letter',    'Official notices, letters, notifications',      					'doctype', true),
-                ('certificate',   'Certificate',        'Diplomas, certificates, vaccination record, inspection, deeds',	'doctype', true),
-                ('report',        'Report',             'Medical findings, expert reports, minutes',     					'doctype', true),
-                ('ticket',        'Ticket & Booking',   'Booking confirmations, admission tickets, invitations', 			'doctype', true),
-                ('application',   'Application',        'Applications, job applications, resume',        					'doctype', true),
-                ('id-document',   'ID Document',        'Official identity documents',                   					'doctype', true),
-                ('manual',        'Manual & Warranty',  'User manuals, warranty cards, data sheets',      					'doctype', true),
-                ('correspondence','Correspondence',     'Other correspondence with no clear form',							'doctype', true)
+                ('contract',      'tag.label.contract',         'Contracts, policies, agreements, terminations', 					'doctype', true),
+                ('invoice',       'tag.label.invoice',  		'Invoices, receipts, bills, reminders',          					'doctype', true),
+                ('statement',     'tag.label.statement',        'Bank statements, payslips, annual statements',  					'doctype', true),
+                ('notice',        'tag.label.notice',    		'Official notices, letters, notifications',      					'doctype', true),
+                ('certificate',   'tag.label.certificate',      'Diplomas, certificates, vaccination record, inspection, deeds',	'doctype', true),
+                ('report',        'tag.label.report',           'Medical findings, expert reports, minutes',     					'doctype', true),
+                ('ticket',        'tag.label.ticket',   		'Booking confirmations, admission tickets, invitations', 			'doctype', true),
+                ('application',   'tag.label.application',      'Applications, job applications, resume',        					'doctype', true),
+                ('id-document',   'tag.label.id-document',      'Official identity documents',                   					'doctype', true),
+                ('manual',        'tag.label.manual',  			'User manuals, warranty cards, data sheets',      					'doctype', true),
+                ('correspondence','tag.label.correspondence',	'Other correspondence with no clear form',							'doctype', true)
             ON CONFLICT (name) DO UPDATE
             SET label = EXCLUDED.label,
             description = EXCLUDED.description, 

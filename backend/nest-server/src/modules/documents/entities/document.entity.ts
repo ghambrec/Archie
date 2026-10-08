@@ -33,6 +33,9 @@ export class Document {
   @Column({ type: 'integer', name: 'page_count', nullable: true })
   pageCount!: number | null;
 
+  @Column({ type: 'timestamptz', name: 'reviewed_ai_at', nullable: true })
+  reviewedAiAt!: Date | null;
+
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
 
