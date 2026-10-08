@@ -57,6 +57,11 @@ export class Login {
 							modalRef.closed.subscribe(() => {
 								this.router.navigateByUrl('/home');
 							});
+
+							modalRef.dismissed.subscribe(() => {
+								this.router.navigateByUrl('/login');
+							});
+
 							return;
 						}
 
