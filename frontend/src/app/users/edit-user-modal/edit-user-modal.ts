@@ -43,6 +43,9 @@ export class EditUserModal {
     pattern(schemaPath.password,  /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*]).*$/, {
        message: 'users.updateUser.errors.passwordPattern'
     })
+    pattern(schemaPath.preferredLanguage,  /^\s*(en|de|es)\s*$/i, {
+      message: 'errors.UNSUPPORTED_LANGUAGE'}
+    )
   })
 
   initialize(user: UserInfo): void {
@@ -77,10 +80,6 @@ export class EditUserModal {
 
     const newLanguage = values.preferredLanguage.trim().toLowerCase(); 
     const origLanguage = this.selectedUser.preferredLanguage;
-    if((newLanguage !== 'en') && (newLanguage !== 'de') && (newLanguage !== 'es')){
-      this.saveErrorKey.set('errors.UNSUPPORTED_LANGUAGE');
-      return;
-    }
     if ( newLanguage !== origLanguage)
         changes.preferredLanguage = newLanguage
       

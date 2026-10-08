@@ -44,7 +44,13 @@
 		type="text"
 		class="form-control"
 		[formField]="editUserForm.preferredLanguage"
+		[class.is-invalid]="editUserForm.preferredLanguage().dirty() && editUserForm.preferredLanguage().invalid()"
 		/>
+		@if (editUserForm.preferredLanguage().dirty() && editUserForm.preferredLanguage().invalid()) {
+		<div class="invalid-feedback">
+		{{ editUserForm.preferredLanguage().errors()[0].message | transloco }}
+		</div>
+		}
 		<div
 			id="explaination-help" class="form-text">
 			supported languages are en, de and es 
