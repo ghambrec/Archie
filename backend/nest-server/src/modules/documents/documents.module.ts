@@ -9,6 +9,7 @@ import { DocumentGroupsModule } from '../document-groups/document-groups.module'
 import { AiServiceModule } from '../ai-service/ai-service.module';
 import { TagsModule } from '../tags/tags.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     DocumentGroupsModule,
     AiServiceModule,
     TagsModule,
+    UsersModule,
   ],
   controllers: [DocumentsController],
   providers: [DocumentsService],

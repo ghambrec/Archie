@@ -8,9 +8,10 @@ import { TagsService } from './tags.service';
 import { AdminTagsService } from './admin-tags.service';
 import { SessionModule } from '../auth/session/session.module';
 import { PermissionsModule } from '../permissions/permissions.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Tag, DocumentTag]), SessionModule, PermissionsModule],
+  imports: [TypeOrmModule.forFeature([Tag, DocumentTag]), SessionModule, PermissionsModule, UsersModule],
   controllers: [TagsController, AdminTagsController],
   providers: [TagsService, AdminTagsService],
   exports: [TypeOrmModule, TagsService],
