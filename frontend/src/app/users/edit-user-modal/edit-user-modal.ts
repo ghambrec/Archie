@@ -44,7 +44,7 @@ export class EditUserModal {
        message: 'users.updateUser.errors.passwordPattern'
     })
     pattern(schemaPath.preferredLanguage,  /^\s*(en|de|es)\s*$/i, {
-      message: 'errors.UNSUPPORTED_LANGUAGE'}
+      message: 'users.updateUser.errors.unsupportedLanguage'}
     )
   })
 
