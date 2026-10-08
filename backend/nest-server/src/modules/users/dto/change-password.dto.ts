@@ -3,7 +3,7 @@ import { IsString, MinLength } from 'class-validator';
 
 
 export class ChangePasswordDto {
-	@ApiPropertyOptional()
+	@ApiProperty()
     @IsString()
     @MinLength(8)
     password!: string;
