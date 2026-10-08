@@ -7,15 +7,16 @@
   </header>
 
   <div class="chat-messages" role="log" aria-label="Chat messages">
-    <article class="message message-user">
-      <strong>You</strong>
-      <p>What documents are available?</p>
+    @for (message of messages(); track message.id) {
+      <article
+      class="message"
+      [class.message-user]="message.sender === 'user'"
+      [class.message-ai]="message.sender === 'llm'"
+    >
+      <strong>{{ message.sender === 'user' ? 'You' : 'AI' }}</strong>
+      <p>{{ message.content | transloco }}</p>
     </article>
-
-    <article class="message message-ai">
-      <strong>AI</strong>
-      <p>You can ask me questions about your documents.</p>
-    </article>
+    }
   </div>
 
   <div class="chat-status" role="status">
@@ -28,15 +29,24 @@
     </label>
 
     <textarea
+      #questionInput
       id="chat-question"
       class="form-control"
       rows="2"
       placeholder="Ask about your documents..."
       maxlength="100"
+      [value] = "draft()"
+      (input) = draft.set(questionInput.value)
     ></textarea>
+    
   <div class="d-flex gab-3">
-    <button type="button" class="btn btn-primary" disabled>
-      Send
+    <button  
+      type="button" 
+      class="btn btn-primary"
+      [disabled] = "!draft().trim()"
+      (click)= "send()"
+      >
+        Send
     </button>
 
 	  <button type="button" class="btn btn-secondary" disabled>
