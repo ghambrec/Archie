@@ -3,16 +3,19 @@ import {
   ExecutionContext,
   Injectable,
   UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { SessionService } from '../session/session.service';
 import { SessionCookieService } from '../session/session-cookie.service';
+import { UsersService } from 'src/modules/users/users.service';
 
 @Injectable()
 export class SessionAuthGuard implements CanActivate {
   constructor(
     private readonly sessionService: SessionService,
     private readonly sessionCookieService: SessionCookieService,
+    private readonly userService: UsersService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -28,6 +31,23 @@ export class SessionAuthGuard implements CanActivate {
     }
 
     req.userId = session.userId;
+
+    // forcing to change password
+    const user = await this.userService.findById(session.userId);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    const method = req.method.toUpperCase();
+    const path = req.path;
+
+    const isPasswordPatch = method === 'PATCH' && path === '/users/me/password';
+    
+    const isLogout = method === 'GET' && path === '/auth/logout';
+
+    if (user.lastLoginAt === null && !isPasswordPatch && !isLogout) {
+      throw new ForbiddenException('PASSWORD_CHANGE_REQUIRED');
+    }
     return true;
   }
 }
