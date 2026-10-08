@@ -9,6 +9,12 @@
 			"logOut": "Cerrar sesión"
 		}
 	},
+	"documents": {
+		"upload": {
+			"upload": "Subir documentos",
+			"selectGroup": "Seleccionar el grupo para la subida"
+		}
+	},
 	"login": {
 		"title": "Archie - Inicio de sesión",
 		"email": "Correo electrónico",
@@ -35,9 +41,138 @@
 			"btnSubmitPending": "Enviando...",
 			"btnCancel": "Cancelar",
 			"feedbackMsg": "Usuario creado correctamente",
+			"displayNameRequired": "El nombre para mostrar es obligatorio",
+			"errors": {
+				"emailRequired": "El correo electrónico es obligatorio.",
+				"emailFormat": "Introduzca una dirección de correo electrónico válida.",
+				"passwordRequired": "La contraseña es obligatoria.",
+				"passwordMinLength": "La contraseña debe contener al menos 8 caracteres.",
+				"displayNameRequired": "El nombre es obligatorio.",
+				"General": "No se pudo crear el usuario",
+				"ConflictMail": "El correo electrónico ya está registrado",
+				"ConflictName": "El nombre ya está registrado",
+				"Conflict": "Ya existe un usuario con estos datos."
+			},
 			"errorGeneral": "No se pudo crear el usuario",
 			"errorConflictMail": "El correo electrónico ya está registrado",
 			"errorConflictName": "El nombre ya está registrado"
+		},
+		"userInfo": {
+			"heading": "Grupos del usuario",
+			"groupName": "Nombre del grupo",
+			"loading": "Cargando grupos...",
+			"errorLoading": "No se pudieron cargar los grupos del usuario",
+			"empty": "Este usuario no está asignado a ningún grupo.",
+			"btnClose": "Cerrar",
+			"description": "El usuario está asignado a los siguientes grupos:",
+			"groupCount": "{{count}} grupos."
+		},
+		"updateUser": {
+			"heading": "Usuario",
+			"displayName": "Nombre",
+			"email": "Correo electrónico",
+			"password": "Contraseña",
+			"btnClose": "Cerrar",
+			"btnSubmit": "Editar usuario",
+			"preferredLanguage": "Idioma preferido",
+			"errors": {
+				"displayNameError": "Este nombre ya está en uso y no está disponible.",
+				"emailError": "Este correo electrónico ya está en uso y no está disponible.",
+				"preferredlangaugeError": "Solo están disponibles en, de y es.",
+				"emailFormat": "Introduzca un correo electrónico válido.",
+				"passwordError": "La contraseña debe contener entre 8 y 25 caracteres.",
+				"passwordPattern": "La contraseña debe incluir una letra mayúscula, una letra minúscula, un número y un carácter especial de !@#$%^&*."
+			}
+		}
+	},
+	"groups": {
+		"groupList": {
+			"heading": "Grupos",
+			"searchPlaceholder": "Buscar por nombre del grupo",
+			"name": "Nombre",
+			"description": "Descripción",
+			"isSystem": "Grupo del sistema",
+			"errorLoading": "No se pudieron cargar los grupos",
+			"empty": "No hay grupos."
+		},
+		"createGroupAdmin": {
+			"heading": "Crear grupo",
+			"name": "Nombre",
+			"description": "Descripción",
+			"btnSubmit": "Crear grupo",
+			"btnSubmitPending": "Enviando...",
+			"btnCancel": "Cancelar",
+			"feedbackMsg": "Grupo creado correctamente",
+			"errorGeneral": "No se pudo crear el grupo",
+			"errorConflictName": "El nombre ya está registrado"
+		},
+		"deleteGroupAdmin": {
+			"heading": "Eliminar grupo",
+			"question": "¿Seguro que desea eliminar el grupo:",
+			"btnDelete": "Eliminar",
+			"btnCancel": "Cancelar",
+			"btnDeletePending": "Eliminando...",
+			"errorForbidden": "No está permitido eliminar este grupo.",
+			"errorNotFound": "No se encontró el grupo.",
+			"errorGeneral": "No se pudo eliminar el grupo",
+			"errorHasDocuments": "No se puede eliminar este grupo porque todavía contiene documentos."
+		},
+		"editGroupAdmin": {
+			"heading": "Editar grupo",
+			"name": "Nombre",
+			"description": "Descripción",
+			"btnSubmit": "Editar grupo",
+			"btnSubmitPending": "Enviando...",
+			"btnCancel": "Cancelar",
+			"feedbackMsg": "Grupo editado correctamente",
+			"errorGeneral": "No se pudo editar el grupo",
+			"errorConflictName": "El nombre ya está en uso",
+			"errorNameRequired": "El nombre no puede estar vacío",
+			"errors": {
+				"nameRequired": "El nombre es obligatorio."
+			}
+		},
+		"infoGroup": {
+			"heading": "Miembros del grupo",
+			"displayName": "Nombre de usuario",
+			"email": "Correo electrónico",
+			"loading": "Cargando miembros...",
+			"errorLoading": "No se pudieron cargar los miembros",
+			"empty": "Este grupo no tiene miembros.",
+			"btnClose": "Cerrar",
+			"memberCount": "{{count}} miembros.",
+			"noMembers": "No hay miembros.",
+			"searchUser": "Añadir usuario",
+			"searchUserPlaceholder": "Buscar por nombre de usuario o correo electrónico",
+			"btnAddUser": "Añadir",
+			"userAdded": "Usuario añadido al grupo",
+			"errorAddingUser": "No se pudo añadir el usuario.",
+			"userAlreadyMember": "El usuario ya está asignado a este grupo.",
+			"userRemoved": "Usuario eliminado del grupo.",
+			"errorRemovingUser": "No se pudo eliminar al usuario del grupo.",
+			"actions": "Acciones",
+			"btnRemoveUser": "Eliminar",
+			"errorLoadingUsers": "No se pudieron cargar los usuarios",
+			"editUserPermission": "Editar permisos",
+			"userPermissions": "Permisos",
+			"errorLoadingPermissions": "No se pudieron cargar los permisos",
+			"errorRemovingLastAdmin": "No se puede eliminar al último administrador."
+		},
+		"userPermissions": {
+			"heading": "Permisos del usuario",
+			"permissionsOf": "Permisos del usuario: {{userName}}",
+			"admin": "Administrador",
+			"documentsRead": "Leer documentos",
+			"documentsUpload": "Subir documentos",
+			"documentsUpdate": "Actualizar documentos",
+			"documentsDelete": "Eliminar documentos",
+			"btnCancel": "Cancelar",
+			"btnSave": "Guardar",
+			"errors": {
+				"nameRequired": "El nombre es obligatorio.",
+				"General": "No se pudieron actualizar los permisos.",
+				"LastAdmin": "No se puede quitar el permiso de administrador porque este es el último administrador."
+			}
 		}
 	},
 	"errors": {
@@ -47,6 +182,7 @@
 		"USER_NAME_ALREADY_REGISTERED": "Este nombre para mostrar ya está registrado.",
 		"VALIDATION_FAILED": "Los datos enviados no son válidos.",
 		"INTERNAL_SERVER_ERROR": "Se produjo un error inesperado.",
+		"UNSUPPORTED_LANGUAGE": "El idioma no es compatible.",
 		"UNKNOWN": "Se produjo un error inesperado."
 	}
 }

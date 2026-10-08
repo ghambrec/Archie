@@ -91,9 +91,18 @@
 			"btnSubmitPending": "Sending...",
 			"btnCancel": "Cancel",
 			"feedbackMsg": "User successfully created",
-			"errorGeneral": "Unable to create user",
-			"errorConflictMail": "E-Mail already registered",
-			"errorConflictName": "Name already registered"
+			"displayNameRequired":"Display name is mandatory",
+			"errors": {
+  				"emailRequired": "Email is required.",
+  				"emailFormat": "Please enter a valid email address.",
+  				"passwordRequired": "Password is required.",
+  				"passwordMinLength": "Password must contain at least 8 characters.",
+  				"displayNameRequired": "Name is required.",
+				"General": "Unable to create user",
+				"ConflictMail": "E-Mail already registered",
+				"ConflictName": "Name already registered",
+				"Conflict": "A user with these details already exists."
+			}
 		},
 		"userInfo": {
 			"heading": "User groups",
@@ -104,7 +113,25 @@
 			"btnClose": "Close",
 			"description": "User is assigned to following groups:",
 			"groupCount": "{{count}} groups."
+		},
+		"updateUser": {
+			"heading": "User",
+			"displayName": "Name",
+			"email": "E-Mail",
+			"password": "Password",
+			"btnClose": "Close",
+			"btnSubmit": "Edit User",
+			"preferredLanguage": "Preferred Language",
+			"errors": {
+				"displayNameError": "Name already given, not available",
+				"emailError": "Email already in use, not available",
+				"preferredlangaugeError": "en, de or es are available, only",
+				"emailFormat": "Enter a valid Email",
+				"passwordError": "Password must contain between 8 and 25 characters.",
+				"passwordPattern": "Password must include an uppercase letter, a lowercase letter, a number, and a special character from !@#$%^&*"
+			}
 		}
+
 
 	}, 
 	"groups": {
@@ -149,7 +176,10 @@
 				"feedbackMsg": "Group successfully edited",
 				"errorGeneral": "Unable to edit Group",
 				"errorConflictName": "Name already Taken",
-				"errorNameRequired": "Name cannot be empty"
+				"errorNameRequired": "Name cannot be empty",
+				"errors": {
+					"nameRequired" : "Name is required."
+				}
 			},
 			"infoGroup": {
 				"heading": "Group members",
@@ -187,18 +217,22 @@
 				"documentsDelete": "Delete documents",
 				"btnCancel": "Cancel",
 				"btnSave": "Save",
-				"errorGeneral": "Unable to update permissions.",
-				"errorLastAdmin": "The admin permission cannot be removed because this is the last admin."
+				"errors": {
+					"nameRequired": "Name is requirred",
+					"General": "Unable to update permissions.",
+					"LastAdmin": "The admin permission cannot be removed because this is the last admin."
+				}
 			}
 	},
 	"errors": {
-	"AUTH_EMAIL_ALREADY_REGISTERED": "This email address is already registered.",
-	"AUTH_INVALID_CREDENTIALS": "Invalid email or password.",
-	"USER_NOT_FOUND": "User was not found.",
-	"USER_NAME_ALREADY_REGISTERED": "This display name is already registered.",
-	"VALIDATION_FAILED": "The submitted data is invalid.",
-	"INTERNAL_SERVER_ERROR": "An unexpected error occurred.",
-	"UNKNOWN": "An unexpected error occurred."
-	}
+    "AUTH_EMAIL_ALREADY_REGISTERED": "This email address is already registered.",
+    "AUTH_INVALID_CREDENTIALS": "Invalid email or password.",
+    "USER_NOT_FOUND": "User was not found.",
+    "USER_NAME_ALREADY_REGISTERED": "This display name is already registered.",
+    "VALIDATION_FAILED": "The submitted data is invalid.",
+    "INTERNAL_SERVER_ERROR": "An unexpected error occurred.",
+	  "UNSUPPORTED_LANGUAGE": "Language is not supported.",
+    "UNKNOWN": "An unexpected error occurred."
+  }
 
 }

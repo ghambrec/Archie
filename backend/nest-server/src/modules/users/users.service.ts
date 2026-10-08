@@ -159,11 +159,14 @@ export class UsersService implements OnApplicationBootstrap {
     {
       const newLang = dto.preferredLanguage?.trim();
     }
+    if(dto.password !==undefined)
+    {
+      const newPassword = dto.password?.trim();
+    }
 
     Object.assign(user,dto);
     const updatedUser = await this.usersRepository.save(user)
     this.logger.log({ userId: updatedUser.id }, 'Profile updated successfully');
-    ///return { id: updatedUser.id };
     return {
       id: updatedUser.id}
 

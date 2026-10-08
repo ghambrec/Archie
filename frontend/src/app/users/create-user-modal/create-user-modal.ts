@@ -25,14 +25,24 @@ export class CreateUserModal {
 
 	createUserForm = form(
 		this.createUserModel,
-		(p) => { // p = schemaPath (pointer to the values not the values itself)
-			required(p.email, { message: 'email is mandatory' });
-			email(p.email, { message: 'please enter valid email' });
+		(schemaPath) => {
+			required(schemaPath.email, {
+			message: 'users.createUser.errors.emailRequired',
+			});
+			email(schemaPath.email, {
+			message: 'users.createUser.errors.emailFormat',
+			});
 
-			required(p.password, { message: 'password is mandatory' });
-			minLength(p.password, 8, { message: 'minlength for password is 8' });
+			required(schemaPath.password, {
+			message: 'users.createUser.errors.passwordRequired',
+			});
+			minLength(schemaPath.password, 8, {
+			message: 'users.createUser.errors.passwordMinLength',
+			});
 
-			required(p.displayName, { message: 'displayName is mandatory' });
+			required(schemaPath.displayName, {
+			message: 'users.createUser.errors.displayNameRequired',
+			});
 		},
 		{
 			submission: {
@@ -41,29 +51,18 @@ export class CreateUserModal {
 					try {
 						const formValues = field().value();
 						const reponse = await firstValueFrom(this.usersService.create(formValues));
-
-						//const createdUser: UserInfo = {
-						//	id: reponse.id,
-						//	email: formValues.email,
-						//	displayName: formValues.displayName,
-						//	preferredLanguage: "en",
-						//	lastLogin: "null",
-						//	isActive: true,
-							//avatar: `https://api.dicebear.com/9.x/identicon/svg?seed=${formValues.displayName}`
-						//}
-
 						this.feedbackMsg.set('users.createUser.feedbackMsg');
 						await firstValueFrom(timer(500));
 						this.activeModal.close();
 						return;
 					} catch (error : any) {
-						let translocoKey = error.status == 409 ? "users.createUser.errorConflict" : "users.createUser.errorGeneral";
-						if (translocoKey == "users.createUser.errorConflict" && error.error?.message.toLowerCase().includes("mail")) {
-							translocoKey = "users.createUser.errorConflictMail"
-						} else if (translocoKey == "users.createUser.errorConflict" && error.error?.message.toLowerCase().includes("name")) {
-							translocoKey = "users.createUser.errorConflictName"
+						let translocoKey = error.status == 409 ? "users.createUser.errors.Conflict" : "users.createUser.errorGeneral";
+						if (translocoKey == "users.createUser.errors.Conflict" && error.error?.message.toLowerCase().includes("mail")) {
+							translocoKey = "users.createUser.errors.ConflictMail"
+						} else if (translocoKey == "users.createUser.errors.Conflict" && error.error?.message.toLowerCase().includes("name")) {
+							translocoKey = "users.createUser.errors.ConflictName"
 						} else {
-							translocoKey = "users.createUser.errorGeneral";
+							translocoKey = "users.createUser.errors.General";
 						}
 						return { kind: 'serverError', message: translocoKey };
 					}

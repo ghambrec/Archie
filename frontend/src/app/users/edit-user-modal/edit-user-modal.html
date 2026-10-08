@@ -1,4 +1,103 @@
-<p>edit-user-modal works!</p>
+<div class="modal-header">
+	<h5 class="modal-title">{{ "users.updateUser.heading" | transloco }}</h5>
+	<button
+		type="button"
+		class="btn-close"
+		aria-label="Close"
+		(click)="activeModal.dismiss()">
+	</button>
+</div>
 
-- edit für: name, mail, is_active 
-- edit auch für passwort falls user sein pw vergisst?, dann muss user aber wieder bei login aufgefordert werden sein pw zu ändern
+<div class="modal-body">
+  <form [formRoot]="editUserForm">
+
+	<div class="mb-3">
+		<label for="edit-email" class="form-label">Email</label>
+		<input
+		id="edit-email"
+		type="email"
+		class="form-control"
+		[formField]="editUserForm.email"
+		[class.is-invalid]="editUserForm.email().dirty() && editUserForm.email().invalid()"
+		/>
+		@if (editUserForm.email().dirty() && editUserForm.email().invalid()) {
+			<div class="invalid-feedback">
+				{{ editUserForm.email().errors()[0].message | transloco }}
+			</div>
+		}
+		</div>
+
+	<div class="mb-3">
+		<label for="edit-displayName" class="form-label">{{'users.updateUser.displayName' | transloco}}</label>
+		<input
+		id="edit-displayName"
+		type="displayName"
+		class="form-control"
+		[formField]="editUserForm.displayName"
+		/>
+	</div>
+
+	<div class="mb-3">
+		<label for="edit-language" class="form-label">{{"users.updateUser.preferredLanguage" | transloco}}</label>
+		<input
+		id="edit-language"
+		type="text"
+		class="form-control"
+		[formField]="editUserForm.preferredLanguage"
+		[class.is-invalid]="editUserForm.preferredLanguage().dirty() && editUserForm.preferredLanguage().invalid()"
+		/>
+		@if (editUserForm.preferredLanguage().dirty() && editUserForm.preferredLanguage().invalid()) {
+		<div class="invalid-feedback">
+		{{ editUserForm.preferredLanguage().errors()[0].message | transloco }}
+		</div>
+		}
+		<div
+			id="explaination-help" class="form-text">
+			supported languages are en, de and es 
+		</div>
+	</div>
+
+
+	<div class="mb-3">
+		<label for="edit-password" class="form-label">Password</label>
+		<input
+		id="edit-password"
+		type="password"
+		autocomplete="new-password"
+		class="form-control"
+		[formField]="editUserForm.password"
+		/>
+		@if (editUserForm.password().touched() && editUserForm.password().invalid()) {
+		  @for (error of editUserForm.password().errors(); track error.kind) {
+		    @if (error.message; as messageKey) {
+		      <div class="text-danger">
+		        {{ messageKey | transloco }}
+		      </div>
+		    }
+		  }
+		}
+	</div>
+		@if (saveErrorKey(); as errorKey) {
+  		<div class="alert alert-danger" role="alert">
+  	  	{{ errorKey | transloco }}
+  		</div>
+		}
+
+	<div class="d-flex justify-content-between">
+		<button
+        type="button"
+        class="btn btn-secondary"
+        (click)="activeModal.dismiss()">
+        {{ "users.updateUser.btnClose" | transloco }}
+      </button>
+
+		<button
+        type="button"
+        class="btn btn-primary"
+        (click)="save()">
+        {{ 'users.updateUser.btnSubmit' | transloco }}
+      </button>
+
+	</div>
+  </form>
+</div>

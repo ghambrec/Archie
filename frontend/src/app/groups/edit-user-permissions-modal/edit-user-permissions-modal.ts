@@ -108,9 +108,9 @@ export class EditUserPermissionsModal {
       next: () => this.activeModal.close(true),
       error: error => {
         if (error.status === 409) {
-			this.errorMsg.set("groups.userPermissions.errorLastAdmin");
+			this.errorMsg.set("groups.userPermissions.errors.LastAdmin");
 		} else {
-			this.errorMsg.set("groups.userPermissions.errorGeneral");
+			this.errorMsg.set("groups.userPermissions.errors.General");
 		}
       },
     });

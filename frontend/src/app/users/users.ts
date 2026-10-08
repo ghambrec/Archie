@@ -22,6 +22,8 @@ export interface CreateUserRequest {
 	displayName: string;
 }
 
+
+
 export interface CreateUserResponse {
 	id: string;
 	email: string;
@@ -29,11 +31,29 @@ export interface CreateUserResponse {
 
 }
 
+export interface PatchUser {
+	email?: string;
+	displayName?: string;
+	password?: string;
+	preferredLanguage?: string;
+}
+
+export interface EditUserForm {
+	email: string;
+	displayName: string;
+	password: string;
+	preferredLanguage: SupportedLanguage;
+}
+
+export interface UpdateUserResponse {
+	id: string; 
+}
+
 export interface UserInfo {
 	id: string;
 	email: string;
 	displayName: string;
-	preferredLanguage: string;
+	preferredLanguage: SupportedLanguage;
 	isActive: boolean;
 	lastLoginAt: string | null;
 	//avatar: string;
@@ -96,5 +116,11 @@ export class Users {
 			return '/avatar';
 		}
 		return `${this.baseUrl}/${userId}/avatar`;
+	}
+
+	update(userId: string, changes: PatchUser) {
+		const url = `${this.baseUrl}/${userId}`;
+		
+		return this.http.patch<PatchUser>(url, changes, {withCredentials: true });
 	}
 }

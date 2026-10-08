@@ -29,4 +29,10 @@ export class UpdateUserDto {
     @MinLength(4)
     email?: string;
 
+    @ApiPropertyOptional({ example: 'password123' })
+    @IsOptional()
+    @IsString()
+    @MinLength(8)
+    password!: string;
+
 }
