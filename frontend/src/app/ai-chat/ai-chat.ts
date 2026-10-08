@@ -7,5 +7,5 @@ import { TranslocoPipe } from '@jsverse/transloco';
 	templateUrl: './ai-chat.html',
 })
 export class AIChat {
-
+	
 }
