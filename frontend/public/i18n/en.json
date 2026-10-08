@@ -4,6 +4,7 @@
 		"home": "Home",
 		"settings": "Settings",
 		"documents": "Documents",
+		"ai-chat" : "ai-chat",
 		"dropdown": {
 			"profile": "Profile",
 			"logOut": "Log out"

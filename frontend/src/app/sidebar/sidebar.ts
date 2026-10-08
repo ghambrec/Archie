@@ -10,7 +10,8 @@ import { TagTree } from '../tags/tag-tree/tag-tree';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, RouterLinkActive, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, TranslocoPipe, DocUpload, TagTree],
+  imports: [RouterLink, RouterLinkActive, NgbDropdown, NgbDropdownToggle, 
+	NgbDropdownMenu, NgbDropdownItem, TranslocoPipe, DocUpload, TagTree],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
 })
