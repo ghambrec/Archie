@@ -130,7 +130,6 @@
 				"errors": {
 					"nameRequired" : "Name is required."
 				}
-			}
 			},
 			"infoGroup": {
 				"heading": "Group members",
@@ -168,11 +167,11 @@
 				"documentsDelete": "Delete documents",
 				"btnCancel": "Cancel",
 				"btnSave": "Save",
-				"errorGeneral": "Unable to update permissions.",
-				"errorLastAdmin": "The admin permission cannot be removed because this is the last admin.",
 				"errors": {
-					"nameRequired": "Name is requirred"
-			}
+					"nameRequired": "Name is requirred",
+					"General": "Unable to update permissions.",
+					"LastAdmin": "The admin permission cannot be removed because this is the last admin."
+				}
 			}
 	},
 	"errors": {
