@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ChatMessage } from './chat.models';
+import { Conversations } from './conversations.service';
 
 @Component({
 	selector: 'app-ai-chat',
@@ -9,7 +10,11 @@ import { ChatMessage } from './chat.models';
 })
 export class AIChat {
 	readonly draft = signal('');
+	private readonly conversation = inject (Conversations);
 
+	readonly conversationId = signal<string | null>(null);
+	readonly creating = signal(false);
+	readonly createError = signal<string | null>(null);
 	readonly messages = signal<ChatMessage[]> ([
 		{
 			id: 'demo-message0',
@@ -39,7 +44,24 @@ export class AIChat {
 		},
 
 		{
-			id: 'demo-message1',
+			id: 'demo-message8',
+			conv_id: 'demo',
+			sender: 'llm',
+			content: 'Hallo! ich bin eine demo antwort',
+			created_at: new Date().toString(),
+
+		}, 
+		{
+			id: 'demo-message3',
+			conv_id: 'demo',
+			sender: 'user',
+			content: 'Hallo! ich bin eine demo frage',
+			created_at: new Date().toString(),
+
+		},
+
+		{
+			id: 'demo-message4',
 			conv_id: 'demo',
 			sender: 'llm',
 			content: 'Hallo! ich bin eine demo antwort',
@@ -71,6 +93,9 @@ export class AIChat {
 			return updateMessages;
 		})
 		this.draft.set('');
+
+	}
+	async startNewChat(): Promise<void> {
 
 	}
 }

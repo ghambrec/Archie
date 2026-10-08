@@ -23,7 +23,7 @@ export interface ListResponse<T> {
 	data: T[];
 }
 
-export interface CreateConverationResponse {
+export interface CreateConversationResponse {
 	id:string
 }
 
@@ -32,10 +32,3 @@ export interface DeleteConversation {
 }
 
 
-@Service()
-export class AIChat {
-
-
-	private readonly http = inject(HttpClient);
-	
-}

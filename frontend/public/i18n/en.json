@@ -76,7 +76,8 @@
 		"botton": {
 			"send": "send", 
 			"Delete_chat": "Delete Chat",
-			"Delete_all_chats" : "Delete all Chats"
+			"Delete_all_chats" : "Delete all Chats",
+			"new_chat": "New Chat"
 		}
 	},
 	"login": {
