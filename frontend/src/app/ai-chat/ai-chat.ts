@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ChatMessage } from './chat.models';
-import { Conversations } from './conversations.service';
+import { ConversationsService } from './conversations.service';
 
 @Component({
 	selector: 'app-ai-chat',
@@ -10,12 +10,14 @@ import { Conversations } from './conversations.service';
 })
 export class AIChat {
 	readonly draft = signal('');
-	private readonly conversation = inject (Conversations);
+	private readonly conversationService = inject (ConversationsService);
 
-	readonly conversationId = signal<string | null>(null);
-	readonly creating = signal(false);
-	readonly createError = signal<string | null>(null);
+	readonly activeConversationId = signal<string | null>(null);
+	readonly isCreatingConversation = signal(false);
+	readonly createConversationError = signal<string | null>(null);
+	
 	readonly messages = signal<ChatMessage[]> ([
+		
 		{
 			id: 'demo-message0',
 			conv_id: 'demo',

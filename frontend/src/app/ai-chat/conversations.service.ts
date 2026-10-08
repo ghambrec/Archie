@@ -8,13 +8,13 @@ import type { CreateConversationResponse } from "./chat.models";
 
 
 @Service()
-export class Conversations  {
+export class ConversationsService  {
 	private readonly http = inject(HttpClient);
 
 	private readonly baseUrl =
 		`${environment.apiUrl}/conversations`;
 	
-	create() {
+	createConversation() {
 		return this.http.post<CreateConversationResponse> (
 			this.baseUrl,
 			{},
