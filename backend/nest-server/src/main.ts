@@ -42,7 +42,9 @@ async function bootstrap() {
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory, {
 	swaggerOptions: {
-		defaultModelsExpandDepth: -1
+		defaultModelsExpandDepth: -1,
+		tagsSorter: 'alpha',
+		operationsSorter: 'method',
 	}
   });
 
