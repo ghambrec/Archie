@@ -79,33 +79,6 @@ export class AIChat {
 		
 	])
 
-
-
-	//send(): void {
-
-	//	const text = this.draft().trim();
-
-		
-	//	if(!text){
-	//		return;
-	//	}
-		
-	//	const newMessage: ChatMessage ={
-	//		id: 'bbf88732-382c-4c9c-8b4d-276e9ac8309e',
-	//		conv_id: '0c3ce122-7dd7-4f14-96b4-523f3c32418b',
-	//		sender: 'user',
-	//		content: text,
-	//		created_at: new Date().toString(),
-
-	//	};
-	//	this.messages.update((previous) => {
-	//		const updateMessages = [...previous,newMessage];
-	//		return updateMessages;
-	//	})
-	//	this.draft.set('');
-
-	//}
-
 	async send(): Promise<void> {
 		const question = this.draft().trim();
 		const conversationId = this.activeConversationId();
@@ -135,7 +108,11 @@ export class AIChat {
     			created_at: new Date().toISOString(),
     		};
 		
-    		
+    		this.messages.update((previous) => {
+				const updateMessage = [... previous, userMessage];
+				return updateMessage 
+			});
+
 		
     		this.draft.set('');
   		} catch {
@@ -150,7 +127,7 @@ export class AIChat {
 
 
 	async startNewChat(): Promise<void> {
-		if (this.isCreatingConversation()) {
+		if (this.isCreatingConversation() || this.isSending()) {
 			return 
 		}
 		this.isCreatingConversation.set(true);

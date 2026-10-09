@@ -16,6 +16,9 @@ export interface ChatMessage {
 	sender: 'user' | 'llm';
 	content:string;
 	created_at:string;
+	
+	confidence_score?: number;
+  	sources?: Citation[];
 }
 
 export interface ListResponse<T> {
@@ -31,11 +34,13 @@ export interface DeleteConversation {
 	id: string;
 }
 
+export interface Citation {
+  chunk_Id: string;
+}
+
 export interface AskConversationResponse {
-	id:string;
-	
-	confidence_score: number;
-	sources: {
-		chunk_Id: string}[];
-	}
+  answer: string;
+  confidence_score: number;
+  sources: Citation[];
+}
 

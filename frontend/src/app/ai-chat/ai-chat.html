@@ -33,17 +33,42 @@
       </strong>
 
   <p>{{ message.content }}</p>
-</article>
+
+  @if (message.sender === 'llm') {
+  @if (message.confidence_score !== undefined) {
+    <p class="small text-muted">
+      Confidence Score: {{ message.confidence_score }}
+    </p>
+  }
+  @if (message.sources; as sources ){
+    <div class="small">
+      <strong>Quellen</strong>
+
+      <ul>
+      @for (source of sources; track $index) {
+        <li>Dokumentabschnitt: {{ source.chunk_Id }}</li>
+      } @empty {
+        <li>'ai-chat.error.noSources' | transloco</li>
+      }
+      </ul>
+  </div>
+  }
+}
+    </article>
     }
   </div>
 
   <div class="chat-status" role="status">
-    <!-- Later: loading indicator or error message -->
+     @if (isSending()) {
+    <p>Thinking…</p>
+    }
   </div>
 
   <footer class="chat-composer">
-    <label for="chat-question" class="visually-hidden">
-      Your question
+    <label 
+      for="chat-question" 
+      class="visually-hidden">  
+      [disabled]= "isSending() || isCreatingConversation()"
     </label>
 
     <textarea
@@ -55,19 +80,29 @@
       maxlength="100"
       [value] = "draft()"
       (input) = draft.set(questionInput.value)
+      
     ></textarea>
     
   <div class="d-flex gap-3">
     <button  
       type="button" 
       class="btn btn-primary"
-      [disabled] = "!draft().trim()"
+      [disabled] = "
+        !draft().trim() ||
+        !activeConversationId() ||
+        isSending ||
+        isCreatingConversation()
+        "
       (click)= "send()"
       >
         {{'ai-chat.botton.send' | transloco}}
     </button>
 
-	  <button type="button" class="btn btn-secondary" disabled>
+	  <button
+      type="button"
+      class="btn btn-secondary" 
+      disabled
+      >
        {{'ai-chat.botton.Delete_chat' | transloco}}
     </button>
 
