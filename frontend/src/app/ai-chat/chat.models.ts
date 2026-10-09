@@ -31,4 +31,11 @@ export interface DeleteConversation {
 	id: string;
 }
 
+export interface AskConversationResponse {
+	id:string;
+	
+	confidence_score: number;
+	sources: {
+		chunk_Id: string}[];
+	}
 

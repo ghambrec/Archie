@@ -81,7 +81,9 @@
 
 		},
 		"error": {
-			"createConversation": "Could not create the conversation. Please try again."
+			"createConversation": "Could not create the conversation. Please try again.",
+			"ask": "No answer could be received. Your question may already have been saved.",
+			"createFirst": "'Please create a new chat first."
 		}
 	},
 	"login": {

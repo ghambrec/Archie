@@ -3,7 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { inject, signal} from "@angular/core";
 import { Service } from "@angular/core";
 import { environment } from "../../environments/environment";
-import type { CreateConversationResponse } from "./chat.models";
+import type { CreateConversationResponse, AskConversationResponse } from "./chat.models";
 
 
 
@@ -21,6 +21,13 @@ export class ConversationsService  {
 			{withCredentials: true}
 		)
 
+	}
+	ask(conversationId: string, question:string){
+		return this.http.post<AskConversationResponse> (
+			`${this.baseUrl}/${conversationId}/ask`,
+			{question: question},
+			{withCredentials: true}
+		)
 	}
 
 

@@ -17,6 +17,9 @@ export class AIChat {
 	readonly activeConversationId = signal<string | null>(null);
 	readonly isCreatingConversation = signal(false);
 	readonly createConversationError = signal<string | null>(null);
+
+	readonly isSending = signal(false);
+	readonly sendError = signal<string | null>(null);
 	
 	readonly messages = signal<ChatMessage[]> ([
 		
@@ -78,30 +81,74 @@ export class AIChat {
 
 
 
-	send(): void {
+	//send(): void {
 
-		const text = this.draft().trim();
+	//	const text = this.draft().trim();
 
 		
-		if(!text){
+	//	if(!text){
+	//		return;
+	//	}
+		
+	//	const newMessage: ChatMessage ={
+	//		id: 'bbf88732-382c-4c9c-8b4d-276e9ac8309e',
+	//		conv_id: '0c3ce122-7dd7-4f14-96b4-523f3c32418b',
+	//		sender: 'user',
+	//		content: text,
+	//		created_at: new Date().toString(),
+
+	//	};
+	//	this.messages.update((previous) => {
+	//		const updateMessages = [...previous,newMessage];
+	//		return updateMessages;
+	//	})
+	//	this.draft.set('');
+
+	//}
+
+	async send(): Promise<void> {
+		const question = this.draft().trim();
+		const conversationId = this.activeConversationId();
+
+		if(this.isSending() || this.isCreatingConversation())
+			return;
+		this.sendError.set(null);
+
+		if (conversationId == null) {
+			this.sendError.set('ai-chat.error.createFirst')
 			return;
 		}
+		if (question == null) {
+			return;
+		}
+
+		try {
+    		const response = await firstValueFrom(
+    		  this.conversationService.ask(conversationId, question),
+    		)
 		
-		const newMessage: ChatMessage ={
-			id: 'bbf88732-382c-4c9c-8b4d-276e9ac8309e',
-			conv_id: '0c3ce122-7dd7-4f14-96b4-523f3c32418b',
-			sender: 'user',
-			content: text,
-			created_at: new Date().toString(),
+    		const userMessage: ChatMessage = {
+    			id: 'demo-message2',
+    		 	conv_id: conversationId,
+    			sender: 'user',
+    			content: question,
+    			created_at: new Date().toISOString(),
+    		};
+		
+    		
+		
+    		this.draft.set('');
+  		} catch {
+    		this.sendError.set(
+    		  'ai-chat.error.ask',
+    		);
+  		} finally {
+    		this.isSending.set(false);
+  		}		
+	}		
 
-		};
-		this.messages.update((previous) => {
-			const updateMessages = [...previous,newMessage];
-			return updateMessages;
-		})
-		this.draft.set('');
 
-	}
+
 	async startNewChat(): Promise<void> {
 		if (this.isCreatingConversation()) {
 			return 
