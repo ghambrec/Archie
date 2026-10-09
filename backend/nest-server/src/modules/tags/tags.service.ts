@@ -46,6 +46,35 @@ export class TagsService {
     this.logger.log({ documentId, tagId }, 'Tag assigned to document');
   }
 
+  async confirmAiSuggestions(documentId: string): Promise<string[]> {
+    this.logger.log({ documentId }, 'Confirming AI-suggested tags for document');
+
+    // Copies every AI suggestion that references an existing tag. Proposals for new tags
+    // (ai_tag_id IS NULL) are skipped, already assigned tags are left untouched.
+    // assigned_by stays NULL to mark the tag as originating from the LLM.
+    const rows = await this.documentTagsRepository.query<{ tagId: string }[]>(
+      `
+      INSERT INTO document_tags (document_id, tag_id)
+      SELECT
+          adt.ai_document_id,
+          adt.ai_tag_id
+      FROM ai_document_tags AS adt
+      WHERE
+          adt.ai_document_id = $1
+          AND adt.ai_tag_id IS NOT NULL
+      ON CONFLICT (document_id, tag_id) DO NOTHING
+      RETURNING tag_id AS "tagId"
+      `,
+      [documentId],
+    );
+
+    const tagIds = rows.map((row) => row.tagId);
+
+    this.logger.log({ documentId, count: tagIds.length }, 'AI-suggested tags confirmed');
+
+    return tagIds;
+  }
+
   async removeFromDocument(documentId: string, tagId: string): Promise<void> {
     this.logger.log({ documentId, tagId }, 'Removing tag from document');
 
@@ -61,6 +90,21 @@ export class TagsService {
   }
 
   async findAll(userId: string): Promise<TagResponseDto[]> {
+    this.logger.log({ userId }, 'Listing all tags');
+
+    const rows = await this.tagsRepository.query<TagResponseDto[]>(
+      `
+		select id, name, label, facet, parent_id as "parentId"
+		from tags
+		order by facet asc, name asc;
+      `
+    );
+
+    this.logger.log({ userId, count: rows.length }, 'Tags listed successfully');
+    return rows.map((row) => Object.assign(new TagResponseDto(), row));
+  }
+
+  async tagsWithDocs(userId: string): Promise<TagResponseDto[]> {
     this.logger.log({ userId }, 'Listing tags visible to user');
 
     const rows = await this.tagsRepository.query<TagRawRow[]>(

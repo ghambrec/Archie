@@ -12,7 +12,57 @@
 	"documents": {
 		"upload": {
 			"upload": "Upload Documents",
-			"selectGroup": "select upload group"
+			"selectGroupTooltip": "Select group for upload",
+			"maxSize": "max. {{ size }} MB per file",
+			"errors": {
+				"empty": "File is empty",
+				"tooBig": "File is too big",
+				"filetypeNotAllowed": "File type is not allowed",
+				"unknown": "Error on uploading file",
+				"filetypeMismatch": "File content does not match to file extension",
+				"alreadyExists": "Identical file already exist"
+			}
+		}
+	},
+	"tag": {
+		"header": "Tags",
+		"noData": "You have no readable documents.",
+		"label": {
+			"work": "Work",
+			"education": "Education",
+			"health": "Health",
+			"insurance": "Insurance",
+			"finance": "Finance",
+			"housing": "Housing",
+			"vehicles": "Vehicles",
+			"travel": "Travel",
+			"leisure": "Leisure",
+			"shopping": "Shopping",
+			"family": "Family & Personal",
+			"legal": "Legal & Authorities",
+			"pets": "Pets",
+			"other": "Other",
+			"loans": "Loans",
+			"investments": "Investments",
+			"retirement": "Retirement",
+			"taxes": "Taxes",
+			"banking": "Bank Account",
+			"property": "Property Ownership",
+			"rental": "Tenancy",
+			"telecom": "Phone & Internet",
+			"utilities": "Utilities",
+			"identity": "ID Documents",
+			"contract": "Contract",
+			"invoice": "Invoice & Receipt",
+			"statement": "Statement",
+			"notice": "Notice & Letter",
+			"id-document": "ID Document",
+			"certificate": "Certificate",
+			"report": "Report",
+			"ticket": "Ticket & Booking",
+			"application": "Application",
+			"correspondence": "Correspondence",
+			"manual": "Manual & Warranty"
 		}
 	},
 	"login": {
@@ -135,27 +185,31 @@
 				"errorLoadingUsers": "Unable to load users",
 				"editUserPermission": "Edit Permissions",
 				"userPermissions": "Permissions",
-				"errorLoadingPermissions": "Unable to load permissions"
+				"errorLoadingPermissions": "Unable to load permissions",
+				"errorRemovingLastAdmin": "The last admin cannot be removed."
 			},
 			"userPermissions": {
 				"heading": "User Permissions",
 				"permissionsOf": "Permissions of user: {{userName}}",
+				"admin": "Admin",
 				"documentsRead": "Read documents",
 				"documentsUpload": "Upload documents",
 				"documentsUpdate": "Update documents",
 				"documentsDelete": "Delete documents",
 				"btnCancel": "Cancel",
-				"btnSave": "Save"
+				"btnSave": "Save",
+				"errorGeneral": "Unable to update permissions.",
+				"errorLastAdmin": "The admin permission cannot be removed because this is the last admin."
 			}
 	},
 	"errors": {
-    "AUTH_EMAIL_ALREADY_REGISTERED": "This email address is already registered.",
-    "AUTH_INVALID_CREDENTIALS": "Invalid email or password.",
-    "USER_NOT_FOUND": "User was not found.",
-    "USER_NAME_ALREADY_REGISTERED": "This display name is already registered.",
-    "VALIDATION_FAILED": "The submitted data is invalid.",
-    "INTERNAL_SERVER_ERROR": "An unexpected error occurred.",
-    "UNKNOWN": "An unexpected error occurred."
-  }
+	"AUTH_EMAIL_ALREADY_REGISTERED": "This email address is already registered.",
+	"AUTH_INVALID_CREDENTIALS": "Invalid email or password.",
+	"USER_NOT_FOUND": "User was not found.",
+	"USER_NAME_ALREADY_REGISTERED": "This display name is already registered.",
+	"VALIDATION_FAILED": "The submitted data is invalid.",
+	"INTERNAL_SERVER_ERROR": "An unexpected error occurred.",
+	"UNKNOWN": "An unexpected error occurred."
+	}
 
 }

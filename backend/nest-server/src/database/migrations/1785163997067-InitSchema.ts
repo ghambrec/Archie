@@ -82,6 +82,7 @@ export class InitSchema1785163997067 implements MigrationInterface {
         "size_bytes" bigint NOT NULL,
         "sha256" varchar NOT NULL,
         "page_count" integer,
+		"reviewed_ai_at" timestamptz,
         "created_at" timestamptz NOT NULL DEFAULT now(),
         "updated_at" timestamptz NOT NULL DEFAULT now(),
         "deleted_at" timestamptz,

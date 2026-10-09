@@ -16,14 +16,15 @@ import { GetDocumentsQueryDto } from './dto/get-documents-query.dto';
 import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
 import { DocumentSummaryDto } from './dto/document-summary.dto';
 import { DocumentDownloadStreamDto } from './dto/document-download-stream.dto';
-import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
 import { GroupsService } from '../groups/groups.service';
 import { DocumentGroupsService } from '../document-groups/document-groups.service';
-import { AiIngestionService } from '../ai-service/ai-ingestion.service';
+import { IngestionService } from '../ai-service/ingestion/ingestion.service';
 import { TagsService } from '../tags/tags.service';
 import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
+import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-response.dto';
+import { DocumentFileValidationService } from './document-file-validation.service';
 
 const DOCUMENTS_BUCKET = 'documents';
 
@@ -35,18 +36,42 @@ export class DocumentsService {
     private readonly documentsRepository: Repository<Document>,
     private readonly groupsService: GroupsService,
     private readonly documentGroupsService: DocumentGroupsService,
-    private readonly aiIngestionService: AiIngestionService,
+    private readonly aiIngestionService: IngestionService,
     private readonly tagsService: TagsService,
     private readonly logger: Logger,
+	private readonly documentFileValidationService: DocumentFileValidationService,
   ) {}
 
-  async upload(userId: string, file: Express.Multer.File): Promise<UploadResponseDto> {
+  async upload(
+    userId: string,
+    groupId: string,
+    file: Express.Multer.File,
+  ): Promise<UploadResponseDto> {
+
+	const filename = this.documentFileValidationService.normalizeFilename(file.originalname);
+
     this.logger.log(
-      { userId, filename: file.originalname, mimeType: file.mimetype, sizeBytes: file.size },
+      { userId, groupId, filename: filename, mimeType: file.mimetype, sizeBytes: file.size },
       'Uploading document',
     );
 
+	const mimeType = await this.documentFileValidationService.validate(file);
+
+    await this.groupsService.get(groupId, userId);
+
     const sha256 = createHash('sha256').update(file.buffer).digest('hex');
+
+    const duplicateExists = await this.documentsRepository
+      .createQueryBuilder('document')
+      .innerJoin(DocumentGroup, 'documentGroup', 'documentGroup.documentId = document.id')
+      .where('documentGroup.groupId = :groupId', { groupId })
+      .andWhere('document.sha256 = :sha256', { sha256 })
+      .getExists();
+
+    if (duplicateExists) {
+      this.logger.warn({ userId, groupId, sha256 }, 'Document already exists in group');
+      throw new ApplicationException(ErrorCode.DocumentAlreadyExistsInGroup);
+    }
 
     const key = `${DOCUMENTS_BUCKET}-${randomUUID()}`;
 
@@ -56,14 +81,14 @@ export class DocumentsService {
       file.buffer,
       file.size,
       {
-        'Content-Type': file.mimetype,
+        'Content-Type': mimeType,
       },
     );
 
     const insertResult = await this.documentsRepository.insert({
       uploadedBy: userId,
-      filename: file.originalname,
-      mimeType: file.mimetype,
+      filename: filename,
+      mimeType: mimeType,
       objectKey: key,
       sizeBytes: file.size,
       sha256,
@@ -71,9 +96,15 @@ export class DocumentsService {
 
     const documentId = insertResult.identifiers[0].id as string;
 
-    this.logger.log({ documentId }, 'Document uploaded successfully');
+    await this.documentGroupsService.setGroup(documentId, groupId);
 
-    await this.aiIngestionService.triggerIngestion(documentId);
+    this.logger.log({ documentId, groupId }, 'Document uploaded successfully');
+
+    try {
+		await this.aiIngestionService.triggerIngestion(documentId);
+	} catch (error) {
+		this.logger.error({ documentId, error }, 'could not trigger ingestion pipeline, is ai service running?');
+	}
 
     return { id: documentId, objectKey: key };
   }
@@ -243,32 +274,6 @@ export class DocumentsService {
     };
   }
 
-  async setGroup(
-    userId: string,
-    id: string,
-    groupId: string,
-  ): Promise<DocumentGroupResponseDto> {
-
-    this.logger.log({ userId, id, groupId }, 'Assign document to group');
-
-    const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
-      select: { id: true },
-    });
-
-    if (!document) {
-      throw new ApplicationException(ErrorCode.DocumentNotFound);
-    }
-
-    await this.groupsService.get(groupId, userId);
-
-    await this.documentGroupsService.setGroup(id, groupId);
-
-    this.logger.log({ userId, id, groupId }, 'Document assigned to group');
-
-    return { documentId: id, groupId };
-  }
-
   async setTag(
     userId: string,
     id: string,
@@ -291,6 +296,29 @@ export class DocumentsService {
     this.logger.log({ userId, id, tagId }, 'Tag assigned to document');
 
     return { documentId: id, tagId };
+  }
+
+  async confirmSuggestedTags(
+    userId: string,
+    id: string,
+  ): Promise<ConfirmSuggestedTagsResponseDto> {
+
+    this.logger.log({ userId, id }, 'Confirm suggested tags for document');
+
+    const document = await this.documentsRepository.findOne({
+      where: { id, uploadedBy: userId },
+      select: { id: true },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    const confirmedTagIds = await this.tagsService.confirmAiSuggestions(id);
+
+    this.logger.log({ userId, id, count: confirmedTagIds.length }, 'Suggested tags confirmed');
+
+    return { documentId: id, confirmedTagIds };
   }
 
   async removeTag(

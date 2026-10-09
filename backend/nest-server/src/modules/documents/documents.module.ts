@@ -9,18 +9,29 @@ import { DocumentGroupsModule } from '../document-groups/document-groups.module'
 import { AiServiceModule } from '../ai-service/ai-service.module';
 import { TagsModule } from '../tags/tags.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MulterModule } from '@nestjs/platform-express';
+import documentsConfig from 'src/config/documents.config';
+import { ConfigType } from '@nestjs/config';
+import { DocumentFileValidationService } from './document-file-validation.service';
 
 @Module({
   imports: [
+	MulterModule.registerAsync({
+		inject: [documentsConfig.KEY],
+		useFactory: (config: ConfigType<typeof documentsConfig>) => ({
+			limits: { fileSize: config.maxUploadSizeBytes, files: 1 },
+			defParamCharset: 'utf-8'
+		})
+	}),
     TypeOrmModule.forFeature([Document]),
     SessionModule,
     StorageModule,
     GroupsModule,
     DocumentGroupsModule,
     AiServiceModule,
-    TagsModule,
+    TagsModule
   ],
   controllers: [DocumentsController],
-  providers: [DocumentsService],
+  providers: [DocumentsService, DocumentFileValidationService],
 })
 export class DocumentsModule {}

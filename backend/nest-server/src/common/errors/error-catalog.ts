@@ -62,6 +62,10 @@ export const ERROR_CATALOG ={
     status: HttpStatus.NOT_FOUND,
     message: 'Document is not assigned to the given group.'
   },
+  [ErrorCode.DocumentAlreadyExistsInGroup]: {
+    status: HttpStatus.CONFLICT,
+    message: 'Document already exists in this group.'
+  },
   [ErrorCode.TagNotFound]: {
     status: HttpStatus.NOT_FOUND,
     message: 'Tag was not found.'
@@ -81,7 +85,30 @@ export const ERROR_CATALOG ={
   [ErrorCode.DocumentTagNotAssigned]: {
     status: HttpStatus.NOT_FOUND,
     message: 'Document does not have the given tag assigned.'
-  }
+  },
+  [ErrorCode.DocumentFileTypeNotAllowed] : {
+	status: HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+	message: 'Document file type is not whitelisted.'
+  },
+  [ErrorCode.DocumentFileTypeMismatch] : {
+	status: HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+	message: 'Document content does not match mime type.'
+  },
+  [ErrorCode.DocumentFileEmpty] : {
+	status: HttpStatus.BAD_REQUEST,
+	message: 'Document file is empty.'
+  },
+  [ErrorCode.DocumentStillProcessing] : {
+	status: HttpStatus.CONFLICT,
+	message: 'Document is still processing the ai pipeline.'
+  },
+    [ErrorCode.DocumentIngestionNotRetryable] : {
+	status: HttpStatus.CONFLICT,
+	message: 'Document ingestion is not retryable, only possible if it was not started or has failed'
+  },
+    [ErrorCode.AiServiceUnavailable] : {
+	status: HttpStatus.SERVICE_UNAVAILABLE,
+	message: 'AI Service is currently unavailable.'
+  },
 
   } satisfies Record<ErrorCode, ErrorDefinition>;
-

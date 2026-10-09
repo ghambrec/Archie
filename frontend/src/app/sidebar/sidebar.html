@@ -3,7 +3,7 @@
 		<span class="fs-4">{{ "programName" | transloco }}</span>
 	</a>
 	<hr>
-	<ul class="nav nav-pills flex-column mb-auto">
+	<ul class="nav nav-pills flex-column">
 
 		<app-doc-upload></app-doc-upload>
 
@@ -32,9 +32,9 @@
 			</a>
 		</li>
 		}
-
 	</ul>
-
+	<hr>
+	<app-tag-tree class="flex-grow-1 overflow-y-auto"></app-tag-tree>
 	<hr>
 	<div class="dropdown" ngbDropdown>
 		<a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2" ngbDropdownToggle (click)="$event.preventDefault()">
