@@ -2,10 +2,12 @@ import { Component, inject, signal } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ChatMessage } from './chat.models';
 import { ConversationsService } from './conversations.service';
+import { firstValueFrom } from 'rxjs';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
 	selector: 'app-ai-chat',
-	imports: [TranslocoPipe],
+	imports: [TranslocoPipe, NgbTooltip],
 	templateUrl: './ai-chat.html',
 })
 export class AIChat {
@@ -53,6 +55,7 @@ export class AIChat {
 			created_at: new Date().toString(),
 
 		}, 
+
 		{
 			id: 'demo-message3',
 			conv_id: 'demo',
@@ -72,6 +75,8 @@ export class AIChat {
 		}
 		
 	])
+
+
 
 	send(): void {
 
@@ -98,6 +103,28 @@ export class AIChat {
 
 	}
 	async startNewChat(): Promise<void> {
+		if (this.isCreatingConversation()) {
+			return 
+		}
+		this.isCreatingConversation.set(true);
+		this.createConversationError.set(null);
 
+		try{
+			const response = await firstValueFrom(
+				this.conversationService.createConversation());
+		
+			this.activeConversationId.set(response.id);
+			this.messages.set([]);
+			this.draft.set('');
+			}
+
+		catch {
+			this.createConversationError.set('ai-chat.error.createConversation');
+			
+		}
+
+		finally {
+			this.isCreatingConversation.set(false);
+		}
 	}
 }

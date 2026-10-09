@@ -1,9 +1,22 @@
 <section class="chat">
   <header class="chat-header">
     <h1>AI Chat</h1>
-    <button type="button" class="btn btn-outline-secondary" disabled>
-      {{'ai-chat.botton.new_chat' | transloco}}
+    <button
+      type="button"
+      class="btn btn-outline-secondary"
+      [disabled]="isCreatingConversation()"
+      (click)="startNewChat()"
+      ngbTooltip="Start a new conversation. Existing chats remain saved."
+      >
+      {{ 'ai-chat.botton.new_chat' | transloco }}
     </button>
+      @if (createConversationError(); as errorKey) {
+    <div class="alert alert-danger" role="alert">
+      {{ errorKey | transloco }}
+    </div>
+    }
+
+
   </header>
 
   <div class="chat-messages" role="log" aria-label="Chat messages">

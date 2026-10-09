@@ -78,6 +78,10 @@
 			"Delete_chat": "Delete Chat",
 			"Delete_all_chats" : "Delete all Chats",
 			"new_chat": "New Chat"
+
+		},
+		"error": {
+			"createConversation": "Could not create the conversation. Please try again."
 		}
 	},
 	"login": {
