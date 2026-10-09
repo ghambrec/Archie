@@ -7,7 +7,6 @@ import { SessionModule } from '../auth/session/session.module';
 import { PermissionsModule } from '../permissions/permissions.module';
 import { UserGroup } from '../user-groups/entities/user-group.entity';
 import { DocumentGroup } from '../document-groups/entities/document-group.entity';
-import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -18,7 +17,6 @@ import { UsersModule } from '../users/users.module';
     ]),
     SessionModule,
     PermissionsModule,
-    UsersModule,
   ],
   exports: [
     TypeOrmModule,

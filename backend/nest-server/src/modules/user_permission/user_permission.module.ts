@@ -7,14 +7,12 @@ import { UserPermissionController } from './user_permission.controller';
 import { UserPermissionService } from './user_permission.service';
 import { SessionModule } from '../auth/session/session.module';
 import { PermissionsModule } from '../permissions/permissions.module';
-import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserPermission, Permission]),
     SessionModule,
     PermissionsModule,
-    UsersModule,
   ],
   controllers: [UserPermissionController],
   providers: [UserPermissionService, GroupPermissionGuard],

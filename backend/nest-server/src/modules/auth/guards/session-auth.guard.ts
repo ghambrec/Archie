@@ -8,14 +8,17 @@ import {
 import type { Request } from 'express';
 import { SessionService } from '../session/session.service';
 import { SessionCookieService } from '../session/session-cookie.service';
-import { UsersService } from 'src/modules/users/users.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/modules/users/entities/user.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class SessionAuthGuard implements CanActivate {
   constructor(
     private readonly sessionService: SessionService,
     private readonly sessionCookieService: SessionCookieService,
-    private readonly userService: UsersService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -33,7 +36,7 @@ export class SessionAuthGuard implements CanActivate {
     req.userId = session.userId;
 
     // forcing to change password
-    const user = await this.userService.findById(session.userId);
+    const user = await this.userRepository.findOneBy({ id: session.userId });
     if (!user) {
       throw new UnauthorizedException();
     }
