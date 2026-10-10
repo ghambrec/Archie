@@ -12,7 +12,10 @@ import { PermissionsModule } from '../permissions/permissions.module';
 @Module({
   imports: [UsersModule, SessionModule, PermissionsModule],
   controllers: [AuthController],
-  providers: [AuthService, SessionService, SessionCookieService, SessionAuthGuard, LoginAttemptService,],
-  exports: [SessionService, SessionCookieService, SessionAuthGuard,],
+  // providers: [AuthService, SessionService, SessionCookieService, SessionAuthGuard, LoginAttemptService,],
+  providers: [AuthService, LoginAttemptService,],
+  // exports: [SessionService, SessionCookieService, SessionAuthGuard,],
+  exports: [SessionModule, PermissionsModule,],
+
 })
 export class AuthModule {}

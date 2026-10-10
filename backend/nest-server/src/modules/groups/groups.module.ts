@@ -13,10 +13,10 @@ import { DocumentGroup } from '../document-groups/entities/document-group.entity
     TypeOrmModule.forFeature([
       Group,
       UserGroup,
-      DocumentGroup
+      DocumentGroup,
     ]),
     SessionModule,
-    PermissionsModule
+    PermissionsModule,
   ],
   exports: [
     TypeOrmModule,

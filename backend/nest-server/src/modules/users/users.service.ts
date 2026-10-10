@@ -16,6 +16,7 @@ import { GetUsersResponseDto } from './dto/get-users-response.dto';
 import { Logger } from 'nestjs-pino';
 import { UsersFileService } from './users-file.service';
 import { PermissionsService } from '../permissions/permissions.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { Permission } from '../permissions/entities/permission.entity';
 import { UserPermission } from '../user_permission/entities/user_permission.entity';
 
@@ -227,6 +228,44 @@ export class UsersService implements OnApplicationBootstrap {
       total,
       totalPages: Math.ceil(total / limit),
     };
+  }
+
+  async changeOwnPassword(userId: string, dto: ChangePasswordDto): Promise<void> {
+    this.logger.log('Execute changeOwnPassword', userId);
+
+    const user = await this.usersRepository.findOneBy({ id: userId });
+
+    if (!user) {
+      this.logger.warn(`Password change failed, user ${userId} not found`);
+      throw new NotFoundException();
+    }
+
+    user.passwordHash = await bcrypt.hash(dto.password, PASSWORD_SALT_ROUNDS);
+    user.lastLoginAt = new Date();
+
+    await this.usersRepository.save(user);
+    this.logger.log({ userId: user.id }, 'User changed password successfully');
+  }
+
+  async resetPassword(userId: string, dto: ChangePasswordDto): Promise<void> {
+    this.logger.log('Execute resetPassword', userId);
+
+    const user = await this.usersRepository.findOneBy({ id: userId });
+
+    if (!user) {
+      this.logger.warn(`Password reset failed, user ${userId} not found`);
+      throw new NotFoundException();
+    }
+
+    user.passwordHash = await bcrypt.hash(dto.password, PASSWORD_SALT_ROUNDS);
+    user.lastLoginAt = null;
+
+    await this.usersRepository.save(user);
+    this.logger.log({ userId: user.id }, 'Admin reset user password successfully');
+  }
+
+  async findById(userId: string): Promise<User | null> {
+    return this.usersRepository.findOneBy({ id: userId });
   }
 }
 

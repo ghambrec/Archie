@@ -73,6 +73,17 @@
 		"errorGeneral": "Error on log in",
 		"errorInvalidCred": "Invalid email or password"
 	},
+	"auth": {
+		"setPassword": {
+			"heading": "Set new password",
+			"password": "New password",
+			"confirmPassword": "Confirm password",
+			"btnCancel": "Cancel",
+			"btnSubmit": "Save",
+			"btnSubmitPending": "Sending...",
+			"errorGeneral": "Failed to set password. Please try again"
+		}
+	},
 	"users": {
 		"userList": {
 			"heading": "Users",
