@@ -90,6 +90,21 @@ export class TagsService {
   }
 
   async findAll(userId: string): Promise<TagResponseDto[]> {
+    this.logger.log({ userId }, 'Listing all tags');
+
+    const rows = await this.tagsRepository.query<TagResponseDto[]>(
+      `
+		select id, name, label, facet, parent_id as "parentId"
+		from tags
+		order by facet asc, name asc;
+      `
+    );
+
+    this.logger.log({ userId, count: rows.length }, 'Tags listed successfully');
+    return rows.map((row) => Object.assign(new TagResponseDto(), row));
+  }
+
+  async tagsWithDocs(userId: string): Promise<TagResponseDto[]> {
     this.logger.log({ userId }, 'Listing tags visible to user');
 
     const rows = await this.tagsRepository.query<TagRawRow[]>(

@@ -20,4 +20,10 @@ export enum ErrorCode {
     DocumentTagAlreadyAssigned = 'DOCUMENT_TAG_ALREADY_ASSIGNED',
     DocumentTagNotAssigned = 'DOCUMENT_TAG_NOT_ASSIGNED',
     //LanguageNotAvailable ='LANGUAGE_NOT_AVAILABLE',
+	DocumentFileTypeNotAllowed = 'DOCUMENT_FILE_TYPE_NOT_ALLOWED',
+	DocumentFileTypeMismatch ='DOCUMENT_FILE_TYPE_MISMATCH',
+	DocumentFileEmpty = 'DOCUMENT_FILE_EMPTY',
+	DocumentStillProcessing = 'DOCUMENT_STILL_PROCESSING',
+	DocumentIngestionNotRetryable = 'DOCUMENT_INGESTION_NOT_RETRYABLE',
+	AiServiceUnavailable = 'AI_SERVICE_UNAVAILABLE',
   }

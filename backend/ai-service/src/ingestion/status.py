@@ -41,6 +41,19 @@ async def mark_as_processing(pool: asyncpg.Pool, doc_id: UUID) -> None:
     await pool.execute(update, doc_id)
 
 
+async def mark_as_skipped(pool: asyncpg.Pool, doc_id: UUID, error_key: str, error_detail: str) -> None:
+    update = """
+                update ai_documents set
+                    status = 'SKIPPED',
+                    error_key = $2,
+                    error_detail = $3,
+                    updated_at = now()
+                where
+                    id = $1
+            """
+    await pool.execute(update, doc_id, "ais.error." + error_key, error_detail)
+
+
 async def mark_as_finished(pool: asyncpg.Pool, doc_id: UUID, language: str | None) -> None:
     update = """
                 update ai_documents set
@@ -51,7 +64,6 @@ async def mark_as_finished(pool: asyncpg.Pool, doc_id: UUID, language: str | Non
                 where
                     id = $1
             """
-
     await pool.execute(update, doc_id, language)
 
 
@@ -65,5 +77,4 @@ async def write_error(pool: asyncpg.Pool, doc_id: UUID, error_key: str, error_de
                 where
                     id = $1
             """
-
     await pool.execute(update, doc_id, "ais.error." + error_key, error_detail)

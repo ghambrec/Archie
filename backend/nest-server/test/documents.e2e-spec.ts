@@ -12,7 +12,7 @@ import { Group } from '../src/modules/groups/entities/group.entity';
 import { UserGroup } from '../src/modules/user-groups/entities/user-group.entity';
 import { Document } from '../src/modules/documents/entities/document.entity';
 import { Tag } from '../src/modules/tags/entities/tag.entity';
-import { AiIngestionService } from '../src/modules/ai-service/ai-ingestion.service';
+import { IngestionService } from '../src/modules/ai-service/ingestion/ingestion.service';
 import { ErrorCode } from '../src/common/errors/error-code';
 
 const randomEmail = () => `e2e-${randomUUID()}@example.com`;
@@ -41,7 +41,7 @@ describe('DocumentsController (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideProvider(AiIngestionService)
+      .overrideProvider(IngestionService)
       .useValue(aiIngestionServiceMock)
       .compile();
 

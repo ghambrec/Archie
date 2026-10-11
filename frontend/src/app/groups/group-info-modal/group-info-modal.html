@@ -3,12 +3,12 @@
     {{ "groups.infoGroup.heading" | transloco }}
   </h5>
 
-  @if (!isLoading() && !hasLoadError()) {
+  @if (members.status() !== 'loading' && !members.error()) {
     <span class="member-count">
-      @if (members().length === 0) {
+      @if (members.value().length === 0) {
         {{ "groups.infoGroup.noMembers" | transloco }}
       } @else {
-        {{ "groups.infoGroup.memberCount" | transloco: { count: members().length } }}
+        {{ "groups.infoGroup.memberCount" | transloco: { count: members.value().length } }}
       }
     </span>
   }
@@ -61,6 +61,12 @@
       }
   </div>
 
+  @if (permissions.error()) {
+	<div class="text-danger mb-2">
+		{{ "groups.infoGroup.errorLoadingPermissions" | transloco }}
+	</div>
+  }
+
   @if (actionError()) {
     <div class="text-danger mb-2">
       {{ actionError() | transloco }}
@@ -73,9 +79,9 @@
     </div>
   }
 
-  @if (isLoading()) {
+  @if (members.status() === 'loading') {
    <p>{{ "groups.infoGroup.loading" | transloco}}</p> 
-  } @else if (hasLoadError()) {
+  } @else if (members.error()) {
     <p class="text-danger">
       {{ "groups.infoGroup.errorLoading" | transloco }}
     </p>
@@ -100,7 +106,7 @@
         </thead>
 
         <tbody>
-        @for (member of members(); track member.userId) {
+        @for (member of members.value(); track member.userId) {
           <tr>
             <td>{{ member.displayName }}</td>
             <td>{{ member.email }} </td>
@@ -115,6 +121,7 @@
               <button
                 type="button"
                 class="btn btn-secondary btn-sm me-2"
+				[disabled]="!permissions.hasValue()"
                 (click)="openUserPermissions(member)"> 
                 {{ "groups.infoGroup.editUserPermission" | transloco }}
               </button>

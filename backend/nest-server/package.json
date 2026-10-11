@@ -38,6 +38,7 @@
     "class-validator": "^0.15.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.4.2",
+    "file-type": "^22.1.1",
     "ioredis": "^5.11.1",
     "minio": "^8.0.7",
     "nestjs-pino": "^4.6.1",

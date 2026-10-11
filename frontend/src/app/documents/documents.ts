@@ -1,6 +1,12 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { environment } from '../../environments/environment';
+
+export interface UploadConfig {
+	maxSizeBytes: number;
+	allowedExtensions: string[]; // mit .
+	aiSupportedExtensions: string[];
+}
 
 export interface UploadResponse {
 	id: string;
@@ -12,8 +18,12 @@ export class Documents {
 	private readonly http = inject(HttpClient);
 	private readonly baseUrl = `${environment.apiUrl}/documents`;
 
-	upload(file: File) {
-		const url = `${this.baseUrl}/upload`;
+	readonly uploadConfig = httpResource<UploadConfig>(
+		() => ({ url: `${this.baseUrl}/upload-config`, withCredentials: true })
+	);
+
+	upload(file: File, groupId: string) {
+		const url = `${this.baseUrl}/upload/${groupId}`;
 
 		const formData = new FormData();
 		formData.append('file', file);
@@ -21,14 +31,14 @@ export class Documents {
 		return this.http.post<UploadResponse>(url, formData, {
 			withCredentials: true,
 			observe: 'events',
-			reportProgress: true
+			reportUploadProgress: true
 		});
 	}
 
-	// TODO: set group wird abgeloest sobald POST upload korrigiert wurde und gruppe pflicht ist
-	setGroup(documentId: string, groupId: string) {
-		return this.http.post<void>(`${this.baseUrl}/${documentId}/group`, { groupId }, {
-			withCredentials: true
-		});
-	}
+	// drin lassen, vielleicht noch mal benoetigt?
+	// setGroup(documentId: string, groupId: string) {
+	// 	return this.http.post<void>(`${this.baseUrl}/${documentId}/group`, { groupId }, {
+	// 		withCredentials: true
+	// 	});
+	// }
 }

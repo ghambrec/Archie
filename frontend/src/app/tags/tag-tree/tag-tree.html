@@ -1,0 +1,13 @@
+<h6 class="text-uppercase text-body-secondary small fw-semibold">
+	{{ "tag.header" | transloco }}
+</h6>
+
+<ul class="nav flex-column">
+	@for (tag of tagsService.tagTree(); track tag.id) {
+		<li class="nav-item">
+			<app-tag-tree-item [tagNode]="tag"></app-tag-tree-item>
+		</li>
+	} @empty {
+		<li class="text-body-secondary small">{{ "tag.noData" | transloco }}</li>
+	}
+</ul>

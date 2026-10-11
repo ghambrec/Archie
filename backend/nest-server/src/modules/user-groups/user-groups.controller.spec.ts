@@ -3,6 +3,7 @@ import { UserGroupsController } from './user-groups.controller';
 import { UserGroupsService } from './user-groups.service';
 import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
 
 describe('UserGroupsController', () => {
   let controller: UserGroupsController;
@@ -27,6 +28,8 @@ describe('UserGroupsController', () => {
     })
       .overrideGuard(SessionAuthGuard)
       .useValue({ canActivate: jest.fn(() => true) }) // bypassing SessionAuthGuard
+      .overrideGuard(AdminRequiredGuard)
+      .useValue({ canActivate: jest.fn(() => true) }) // bypassing AdminRequiredGuard
       .compile();
 
     controller = module.get(UserGroupsController);

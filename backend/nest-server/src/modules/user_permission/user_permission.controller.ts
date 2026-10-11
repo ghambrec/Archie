@@ -10,10 +10,8 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
-import { RequireGroupPermission } from './decorators/require-group-permission.decorator';
 import { GrantPermissionDto } from './dto/grant-permission.dto';
 import { UserPermissionResponseDto } from './dto/user-permission-response.dto';
-import { GroupPermissionGuard } from './guards/group-permission.guard';
 import { UserPermissionService } from './user_permission.service';
 import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
 
@@ -28,9 +26,8 @@ export class UserPermissionController {
   @ApiOperation({
     summary: 'Grant a permission to a user in a group',
     description:
-      'Grants the given permission key to a user, scoped to this group. ' +
-      'Idempotent: granting a permission the user already has in this group is a no-op. ' +
-      'Requires the caller to have `group.manage_users` in this group.',
+      'Grants the given permission key to a user, scoped to this group.' +
+      'Idempotent: granting a permission the user already has in this group is a no-op.'
   })
   async grant(
     @Param('groupId', new ParseUUIDPipe()) groupId: string,
@@ -44,9 +41,8 @@ export class UserPermissionController {
   @ApiOperation({
     summary: 'Revoke a permission from a user in a group',
     description:
-      'Removes the given permission key from a user, scoped to this group. ' +
-      'Idempotent: revoking a permission the user does not have in this group is a no-op. ' +
-      'Requires the caller to have `group.manage_users` in this group.',
+      'Removes the given permission key from a user, scoped to this group.' +
+      'Idempotent: revoking a permission the user does not have in this group is a no-op.'
   })
   async revoke(
     @Param('groupId', new ParseUUIDPipe()) groupId: string,
@@ -61,8 +57,7 @@ export class UserPermissionController {
   @ApiOperation({
     summary: 'List permission grants in a group',
     description:
-      'Returns every (user, permission) grant scoped to this group. ' +
-      'Requires the caller to have `group.manage_users` in this group.',
+      'Returns every (user, permission) grant scoped to this group.'
   })
   async list(
     @Param('groupId', new ParseUUIDPipe()) groupId: string,

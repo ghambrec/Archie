@@ -8,12 +8,15 @@ import { provideMockRepository } from '../groups/test-utils/mock-repositories';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
+import { PermissionsService } from '../permissions/permissions.service';
+import { GroupsService } from '../groups/groups.service';
 
 describe('UserGroupsService', () => {
   let service: UserGroupsService;
   let userGroupRepo: jest.Mocked<Repository<UserGroup>>;
   let groupRepo: jest.Mocked<Repository<Group>>;
   let userRepo: jest.Mocked<Repository<User>>;
+  let manager: { delete: jest.Mock };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -32,6 +35,11 @@ describe('UserGroupsService', () => {
             verbose: jest.fn(),
           },
         },
+        {
+          provide: PermissionsService,
+          useValue: { checkForLastAdmin: jest.fn(), invalidateUserPermissions: jest.fn() },
+        },
+        { provide: GroupsService, useValue: {} },
       ],
     }).compile();
 
@@ -39,6 +47,11 @@ describe('UserGroupsService', () => {
     userGroupRepo = module.get(getRepositoryToken(UserGroup));
     groupRepo = module.get(getRepositoryToken(Group));
     userRepo = module.get(getRepositoryToken(User));
+
+    manager = { delete: jest.fn() };
+    (userGroupRepo as any).manager = {
+      transaction: jest.fn(async (cb) => cb(manager)),
+    };
   });
 
   it('add() should add member and return UserGroup', async () => {
@@ -58,14 +71,14 @@ describe('UserGroupsService', () => {
   });
 
   it('remove() should delete user from a group', async () => {
-    userGroupRepo.delete.mockResolvedValue({ affected: 1 } as any);
+    manager.delete.mockResolvedValue({ affected: 1 });
     await expect(service.remove('u1', 'g1')).resolves.toBeUndefined();
 
-    expect(userGroupRepo.delete).toHaveBeenCalledWith({ userId: 'u1', groupId: 'g1' });
+    expect(manager.delete).toHaveBeenCalledWith(UserGroup, { userId: 'u1', groupId: 'g1' });
   });
 
   it('remove() should throw NotFoundException if not fouud', async () => {
-    userGroupRepo.delete.mockResolvedValue({ affected: 0 } as any);
+    manager.delete.mockResolvedValue({ affected: 0 });
     await expect(service.remove('u1', 'g1')).rejects.toThrow(NotFoundException);
   });
 

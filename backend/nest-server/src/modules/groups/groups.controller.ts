@@ -41,7 +41,7 @@ export class GroupsController {
 		description: 'Query is optional<br>Admin will get all groups<br>User will get only the groups he is assigned to'
 	})
 	async findAll(@Query() query: GetGroupsQueryDto, @Req() req: Request): Promise<GroupsAdminResponseDto[]> {
-		return this.groupsService.findAll(req.userId!, query.name);
+		return this.groupsService.findAll(req.userId!, query.name, query.permission);
 	}
 
 	@Patch(':id')

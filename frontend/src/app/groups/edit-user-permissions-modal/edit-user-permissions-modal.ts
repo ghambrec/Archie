@@ -15,10 +15,26 @@ export class EditUserPermissionsModal {
   selectedUser!: GroupMember;
   userPermissions!: UserPermission[];
 
+  protected readonly availablePermissions = [
+	{ key: "admin",				label: "groups.userPermissions.admin", adminGroupOnly: true },
+	{ key: "documents.read",	label: "groups.userPermissions.documentsRead" },
+	{ key: "documents.upload",	label: "groups.userPermissions.documentsUpload" },
+	{ key: "documents.update",	label: "groups.userPermissions.documentsUpdate" },
+	{ key: "documents.delete",	label: "groups.userPermissions.documentsDelete" },
+  ];
+
+  protected get visiblePermissions() {
+	const isAdminGroup = this.selectedGroup.isSystem;
+
+	return this.availablePermissions.filter(
+		permission => !!permission.adminGroupOnly === isAdminGroup
+	);
+  }
 
   protected readonly activeModal = inject(NgbActiveModal);
 
   readonly selectedPermissions = signal<Set<string>>(new Set());
+  readonly errorMsg = signal<string | null>(null);
 
   private readonly groupsService = inject(Groups);
 
@@ -52,6 +68,8 @@ export class EditUserPermissionsModal {
   }
 
   save(): void {
+	this.errorMsg.set(null);
+
     const initialPermissions = new Set(
       this.userPermissions.map(permission => permission.permKey)
     );
@@ -89,7 +107,11 @@ export class EditUserPermissionsModal {
     forkJoin(requests).subscribe({
       next: () => this.activeModal.close(true),
       error: error => {
-        console.error("Unable to update user permissions", error);
+        if (error.status === 409) {
+			this.errorMsg.set("groups.userPermissions.errorLastAdmin");
+		} else {
+			this.errorMsg.set("groups.userPermissions.errorGeneral");
+		}
       },
     });
   }

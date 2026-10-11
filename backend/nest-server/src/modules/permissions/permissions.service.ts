@@ -1,93 +1,139 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type Redis from 'ioredis';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { REDIS_CLIENT } from '../redis/redis.module';
 import { UserGroup } from '../user-groups/entities/user-group.entity';
 import { Permission } from './entities/permission.entity';
 
 const USER_PERMISSIONS_TTL_SECONDS = 3600;
 const USER_IS_ADMIN_TTL_SECONDS = 3600;
-const ADMIN_GROUP_NAME = 'Admin';
+export const ADMIN_PERMISSION_KEY = 'admin';
 
 const userPermissionsKey = (userId: string) => `user:${userId}:permissions`;
 const userIsAdminKey = (userId: string) => `user:${userId}:isAdmin`;
 
 @Injectable()
 export class PermissionsService {
-  constructor(
-    @Inject(REDIS_CLIENT) private readonly redis: Redis,
-    @InjectRepository(Permission)
-    private readonly permissionsRepository: Repository<Permission>,
-    @InjectRepository(UserGroup)
-    private readonly userGroupsRepository: Repository<UserGroup>,
-  ) {}
+	constructor(
+		@Inject(REDIS_CLIENT) private readonly redis: Redis,
+		@InjectRepository(Permission)
+		private readonly permissionsRepository: Repository<Permission>,
+		@InjectRepository(UserGroup)
+		private readonly userGroupsRepository: Repository<UserGroup>,
+	) { }
 
-  async findAll(): Promise<Permission[]> {
-    return this.permissionsRepository.find();
-  }
+	async findAll(): Promise<Permission[]> {
+		return this.permissionsRepository.find();
+	}
 
-  async getUserPermissionKeys(userId: string): Promise<Set<string>> {
-    const cached = await this.redis.get(userPermissionsKey(userId));
-    if (cached) {
-      return new Set(JSON.parse(cached) as string[]);
-    }
+	async hasPermission(userId: string, groupId: string, permKey: string): Promise<boolean> {
+		const permissionsByGroup = await this.getUserPermissionsByGroupId(userId);
+		return permissionsByGroup[groupId]?.includes(permKey) ?? false;
+	}
 
-    const rows = await this.permissionsRepository
-      .createQueryBuilder('permission')
-      .innerJoin('group_permission', 'gp', 'gp.permission_id = permission.id')
-      .innerJoin('user_groups', 'ug', 'ug.group_id = gp.group_id')
-      .where('ug.user_id = :userId', { userId })
-      .select('DISTINCT permission.perm_key', 'permKey')
-      .getRawMany<{ permKey: string }>();
+	async getGroupIdsWithPermission(userId: string, permKey: string): Promise<string[]> {
+		const permissionsByGroup = await this.getUserPermissionsByGroupId(userId);
+		return Object.entries(permissionsByGroup)
+			.filter(([, permKeys]) => permKeys.includes(permKey))
+			.map(([groupId]) => groupId);
+	}
 
-    const permKeys = rows.map((row) => row.permKey);
+	async getUserPermissionsByGroupId(userId: string): Promise<Record<string, string[]>> {
+		const cached = await this.redis.get(userPermissionsKey(userId));
+		if (cached) {
+			return JSON.parse(cached) as Record<string, string[]>;
+		}
 
-    await this.redis.set(
-      userPermissionsKey(userId),
-      JSON.stringify(permKeys),
-      'EX',
-      USER_PERMISSIONS_TTL_SECONDS,
-    );
+		const rows = await this.permissionsRepository
+			.createQueryBuilder('permission')
+			.innerJoin('user_permission', 'up', 'up.permission_id = permission.id')
+			.where('up.user_id = :userId', { userId })
+			.select('up.group_id', 'groupId')
+			.addSelect('permission.perm_key', 'permKey')
+			.getRawMany<{ groupId: string; permKey: string }>();
+		
+		const permissionsByGroupId: Record<string, string[]> = {};
+		for (const row of rows) {
+			(permissionsByGroupId[row.groupId] ??= []).push(row.permKey);
+		}
 
-    return new Set(permKeys);
-  }
+		await this.redis.set(
+			userPermissionsKey(userId),
+			JSON.stringify(permissionsByGroupId),
+			'EX',
+			USER_PERMISSIONS_TTL_SECONDS
+		);
 
-  async isUserAdmin(userId: string): Promise<boolean> {
-    const cached = await this.redis.get(userIsAdminKey(userId));
-    if (cached) {
-      return cached === 'true';
-    }
+		return permissionsByGroupId;
+	}
 
-    const isAdmin = await this.userGroupsRepository
-      .createQueryBuilder('userGroup')
-      .innerJoin('userGroup.group', 'group')
-      .where('userGroup.userId = :userId', { userId })
-      .andWhere('group.name = :name', { name: ADMIN_GROUP_NAME })
-      .getExists();
+	async isUserAdmin(userId: string): Promise<boolean> {
+		const cached = await this.redis.get(userIsAdminKey(userId));
+		if (cached) {
+			return cached === 'true';
+		}
 
-    await this.redis.set(
-      userIsAdminKey(userId),
-      String(isAdmin),
-      'EX',
-      USER_IS_ADMIN_TTL_SECONDS,
-    );
+		const rows: Array<{ isAdmin: boolean }> = await this.userGroupsRepository.query(
+			`
+		select exists (
+			select 1
+			from user_permission as up
+			inner join permissions as p
+				on p.id = up.permission_id
+			where
+				up.user_id = $1
+				and p.perm_key = $2
+		) as "isAdmin"
+		`,
+			[userId, ADMIN_PERMISSION_KEY]
+		);
 
-    return isAdmin;
-  }
+		const isAdmin = rows[0].isAdmin;
 
-  async invalidateUserPermissions(userId: string): Promise<void> {
-    await this.redis.del(userPermissionsKey(userId), userIsAdminKey(userId));
-  }
+		await this.redis.set(
+			userIsAdminKey(userId),
+			String(isAdmin),
+			'EX',
+			USER_IS_ADMIN_TTL_SECONDS,
+		);
 
-  async invalidateUsersPermissions(userIds: string[]): Promise<void> {
-    if (userIds.length === 0) {
-      return;
-    }
+		return isAdmin;
+	}
 
-    await this.redis.del([
-      ...userIds.map(userPermissionsKey),
-      ...userIds.map(userIsAdminKey),
-    ]);
-  }
+	async invalidateUserPermissions(userId: string): Promise<void> {
+		await this.redis.del(userPermissionsKey(userId), userIsAdminKey(userId));
+	}
+
+	async invalidateUsersPermissions(userIds: string[]): Promise<void> {
+		if (userIds.length === 0) {
+			return;
+		}
+
+		await this.redis.del([
+			...userIds.map(userPermissionsKey),
+			...userIds.map(userIsAdminKey),
+		]);
+	}
+
+	async checkForLastAdmin(manager: EntityManager, userId: string, groupId: string): Promise<void> {
+		const rows: Array<{ exists: boolean }> = await manager.query(
+			`
+		select exists (
+			select 1
+			from user_permission as up
+			inner join permissions as p
+				on p.id = up.permission_id
+			where
+				p.perm_key = $1
+				and not (up.user_id = $2 and up.group_id = $3)
+		) as "exists"
+		`,
+			[ADMIN_PERMISSION_KEY, userId, groupId]
+		);
+
+		if (!rows[0].exists) {
+			throw new ConflictException('cannot remove the last admin');
+		}
+	}
 }

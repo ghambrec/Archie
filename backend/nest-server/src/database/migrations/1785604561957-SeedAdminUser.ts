@@ -33,7 +33,7 @@ export class SeedAdminUser1785604561957 implements MigrationInterface {
         SELECT u.id, g.id
         FROM "users" u
         CROSS JOIN "groups" g
-        WHERE u.email = $1 AND g.name = 'Admin'
+        WHERE u.email = $1 AND g.is_system = true
         ON CONFLICT ("user_id", "group_id") DO NOTHING
       `,
       [email.trim().toLowerCase()],

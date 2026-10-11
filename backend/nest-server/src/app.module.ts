@@ -16,11 +16,13 @@ import { StorageModule } from './modules/storage/storage.module';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { UserPermissionModule } from './modules/user_permission/user_permission.module';
 import { TagsModule } from './modules/tags/tags.module';
+import { DocumentsReviewModule } from './modules/documents-review/documents-review.module';
 import authConfig from './config/auth.config';
 import redisConfig from './config/redis.config';
 import storageConfig from './config/storage.config';
 import databaseConfig from './config/database.config';
 import aiServiceConfig from './config/ai-service.config';
+import documentsConfig from './config/documents.config';
 
 @Module({
   imports: [
@@ -31,7 +33,8 @@ import aiServiceConfig from './config/ai-service.config';
         databaseConfig,
         redisConfig,
         storageConfig,
-        aiServiceConfig
+        aiServiceConfig,
+		documentsConfig
         ],
     }),
     TypeOrmModule.forRootAsync({
@@ -65,6 +68,7 @@ import aiServiceConfig from './config/ai-service.config';
     StorageModule,
     UserPermissionModule,
     TagsModule,
+    DocumentsReviewModule,
   ],
   controllers: [AppController, GroupsController],
   providers: [AppService],

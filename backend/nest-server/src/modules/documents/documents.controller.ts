@@ -31,11 +31,18 @@ import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
 import { SetDocumentGroupDto } from './dto/set-document-group.dto';
 import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-response.dto';
+import { ApplicationException } from 'src/common/errors/application.exception';
+import { ErrorCode } from 'src/common/errors/error-code';
+import { DocumentFileValidationService } from './document-file-validation.service';
+import { UploadConfigResponseDto } from './dto/upload-config-response.dto';
 
 @ApiTags('documents')
 @Controller('documents')
 export class DocumentsController {
-  constructor(private readonly documentsService: DocumentsService) {}
+  constructor(
+	private readonly documentsService: DocumentsService,
+	private readonly documentFileValidationService: DocumentFileValidationService
+  ) {}
 
   @ApiOperation({
     summary: 'Upload a document',
@@ -62,8 +69,8 @@ export class DocumentsController {
     @Param('groupId', new ParseUUIDPipe()) groupId: string,
     @UploadedFileDecorator() file: Express.Multer.File,
   ): Promise<UploadResponseDto> {
-    if (!file) {
-      throw new BadRequestException('No file was provided.');
+    if (!file || file.size === 0) {
+	  throw new ApplicationException(ErrorCode.DocumentFileEmpty);
     }
 
     return this.documentsService.upload(req.userId!, groupId, file);
@@ -80,6 +87,15 @@ export class DocumentsController {
     @Query() query: GetDocumentsQueryDto,
   ): Promise<GetDocumentsResponseDto> {
     return this.documentsService.findAll(req.userId!, query);
+  }
+
+  @ApiOperation({
+	summary: 'Get upload configuration'
+  })
+  @UseGuards(SessionAuthGuard)
+  @Get('upload-config')
+  getUploadConfig(): UploadConfigResponseDto {
+	return this.documentFileValidationService.getUploadConfig();
   }
 
   @ApiOperation({
@@ -138,12 +154,10 @@ export class DocumentsController {
       id,
     );
 
-    res.setHeader(
-      'Content-Type',documentDownloadStream.mimeType);
-    res.setHeader(
-      'Content-Disposition', `attachment; filename="${documentDownloadStream.filename}"`);
-    res.setHeader(
-      'Content-Length', documentDownloadStream.sizeBytes.toString());
+    res.attachment(documentDownloadStream.filename);
+	res.setHeader('Content-Type', documentDownloadStream.mimeType);
+	res.setHeader('Content-Length', documentDownloadStream.sizeBytes.toString());
+	res.setHeader('X-Content-Type-Options', 'nosniff');
 
     documentDownloadStream.stream.on('error', () => {
       if (!res.headersSent) {

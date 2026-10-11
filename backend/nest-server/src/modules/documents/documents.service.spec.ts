@@ -7,7 +7,7 @@ import { DocumentsService } from './documents.service';
 import { StorageService } from '../storage/storage.service';
 import { GroupsService } from '../groups/groups.service';
 import { DocumentGroupsService } from '../document-groups/document-groups.service';
-import { AiIngestionService } from '../ai-service/ai-ingestion.service';
+import { IngestionService } from '../ai-service/ingestion/ingestion.service';
 import { TagsService } from '../tags/tags.service';
 import { Document } from './entities/document.entity';
 import { DocumentAiStatus } from './dto/document-ai-status.enum';
@@ -93,7 +93,7 @@ describe('DocumentsService', () => {
         { provide: getRepositoryToken(Document), useValue: documentsRepository },
         { provide: GroupsService, useValue: groupsService },
         { provide: DocumentGroupsService, useValue: documentGroupsService },
-        { provide: AiIngestionService, useValue: aiIngestionService },
+        { provide: IngestionService, useValue: aiIngestionService },
         { provide: TagsService, useValue: tagsService },
         { provide: Logger, useValue: { log: jest.fn(), warn: jest.fn(), error: jest.fn() } },
       ],

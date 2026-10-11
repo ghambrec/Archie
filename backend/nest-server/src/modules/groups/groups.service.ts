@@ -66,8 +66,21 @@ export class GroupsService {
 		return new GroupsAdminResponseDto(group);
 	}
 
-	async findAll(userId: string, name?: string): Promise<GroupsAdminResponseDto[]> {
+	async findAll(userId: string, name?: string, permission?: string): Promise<GroupsAdminResponseDto[]> {
 		this.logger.log(name ? { name } : {}, 'Fetching groups');
+
+		// permission filter
+		if (permission) {
+			const groupIds = await this.permissionsService.getGroupIdsWithPermission(userId, permission);
+			if (groupIds.length === 0) {
+				return [];
+			}
+			const groups = await this.groupsRepository.find({
+				where: name ? { id: In(groupIds), name } : { id: In(groupIds) }
+			});
+			return groups.map(group => new GroupsAdminResponseDto(group));
+		}
+
 		const isAdmin = await this.permissionsService.isUserAdmin(userId);
 
 		// if admin: return all groups
