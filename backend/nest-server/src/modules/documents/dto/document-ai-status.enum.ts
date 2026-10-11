@@ -3,4 +3,5 @@ export enum DocumentAiStatus {
   PROCESSING = 'PROCESSING',
   FINISHED = 'FINISHED',
   FAILED = 'FAILED',
+  SKIPPED = 'SKIPPED',
 }
