@@ -27,9 +27,9 @@ import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-response.dto';
 import { DocumentFileValidationService } from './document-file-validation.service';
 import { PermissionsService } from '../permissions/permissions.service';
+import { DocumentPermission } from '../permissions/permission-keys';
 
 const DOCUMENTS_BUCKET = 'documents';
-const DOCUMENTS_READ_PERMISSION = 'documents.read';
 
 @Injectable()
 export class DocumentsService {
@@ -197,20 +197,16 @@ export class DocumentsService {
 
     this.logger.log({ userId, id }, 'Find one document');
 
-    const baseQuery = await this.createReadableDocumentsQuery(userId);
-
-    if (!baseQuery) {
-      throw new ApplicationException(ErrorCode.DocumentNotFound);
-    }
-
-    const raw = await baseQuery
+    // Access is checked by DocumentPermissionsGuard (documents.read)
+    const raw = await this.documentsRepository
+      .createQueryBuilder('document')
       .innerJoin(User, 'uploader', 'uploader.id = document.uploadedBy')
       .leftJoin(DocumentGroup, 'documentGroup', 'documentGroup.documentId = document.id')
       .leftJoin(Group, 'group', 'group.id = documentGroup.groupId')
       .leftJoin(DocumentTag, 'documentTag', 'documentTag.documentId = document.id')
       .leftJoin(Tag, 'tag', 'tag.id = documentTag.tagId')
       .leftJoin('ai_documents', 'aiDocument', '"aiDocument"."id" = document.id')
-      .andWhere('document.id = :id', { id })
+      .where('document.id = :id', { id })
       .select([
         'document.id AS "id"',
         'document.filename AS "filename"',
@@ -274,7 +270,7 @@ export class DocumentsService {
     this.logger.log({ userId, id }, 'Stream document download');
 
     const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
+      where: { id },
       select: { objectKey: true, filename: true, mimeType: true, sizeBytes: true },
     });
 
@@ -303,7 +299,7 @@ export class DocumentsService {
     this.logger.log({ userId, id, tagId }, 'Assign tag to document');
 
     const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
+      where: { id },
       select: { id: true },
     });
 
@@ -326,7 +322,7 @@ export class DocumentsService {
     this.logger.log({ userId, id }, 'Confirm suggested tags for document');
 
     const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
+      where: { id },
       select: { id: true },
     });
 
@@ -350,7 +346,7 @@ export class DocumentsService {
     this.logger.log({ userId, id, tagId }, 'Remove tag from document');
 
     const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
+      where: { id },
       select: { id: true },
     });
 
@@ -372,7 +368,7 @@ export class DocumentsService {
     this.logger.log({ userId, id, groupId }, 'Move document to group');
 
     const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
+      where: { id },
       select: { id: true, sha256: true },
     });
 
@@ -404,7 +400,7 @@ export class DocumentsService {
     this.logger.log({ userId, id, groupId }, 'Remove document from group');
 
     const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
+      where: { id },
       select: { id: true },
     });
 
@@ -422,7 +418,7 @@ export class DocumentsService {
     this.logger.log({ userId, id }, 'Delete document');
 
     const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
+      where: { id },
       select: { id: true },
     });
 
@@ -441,7 +437,7 @@ export class DocumentsService {
   ): Promise<SelectQueryBuilder<Document> | null> {
     const readableGroupIds = await this.permissionsService.getGroupIdsWithPermission(
       userId,
-      DOCUMENTS_READ_PERMISSION,
+      DocumentPermission.Read,
     );
 
     if (readableGroupIds.length === 0) {

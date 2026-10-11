@@ -4,6 +4,8 @@ import { DocumentsController } from './documents.controller';
 import { DocumentsService } from './documents.service';
 import { DocumentFileValidationService } from './document-file-validation.service';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { PermissionsGuard } from '../permissions/guards/permissions.guard';
+import { DocumentPermissionsGuard } from './guards/document-permissions.guard';
 import { ErrorCode } from 'src/common/errors/error-code';
 
 describe('DocumentsController', () => {
@@ -25,6 +27,10 @@ describe('DocumentsController', () => {
       ],
     })
       .overrideGuard(SessionAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(PermissionsGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(DocumentPermissionsGuard)
       .useValue({ canActivate: () => true })
       .compile();
 

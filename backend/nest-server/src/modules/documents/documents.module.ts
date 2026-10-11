@@ -14,6 +14,7 @@ import documentsConfig from 'src/config/documents.config';
 import { ConfigType } from '@nestjs/config';
 import { DocumentFileValidationService } from './document-file-validation.service';
 import { PermissionsModule } from '../permissions/permissions.module';
+import { DocumentPermissionsGuard } from './guards/document-permissions.guard';
 
 @Module({
   imports: [
@@ -34,6 +35,6 @@ import { PermissionsModule } from '../permissions/permissions.module';
     PermissionsModule,
   ],
   controllers: [DocumentsController],
-  providers: [DocumentsService, DocumentFileValidationService],
+  providers: [DocumentsService, DocumentFileValidationService, DocumentPermissionsGuard],
 })
 export class DocumentsModule {}

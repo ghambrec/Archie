@@ -249,16 +249,7 @@ describe('DocumentsService', () => {
       const result = await service.findOne(userId, documentId);
 
       expect(result).toMatchObject({ id: documentId, filename: 'hello.txt', sizeBytes: 11 });
-      expect(permissionsService.getGroupIdsWithPermission).toHaveBeenCalledWith(userId, 'documents.read');
-    });
-
-    it('throws DocumentNotFound when the user has no documents.read group', async () => {
-      permissionsService.getGroupIdsWithPermission.mockResolvedValue([]);
-
-      await expect(service.findOne(userId, documentId)).rejects.toMatchObject({
-        code: ErrorCode.DocumentNotFound,
-      });
-      expect(documentsRepository.createQueryBuilder).not.toHaveBeenCalled();
+      expect(queryBuilder.where).toHaveBeenCalledWith('document.id = :id', { id: documentId });
     });
 
     it('returns the AI fields from ai_documents when present', async () => {
@@ -298,7 +289,7 @@ describe('DocumentsService', () => {
     });
   });
 
-  describe('documents.read access control', () => {
+  describe('findAll documents.read filter', () => {
     const readableGroupIds = ['group-1', 'group-2'];
     const otherUserId = 'user-2';
 
@@ -337,15 +328,11 @@ describe('DocumentsService', () => {
       permissionsService.getGroupIdsWithPermission.mockResolvedValue(readableGroupIds);
     });
 
-    it.each([
-      ['findAll', () => service.findAll(userId, { page: 1, limit: 20, includeDescendants: false })],
-      ['findOne', () => service.findOne(userId, documentId)],
-    ])('%s restricts documents to groups where the user has documents.read', async (_, call) => {
+    it('restricts documents to groups where the user has documents.read', async () => {
       queryBuilder.getCount.mockResolvedValue(1);
       queryBuilder.getRawMany.mockResolvedValue([documentRow]);
-      queryBuilder.getRawOne.mockResolvedValue(documentRow);
 
-      await call();
+      await service.findAll(userId, { page: 1, limit: 20, includeDescendants: false });
 
       expect(permissionsService.getGroupIdsWithPermission).toHaveBeenCalledWith(userId, 'documents.read');
 
@@ -385,22 +372,12 @@ describe('DocumentsService', () => {
       expect(result.data[0].uploadedBy).toEqual({ id: otherUserId, name: 'Jane Doe' });
     });
 
-    it('findOne returns a document uploaded by another user in a readable group', async () => {
+    it('findOne returns a document uploaded by another user', async () => {
       queryBuilder.getRawOne.mockResolvedValue(documentRow);
 
       const result = await service.findOne(userId, documentId);
 
       expect(result.uploadedBy).toEqual({ id: otherUserId, name: 'Jane Doe' });
-      expect(queryBuilder.andWhere).toHaveBeenCalledWith('document.id = :id', { id: documentId });
-    });
-
-    it('findOne throws DocumentNotFound when the document is not in a readable group', async () => {
-      // The access filter excludes the document, so the query finds nothing
-      queryBuilder.getRawOne.mockResolvedValue(undefined);
-
-      await expect(service.findOne(userId, documentId)).rejects.toMatchObject({
-        code: ErrorCode.DocumentNotFound,
-      });
     });
 
     it('findAll returns an empty page when no document is in a readable group', async () => {
@@ -546,7 +523,7 @@ describe('DocumentsService', () => {
       const result = await service.confirmSuggestedTags(userId, documentId);
 
       expect(documentsRepository.findOne).toHaveBeenCalledWith({
-        where: { id: documentId, uploadedBy: userId },
+        where: { id: documentId },
         select: { id: true },
       });
       expect(tagsService.confirmAiSuggestions).toHaveBeenCalledWith(documentId);
