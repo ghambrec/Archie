@@ -9,6 +9,7 @@ import { GroupsService } from '../groups/groups.service';
 import { DocumentGroupsService } from '../document-groups/document-groups.service';
 import { IngestionService } from '../ai-service/ingestion/ingestion.service';
 import { TagsService } from '../tags/tags.service';
+import { PermissionsService } from '../permissions/permissions.service';
 import { Document } from './entities/document.entity';
 import { DocumentAiStatus } from './dto/document-ai-status.enum';
 import { ApplicationException } from 'src/common/errors/application.exception';
@@ -62,6 +63,7 @@ describe('DocumentsService', () => {
     removeFromDocument: jest.Mock;
     confirmAiSuggestions: jest.Mock;
   };
+  let permissionsService: { getGroupIdsWithPermission: jest.Mock };
   let queryBuilder: QueryBuilderMock;
 
   const userId = 'user-1';
@@ -86,6 +88,8 @@ describe('DocumentsService', () => {
       confirmAiSuggestions: jest.fn(),
     };
 
+    permissionsService = { getGroupIdsWithPermission: jest.fn().mockResolvedValue(['group-1']) };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DocumentsService,
@@ -95,6 +99,7 @@ describe('DocumentsService', () => {
         { provide: DocumentGroupsService, useValue: documentGroupsService },
         { provide: IngestionService, useValue: aiIngestionService },
         { provide: TagsService, useValue: tagsService },
+        { provide: PermissionsService, useValue: permissionsService },
         { provide: Logger, useValue: { log: jest.fn(), warn: jest.fn(), error: jest.fn() } },
       ],
     }).compile();
@@ -204,6 +209,16 @@ describe('DocumentsService', () => {
         uploadedBy: { id: userId, name: 'John Doe' },
         aiStatus: DocumentAiStatus.PENDING,
       });
+      expect(permissionsService.getGroupIdsWithPermission).toHaveBeenCalledWith(userId, 'documents.read');
+    });
+
+    it('returns an empty page without querying when the user has no documents.read group', async () => {
+      permissionsService.getGroupIdsWithPermission.mockResolvedValue([]);
+
+      const result = await service.findAll(userId, { page: 1, limit: 20, includeDescendants: false });
+
+      expect(result).toEqual({ data: [], page: 1, limit: 20, total: 0, totalPages: 0 });
+      expect(documentsRepository.createQueryBuilder).not.toHaveBeenCalled();
     });
   });
 
@@ -225,6 +240,16 @@ describe('DocumentsService', () => {
       const result = await service.findOne(userId, documentId);
 
       expect(result).toMatchObject({ id: documentId, filename: 'hello.txt', sizeBytes: 11 });
+      expect(permissionsService.getGroupIdsWithPermission).toHaveBeenCalledWith(userId, 'documents.read');
+    });
+
+    it('throws DocumentNotFound when the user has no documents.read group', async () => {
+      permissionsService.getGroupIdsWithPermission.mockResolvedValue([]);
+
+      await expect(service.findOne(userId, documentId)).rejects.toMatchObject({
+        code: ErrorCode.DocumentNotFound,
+      });
+      expect(documentsRepository.createQueryBuilder).not.toHaveBeenCalled();
     });
 
     it('returns the AI fields from ai_documents when present', async () => {

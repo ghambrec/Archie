@@ -13,6 +13,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import documentsConfig from 'src/config/documents.config';
 import { ConfigType } from '@nestjs/config';
 import { DocumentFileValidationService } from './document-file-validation.service';
+import { PermissionsModule } from '../permissions/permissions.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { DocumentFileValidationService } from './document-file-validation.servic
     GroupsModule,
     DocumentGroupsModule,
     AiServiceModule,
-    TagsModule
+    TagsModule,
+    PermissionsModule,
   ],
   controllers: [DocumentsController],
   providers: [DocumentsService, DocumentFileValidationService],

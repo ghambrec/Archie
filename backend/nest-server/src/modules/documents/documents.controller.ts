@@ -78,7 +78,7 @@ export class DocumentsController {
 
   @ApiOperation({
     summary: 'List documents',
-    description: "Returns a paginated, filterable list of the current user's documents.",
+    description: 'Returns a paginated, filterable list of documents in groups where the current user has the documents.read permission.',
   })
   @UseGuards(SessionAuthGuard)
   @Get()
@@ -154,7 +154,7 @@ export class DocumentsController {
       id,
     );
 
-    res.attachment(documentDownloadStream.filename);
+  res.attachment(documentDownloadStream.filename);
 	res.setHeader('Content-Type', documentDownloadStream.mimeType);
 	res.setHeader('Content-Length', documentDownloadStream.sizeBytes.toString());
 	res.setHeader('X-Content-Type-Options', 'nosniff');

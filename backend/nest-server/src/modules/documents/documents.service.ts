@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { randomUUID, createHash } from 'crypto';
 import { Logger } from 'nestjs-pino';
 import { StorageService, DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS } from '../storage/storage.service';
@@ -26,8 +26,10 @@ import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
 import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-response.dto';
 import { DocumentFileValidationService } from './document-file-validation.service';
+import { PermissionsService } from '../permissions/permissions.service';
 
 const DOCUMENTS_BUCKET = 'documents';
+const DOCUMENTS_READ_PERMISSION = 'documents.read';
 
 @Injectable()
 export class DocumentsService {
@@ -41,6 +43,7 @@ export class DocumentsService {
     private readonly tagsService: TagsService,
     private readonly logger: Logger,
 	private readonly documentFileValidationService: DocumentFileValidationService,
+    private readonly permissionsService: PermissionsService,
   ) {}
 
   async upload(
@@ -108,9 +111,12 @@ export class DocumentsService {
 
     this.logger.log({ userId, page, limit }, 'Listing documents');
 
-    const baseQuery = this.documentsRepository
-      .createQueryBuilder('document')
-      .where('document.uploadedBy = :userId', { userId });
+    const baseQuery = await this.createReadableDocumentsQuery(userId);
+
+    if (!baseQuery) {
+      this.logger.log({ userId, total: 0 }, 'Documents listed successfully');
+      return { data: [], page, limit, total: 0, totalPages: 0 };
+    }
 
     const total = await baseQuery.getCount();
 
@@ -191,16 +197,20 @@ export class DocumentsService {
 
     this.logger.log({ userId, id }, 'Find one document');
 
-    const raw = await this.documentsRepository
-      .createQueryBuilder('document')
+    const baseQuery = await this.createReadableDocumentsQuery(userId);
+
+    if (!baseQuery) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    const raw = await baseQuery
       .innerJoin(User, 'uploader', 'uploader.id = document.uploadedBy')
       .leftJoin(DocumentGroup, 'documentGroup', 'documentGroup.documentId = document.id')
       .leftJoin(Group, 'group', 'group.id = documentGroup.groupId')
       .leftJoin(DocumentTag, 'documentTag', 'documentTag.documentId = document.id')
       .leftJoin(Tag, 'tag', 'tag.id = documentTag.tagId')
       .leftJoin('ai_documents', 'aiDocument', '"aiDocument"."id" = document.id')
-      .where('document.id = :id', { id })
-      .andWhere('document.uploadedBy = :userId', { userId })
+      .andWhere('document.id = :id', { id })
       .select([
         'document.id AS "id"',
         'document.filename AS "filename"',
@@ -423,6 +433,33 @@ export class DocumentsService {
     await this.documentsRepository.softDelete(id);
 
     this.logger.log({ userId, id }, 'Document deleted');
+  }
+
+
+  private async createReadableDocumentsQuery(
+    userId: string,
+  ): Promise<SelectQueryBuilder<Document> | null> {
+    const readableGroupIds = await this.permissionsService.getGroupIdsWithPermission(
+      userId,
+      DOCUMENTS_READ_PERMISSION,
+    );
+
+    if (readableGroupIds.length === 0) {
+      return null;
+    }
+
+    return this.documentsRepository
+      .createQueryBuilder('document')
+      .where((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select('1')
+          .from(DocumentGroup, 'readableDocumentGroup')
+          .where('readableDocumentGroup.documentId = document.id')
+          .andWhere('readableDocumentGroup.groupId IN (:...readableGroupIds)', { readableGroupIds })
+          .getQuery();
+        return `EXISTS ${subQuery}`;
+      });
   }
 
   private existsInGroup(groupId: string, sha256: string, excludeDocumentId?: string): Promise<boolean> {
