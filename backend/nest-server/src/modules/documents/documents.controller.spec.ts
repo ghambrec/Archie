@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
 import type { Request } from 'express';
 import { DocumentsController } from './documents.controller';
 import { DocumentsService } from './documents.service';
+import { DocumentFileValidationService } from './document-file-validation.service';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { ErrorCode } from 'src/common/errors/error-code';
 
 describe('DocumentsController', () => {
   let controller: DocumentsController;
@@ -18,7 +19,10 @@ describe('DocumentsController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [DocumentsController],
-      providers: [{ provide: DocumentsService, useValue: documentsService }],
+      providers: [
+        { provide: DocumentsService, useValue: documentsService },
+        { provide: DocumentFileValidationService, useValue: { getUploadConfig: jest.fn() } },
+      ],
     })
       .overrideGuard(SessionAuthGuard)
       .useValue({ canActivate: () => true })
@@ -47,10 +51,10 @@ describe('DocumentsController', () => {
       expect(documentsService.upload).toHaveBeenCalledWith(userId, groupId, file);
     });
 
-    it('throws BadRequestException when no file is provided', async () => {
+    it('throws DocumentFileEmpty when no file is provided', async () => {
       await expect(
         controller.upload(req, groupId, undefined as unknown as Express.Multer.File),
-      ).rejects.toBeInstanceOf(BadRequestException);
+      ).rejects.toMatchObject({ code: ErrorCode.DocumentFileEmpty });
       expect(documentsService.upload).not.toHaveBeenCalled();
     });
   });

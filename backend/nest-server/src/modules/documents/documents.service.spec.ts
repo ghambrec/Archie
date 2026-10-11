@@ -10,7 +10,9 @@ import { DocumentGroupsService } from '../document-groups/document-groups.servic
 import { IngestionService } from '../ai-service/ingestion/ingestion.service';
 import { TagsService } from '../tags/tags.service';
 import { PermissionsService } from '../permissions/permissions.service';
+import { DocumentFileValidationService } from './document-file-validation.service';
 import { Document } from './entities/document.entity';
+import { DocumentGroup } from '../document-groups/entities/document-group.entity';
 import { DocumentAiStatus } from './dto/document-ai-status.enum';
 import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
@@ -100,6 +102,13 @@ describe('DocumentsService', () => {
         { provide: IngestionService, useValue: aiIngestionService },
         { provide: TagsService, useValue: tagsService },
         { provide: PermissionsService, useValue: permissionsService },
+        {
+          provide: DocumentFileValidationService,
+          useValue: {
+            normalizeFilename: jest.fn((filename: string) => filename),
+            validate: jest.fn((file: Express.Multer.File) => Promise.resolve(file.mimetype)),
+          },
+        },
         { provide: Logger, useValue: { log: jest.fn(), warn: jest.fn(), error: jest.fn() } },
       ],
     }).compile();
@@ -286,6 +295,121 @@ describe('DocumentsService', () => {
       await expect(service.findOne(userId, documentId)).rejects.toMatchObject({
         code: ErrorCode.DocumentNotFound,
       });
+    });
+  });
+
+  describe('documents.read access control', () => {
+    const readableGroupIds = ['group-1', 'group-2'];
+    const otherUserId = 'user-2';
+
+    const documentRow = {
+      id: documentId,
+      filename: 'hello.txt',
+      mimeType: 'text/plain',
+      sizeBytes: '11',
+      createdAt: new Date('2026-01-01'),
+      updatedAt: new Date('2026-01-01'),
+      uploaderId: otherUserId,
+      uploaderName: 'Jane Doe',
+      groups: [{ id: 'group-1', name: 'Group 1' }],
+      tags: [],
+    };
+
+    // Runs the callback passed to queryBuilder.where() against a fake subquery builder
+    // and returns the generated condition plus the subquery calls.
+    const runAccessFilter = () => {
+      const subQueryBuilder: QueryBuilderMock = {};
+      ['select', 'from', 'where', 'andWhere'].forEach((method) => {
+        subQueryBuilder[method] = jest.fn().mockReturnValue(subQueryBuilder);
+      });
+      subQueryBuilder.getQuery = jest.fn().mockReturnValue('(SUBQUERY)');
+
+      const whereCallback = queryBuilder.where.mock.calls
+        .map(([condition]) => condition)
+        .find((condition) => typeof condition === 'function');
+      expect(whereCallback).toBeDefined();
+
+      const condition = whereCallback({ subQuery: () => subQueryBuilder });
+      return { condition, subQueryBuilder };
+    };
+
+    beforeEach(() => {
+      permissionsService.getGroupIdsWithPermission.mockResolvedValue(readableGroupIds);
+    });
+
+    it.each([
+      ['findAll', () => service.findAll(userId, { page: 1, limit: 20, includeDescendants: false })],
+      ['findOne', () => service.findOne(userId, documentId)],
+    ])('%s restricts documents to groups where the user has documents.read', async (_, call) => {
+      queryBuilder.getCount.mockResolvedValue(1);
+      queryBuilder.getRawMany.mockResolvedValue([documentRow]);
+      queryBuilder.getRawOne.mockResolvedValue(documentRow);
+
+      await call();
+
+      expect(permissionsService.getGroupIdsWithPermission).toHaveBeenCalledWith(userId, 'documents.read');
+
+      const { condition, subQueryBuilder } = runAccessFilter();
+      expect(condition).toBe('EXISTS (SUBQUERY)');
+      expect(subQueryBuilder.from).toHaveBeenCalledWith(DocumentGroup, 'readableDocumentGroup');
+      expect(subQueryBuilder.where).toHaveBeenCalledWith('readableDocumentGroup.documentId = document.id');
+      expect(subQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'readableDocumentGroup.groupId IN (:...readableGroupIds)',
+        { readableGroupIds },
+      );
+    });
+
+    it.each([
+      ['findAll', () => service.findAll(userId, { page: 1, limit: 20, includeDescendants: false })],
+      ['findOne', () => service.findOne(userId, documentId)],
+    ])('%s does not filter by uploader anymore', async (_, call) => {
+      queryBuilder.getCount.mockResolvedValue(1);
+      queryBuilder.getRawMany.mockResolvedValue([documentRow]);
+      queryBuilder.getRawOne.mockResolvedValue(documentRow);
+
+      await call();
+
+      const allConditions = [...queryBuilder.where.mock.calls, ...queryBuilder.andWhere.mock.calls].map(
+        ([condition]) => condition,
+      );
+      expect(allConditions).not.toContainEqual(expect.stringContaining('uploadedBy'));
+    });
+
+    it('findAll returns documents uploaded by other users in readable groups', async () => {
+      queryBuilder.getCount.mockResolvedValue(1);
+      queryBuilder.getRawMany.mockResolvedValue([documentRow]);
+
+      const result = await service.findAll(userId, { page: 1, limit: 20, includeDescendants: false });
+
+      expect(result.total).toBe(1);
+      expect(result.data[0].uploadedBy).toEqual({ id: otherUserId, name: 'Jane Doe' });
+    });
+
+    it('findOne returns a document uploaded by another user in a readable group', async () => {
+      queryBuilder.getRawOne.mockResolvedValue(documentRow);
+
+      const result = await service.findOne(userId, documentId);
+
+      expect(result.uploadedBy).toEqual({ id: otherUserId, name: 'Jane Doe' });
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith('document.id = :id', { id: documentId });
+    });
+
+    it('findOne throws DocumentNotFound when the document is not in a readable group', async () => {
+      // The access filter excludes the document, so the query finds nothing
+      queryBuilder.getRawOne.mockResolvedValue(undefined);
+
+      await expect(service.findOne(userId, documentId)).rejects.toMatchObject({
+        code: ErrorCode.DocumentNotFound,
+      });
+    });
+
+    it('findAll returns an empty page when no document is in a readable group', async () => {
+      queryBuilder.getCount.mockResolvedValue(0);
+      queryBuilder.getRawMany.mockResolvedValue([]);
+
+      const result = await service.findAll(userId, { page: 1, limit: 20, includeDescendants: false });
+
+      expect(result).toEqual({ data: [], page: 1, limit: 20, total: 0, totalPages: 0 });
     });
   });
 
