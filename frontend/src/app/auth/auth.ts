@@ -15,6 +15,7 @@ export interface LoginResponse {
 	email: string;
 	displayName: string;
 	preferredLanguage: SupportedLanguage;
+	hasToChangePassword: boolean;
 }
 
 
@@ -46,5 +47,11 @@ export class Auth {
 			this.usersService.currentUser.set(null);
 			return false;
 		}
+	}
+
+	setPassword(body: { password: string }) {
+		const setPasswordUrl = `${environment.apiUrl}/users/me/password`;
+
+		return this.http.patch<void>(setPasswordUrl, body, { withCredentials: true });
 	}
 }

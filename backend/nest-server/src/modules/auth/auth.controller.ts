@@ -26,11 +26,11 @@ export class AuthController {
 		@Body() loginRequest: LoginRequestDto,
 		@Res({ passthrough: true }) res: Response,
 	): Promise<LoginResponseDto> {
-		const { user, sessionId } = await this.authService.login(loginRequest);
+		const { user, sessionId, hasToChangePassword } = await this.authService.login(loginRequest); //hasToChangePassword
 
 		this.sessionCookieService.set(res, sessionId);
 
-		return { id: user.id, email: user.email, displayName: user.displayName };
+		return { id: user.id, email: user.email, displayName: user.displayName, hasToChangePassword }; // hasToChangePassword
 	}
 
 	@ApiOperation({
