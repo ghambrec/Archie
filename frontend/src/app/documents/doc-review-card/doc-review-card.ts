@@ -1,5 +1,5 @@
 import { Component, computed, input, linkedSignal, output } from '@angular/core';
-import { DocumentsReviewResponse } from '../documents-review';
+import { DocumentsReviewResponse, isAiProcessing } from '../documents-review';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PercentPipe } from '@angular/common';
 
@@ -15,7 +15,7 @@ export class DocReviewCard {
 	readonly confirmTags = output<string[]>();
 	readonly retry = output<void>();
 
-	protected readonly isProcessing = computed(() => this.doc().aiStatus === "PROCESSING" || this.doc().aiStatus === "PENDING");
+	protected readonly isProcessing = computed(() => isAiProcessing(this.doc().aiStatus));
 	protected readonly canRetry = computed(() => this.doc().aiStatus === "FAILED" || this.doc().aiStatus === "NOT_STARTED")
 
 	protected readonly selectedTags = linkedSignal({

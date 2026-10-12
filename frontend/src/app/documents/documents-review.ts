@@ -22,6 +22,10 @@ export interface DocumentsReviewResponseSuggestion {
 	confidence: number;
 }
 
+export function isAiProcessing(status: AiStatus) {
+	return status === "PENDING" || status === "PROCESSING";
+}
+
 @Service()
 export class DocumentsReview {
 	private readonly http = inject(HttpClient);

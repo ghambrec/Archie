@@ -1,5 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
-import { DocumentsReview } from '../documents-review';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { DocumentsReview, isAiProcessing } from '../documents-review';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { DocReviewCard } from '../doc-review-card/doc-review-card';
 import { Tags } from '../../tags/tags';
@@ -12,12 +12,27 @@ import { HttpErrorResponse } from '@angular/common/http';
 	styleUrl: './doc-review.scss',
 })
 export class DocReview {
+	constructor() {
+
+		// wenn processing docs dann liste alle 3s aktualisieren
+		effect(onCleanup => {
+			if (!this.hasProcessingDocs()) {
+				return ;
+			}
+			const intervalId = setInterval(() => this.reviewService.queue.reload(), 3000);
+			onCleanup(() => clearInterval(intervalId));
+		})
+	}
+
 	protected readonly reviewService = inject(DocumentsReview);
 	private readonly tags = inject(Tags);
 
 	protected readonly busyIds = signal<Set<string>>(new Set());
 	protected readonly actionError = signal<string | null>(null); // transloco
 
+	private readonly hasProcessingDocs = computed(() => this.reviewService.queue.value().some(doc => isAiProcessing(doc.aiStatus)));
+
+	// doc auf busy setzen damit nicht zwei mal hintereinander buttons gedrueckt werden koennen
 	private setBusy(docId: string, busy: boolean) {
 		this.busyIds.update(current => {
 			const next = new Set(current);
@@ -30,6 +45,7 @@ export class DocReview {
 		});
 	}
 
+	// tags bestaetigen
 	protected onConfirm(docId: string, tagIds: string[]) {
 		this.setBusy(docId, true);
 		this.actionError.set(null);
@@ -52,6 +68,7 @@ export class DocReview {
 		return code ? `errors.${code}` : 'errors.UNKNOWN';
 	}
 
+	// ingestion retryen
 	protected onRetry(docId: string) {
 		this.setBusy(docId, true);
 		this.actionError.set(null);

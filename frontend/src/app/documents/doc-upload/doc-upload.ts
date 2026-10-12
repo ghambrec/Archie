@@ -5,6 +5,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { Groups } from '../../groups/groups';
 import { Subscription } from 'rxjs';
+import { DocumentsReview } from '../documents-review';
 
 interface UploadTask {
 	id: string;
@@ -30,6 +31,7 @@ const UPLOAD_ERROR_KEYS: Record<string, string> = {
 export class DocUpload {
 	private readonly documentsService = inject(Documents);
 	protected readonly groupsService = inject(Groups);
+	private readonly reviewService = inject(DocumentsReview);
 
 	private readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 	private readonly subscriptions = new Map<string, Subscription>();
@@ -123,6 +125,7 @@ export class DocUpload {
 					if (event.type === HttpEventType.Response) {
 						this.subscriptions.delete(task.id);
 						this.updateTask(task.id, { status: 'done', progress: 100 });
+						this.reviewService.queue.reload();
 						setTimeout(() => this.removeTask(task.id), 3000);
 					}
 				},
