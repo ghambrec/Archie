@@ -1,5 +1,9 @@
 <section class="mb-4">
 	<h5>DOC REVIEW:</h5>
+	@if (actionError(); as key) {
+			<div class="alert alert-danger">{{ key | transloco }}</div>
+	}
+
 
 	@if (reviewService.queue.error()) {
 		<div class="alert alert-danger">Fehler beim Laden</div>
@@ -8,7 +12,14 @@
 	} @else {
 	<ul class="list-group">
 		@for (doc of reviewService.queue.value(); track doc.id) {
-			<app-doc-review-card [doc]="doc"></app-doc-review-card>
+			<li class="list-group-item">
+				<app-doc-review-card 
+					[doc]="doc"
+					[busy]="busyIds().has(doc.id)"
+					(confirmTags)="onConfirm(doc.id, $event)"
+					(retry)="onRetry(doc.id)"
+				/>
+			</li>
 		} @empty {
 		<li class="list-group-item text-muted">Keine Dokumente zu prüfen.</li>
 		}

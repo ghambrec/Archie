@@ -1,19 +1,28 @@
-<li class="list-group-item">
-	<div class="d-flex justify-content-between">
-		<strong>{{ doc().filename }}</strong>
-		<span class="text-muted small">{{ doc().aiStatus }}</span>
-	</div>
-	<div class="mt-2 d-flex flex-wrap gap-1">
-		@if (isProcessing()) {
-			<div class="spinner-border spinner-border-sm" role="status"></div>
-		} @else {
-			@for (s of doc().suggestions; track s.tagId) {
-				<span class="badge text-bg-light border">
-					{{ s.label | transloco }} · {{ s.confidence | percent }}
-				</span>
-			} @empty {
-				<span class="text-muted small">Keine Vorschläge</span>
-			}
+<div class="d-flex justify-content-between">
+	<strong>{{ doc().filename }}</strong>
+	<span class="text-muted small">{{ doc().aiStatus }}</span>
+</div>
+<div class="mt-2 d-flex flex-wrap gap-1">
+	@if (isProcessing()) {
+		<div class="spinner-border spinner-border-sm" role="status"></div>
+	} @else {
+		@for (s of doc().suggestions; track s.tagId) {
+			<label class="badge text-bg-light border d-inline-flex align-items-center gap-1">
+			<input type="checkbox" class="form-check-input m-0"
+				[checked]="selectedTags().has(s.tagId)"
+				(change)="toggleTag(s.tagId)" />
+				{{ s.label | transloco }} · {{ s.confidence | percent }}
+			</label>
+		} @empty {
+			<span class="text-muted small">Keine Vorschläge</span>
 		}
-	</div>
-</li>
+	}
+</div>
+<div class="mt-2 d-flex gap-2">
+	@if (canRetry()) {
+		<button class="btn btn-sm btn-outline-secondary" [disabled]="busy()" (click)="retry.emit()">Erneut starten</button>
+	}
+	<button class="btn btn-sm btn-primary" [disabled]="isProcessing() || busy()" (click)="onConfirm()">
+	Bestätigen
+	</button>
+</div>
