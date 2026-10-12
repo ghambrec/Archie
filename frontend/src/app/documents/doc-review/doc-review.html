@@ -1,5 +1,17 @@
-<p>doc-review works!</p>
+<section class="mb-4">
+	<h5>DOC REVIEW:</h5>
 
-@if (documentsReviewService.queue.hasValue()) {
-	daten erfolgreich geladen
-}
+	@if (reviewService.queue.error()) {
+		<div class="alert alert-danger">Fehler beim Laden</div>
+	} @else if (reviewService.queue.isLoading() && reviewService.queue.value().length === 0) {
+		<div class="spinner-border spinner-border-sm" role="status"></div>
+	} @else {
+	<ul class="list-group">
+		@for (doc of reviewService.queue.value(); track doc.id) {
+			<app-doc-review-card [doc]="doc"></app-doc-review-card>
+		} @empty {
+		<li class="list-group-item text-muted">Keine Dokumente zu prüfen.</li>
+		}
+	</ul>
+	}
+</section>

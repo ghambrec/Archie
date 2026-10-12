@@ -1,0 +1,19 @@
+<li class="list-group-item">
+	<div class="d-flex justify-content-between">
+		<strong>{{ doc().filename }}</strong>
+		<span class="text-muted small">{{ doc().aiStatus }}</span>
+	</div>
+	<div class="mt-2 d-flex flex-wrap gap-1">
+		@if (isProcessing()) {
+			<div class="spinner-border spinner-border-sm" role="status"></div>
+		} @else {
+			@for (s of doc().suggestions; track s.tagId) {
+				<span class="badge text-bg-light border">
+					{{ s.label | transloco }} · {{ s.confidence | percent }}
+				</span>
+			} @empty {
+				<span class="text-muted small">Keine Vorschläge</span>
+			}
+		}
+	</div>
+</li>
