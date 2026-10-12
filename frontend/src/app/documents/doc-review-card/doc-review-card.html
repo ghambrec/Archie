@@ -14,15 +14,15 @@
 				{{ s.label | transloco }} · {{ s.confidence | percent }}
 			</label>
 		} @empty {
-			<span class="text-muted small">Keine Vorschläge</span>
+			<span class="text-muted small">{{ "documents.review.noTagsSuggested" | transloco }}</span>
 		}
 	}
 </div>
 <div class="mt-2 d-flex gap-2">
 	@if (canRetry()) {
-		<button class="btn btn-sm btn-outline-secondary" [disabled]="busy()" (click)="retry.emit()">Erneut starten</button>
+		<button class="btn btn-sm btn-outline-secondary" [disabled]="busy()" (click)="retry.emit()">{{ "documents.review.btnRetry" | transloco }}</button>
 	}
 	<button class="btn btn-sm btn-primary" [disabled]="isProcessing() || busy()" (click)="onConfirm()">
-	Bestätigen
+	{{ "documents.review.btnConfirm" | transloco }}
 	</button>
 </div>

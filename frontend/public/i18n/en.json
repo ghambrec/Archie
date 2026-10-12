@@ -22,6 +22,14 @@
 				"filetypeMismatch": "File content does not match to file extension",
 				"alreadyExists": "Identical file already exist"
 			}
+		},
+		"review": {
+			"heading": "Documents waiting for review",
+			"btnConfirm": "Confirm tags",
+			"btnRetry": "Retry AI pipeline",
+			"noTagsSuggested": "No suggestions",
+			"errorLoadingQueue": "Error on loading review queue",
+			"noDocsToReview": "There are no documents to review"
 		}
 	},
 	"tag": {

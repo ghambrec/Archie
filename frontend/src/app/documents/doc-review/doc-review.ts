@@ -13,7 +13,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 })
 export class DocReview {
 	constructor() {
-
 		// wenn processing docs dann liste alle 3s aktualisieren
 		effect(onCleanup => {
 			if (!this.hasProcessingDocs()) {
