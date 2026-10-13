@@ -2,10 +2,11 @@ import { Component, computed, input, linkedSignal, output } from '@angular/core'
 import { DocumentsReviewResponse, isAiProcessing } from '../documents-review';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PercentPipe } from '@angular/common';
+import { DocStatusBadge } from '../doc-status-badge/doc-status-badge';
 
 @Component({
 	selector: 'app-doc-review-card',
-	imports: [PercentPipe, TranslocoPipe],
+	imports: [PercentPipe, TranslocoPipe, DocStatusBadge],
 	templateUrl: './doc-review-card.html',
 	styleUrl: './doc-review-card.scss',
 })

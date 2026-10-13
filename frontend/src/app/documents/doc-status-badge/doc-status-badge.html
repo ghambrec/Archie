@@ -1,0 +1,6 @@
+<span class="badge d-inline-flex align-items-center gap-1" [class]="config().cssClass">
+	@if (config().spinner) {
+		<span class="spinner-border spinner-border-sm"></span>
+	}
+	{{ config().translocoKey | transloco }}
+</span>
