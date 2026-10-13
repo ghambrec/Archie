@@ -1,36 +1,46 @@
-<div class="d-flex justify-content-between">
-	<strong>{{ doc().filename }}</strong>
-	<app-doc-status-badge [status]="doc().aiStatus"></app-doc-status-badge>
-</div>
-@if (!isProcessing()) {
-	<div class="mt-2 d-flex flex-wrap gap-1">
-		@for (s of doc().suggestions; track s.tagId) {
-			<label class="badge text-bg-light border d-inline-flex align-items-center gap-1">
-			<input type="checkbox" class="form-check-input m-0"
-				[checked]="selectedTags().has(s.tagId)"
-				(change)="toggleTag(s.tagId)" />
-				{{ s.label | transloco }} · {{ s.confidence | percent }}
-			</label>
-		} @empty {
-			<span class="text-muted small">{{ "documents.review.noTagsSuggested" | transloco }}</span>
+<div class="card h-100 shadow-sm">
+	<div class="card-header bg-transparent d-flex align-items-center gap-2">
+		<i class="bi bi-file-earmark-text text-secondary"></i>
+		<span class="fw-semibold text-truncate flex-grow-1" [ngbTooltip]="doc().filename" container="body" [openDelay]="400">{{ doc().filename }}</span>
+		<app-doc-status-badge [status]="doc().aiStatus" />
+	</div>
+
+	<div class="card-body">
+		@if (isProcessing()) {
+			<span class="text-muted small">{{ "documents.review.suggestionsPending" | transloco }}</span>
+		} @else {
+			<div class="d-flex flex-wrap gap-2 align-items-center">
+				@for (s of doc().suggestions; track s.tagId) {
+					<button type="button" class="tag-chip"
+						[class.selected]="selectedTags().has(s.tagId)"
+						(click)="toggleTag(s.tagId)">
+						{{ s.label | transloco }}
+						<span class="tag-chip-confidence">{{ s.confidence | percent }}</span>
+					</button>
+				}
+				@for (tag of addedTags(); track tag.id) {
+					<button type="button" class="tag-chip selected" (click)="removeTag(tag.id)">
+						{{ tag.label | transloco }}
+						<i class="bi bi-x"></i>
+					</button>
+				}
+				<app-tag-picker [excludeIds]="usedTagIds()" (picked)="addTag($event)" />
+			</div>
 		}
 	</div>
-	<div class="mt-2 d-flex flex-wrap gap-1 align-items-center">
-		@for (tag of addedTags(); track tag.id) {
-			<span class="badge text-bg-primary d-inline-flex align-items-center gap-1">
-					{{ tag.label | transloco }}
-					<button type="button" class="btn-close btn-close-white btn-sm"
-							(click)="removeTag(tag.id)"></button>
-			</span>
+
+	<div class="card-footer bg-transparent d-flex justify-content-end gap-2">
+		@if (canRetry()) {
+			<button type="button" class="btn btn-sm btn-outline-secondary"
+				[ngbTooltip]="'documents.review.btnRetry' | transloco"
+				[disabled]="busy()" (click)="retry.emit()">
+				<i class="bi bi-arrow-clockwise"></i>
+			</button>
 		}
-		<app-tag-picker class="flex-grow-1" [excludeIds]="usedTagIds()" (picked)="addTag($event)" />
+		<button type="button" class="btn btn-sm btn-success"
+			[ngbTooltip]="'documents.review.btnConfirm' | transloco"
+			[disabled]="isProcessing() || busy()" (click)="onConfirm()">
+			<i class="bi bi-check-lg"></i>
+		</button>
 	</div>
-}
-<div class="mt-2 d-flex gap-2">
-	@if (canRetry()) {
-		<button class="btn btn-sm btn-outline-secondary" [disabled]="busy()" (click)="retry.emit()">{{ "documents.review.btnRetry" | transloco }}</button>
-	}
-	<button class="btn btn-sm btn-primary" [disabled]="isProcessing() || busy()" (click)="onConfirm()">
-	{{ "documents.review.btnConfirm" | transloco }}
-	</button>
 </div>

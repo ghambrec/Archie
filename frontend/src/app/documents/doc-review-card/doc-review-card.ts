@@ -5,10 +5,11 @@ import { PercentPipe } from '@angular/common';
 import { DocStatusBadge } from '../doc-status-badge/doc-status-badge';
 import { Tag } from '../../tags/tags';
 import { TagPicker } from '../../tags/tag-picker/tag-picker';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
 	selector: 'app-doc-review-card',
-	imports: [PercentPipe, TranslocoPipe, DocStatusBadge, TagPicker],
+	imports: [PercentPipe, TranslocoPipe, DocStatusBadge, TagPicker, NgbTooltip],
 	templateUrl: './doc-review-card.html',
 	styleUrl: './doc-review-card.scss',
 })

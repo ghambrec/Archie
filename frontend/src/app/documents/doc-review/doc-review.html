@@ -1,6 +1,9 @@
 @if (reviewService.queue.value().length > 0) {
 	<section class="mb-4">
-		<h3>{{ "documents.review.heading" | transloco }}</h3>
+		<h2 class="h5 fw-semibold d-flex align-items-center gap-2 mb-3">
+			{{ "documents.review.heading" | transloco }}
+			<span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">{{ reviewService.queue.value().length }}</span>
+		</h2>
 		@if (actionError(); as key) {
 				<div class="alert alert-danger">{{ key | transloco }}</div>
 		}
@@ -10,20 +13,18 @@
 		} @else if (reviewService.queue.isLoading() && reviewService.queue.value().length === 0) {
 			<div class="spinner-border spinner-border-sm" role="status"></div>
 		} @else {
-		<ul class="list-group">
+		<div class="review-grid">
 			@for (doc of reviewService.queue.value(); track doc.id) {
-				<li class="list-group-item">
-					<app-doc-review-card 
-						[doc]="doc"
-						[busy]="busyIds().has(doc.id)"
-						(confirmTags)="onConfirm(doc.id, $event)"
-						(retry)="onRetry(doc.id)"
-					/>
-				</li>
+				<app-doc-review-card
+					[doc]="doc"
+					[busy]="busyIds().has(doc.id)"
+					(confirmTags)="onConfirm(doc.id, $event)"
+					(retry)="onRetry(doc.id)"
+				/>
 			} @empty {
-				<li class="list-group-item text-muted">{{ "documents.review.noDocsToReview" | transloco }}</li>
+				<p class="text-muted">{{ "documents.review.noDocsToReview" | transloco }}</p>
 			}
-		</ul>
+		</div>
 		}
 	</section>
 }
