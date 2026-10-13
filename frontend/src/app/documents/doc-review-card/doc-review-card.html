@@ -4,16 +4,26 @@
 </div>
 @if (!isProcessing()) {
 	<div class="mt-2 d-flex flex-wrap gap-1">
-			@for (s of doc().suggestions; track s.tagId) {
-				<label class="badge text-bg-light border d-inline-flex align-items-center gap-1">
-				<input type="checkbox" class="form-check-input m-0"
-					[checked]="selectedTags().has(s.tagId)"
-					(change)="toggleTag(s.tagId)" />
-					{{ s.label | transloco }} · {{ s.confidence | percent }}
-				</label>
-			} @empty {
-				<span class="text-muted small">{{ "documents.review.noTagsSuggested" | transloco }}</span>
-			}
+		@for (s of doc().suggestions; track s.tagId) {
+			<label class="badge text-bg-light border d-inline-flex align-items-center gap-1">
+			<input type="checkbox" class="form-check-input m-0"
+				[checked]="selectedTags().has(s.tagId)"
+				(change)="toggleTag(s.tagId)" />
+				{{ s.label | transloco }} · {{ s.confidence | percent }}
+			</label>
+		} @empty {
+			<span class="text-muted small">{{ "documents.review.noTagsSuggested" | transloco }}</span>
+		}
+	</div>
+	<div class="mt-2 d-flex flex-wrap gap-1 align-items-center">
+		@for (tag of addedTags(); track tag.id) {
+			<span class="badge text-bg-primary d-inline-flex align-items-center gap-1">
+					{{ tag.label | transloco }}
+					<button type="button" class="btn-close btn-close-white btn-sm"
+							(click)="removeTag(tag.id)"></button>
+			</span>
+		}
+		<app-tag-picker class="flex-grow-1" [excludeIds]="usedTagIds()" (picked)="addTag($event)" />
 	</div>
 }
 <div class="mt-2 d-flex gap-2">

@@ -1,0 +1,7 @@
+<input #tagInput type="text" class="form-control form-control-sm"
+	[placeholder]="'documents.review.addTagPlaceholder' | transloco" [ngbTypeahead]="search" [resultTemplate]="result"
+	[inputFormatter]="translate" [editable]="false" (selectItem)="onSelect($event, tagInput)" />
+
+<ng-template #result let-tag="result" let-term="term">
+	<ngb-highlight [result]="translate(tag)" [term]="term" />
+</ng-template>

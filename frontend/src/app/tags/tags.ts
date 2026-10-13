@@ -5,11 +5,14 @@ import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 
-export interface TagResponse {
+export interface Tag {
 	id: string;
 	name: string;
 	label: string;
 	parentId: string | null;
+}
+
+export interface TagResponse extends Tag {
 	documentCount: number;
 }
 
@@ -40,6 +43,12 @@ function buildTagTree(tags: TagResponse[]): TagNode[] {
 @Service()
 export class Tags {
 	private readonly baseUrl = `${environment.apiUrl}/tags`;
+
+	// alle tags
+	readonly tags = httpResource<Tag[]>(
+		() => ({ url: this.baseUrl, withCredentials: true }),
+		{ defaultValue: [] }
+	);
 
 	// falche tag liste aller docs
 	readonly tagDocsList = httpResource<TagResponse[]>(

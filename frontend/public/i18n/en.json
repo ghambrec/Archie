@@ -37,7 +37,8 @@
 			"btnRetry": "Retry AI pipeline",
 			"noTagsSuggested": "No suggestions",
 			"errorLoadingQueue": "Error on loading review queue",
-			"noDocsToReview": "There are no documents to review"
+			"noDocsToReview": "There are no documents to review",
+			"addTagPlaceholder": "add a tag manually"
 		}
 	},
 	"tag": {
