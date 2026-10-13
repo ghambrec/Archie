@@ -1,0 +1,73 @@
+<section>
+	<h2 class="h5 fw-semibold d-flex align-items-center gap-2 mb-3">
+		{{ "documents.list.heading" | transloco }}
+		<span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">{{ docs.shownPage().total }}</span>
+		@if (docs.list.isLoading()) {
+		<span class="spinner-border spinner-border-sm text-secondary"></span>
+		}
+	</h2>
+
+	@if (docs.list.error()) {
+	<div class="alert alert-danger">{{ "documents.list.errorLoading" | transloco }}</div>
+	} @else {
+	<div class="card shadow-sm overflow-hidden" [class.loading]="docs.list.isLoading()">
+		<table class="table table-hover align-middle mb-0">
+			<thead>
+				<tr>
+					<th>{{ "documents.list.name" | transloco }}</th>
+					<th>{{ "documents.list.tags" | transloco }}</th>
+					<th>{{ "documents.list.groups" | transloco }}</th>
+					<th class="text-end">{{ "documents.list.size" | transloco }}</th>
+					<th>{{ "documents.list.uploaded" | transloco }}</th>
+				</tr>
+			</thead>
+			<tbody>
+				@for (doc of docs.shownPage().data; track doc.id) {
+				<tr>
+					<td class="name-cell">
+						<div class="d-flex align-items-center gap-2">
+							<i class="bi bi-file-earmark-text text-secondary"></i>
+							<span class="text-truncate" [ngbTooltip]="doc.filename" container="body"
+								[openDelay]="400">{{ doc.filename }}</span>
+							@if (doc.aiStatus !== 'FINISHED') {
+							<app-doc-status-badge [status]="doc.aiStatus" />
+							}
+						</div>
+					</td>
+					<td>
+						<div class="d-flex flex-wrap gap-1">
+							@for (tag of doc.tags; track tag.id) {
+							<span class="tag-chip">{{ tag.label | transloco }}</span>
+							}
+						</div>
+					</td>
+					<td>
+						<div class="d-flex flex-wrap gap-1">
+							@for (group of doc.groups; track group.id) {
+							<span class="tag-chip">{{ group.name }}</span>
+							}
+						</div>
+					</td>
+					<td class="text-end text-nowrap text-secondary small">{{ doc.sizeBytes | fileSize }}</td>
+					<td class="text-nowrap small">
+						<div>{{ doc.createdAt | date: 'dd.MM.yyyy' }}</div>
+						<div class="small text-secondary">{{ doc.uploadedBy.name }}</div>
+					</td>
+				</tr>
+				} @empty {
+				<tr>
+					<td colspan="5" class="text-center text-muted py-4">{{ "documents.list.noDocs" | transloco
+						}}</td>
+				</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+
+	@if (docs.shownPage().totalPages > 1) {
+	<ngb-pagination class="d-flex justify-content-center mt-3" [collectionSize]="docs.shownPage().total"
+		[pageSize]="docs.shownPage().limit" [page]="docs.page()" (pageChange)="docs.page.set($event)" [maxSize]="5"
+		[rotate]="true" size="sm" />
+	}
+	}
+</section>

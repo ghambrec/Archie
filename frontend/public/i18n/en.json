@@ -18,6 +18,16 @@
 			"failed": "ERROR",
 			"skipped": "ANALYSIS NOT POSSIBLE"
 		},
+		"list": {
+			"heading": "Documents",
+			"name": "Name",
+			"tags": "Tags",
+			"groups": "Groups",
+			"size": "Size",
+			"uploaded": "Uploaded",
+			"noDocs": "No documents found",
+			"errorLoading": "Error on loading documents"
+		},
 		"upload": {
 			"upload": "Upload Documents",
 			"selectGroupTooltip": "Select group for upload",

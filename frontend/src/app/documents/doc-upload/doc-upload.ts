@@ -126,6 +126,7 @@ export class DocUpload {
 						this.subscriptions.delete(task.id);
 						this.updateTask(task.id, { status: 'done', progress: 100 });
 						this.reviewService.queue.reload();
+						this.documentsService.list.reload();
 						setTimeout(() => this.removeTask(task.id), 3000);
 					}
 				},

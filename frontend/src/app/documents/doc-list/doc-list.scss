@@ -1,0 +1,32 @@
+:host {
+	display: block;
+}
+
+.name-cell {
+	max-width: 22rem;
+}
+
+.tag-chip {
+	padding: 0.1rem 0.55rem;
+	font-size: 0.75rem;
+	border-radius: 999px;
+	background: var(--bs-tertiary-bg);
+	color: var(--bs-secondary-color);
+	white-space: nowrap;
+}
+
+.table th {
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	color: var(--bs-secondary-color);
+}
+
+.card {
+	transition: opacity 0.15s;
+
+	&.loading {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+}

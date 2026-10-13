@@ -4,6 +4,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { DocReviewCard } from '../doc-review-card/doc-review-card';
 import { Tags } from '../../tags/tags';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Documents } from '../documents';
 
 @Component({
 	selector: 'app-doc-review',
@@ -25,6 +26,7 @@ export class DocReview {
 
 	protected readonly reviewService = inject(DocumentsReview);
 	private readonly tags = inject(Tags);
+	private readonly documentsService = inject(Documents);
 
 	protected readonly busyIds = signal<Set<string>>(new Set());
 	protected readonly actionError = signal<string | null>(null); // transloco
@@ -54,6 +56,7 @@ export class DocReview {
 				this.setBusy(docId, false);
 				this.reviewService.queue.reload();
 				this.tags.tagDocsList.reload();
+				this.documentsService.list.reload();
 			},
 			error: (err: HttpErrorResponse) => {
 				this.setBusy(docId, false);
