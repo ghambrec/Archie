@@ -11,12 +11,12 @@
 	},
 	"documents": {
 		"aiStatus": {
-			"notStarted": "not started",
-			"pending": "pending",
-			"processing": "getting analyzed",
-			"finished": "finished",
-			"failed": "error",
-			"skipped": "analysis not possible"
+			"notStarted": "NOT STARTED",
+			"pending": "PENDING",
+			"processing": "GETTING ANALYZED",
+			"finished": "FINISHED",
+			"failed": "ERROR",
+			"skipped": "ANALYSIS NOT POSSIBLE"
 		},
 		"upload": {
 			"upload": "Upload Documents",
