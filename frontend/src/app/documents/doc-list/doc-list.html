@@ -23,7 +23,7 @@
 			</thead>
 			<tbody>
 				@for (doc of docs.shownPage().data; track doc.id) {
-				<tr>
+				<tr class="doc-row" [routerLink]="[]" [queryParams]="{ doc: doc.id }" queryParamsHandling="merge" [class.table-active]="docs.selectedDocId() === doc.id">
 					<td class="name-cell">
 						<div class="d-flex align-items-center gap-2">
 							<i class="bi bi-file-earmark-text text-secondary"></i>

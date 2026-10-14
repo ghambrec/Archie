@@ -3,6 +3,9 @@ import { inject, linkedSignal, Service } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { AiStatus } from './documents-review';
 import { Tag, Tags } from '../tags/tags';
+import { ActivatedRoute, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 
 export interface UploadConfig {
 	maxSizeBytes: number;
@@ -39,13 +42,15 @@ export interface DocumentsPage {
 	totalPages: number;
 }
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 const EMPTY_PAGE: DocumentsPage = { data: [], page: 1, limit: PAGE_SIZE, total: 0, totalPages: 0 };
 
 @Service()
 export class Documents {
 	private readonly http = inject(HttpClient);
 	private readonly tags = inject(Tags);
+	private readonly router = inject(Router);
+	private readonly route = inject(ActivatedRoute);
 	private readonly baseUrl = `${environment.apiUrl}/documents`;
 
 	readonly uploadConfig = httpResource<UploadConfig>(
@@ -93,6 +98,39 @@ export class Documents {
 		computation: (current, previous) =>
 			current.loading && previous ? previous.value : current.value,
 	});
+
+	// aktuell geoffnetes doc aus query param
+	readonly selectedDocId = toSignal(
+		this.route.queryParamMap.pipe(map(params => params.get('doc'))),
+		{ initialValue: null }
+	);
+
+	// detail values nur laden wenn doc ausgewaehlt ist
+	readonly detail = httpResource<DocumentSummary>(() => {
+		const id = this.selectedDocId();
+		return id ? { url: `${this.baseUrl}/${id}`, withCredentials: true } : undefined;
+	});
+
+	// ?doc entfernen, ?tag bleibt da
+	closeDetail() {
+		this.router.navigate([], { queryParams: { doc: null }, queryParamsHandling: 'merge' });
+	}
+
+	downloadUrl(id: string) {
+		return `${this.baseUrl}/${id}/download`;
+	}
+
+	addTag(docId: string, tagId: string) {
+		return this.http.post<void>(`${this.baseUrl}/${docId}/tags`, { tagId }, { withCredentials: true });
+	}
+
+	removeTag(docId: string, tagId: string) {
+		return this.http.delete<void>(`${this.baseUrl}/${docId}/tags/${tagId}`, { withCredentials: true });
+	}
+
+	deleteDocument(docId: string) {
+		return this.http.delete<void>(`${this.baseUrl}/${docId}`, { withCredentials: true });
+	}
 
 	// drin lassen, vielleicht noch mal benoetigt?
 	// setGroup(documentId: string, groupId: string) {

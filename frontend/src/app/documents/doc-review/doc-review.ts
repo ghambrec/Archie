@@ -5,6 +5,7 @@ import { DocReviewCard } from '../doc-review-card/doc-review-card';
 import { Tags } from '../../tags/tags';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Documents } from '../documents';
+import { toErrorKey } from '../../core/error-key';
 
 @Component({
 	selector: 'app-doc-review',
@@ -60,14 +61,9 @@ export class DocReview {
 			},
 			error: (err: HttpErrorResponse) => {
 				this.setBusy(docId, false);
-				this.actionError.set(this.toErrorKey(err));
+				this.actionError.set(toErrorKey(err));
 			},
 		});
-	}
-
-	private toErrorKey(err: HttpErrorResponse): string {
-		const code = err.error?.code;
-		return code ? `errors.${code}` : 'errors.UNKNOWN';
 	}
 
 	// ingestion retryen
@@ -82,7 +78,7 @@ export class DocReview {
 			},
 			error: (err: HttpErrorResponse) => {
 				this.setBusy(docId, false);
-				this.actionError.set(this.toErrorKey(err));
+				this.actionError.set(toErrorKey(err));
 			},
 		});
 	}
