@@ -13,6 +13,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class TagTree {
 	protected readonly tagsService = inject(Tags);
 	protected readonly searchString = signal("");
+	protected readonly isSearching = computed(() => this.searchString().trim() !== "");
 
 	private readonly translocoService = inject(TranslocoService);
 

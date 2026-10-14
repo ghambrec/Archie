@@ -32,7 +32,7 @@
 	<ul class="ps-3 list-unstyled mb-0">
 		@for (child of tagNode().children; track child.id) {
 			<li>
-				<app-tag-tree-item [tagNode]="child"></app-tag-tree-item>
+				<app-tag-tree-item [tagNode]="child" [searchActive]="searchActive()"></app-tag-tree-item>
 			</li>
 		}
 	</ul>

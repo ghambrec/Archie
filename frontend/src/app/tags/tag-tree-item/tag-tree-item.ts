@@ -11,12 +11,13 @@ import { TranslocoPipe } from '@jsverse/transloco';
 })
 export class TagTreeItem {
 	readonly tagNode = input.required<TagNode>();
+	readonly searchActive = input(false);
 
 	private readonly tagsService = inject(Tags);
 
 	protected readonly hasChilds = computed(() => this.tagNode().children.length > 0);
 	protected readonly expanded = linkedSignal({
-		source: () => this.tagsService.selectedParentIds().has(this.tagNode().id),
+		source: () => this.searchActive() || this.tagsService.selectedParentIds().has(this.tagNode().id),
 		computation: (isParent, previous) => isParent || (previous?.value ?? false)
 	});
 
