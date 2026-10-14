@@ -37,6 +37,24 @@ function buildTagTree(tags: TagResponse[]): TagNode[] {
 	return roots;
 }
 
+export function filterTagTree(nodes: TagNode[], matches: (node: TagNode) => boolean): TagNode[] {
+	const result: TagNode[] = [];
+	for (const node of nodes) {
+		// gefunden -> knoten mit allen kindern behalten
+		if (matches(node)) {
+			result.push(node);
+			continue;
+		}
+
+		// nicht gefunden -> nur behalten, wenn ein kind davon passt
+		const matchingChildren = filterTagTree(node.children, matches);
+		if (matchingChildren.length > 0) {
+			result.push({ ...node, children: matchingChildren });
+		}
+	}
+	return result;
+}
+
 @Service()
 export class Tags {
 	private readonly baseUrl = `${environment.apiUrl}/tags`;

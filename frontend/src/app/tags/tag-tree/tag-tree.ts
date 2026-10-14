@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
-import { Tags } from '../tags';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { Component, computed, inject, signal } from '@angular/core';
+import { filterTagTree, Tags } from '../tags';
+import { Translation, TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { TagTreeItem } from '../tag-tree-item/tag-tree-item';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
 	selector: 'app-tag-tree',
@@ -11,4 +12,29 @@ import { TagTreeItem } from '../tag-tree-item/tag-tree-item';
 })
 export class TagTree {
 	protected readonly tagsService = inject(Tags);
+	protected readonly searchString = signal("");
+
+	private readonly translocoService = inject(TranslocoService);
+
+	private readonly translation = toSignal(
+		this.translocoService.selectTranslation(),
+		{ initialValue: {} as Translation }
+	);
+
+	private translateLabel(label: string): string {
+		return this.translation()[label] ?? label;
+	}
+
+	protected readonly filteredTagTree = computed(() => {
+		const search = this.searchString().trim().toLowerCase();
+		const tree = this.tagsService.tagTree();
+		if (!search) {
+			return tree;
+		}
+
+		return filterTagTree(
+			tree,
+			node => this.translateLabel(node.label).toLowerCase().includes(search)
+		);
+	});
 }
