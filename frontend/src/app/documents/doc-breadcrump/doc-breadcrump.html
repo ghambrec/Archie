@@ -1,1 +1,26 @@
-<p>doc-breadcrump works!</p>
+@let path = tags.selectedTagPath();
+
+<div class="d-flex align-items-center gap-2 mb-3">
+	<ol class="breadcrumb h5 fw-semibold mb-0">
+		<li class="breadcrumb-item" [class.active]="path.length === 0">
+			<a [routerLink]="path.length ? '/documents' : null">{{ "documents.breadcrumb.root" | transloco }}</a>
+		</li>
+
+		@for (tag of path; track tag.id; let last = $last) {
+			<li class="breadcrumb-item" [class.active]="last">
+				<a [routerLink]="last ? null : '/documents'" [queryParams]="{ tag: tag.id }">
+					@if (isTranslocoKey(tag.label)) {
+						{{ tag.label | transloco }}
+					} @else {
+						{{ tag.label }}
+					}
+				</a>
+			</li>
+		}
+	</ol>
+
+	<span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">{{ docs.shownPage().total }}</span>
+	@if (docs.list.isLoading()) {
+		<span class="spinner-border spinner-border-sm text-secondary"></span>
+	}
+</div>
