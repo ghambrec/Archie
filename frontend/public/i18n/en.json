@@ -44,7 +44,9 @@
 	},
 	"tag": {
 		"header": "Tags",
+		"searchPlaceholder": "Search...",
 		"noData": "You have no readable documents.",
+		"noSearchResults": "No matching tags.",
 		"label": {
 			"work": "Work",
 			"education": "Education",
