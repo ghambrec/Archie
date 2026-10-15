@@ -45,7 +45,7 @@ export class CreateUserModal {
 			message: 'users.createUser.errors.passwordMinLength',
 			});
 			
-			maxLength(schemaPath.displayName, DISPLAY_NAME_MAX_LENGTH, { message: 'users.updateUser.errors.displayNameTooLong'})
+			maxLength(schemaPath.displayName, DISPLAY_NAME_MAX_LENGTH, { message: 'users.createUser.errors.displayNameTooLong'})
 			required(schemaPath.displayName, {
 			message: 'users.createUser.errors.displayNameRequired',
 			});
