@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment';
 import { PrefixNot } from '@angular/compiler';
 import { firstValueFrom } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
-
+import { PASSWORD_POLICY } from '../../validation/password-policy';
 
 type EditUserFormInput = Omit<EditUserForm, 'preferredLanguage'> & {
   preferredLanguage: string;
@@ -36,13 +36,9 @@ export class EditUserModal {
   })
 
   editUserForm = form(this.editUserModal, (schemaPath) =>{
-    minLength(schemaPath.password, 8, {  message: 'users.updateUser.errors.passwordError'})
-    maxLength(schemaPath.password, 25, { message: 'users.updateUser.errors.passwordError'})
-
+    minLength(schemaPath.password, PASSWORD_POLICY.minLength, {  message: 'users.updateUser.errors.passwordError'})
+   
     email(schemaPath.email,   {message: 'users.updateUser.errors.emailFormat'})
-    pattern(schemaPath.password,  /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*]).*$/, {
-       message: 'users.updateUser.errors.passwordPattern'
-    })
     pattern(schemaPath.preferredLanguage,  /^\s*(en|de|es)\s*$/i, {
       message: 'users.updateUser.errors.unsupportedLanguage'}
     )

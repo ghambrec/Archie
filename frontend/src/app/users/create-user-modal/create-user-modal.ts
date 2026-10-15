@@ -4,6 +4,7 @@ import { email, form, minLength, required, FormRoot, FormField } from '@angular/
 import { firstValueFrom, timer } from 'rxjs';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { PASSWORD_POLICY } from '../../validation/password-policy';
 
 @Component({
 	selector: 'app-create-user-modal',
@@ -36,9 +37,10 @@ export class CreateUserModal {
 			required(schemaPath.password, {
 			message: 'users.createUser.errors.passwordRequired',
 			});
-			minLength(schemaPath.password, 8, {
+			minLength(schemaPath.password, PASSWORD_POLICY.minLength, {
 			message: 'users.createUser.errors.passwordMinLength',
 			});
+			
 
 			required(schemaPath.displayName, {
 			message: 'users.createUser.errors.displayNameRequired',
