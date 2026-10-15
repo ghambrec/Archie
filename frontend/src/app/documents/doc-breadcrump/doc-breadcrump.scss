@@ -1,0 +1,19 @@
+:host {
+	display: block;
+}
+
+.breadcrumb {
+	--bs-breadcrumb-divider: '›';
+	--bs-breadcrumb-divider-color: var(--bs-tertiary-color);
+	--bs-breadcrumb-item-active-color: var(--bs-emphasis-color);
+}
+
+.breadcrumb-item a[href] {
+	color: var(--bs-secondary-color);
+	text-decoration: none;
+	transition: color 0.15s;
+
+	&:hover {
+		color: var(--bs-primary);
+	}
+}
