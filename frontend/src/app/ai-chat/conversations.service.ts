@@ -31,7 +31,7 @@ export class ConversationsService  {
 	}
 
 	deleteConversation(conversationId: string){
-		return this.http.post<DeleteConversation> (
+		return this.http.delete<DeleteConversation> (
 			`${this.baseUrl}/${conversationId}`,
 			{withCredentials: true}
 		)

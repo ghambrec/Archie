@@ -29,7 +29,7 @@ export class AIChat {
 	async send(): Promise<void> {
 		const conversationId = this.activeConversationId();
 		
-		if(this.isSending() || this.isCreatingConversation())
+		if(this.isSending() || this.isCreatingConversation() || this.isDeleting())
 			return;
 		this.sendError.set(null);
 		
@@ -49,7 +49,7 @@ export class AIChat {
     		)
 		
     		const userMessage: ChatMessage = {
-    			id: 'crypto.randomUUID()',
+    			id: crypto.randomUUID(),
     		 	conv_id: conversationId,
     			sender: 'user',
     			content: question,
