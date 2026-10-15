@@ -10,7 +10,11 @@ import { SessionModule } from '../auth/session/session.module';
 import { PermissionsModule } from '../permissions/permissions.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Tag, DocumentTag]), SessionModule, PermissionsModule],
+  imports: [
+    TypeOrmModule.forFeature([Tag, DocumentTag]),
+    SessionModule,
+    PermissionsModule,
+  ],
   controllers: [TagsController, AdminTagsController],
   providers: [TagsService, AdminTagsService],
   exports: [TypeOrmModule, TagsService],

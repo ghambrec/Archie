@@ -5,6 +5,8 @@ import { Auth } from '../auth';
 import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { Users } from '../../users/users';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { SetPassword } from '../set-password/set-password';
 
 @Component({
 	selector: 'app-login',
@@ -17,6 +19,7 @@ export class Login {
 	private readonly router = inject(Router);
 	private readonly translocoService = inject(TranslocoService);
 	private readonly usersService = inject(Users)
+	private readonly modalService = inject(NgbModal);
 
 	loginModel = signal({
 		email: '',
@@ -35,12 +38,36 @@ export class Login {
 			submission: {
 				action: async (field) => {
 					try {
-						await firstValueFrom(this.authService.login(field().value()));
+						const response = await firstValueFrom(this.authService.login(field().value()));
+						
 						await this.authService.checkSession();
+						
 						const user = this.usersService.currentUser();
+						
 						this.translocoService.setActiveLang(user!.preferredLanguage);
+						
+						if (response.hasToChangePassword) {
+							// this.router.navigateByUrl('/set-password');
+							const modalRef = this.modalService.open(SetPassword, {
+								centered: true,
+								backdrop: 'static',
+								keyboard: false,
+							});
+
+							modalRef.closed.subscribe(() => {
+								this.router.navigateByUrl('/home');
+							});
+
+							modalRef.dismissed.subscribe(() => {
+								this.router.navigateByUrl('/login');
+							});
+
+							return;
+						}
+
 						this.router.navigateByUrl('/home');
-						return
+						
+						return;
 					} catch (error : any) {
 						const translocoKey = error.status == 401 ? 'login.errorInvalidCred' : 'login.errorGeneral';
 						return { kind: 'serverError', message: translocoKey };
