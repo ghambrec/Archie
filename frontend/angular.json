@@ -23,17 +23,15 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
-			"inlineStyleLanguage": "scss",
+            "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
                 "input": "public"
               }
             ],
-            "styles": [
-				"node_modules/bootstrap-icons/font/bootstrap-icons.css",
-				"src/styles.scss"
-			]
+            "styles": ["node_modules/bootstrap-icons/font/bootstrap-icons.css", "src/styles.scss"],
+            "polyfills": ["@angular/localize/init"]
           },
           "configurations": {
             "production": {

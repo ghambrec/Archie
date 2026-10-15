@@ -18,6 +18,16 @@
 			"failed": "ERROR",
 			"skipped": "ANALYSIS NOT POSSIBLE"
 		},
+		"list": {
+			"heading": "Documents",
+			"name": "Name",
+			"tags": "Tags",
+			"groups": "Groups",
+			"size": "Size",
+			"uploaded": "Uploaded",
+			"noDocs": "No documents found",
+			"errorLoading": "Error on loading documents"
+		},
 		"upload": {
 			"upload": "Upload Documents",
 			"selectGroupTooltip": "Select group for upload",
@@ -40,6 +50,30 @@
 			"addTag": "+ Tag",
 			"searchTag": "Search tag...",
 			"suggestionsPending": "Suggestions will appear once the analysis is done"
+		},
+		"detail": {
+			"download": "Download",
+			"ai": "AI analysis",
+			"language": "Language",
+			"info": "Details",
+			"type": "File type",
+			"uploadedBy": "Uploaded by",
+			"createdAt": "Uploaded on",
+			"updatedAt": "Last modified",
+			"errorLoading": "Error on loading document",
+			"delete": "Delete",
+			"deleteConfirm": "Confirm delete",
+			"cancel": "Cancel"
+		},
+		"aiError": {
+			"unsupported_mime_type": "Analysis is not available for this file type",
+			"no_text": "No text could be extracted from this document",
+			"not_found": "File could not be found in storage",
+			"minio_error": "Error on reading the file from storage",
+			"minio_connection": "Storage is currently not reachable",
+			"llm_error": "The AI model returned an error",
+			"timeout": "Analysis took too long and was cancelled",
+			"unknown": "An unknown error occurred during analysis"
 		}
 	},
 	"tag": {
@@ -233,6 +267,7 @@
 		"DOCUMENT_STILL_PROCESSING": "The document is still being analyzed.",
 		"DOCUMENT_INGESTION_NOT_RETRYABLE": "The analysis can only be restarted if it failed or was never started.",
 		"AI_SERVICE_UNAVAILABLE": "The AI service is currently unavailable. Please try again later.",
-		"TAG_NOT_FOUND": "Tag was not found."
+		"TAG_NOT_FOUND": "Tag was not found.",
+		"FORBIDDEN": "You don't have permission for this action."
 	}
 }
