@@ -28,13 +28,33 @@
 		</div>
 
 	<div class="mb-3">
-		<label for="edit-displayName" class="form-label">{{'users.updateUser.displayName' | transloco}}</label>
-		<input
-		id="edit-displayName"
-		type="displayName"
-		class="form-control"
-		[formField]="editUserForm.displayName"
-		/>
+		<label for="edit-displayName" class="form-label">
+		{{ 'users.updateUser.displayName' | transloco }}
+		 </label>
+
+		  <input
+		    id="edit-displayName"
+		    type="text"
+		    class="form-control"
+		    [formField]="editUserForm.displayName"
+		    [class.is-invalid]="
+		      editUserForm.displayName().touched() &&
+		      editUserForm.displayName().invalid()
+		    "
+		  />
+
+		  @if (
+		    editUserForm.displayName().touched() &&
+		    editUserForm.displayName().invalid()
+		  ) {
+		    @for (error of editUserForm.displayName().errors(); track error.kind) {
+		      @if (error.message; as messageKey) {
+		        <div class="invalid-feedback">
+		          {{ messageKey | transloco }}
+		        </div>
+		      }
+		    }
+		  }
 	</div>
 
 	<div class="mb-3">
@@ -53,7 +73,7 @@
 		}
 		<div
 			id="explaination-help" class="form-text">
-			supported languages are en, de and es 
+			{{ 'users.updateUser.languageHint' | transloco }}
 		</div>
 	</div>
 

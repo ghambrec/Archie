@@ -133,6 +133,7 @@
 			"btnClose": "Close",
 			"btnSubmit": "Edit User",
 			"preferredLanguage": "Preferred Language",
+			"languageHint": "Supported languages: en, de and es.",
 			"errors": {
 				"displayNameError": "Name already given, not available",
 				"emailError": "Email already in use, not available",
@@ -141,7 +142,8 @@
 				"passwordError": "Password must contain between 8 and 25 characters.",
 				"passwordPattern": "Password must include an uppercase letter, a lowercase letter, a number, and a special character from !@#$%^&*",
 				"displayNameRequired": "Display name is mandatory",
-				"displayNameTooLong" : " Display name is too long, 25 characters are maximum"
+				"displayNameTooLong" : " Display name is too long, 25 characters are maximum",
+				"unsupportedLanguage": "Please enter en, de or es."
 			}
 		}
 

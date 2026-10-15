@@ -1,5 +1,5 @@
 import { Component, inject, signal} from '@angular/core';
-import { minLength, form, FormField,FormRoot, maxLength, pattern, email } from '@angular/forms/signals';
+import { minLength, form, FormField,FormRoot, maxLength, pattern, email, required } from '@angular/forms/signals';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SupportedLanguage } from '../../core/i18n/supported-language';
@@ -11,6 +11,7 @@ import { firstValueFrom } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PASSWORD_POLICY } from '../../validation/password-policy';
 import { SUPPORTED_LANGUAGE_PATTERN } from '../../core/i18n/supported-language';
+import { DISPLAY_NAME_MAX_LENGTH  } from '../../validation/display-name-policy';
 
 type EditUserFormInput = Omit<EditUserForm, 'preferredLanguage'> & {
   preferredLanguage: string;
@@ -38,11 +39,13 @@ export class EditUserModal {
 
   editUserForm = form(this.editUserModal, (schemaPath) =>{
     minLength(schemaPath.password, PASSWORD_POLICY.minLength, {  message: 'users.updateUser.errors.passwordError'})
-   
+    maxLength(schemaPath.displayName, DISPLAY_NAME_MAX_LENGTH, { message: 'users.updateUser.errors.displayNameTooLong'})
     email(schemaPath.email,   {message: 'users.updateUser.errors.emailFormat'})
     pattern(schemaPath.preferredLanguage, SUPPORTED_LANGUAGE_PATTERN,{
-      message: 'users.updateUser.errors.unsupportedLanguage'}
-    )
+      message: 'users.updateUser.errors.unsupportedLanguage'})
+    required(schemaPath.displayName, { 
+      message: 'users.updateUser.errors.displayNameRequired'
+    })
   })
 
   initialize(user: UserInfo): void {
@@ -87,7 +90,8 @@ export class EditUserModal {
     }
 
     this.editUserForm.password().markAsTouched();
-      if (this.editUserForm().invalid()) {
+    this.editUserForm.displayName().markAsTouched();
+    if (this.editUserForm().invalid()) {
         return 
       }
     try {
@@ -117,6 +121,7 @@ export class EditUserModal {
   
         default:
           this.saveErrorKey.set('errors.UNKNOWN');
+          break;
       }
       
       }
