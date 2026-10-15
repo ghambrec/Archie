@@ -22,13 +22,8 @@ export interface CreateUserRequest {
 	displayName: string;
 }
 
-
-
 export interface CreateUserResponse {
 	id: string;
-	email: string;
-	displayName: string;
-
 }
 
 export interface PatchUser {

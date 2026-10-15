@@ -7,6 +7,8 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { PASSWORD_POLICY } from '../../validation/password-policy';
 import { DISPLAY_NAME_MAX_LENGTH } from '../../validation/display-name-policy';
 import { maxLength } from '@angular/forms/signals';
+import { HttpErrorResponse } from '@angular/common/http';
+
 
 @Component({
 	selector: 'app-create-user-modal',
@@ -54,22 +56,34 @@ export class CreateUserModal {
 					this.feedbackMsg.set(null);
 					try {
 						const formValues = field().value();
-						const reponse = await firstValueFrom(this.usersService.create(formValues));
+		
+						await firstValueFrom(this.usersService.create(formValues));
 						this.feedbackMsg.set('users.createUser.feedbackMsg');
 						await firstValueFrom(timer(500));
 						this.activeModal.close();
 						return;
-					} catch (error : any) {
-						let translocoKey = error.status == 409 ? "users.createUser.errors.Conflict" : "users.createUser.errorGeneral";
-						if (translocoKey == "users.createUser.errors.Conflict" && error.error?.message.toLowerCase().includes("mail")) {
-							translocoKey = "users.createUser.errors.ConflictMail"
-						} else if (translocoKey == "users.createUser.errors.Conflict" && error.error?.message.toLowerCase().includes("name")) {
-							translocoKey = "users.createUser.errors.ConflictName"
-						} else {
-							translocoKey = "users.createUser.errors.General";
+					} catch (error: unknown) {
+  						let message = 'users.createUser.errors.General';
+
+  						if (error instanceof HttpErrorResponse) {
+  						  switch (error.error?.code) {
+  						    case 'AUTH_EMAIL_ALREADY_REGISTERED':
+  						      message = 'errors.AUTH_EMAIL_ALREADY_REGISTERED';
+  						      break;
+  						    case 'USER_NAME_ALREADY_REGISTERED':
+  						      message = 'errors.USER_NAME_ALREADY_REGISTERED';
+  						      break;
+  						    case 'VALIDATION_FAILED':
+  						      message = 'errors.VALIDATION_FAILED';
+  						      break;
+  						    default:
+  						      if (error.status === 409) {
+  						        message = 'users.createUser.errors.Conflict';
+  						      }
+  							 }
 						}
-						return { kind: 'serverError', message: translocoKey };
-					}
+						return { kind: 'serverError', message };
+  					}
 				}
 			}
 		}
