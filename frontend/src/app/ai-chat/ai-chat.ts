@@ -20,6 +20,9 @@ export class AIChat {
 
 	readonly isSending = signal(false);
 	readonly sendError = signal<string | null>(null);
+
+	readonly isDeleting = signal(false);
+	readonly deleteError = signal<string | null>(null);
 	
 	readonly messages = signal<ChatMessage[]> ([]);
 
@@ -86,8 +89,10 @@ export class AIChat {
 
 
 	async startNewChat(): Promise<void> {
-		if (this.isCreatingConversation() || this.isSending()) {
-			return 
+		if (this.isCreatingConversation() ||
+			this.isSending() ||
+			this.isDeleting() ) {
+			return;
 		}
 		this.isCreatingConversation.set(true);
 		this.createConversationError.set(null);
@@ -110,4 +115,35 @@ export class AIChat {
 			this.isCreatingConversation.set(false);
 		}
 	}
-}
+
+	async deleteChat(): Promise<void> {
+		const conversationId = this.activeConversationId();
+
+		if (
+			!conversationId ||
+			this.isDeleting() ||
+			this.isSending() ||
+			this.isCreatingConversation())	
+			{
+  			return;
+			}
+		this.isDeleting.set(true);
+  		this.deleteError.set(null);
+
+		  try {
+		    await firstValueFrom(
+		      this.conversationService.deleteConversation(conversationId)
+		    );
+		
+		    this.activeConversationId.set(null);
+		    this.messages.set([]);
+		    this.draft.set('');
+		    this.sendError.set(null);
+		    this.createConversationError.set(null);
+		  } catch {
+		    this.deleteError.set('ai-chat.error.deleteConversation');
+		  } finally {
+		    this.isDeleting.set(false);
+		  }
+		}
+	}

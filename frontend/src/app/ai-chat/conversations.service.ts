@@ -3,7 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { inject, signal} from "@angular/core";
 import { Service } from "@angular/core";
 import { environment } from "../../environments/environment";
-import type { CreateConversationResponse, AskConversationResponse } from "./chat.models";
+import { type CreateConversationResponse, type AskConversationResponse, DeleteConversation } from "./chat.models";
 
 
 
@@ -28,6 +28,14 @@ export class ConversationsService  {
 			{question: question},
 			{withCredentials: true}
 		)
+	}
+
+	deleteConversation(conversationId: string){
+		return this.http.post<DeleteConversation> (
+			`${this.baseUrl}/${conversationId}`,
+			{withCredentials: true}
+		)
+
 	}
 
 

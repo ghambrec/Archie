@@ -4,7 +4,7 @@
     <button
       type="button"
       class="btn btn-outline-secondary"
-      [disabled]="isCreatingConversation()"
+      [disabled]="isCreatingConversation() || isDeleting()"
       (click)="startNewChat()"
       ngbTooltip="Start a new conversation. Existing chats remain saved."
       >
@@ -78,7 +78,7 @@
       rows="2"
       placeholder="Ask about your documents..."
       maxlength="1000"
-      [disabled]="isSending() || isCreatingConversation()"
+      [disabled]="isSending() || isCreatingConversation() || isDeleting()"
       [value] = "draft()"
       (input) = draft.set(questionInput.value)
       
@@ -104,14 +104,24 @@
       </div>
       }
 
-	  <button
+    <button
       type="button"
-      class="btn btn-secondary" 
-      disabled
-      >
-       {{'ai-chat.botton.Delete_chat' | transloco}}
+      class="btn btn-secondary"
+      [disabled]="
+        !activeConversationId() ||
+        isDeleting() ||
+        isSending() ||
+        isCreatingConversation()
+      "
+      (click)="deleteChat()"
+    >
+      {{ 'ai-chat.botton.Delete_chat' | transloco }}
     </button>
-
+      @if (deleteError(); as errorKey) {
+    <div class="alert alert-danger" role="alert">
+      {{ errorKey | transloco }}
+    </div>
+  }
 	  <button type="button" class="btn btn-secondary" disabled>
       {{'ai-chat.botton.Delete_all_chats' | transloco}}
     </button>
