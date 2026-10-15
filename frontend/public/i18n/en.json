@@ -233,6 +233,9 @@
 				"documentsDelete": "Delete documents",
 				"btnCancel": "Cancel",
 				"btnSave": "Save",
+				"errorGeneral": "Unable to update permissions.",
+				"errorLastAdmin": "The admin permission cannot be removed because this is the last admin.",
+				"errorNameRequired": "Name is required.",
 				"errors": {
 					"nameRequired": "Name is requirred",
 					"General": "Unable to update permissions.",
@@ -241,14 +244,20 @@
 			}
 	},
 	"errors": {
-    "AUTH_EMAIL_ALREADY_REGISTERED": "This email address is already registered.",
-    "AUTH_INVALID_CREDENTIALS": "Invalid email or password.",
-    "USER_NOT_FOUND": "User was not found.",
-    "USER_NAME_ALREADY_REGISTERED": "This display name is already registered.",
-    "VALIDATION_FAILED": "The submitted data is invalid.",
-    "INTERNAL_SERVER_ERROR": "An unexpected error occurred.",
-	  "UNSUPPORTED_LANGUAGE": "Language is not supported.",
-    "UNKNOWN": "An unexpected error occurred."
+		"AUTH_EMAIL_ALREADY_REGISTERED": "This email address is already registered.",
+		"AUTH_INVALID_CREDENTIALS": "Invalid email or password.",
+		"USER_NOT_FOUND": "User was not found.",
+		"USER_NAME_ALREADY_REGISTERED": "This display name is already registered.",
+		"VALIDATION_FAILED": "The submitted data is invalid.",
+		"INTERNAL_SERVER_ERROR": "An unexpected error occurred.",
+		"UNSUPPORTED_LANGUAGE": "Language is not supported.",
+		"UNKNOWN": "An unexpected error occurred.",
+		"DOCUMENT_NOT_FOUND": "Document was not found.",
+		"DOCUMENT_STILL_PROCESSING": "The document is still being analyzed.",
+		"DOCUMENT_INGESTION_NOT_RETRYABLE": "The analysis can only be restarted if it failed or was never started.",
+		"AI_SERVICE_UNAVAILABLE": "The AI service is currently unavailable. Please try again later.",
+		"TAG_NOT_FOUND": "Tag was not found.",
+		"FORBIDDEN": "You don't have permission for this action."
   }
 
 }
