@@ -6,7 +6,7 @@ export class UpdateUserDto {
 	@ApiPropertyOptional()
     @IsOptional()
     @IsString()
-    @MinLength(1)
+    @Length(1, 25)
     displayName?: string;
 
     @ApiPropertyOptional({
@@ -32,7 +32,7 @@ export class UpdateUserDto {
     @ApiPropertyOptional({ example: 'password123' })
     @IsOptional()
     @IsString()
-    @MinLength(8)
+    @Length(8, 25)
     password!: string;
 
 }

@@ -5,6 +5,8 @@ import { firstValueFrom, timer } from 'rxjs';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PASSWORD_POLICY } from '../../validation/password-policy';
+import { DISPLAY_NAME_MAX_LENGTH } from '../../validation/display-name-policy';
+import { maxLength } from '@angular/forms/signals';
 
 @Component({
 	selector: 'app-create-user-modal',
@@ -41,7 +43,7 @@ export class CreateUserModal {
 			message: 'users.createUser.errors.passwordMinLength',
 			});
 			
-
+			maxLength(schemaPath.displayName, DISPLAY_NAME_MAX_LENGTH, { message: 'users.updateUser.errors.displayNameTooLong'})
 			required(schemaPath.displayName, {
 			message: 'users.createUser.errors.displayNameRequired',
 			});
