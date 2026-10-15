@@ -20,14 +20,14 @@ export const routes: Routes = [
 		children: [
 			{
 				path: '',
-				redirectTo: 'home',
+				redirectTo: 'documents',
 				pathMatch: 'full',
 			},
-			{
-				path: 'home',
-				component: Home,
-				title: 'Home',
-			},
+			// {
+			// 	path: 'home',
+			// 	component: Home,
+			// 	title: 'Home',
+			// },
 			{
 				path: 'documents',
 				component: DocPage,
