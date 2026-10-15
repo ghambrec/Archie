@@ -1,0 +1,26 @@
+@if (editing()) {
+	<input #tagInput type="text" class="form-control form-control-sm tag-input"
+		[placeholder]="'documents.review.searchTag' | transloco"
+		[ngbTypeahead]="search"
+		[resultTemplate]="result"
+		[inputFormatter]="translate"
+		[editable]="false"
+		container="body"
+		popupClass="tag-picker-popup"
+		(focus)="open$.next(tagInput.value)"
+		(click)="open$.next(tagInput.value)"
+		(selectItem)="onSelect($event)"
+		(blur)="onBlur(tagInput)"
+		(keydown.escape)="editing.set(false)" />
+} @else {
+	<button type="button" class="add-chip" (click)="editing.set(true)">
+		{{ "documents.review.addTag" | transloco }}
+	</button>
+}
+
+<ng-template #result let-tag="result" let-term="term">
+	<ngb-highlight [result]="translate(tag)" [term]="term" />
+	@if (parentLabel(tag); as parent) {
+		<span class="tag-picker-parent">{{ parent }}</span>
+	}
+</ng-template>
