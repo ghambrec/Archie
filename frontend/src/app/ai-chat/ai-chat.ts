@@ -21,79 +21,24 @@ export class AIChat {
 	readonly isSending = signal(false);
 	readonly sendError = signal<string | null>(null);
 	
-	readonly messages = signal<ChatMessage[]> ([
-		
-		{
-			id: 'demo-message0',
-			conv_id: 'demo',
-			sender: 'user',
-			content: 'Hallo! ich bin eine demooooooooooooooooooooooo frage',
-			created_at: new Date().toString(),
-
-		},
-
-		{
-			id: 'demo-message1',
-			conv_id: 'demo',
-			sender: 'llm',
-			content: 'Hallo! ich bin eine demo antworttttttttttttttttttttttttttttttttttttt',
-			created_at: new Date().toString(),
-
-		},
-		
-		{
-			id: 'demo-message2',
-			conv_id: 'demo',
-			sender: 'user',
-			content: 'Hallo! ich bin eine demo frage',
-			created_at: new Date().toString(),
-
-		},
-
-		{
-			id: 'demo-message8',
-			conv_id: 'demo',
-			sender: 'llm',
-			content: 'Hallo! ich bin eine demo antwort',
-			created_at: new Date().toString(),
-
-		}, 
-
-		{
-			id: 'demo-message3',
-			conv_id: 'demo',
-			sender: 'user',
-			content: 'Hallo! ich bin eine demo frage',
-			created_at: new Date().toString(),
-
-		},
-
-		{
-			id: 'demo-message4',
-			conv_id: 'demo',
-			sender: 'llm',
-			content: 'Hallo! ich bin eine demo antwort',
-			created_at: new Date().toString(),
-
-		}
-		
-	])
+	readonly messages = signal<ChatMessage[]> ([]);
 
 	async send(): Promise<void> {
-		const question = this.draft().trim();
 		const conversationId = this.activeConversationId();
-
+		
 		if(this.isSending() || this.isCreatingConversation())
 			return;
 		this.sendError.set(null);
-
+		
+		const question = this.draft().trim();
 		if (conversationId == null) {
 			this.sendError.set('ai-chat.error.createFirst')
 			return;
 		}
-		if (question == null) {
+		if (!question) {
 			return;
 		}
+		this.isSending.set(true);
 
 		try {
     		const response = await firstValueFrom(
@@ -101,15 +46,29 @@ export class AIChat {
     		)
 		
     		const userMessage: ChatMessage = {
-    			id: 'demo-message2',
+    			id: 'crypto.randomUUID()',
     		 	conv_id: conversationId,
     			sender: 'user',
     			content: question,
     			created_at: new Date().toISOString(),
     		};
+
+		    const aiMessage: ChatMessage = {
+      			id: crypto.randomUUID(),
+      			conv_id: conversationId,
+      			sender: 'llm',
+      			content: response.answer,
+      			confidence_score: response.confidence_score,
+      			sources: response.sources,
+      			created_at: new Date().toISOString(),
+    		};			
 		
     		this.messages.update((previous) => {
-				const updateMessage = [... previous, userMessage];
+				const updateMessage = [
+					... previous,
+					userMessage,
+					aiMessage,
+				];
 				return updateMessage 
 			});
 

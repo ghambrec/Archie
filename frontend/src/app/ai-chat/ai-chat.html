@@ -48,7 +48,7 @@
       @for (source of sources; track $index) {
         <li>Dokumentabschnitt: {{ source.chunk_Id }}</li>
       } @empty {
-        <li>'ai-chat.error.noSources' | transloco</li>
+        <li>{{'ai-chat.error.noSources' | transloco }}</li>
       }
       </ul>
   </div>
@@ -68,7 +68,7 @@
     <label 
       for="chat-question" 
       class="visually-hidden">  
-      [disabled]= "isSending() || isCreatingConversation()"
+      {{ 'ai-chat.hint.sending' | transloco}}
     </label>
 
     <textarea
@@ -77,7 +77,8 @@
       class="form-control"
       rows="2"
       placeholder="Ask about your documents..."
-      maxlength="100"
+      maxlength="1000"
+      [disabled]="isSending() || isCreatingConversation()"
       [value] = "draft()"
       (input) = draft.set(questionInput.value)
       
@@ -90,13 +91,18 @@
       [disabled] = "
         !draft().trim() ||
         !activeConversationId() ||
-        isSending ||
+        isSending() ||
         isCreatingConversation()
         "
       (click)= "send()"
       >
-        {{'ai-chat.botton.send' | transloco}}
+      {{'ai-chat.botton.send' | transloco}}
     </button>
+       @if (sendError(); as errorKey) {
+      <div class="alert alert-danger" role="alert">
+        {{ errorKey | transloco }}
+      </div>
+      }
 
 	  <button
       type="button"

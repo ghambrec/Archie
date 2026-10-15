@@ -11,7 +11,7 @@ from pydantic_ai import UsageLimitExceeded
 
 
 class AskRequest(BaseModel):
-    question: str = Field(min_length=1, max_length=100, examples=["ask your question here"])
+    question: str = Field(min_length=1, max_length=1000, examples=["ask your question here"])
 
 
 router = APIRouter(tags=["conversations"], dependencies=[Security(check_api_key)])

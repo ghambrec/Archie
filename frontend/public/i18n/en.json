@@ -127,6 +127,10 @@
 				"llm" : "KI"
 			}
 		},
+		"hint": {
+			"sending": "Your Question",
+			"ask" : "Ask about your documents... "
+		},
 		"botton": {
 			"send": "send", 
 			"Delete_chat": "Delete Chat",
@@ -138,7 +142,7 @@
 			"createConversation": "Could not create the conversation. Please try again.",
 			"ask": "No answer could be received. Your question may already have been saved.",
 			"createFirst": "'Please create a new chat first.",
-			"noSources": "Keine Quellen angegeben."
+			"noSources": "No Sources given"
 		}
 	},
 	"login": {
