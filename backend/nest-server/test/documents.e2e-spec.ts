@@ -87,6 +87,12 @@ describe('DocumentsController (e2e)', () => {
       .send({ email, password: testPassword, displayName: randomDisplayName() })
       .expect(statusCodeCreated);
 
+    await request(app.getHttpServer())
+      .patch('/users/me/password')
+      .set('Cookie', response.headers['set-cookie'])
+      .send({ password: testPassword })
+      .expect(statusCodeOk);
+
     const user = await dataSource.manager.findOneByOrFail(User, { email });
 
     return { sessionCookie: response.headers['set-cookie'], userId: user.id };

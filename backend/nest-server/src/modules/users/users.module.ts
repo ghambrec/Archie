@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Group } from '../groups/entities/group.entity';
@@ -11,7 +11,7 @@ import { StorageModule } from '../storage/storage.module';
 import { PermissionsModule } from '../permissions/permissions.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Group, UserGroup]), SessionModule, StorageModule, PermissionsModule],
+  imports: [TypeOrmModule.forFeature([User, Group, UserGroup]), StorageModule, PermissionsModule, forwardRef(() => SessionModule)],
   exports: [TypeOrmModule, UsersService, UsersFileService],
   controllers: [UsersController],
   providers: [UsersService, UsersFileService],
