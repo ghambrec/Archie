@@ -1,22 +1,28 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit} from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { ChatMessage } from './chat.models';
+import { ChatMessage, Conversation } from './chat.models';
 import { ConversationsService } from './conversations.service';
 import { firstValueFrom } from 'rxjs';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { ConversationList } from './conversation-list/conversation-list';
+
 
 @Component({
 	selector: 'app-ai-chat',
-	imports: [TranslocoPipe, NgbTooltip],
+	imports: [TranslocoPipe, NgbTooltip, ConversationList],
 	templateUrl: './ai-chat.html',
 })
-export class AIChat {
+export class AIChat implements OnInit {
 	readonly draft = signal('');
 	private readonly conversationService = inject (ConversationsService);
 
 	readonly activeConversationId = signal<string | null>(null);
 	readonly isCreatingConversation = signal(false);
 	readonly createConversationError = signal<string | null>(null);
+
+	readonly conversations = signal<Conversation[]>([]);
+	readonly isLoadingHistory = signal(false);
+	readonly historyError = signal<string | null>(null);
 
 	readonly isSending = signal(false);
 	readonly sendError = signal<string | null>(null);
@@ -25,6 +31,30 @@ export class AIChat {
 	readonly deleteError = signal<string | null>(null);
 	
 	readonly messages = signal<ChatMessage[]> ([]);
+
+	ngOnInit(): void {
+		void this.loadConversations();
+	}
+	async loadConversations(): Promise<void> {
+ 		 if (this.isLoadingHistory()) {
+ 		   return;
+ 		 }
+	 
+ 		 this.isLoadingHistory.set(true);
+ 		 this.historyError.set(null);
+	 
+ 		 try {
+ 		   const response = await firstValueFrom(
+ 		     this.conversationService.getConversations()
+ 		   );
+	   
+ 		   this.conversations.set(response.data);
+ 		 } catch {
+ 		   this.historyError.set('ai-chat.history.loadError');
+ 		 } finally {
+ 		   this.isLoadingHistory.set(false);
+ 		 }
+}
 
 	async send(): Promise<void> {
 		const conversationId = this.activeConversationId();

@@ -1,0 +1,59 @@
+
+<h2 class="mt-4">
+  {{ 'ai-chat.history.heading' | transloco }}
+</h2>
+
+@if (isLoadingHistory()) {
+  <p role="status">
+    {{ 'ai-chat.history.loading' | transloco }}
+  </p>
+}
+
+@if (historyError(); as errorKey) {
+  <div class="alert alert-danger" role="alert">
+    {{ errorKey | transloco }}
+  </div>
+}
+
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">
+          {{ 'ai-chat.history.title' | transloco }}
+        </th>
+        <th scope="col">
+          {{ 'ai-chat.history.updatedAt' | transloco }}
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      @for (conversation of conversations(); track conversation.id) {
+        <tr
+          [class.table-active]="
+            conversation.id === activeConversationId()
+          "
+        >
+          <td>
+            {{
+              conversation.title ||
+              ('ai-chat.history.untitled' | transloco)
+            }}
+          </td>
+          <td>
+            {{ conversation.updated_at | date: 'dd.MM.yyyy HH:mm' }}
+          </td>
+        </tr>
+      } @empty {
+        @if (!isLoadingHistory() && !historyError()) {
+          <tr>
+            <td colspan="2">
+              {{ 'ai-chat.history.empty' | transloco }}
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>

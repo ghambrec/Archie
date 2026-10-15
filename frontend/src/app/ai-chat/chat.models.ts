@@ -7,7 +7,6 @@ export interface Conversation {
 	id:string;
 	title: string | null;
 	updated_at: string;
-	created_at: string;
 }
 
 export interface ChatMessage {

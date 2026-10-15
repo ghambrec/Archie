@@ -4,7 +4,7 @@ import { inject, signal} from "@angular/core";
 import { Service } from "@angular/core";
 import { environment } from "../../environments/environment";
 import { type CreateConversationResponse, type AskConversationResponse, DeleteConversation } from "./chat.models";
-
+import type { Conversation, ListResponse } from "./chat.models";
 
 
 @Service()
@@ -20,7 +20,12 @@ export class ConversationsService  {
 			{},
 			{withCredentials: true}
 		)
-
+	}
+	getConversations() {
+	  return this.http.get<ListResponse<Conversation>>(
+	    this.baseUrl,
+	    { withCredentials: true }
+	  );
 	}
 	ask(conversationId: string, question:string){
 		return this.http.post<AskConversationResponse> (

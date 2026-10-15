@@ -1,6 +1,6 @@
 <section class="chat">
   <header class="chat-header">
-    <h1>AI Chat</h1>
+    <h1>Archie Chat</h1>
     <button
       type="button"
       class="btn btn-outline-secondary"
@@ -128,4 +128,10 @@
   </div>
 
   </footer>
+  <app-conversation-list
+  [conversations]="conversations()"
+  [activeConversationId]="activeConversationId()"
+  [isLoadingHistory]="isLoadingHistory()"
+  [historyError]="historyError()"
+/>
 </section>
