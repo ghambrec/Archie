@@ -1,0 +1,44 @@
+.add-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.25rem 0.7rem;
+	font-size: 0.85rem;
+	border-radius: 999px;
+	border: 1px dashed var(--bs-border-color);
+	background: transparent;
+	color: var(--bs-secondary-color);
+
+	&:hover {
+		border-color: var(--bs-primary);
+		color: var(--bs-primary);
+	}
+}
+
+.tag-input {
+	width: 12rem;
+	border-radius: 999px;
+}
+
+::ng-deep .tag-picker-popup {
+	max-height: 16rem;
+	min-width: 14rem;
+	overflow-y: auto;
+
+	.dropdown-item {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		font-size: 0.875rem;
+	}
+
+	.tag-picker-parent {
+		font-size: 0.75rem;
+		color: var(--bs-secondary-color);
+	}
+
+	.dropdown-item.active .tag-picker-parent {
+		color: inherit;
+		opacity: 0.75;
+	}
+}

@@ -10,6 +10,24 @@
 		}
 	},
 	"documents": {
+		"aiStatus": {
+			"notStarted": "NOT STARTED",
+			"pending": "PENDING",
+			"processing": "GETTING ANALYZED",
+			"finished": "FINISHED",
+			"failed": "ERROR",
+			"skipped": "ANALYSIS NOT POSSIBLE"
+		},
+		"list": {
+			"heading": "Documents",
+			"name": "Name",
+			"tags": "Tags",
+			"groups": "Groups",
+			"size": "Size",
+			"uploaded": "Uploaded",
+			"noDocs": "No documents found",
+			"errorLoading": "Error on loading documents"
+		},
 		"upload": {
 			"upload": "Upload Documents",
 			"selectGroupTooltip": "Select group for upload",
@@ -22,11 +40,47 @@
 				"filetypeMismatch": "File content does not match to file extension",
 				"alreadyExists": "Identical file already exist"
 			}
+		},
+		"review": {
+			"heading": "Waiting for review",
+			"btnConfirm": "Confirm tags",
+			"btnRetry": "Retry AI pipeline",
+			"errorLoadingQueue": "Error on loading review queue",
+			"noDocsToReview": "There are no documents to review",
+			"addTag": "+ Tag",
+			"searchTag": "Search tag...",
+			"suggestionsPending": "Suggestions will appear once the analysis is done"
+		},
+		"detail": {
+			"download": "Download",
+			"ai": "AI analysis",
+			"language": "Language",
+			"info": "Details",
+			"type": "File type",
+			"uploadedBy": "Uploaded by",
+			"createdAt": "Uploaded on",
+			"updatedAt": "Last modified",
+			"errorLoading": "Error on loading document",
+			"delete": "Delete",
+			"deleteConfirm": "Confirm delete",
+			"cancel": "Cancel"
+		},
+		"aiError": {
+			"unsupported_mime_type": "Analysis is not available for this file type",
+			"no_text": "No text could be extracted from this document",
+			"not_found": "File could not be found in storage",
+			"minio_error": "Error on reading the file from storage",
+			"minio_connection": "Storage is currently not reachable",
+			"llm_error": "The AI model returned an error",
+			"timeout": "Analysis took too long and was cancelled",
+			"unknown": "An unknown error occurred during analysis"
 		}
 	},
 	"tag": {
 		"header": "Tags",
+		"searchPlaceholder": "Search...",
 		"noData": "You have no readable documents.",
+		"noSearchResults": "No matching tags.",
 		"label": {
 			"work": "Work",
 			"education": "Education",
@@ -147,9 +201,7 @@
 				"unsupportedLanguage": "Please enter en, de or es."
 			}
 		}
-
-
-	}, 
+	},
 	"groups": {
 		"groupList": {
 			"heading": "Groups",
@@ -158,90 +210,81 @@
 			"description": "Description",
 			"isSystem": "System-group",
 			"errorLoading": "Unable to load groups",
-			"empty": "No groups exist."	
-			},
-			"createGroupAdmin": {
-				"heading": "Create Group",
-				"name": "Name",
-				"description": "Description",
-				"btnSubmit": "Create Group",
-				"btnSubmitPending": "Sending...",
-				"btnCancel": "Cancel",
-				"feedbackMsg": "Group successfully created",
-				"errorGeneral": "Unable to create Group",
-				"errorConflictName": "Name already registered"
-			},
-			"deleteGroupAdmin": {
-				"heading": "Delete Group",
-				"question": "Do you really want to delete the group:",
-				"btnDelete": "Delete",
-				"btnCancel": "Cancel",
-				"btnDeletePending": "Deleting...",
-				"errorForbidden": "Deleting this group is forbidden.",
-				"errorNotFound": "Group not found.",
-				"errorGeneral": "Unable to delete group",
-				"errorHasDocuments": "This group cannot be deleted. The group still contains documents."
-			},
-			"editGroupAdmin": {
-				"heading": "Edit Group",
-				"name": "Name",
-				"description": "Description",
-				"btnSubmit": "Edit Group",
-				"btnSubmitPending": "Sending...",
-				"btnCancel": "Cancel",
-				"feedbackMsg": "Group successfully edited",
-				"errorGeneral": "Unable to edit Group",
-				"errorConflictName": "Name already Taken",
-				"errorNameRequired": "Name cannot be empty",
-				"errors": {
-					"nameRequired" : "Name is required."
-				}
-			},
-			"infoGroup": {
-				"heading": "Group members",
-				"displayName": "User-name",
-				"email": "E-Mail",
-				"loading": "Loading members...",
-				"errorLoading": "Unable to load members",
-				"empty": "This group has no members.",
-				"btnClose": "Close",
-				"memberCount": "{{count}} members.",
-				"noMembers": "No members.",
-				"searchUser": "Add user",
-				"searchUserPlaceholder": "Search by username or email",
-				"btnAddUser": "Add",
-				"userAdded": "User added to group",
-				"errorAddingUser": "The user could not be added.",
-				"userAlreadyMember": "The user is already assigned to this group.",
-				"userRemoved": "User removed from group.",
-				"errorRemovingUser": "The user could not be removed from the group.",
-				"actions": "Actions",
-				"btnRemoveUser": "Delete",
-				"errorLoadingUsers": "Unable to load users",
-				"editUserPermission": "Edit Permissions",
-				"userPermissions": "Permissions",
-				"errorLoadingPermissions": "Unable to load permissions",
-				"errorRemovingLastAdmin": "The last admin cannot be removed."
-			},
-			"userPermissions": {
-				"heading": "User Permissions",
-				"permissionsOf": "Permissions of user: {{userName}}",
-				"admin": "Admin",
-				"documentsRead": "Read documents",
-				"documentsUpload": "Upload documents",
-				"documentsUpdate": "Update documents",
-				"documentsDelete": "Delete documents",
-				"btnCancel": "Cancel",
-				"btnSave": "Save",
-				"errorGeneral": "Unable to update permissions.",
-				"errorLastAdmin": "The admin permission cannot be removed because this is the last admin.",
-				"errorNameRequired": "Name is required.",
-				"errors": {
-					"nameRequired": "Name is requirred",
-					"General": "Unable to update permissions.",
-					"LastAdmin": "The admin permission cannot be removed because this is the last admin."
-				}
-			}
+			"empty": "No groups exist."
+		},
+		"createGroupAdmin": {
+			"heading": "Create Group",
+			"name": "Name",
+			"description": "Description",
+			"btnSubmit": "Create Group",
+			"btnSubmitPending": "Sending...",
+			"btnCancel": "Cancel",
+			"feedbackMsg": "Group successfully created",
+			"errorGeneral": "Unable to create Group",
+			"errorConflictName": "Name already registered"
+		},
+		"deleteGroupAdmin": {
+			"heading": "Delete Group",
+			"question": "Do you really want to delete the group:",
+			"btnDelete": "Delete",
+			"btnCancel": "Cancel",
+			"btnDeletePending": "Deleting...",
+			"errorForbidden": "Deleting this group is forbidden.",
+			"errorNotFound": "Group not found.",
+			"errorGeneral": "Unable to delete group",
+			"errorHasDocuments": "This group cannot be deleted. The group still contains documents."
+		},
+		"editGroupAdmin": {
+			"heading": "Edit Group",
+			"name": "Name",
+			"description": "Description",
+			"btnSubmit": "Edit Group",
+			"btnSubmitPending": "Sending...",
+			"btnCancel": "Cancel",
+			"feedbackMsg": "Group successfully edited",
+			"errorGeneral": "Unable to edit Group",
+			"errorConflictName": "Name already Taken",
+			"errorNameRequired": "Name cannot be empty"
+		},
+		"infoGroup": {
+			"heading": "Group members",
+			"displayName": "User-name",
+			"email": "E-Mail",
+			"loading": "Loading members...",
+			"errorLoading": "Unable to load members",
+			"empty": "This group has no members.",
+			"btnClose": "Close",
+			"memberCount": "{{count}} members.",
+			"noMembers": "No members.",
+			"searchUser": "Add user",
+			"searchUserPlaceholder": "Search by username or email",
+			"btnAddUser": "Add",
+			"userAdded": "User added to group",
+			"errorAddingUser": "The user could not be added.",
+			"userAlreadyMember": "The user is already assigned to this group.",
+			"userRemoved": "User removed from group.",
+			"errorRemovingUser": "The user could not be removed from the group.",
+			"actions": "Actions",
+			"btnRemoveUser": "Delete",
+			"errorLoadingUsers": "Unable to load users",
+			"editUserPermission": "Edit Permissions",
+			"userPermissions": "Permissions",
+			"errorLoadingPermissions": "Unable to load permissions",
+			"errorRemovingLastAdmin": "The last admin cannot be removed."
+		},
+		"userPermissions": {
+			"heading": "User Permissions",
+			"permissionsOf": "Permissions of user: {{userName}}",
+			"admin": "Admin",
+			"documentsRead": "Read documents",
+			"documentsUpload": "Upload documents",
+			"documentsUpdate": "Update documents",
+			"documentsDelete": "Delete documents",
+			"btnCancel": "Cancel",
+			"btnSave": "Save",
+			"errorGeneral": "Unable to update permissions.",
+			"errorLastAdmin": "The admin permission cannot be removed because this is the last admin."
+		}
 	},
 	"errors": {
 		"AUTH_EMAIL_ALREADY_REGISTERED": "This email address is already registered.",
@@ -250,7 +293,6 @@
 		"USER_NAME_ALREADY_REGISTERED": "This display name is already registered.",
 		"VALIDATION_FAILED": "The submitted data is invalid.",
 		"INTERNAL_SERVER_ERROR": "An unexpected error occurred.",
-		"UNSUPPORTED_LANGUAGE": "Language is not supported.",
 		"UNKNOWN": "An unexpected error occurred.",
 		"DOCUMENT_NOT_FOUND": "Document was not found.",
 		"DOCUMENT_STILL_PROCESSING": "The document is still being analyzed.",
@@ -258,6 +300,5 @@
 		"AI_SERVICE_UNAVAILABLE": "The AI service is currently unavailable. Please try again later.",
 		"TAG_NOT_FOUND": "Tag was not found.",
 		"FORBIDDEN": "You don't have permission for this action."
-  }
-
+	}
 }

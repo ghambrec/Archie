@@ -1,0 +1,119 @@
+@if (docs.selectedDocId()) {
+	<div class="offcanvas-backdrop show" (click)="docs.closeDetail()"></div>
+
+	<aside class="offcanvas offcanvas-end show doc-detail" animate.enter="slide-in">
+		@if (docs.detail.hasValue()) {
+			@let doc = docs.detail.value();
+
+			<div class="offcanvas-header gap-2 border-bottom">
+				<i class="bi bi-file-earmark-text text-secondary fs-5"></i>
+				<h2 class="h6 fw-semibold mb-0 text-truncate flex-grow-1" [ngbTooltip]="doc.filename" container="body" [openDelay]="400">{{ doc.filename }}</h2>
+				<button type="button" class="btn-close" (click)="docs.closeDetail()"></button>
+			</div>
+
+			<div class="offcanvas-body d-flex flex-column gap-4">
+				<!-- aktionen -->
+				<div class="d-flex align-items-center gap-2">
+					<a class="btn btn-sm btn-primary" [href]="docs.downloadUrl(doc.id)">
+						<i class="bi bi-download me-1"></i>{{ "documents.detail.download" | transloco }}
+					</a>
+
+					<div class="ms-auto d-flex gap-2">
+						@if (confirmDelete()) {
+							<button type="button" class="btn btn-sm btn-link text-secondary" (click)="confirmDelete.set(false)">
+								{{ "documents.detail.cancel" | transloco }}
+							</button>
+						}
+						<button type="button" class="btn btn-sm"
+							[class.btn-outline-danger]="!confirmDelete()"
+							[class.btn-danger]="confirmDelete()"
+							[disabled]="busy()" (click)="onDelete(doc.id)">
+							<i class="bi bi-trash me-1"></i>
+							{{ (confirmDelete() ? "documents.detail.deleteConfirm" : "documents.detail.delete") | transloco }}
+						</button>
+					</div>
+				</div>
+				@if (actionError(); as key) {
+					<div class="alert alert-danger py-2 small mb-0">{{ key | transloco }}</div>
+				}
+
+				<!-- ki -->
+				<section>
+					<h3 class="section-title">
+						{{ "documents.detail.ai" | transloco }}
+						<app-doc-status-badge [status]="doc.aiStatus" />
+					</h3>
+					@switch (doc.aiStatus) {
+						@case ('FINISHED') {
+							<p class="mb-1">{{ doc.aiSummary }}</p>
+							@if (doc.language) {
+							<span class="small text-secondary">{{ "documents.detail.language" | transloco }}: {{ doc.language | uppercase }}</span>
+							}
+						}
+						@case ('FAILED') {
+							<p class="text-danger small mb-2">{{ "documents.aiError." + (doc.aiErrorKey ?? 'unknown') | transloco }}</p>
+							<button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="busy()" (click)="onRetry(doc.id)">
+								<i class="bi bi-arrow-clockwise me-1"></i>{{ "documents.review.btnRetry" | transloco }}
+							</button>
+						}
+						@case ('SKIPPED') {
+							<p class="text-secondary small mb-0">{{ "documents.aiError." + (doc.aiErrorKey ?? 'unknown') | transloco }}</p>
+						}
+						@default {
+							<p class="text-secondary small mb-0">{{ "documents.review.suggestionsPending" | transloco }}</p>
+						}
+					}
+				</section>
+
+				<!-- tags -->
+				<section>
+					<h3 class="section-title">{{ "documents.list.tags" | transloco }}</h3>
+					<div class="d-flex flex-wrap align-items-center gap-1">
+						@for (tag of doc.tags; track tag.id) {
+							<button type="button" class="chip chip-removable" [disabled]="busy()" (click)="onRemoveTag(doc.id, tag.id)">
+								{{ tag.label | transloco }}
+								<i class="bi bi-x"></i>
+							</button>
+						}
+						<app-tag-picker [excludeIds]="usedTagIds()" (picked)="onAddTag(doc.id, $event)" />
+					</div>
+				</section>
+
+				<!-- gruppen -->
+				<section>
+					<h3 class="section-title">{{ "documents.list.groups" | transloco }}</h3>
+					<div class="d-flex flex-wrap gap-1">
+						@for (group of doc.groups; track group.id) {
+							<span class="chip">{{ group.name }}</span>
+						}
+					</div>
+				</section>
+
+				<!-- infos -->
+				<section>
+					<h3 class="section-title">{{ "documents.detail.info" | transloco }}</h3>
+					<dl class="info-list small mb-0">
+						<dt>{{ "documents.list.size" | transloco }}</dt>
+						<dd>{{ doc.sizeBytes | fileSize }}</dd>
+						<dt>{{ "documents.detail.type" | transloco }}</dt>
+						<dd>{{ doc.mimeType }}</dd>
+						<dt>{{ "documents.detail.uploadedBy" | transloco }}</dt>
+						<dd>{{ doc.uploadedBy.name }}</dd>
+						<dt>{{ "documents.detail.createdAt" | transloco }}</dt>
+						<dd>{{ doc.createdAt | date: 'dd.MM.yyyy, HH:mm' }}</dd>
+						<dt>{{ "documents.detail.updatedAt" | transloco }}</dt>
+						<dd>{{ doc.updatedAt | date: 'dd.MM.yyyy, HH:mm' }}</dd>
+					</dl>
+				</section>
+			</div>
+		} @else if (docs.detail.error()) {
+			<div class="offcanvas-body">
+				<div class="alert alert-danger">{{ "documents.detail.errorLoading" | transloco }}</div>
+			</div>
+		} @else {
+			<div class="offcanvas-body">
+				<div class="spinner-border spinner-border-sm"></div>
+			</div>
+		}
+	</aside>
+}
