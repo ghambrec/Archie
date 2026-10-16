@@ -57,23 +57,32 @@ export class AIChat implements OnInit {
 }
 
 	async send(): Promise<void> {
-		const conversationId = this.activeConversationId();
-		
 		if(this.isSending() || this.isCreatingConversation() || this.isDeleting())
 			return;
-		this.sendError.set(null);
+
 		
 		const question = this.draft().trim();
-		if (conversationId == null) {
-			this.sendError.set('ai-chat.error.createFirst')
-			return;
-		}
 		if (!question) {
 			return;
 		}
+		this.sendError.set(null);
 		this.isSending.set(true);
 
+		let conversationId = this.activeConversationId();
+
 		try {
+			if (!conversationId) {
+     			const conversation = await firstValueFrom(
+     			  this.conversationService.createConversation()
+     			);
+				
+				conversationId = conversation.id;
+      			this.activeConversationId.set(conversationId);
+      			this.messages.set([]);
+
+				await this.loadConversations();
+    		}
+
     		const response = await firstValueFrom(
     		  this.conversationService.ask(conversationId, question),
     		)

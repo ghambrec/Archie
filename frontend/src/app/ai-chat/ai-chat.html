@@ -90,7 +90,6 @@
       class="btn btn-primary"
       [disabled] = "
         !draft().trim() ||
-        !activeConversationId() ||
         isSending() ||
         isCreatingConversation()
         "
