@@ -156,9 +156,19 @@
 			"btnSubmitPending": "Sending...",
 			"btnCancel": "Cancel",
 			"feedbackMsg": "User successfully created",
-			"errorGeneral": "Unable to create user",
-			"errorConflictMail": "E-Mail already registered",
-			"errorConflictName": "Name already registered"
+			"displayNameRequired":"Display name is mandatory",
+			"errors": {
+  				"emailRequired": "Email is required.",
+  				"emailFormat": "Please enter a valid email address.",
+  				"passwordRequired": "Password is required.",
+  				"passwordMinLength": "Password must contain at least 8 characters.",
+  				"displayNameRequired": "Name is required.",
+				"General": "Unable to create user",
+				"ConflictMail": "E-Mail already registered",
+				"ConflictName": "Name already registered",
+				"Conflict": "A user with these details already exists.",
+				"displayNameTooLong" : " Display name is too long, 25 characters are maximum",
+			}
 		},
 		"userInfo": {
 			"heading": "User groups",
@@ -169,6 +179,27 @@
 			"btnClose": "Close",
 			"description": "User is assigned to following groups:",
 			"groupCount": "{{count}} groups."
+		},
+		"updateUser": {
+			"heading": "User",
+			"displayName": "Name",
+			"email": "E-Mail",
+			"password": "Password",
+			"btnClose": "Close",
+			"btnSubmit": "Edit User",
+			"preferredLanguage": "Preferred Language",
+			"languageHint": "Supported languages: en, de and es.",
+			"errors": {
+				"displayNameError": "Name already given, not available",
+				"emailError": "Email already in use, not available",
+				"preferredlangaugeError": "en, de or es are available, only",
+				"emailFormat": "Enter a valid Email",
+				"passwordError": "Password must contain between 8 and 25 characters.",
+				"passwordPattern": "Password must include an uppercase letter, a lowercase letter, a number, and a special character from !@#$%^&*",
+				"displayNameRequired": "Display name is mandatory",
+				"displayNameTooLong" : " Display name is too long, 25 characters are maximum",
+				"unsupportedLanguage": "Please enter en, de or es."
+			}
 		}
 	},
 	"groups": {
