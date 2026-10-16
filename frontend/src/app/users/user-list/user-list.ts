@@ -7,7 +7,6 @@ import { EditUserModal } from '../edit-user-modal/edit-user-modal';
 import { UserInfoModal } from '../user-info-modal/user-info-modal';
 import { Groups } from '../../groups/groups';
 
-
 @Component({
 	selector: 'app-user-list',
 	imports: [TranslocoPipe],
@@ -44,14 +43,9 @@ export class UserList {
 		});
 	}
 
-	openEditUserModal(user: UserInfo): void {
-		const modal = this.modalService.open(EditUserModal, 
+	openEditUserModal() {
+		this.modalService.open(EditUserModal, 
 			{ centered: true });
-		
-		modal.componentInstance.initialize(user);
-		modal.closed.subscribe(() => {
-			this.usersService.users.reload()
-		})
 	}
 
 	openUserInfoModal(user: UserInfo): void {

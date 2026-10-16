@@ -1,17 +1,12 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { SupportedLanguage } from '../enums/supported-language.enum';
 import { IsEmail, IsEnum, isEnum,  IsOptional, IsString, Length,MinLength } from 'class-validator';
-import { Transform } from 'class-transformer';
-
 
 export class UpdateUserDto {
 	@ApiPropertyOptional()
     @IsOptional()
     @IsString()
-    @Length(1, 25)
-    @Transform(({ value }) =>
-      typeof value === 'string' ? value.trim() : value
-    )
+    @MinLength(1)
     displayName?: string;
 
     @ApiPropertyOptional({
@@ -32,15 +27,6 @@ export class UpdateUserDto {
     @IsString()
     @IsEmail()
     @MinLength(4)
-    @Transform(({ value }) =>
-        typeof value === 'string' ? value.trim().toLowerCase() : value
-    )
     email?: string;
-
-    @ApiPropertyOptional({ example: 'password123' })
-    @IsOptional()
-    @IsString()
-    @Length(8, 25)
-    password!: string;
 
 }

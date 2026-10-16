@@ -1,1 +1,0 @@
-export const DISPLAY_NAME_MAX_LENGTH = 25;

@@ -4,11 +4,6 @@ import { email, form, minLength, required, FormRoot, FormField } from '@angular/
 import { firstValueFrom, timer } from 'rxjs';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { PASSWORD_POLICY } from '../../validation/password-policy';
-import { DISPLAY_NAME_MAX_LENGTH } from '../../validation/display-name-policy';
-import { maxLength } from '@angular/forms/signals';
-import { HttpErrorResponse } from '@angular/common/http';
-
 
 @Component({
 	selector: 'app-create-user-modal',
@@ -30,25 +25,14 @@ export class CreateUserModal {
 
 	createUserForm = form(
 		this.createUserModel,
-		(schemaPath) => {
-			required(schemaPath.email, {
-			message: 'users.createUser.errors.emailRequired',
-			});
-			email(schemaPath.email, {
-			message: 'users.createUser.errors.emailFormat',
-			});
+		(p) => { // p = schemaPath (pointer to the values not the values itself)
+			required(p.email, { message: 'email is mandatory' });
+			email(p.email, { message: 'please enter valid email' });
 
-			required(schemaPath.password, {
-			message: 'users.createUser.errors.passwordRequired',
-			});
-			minLength(schemaPath.password, PASSWORD_POLICY.minLength, {
-			message: 'users.createUser.errors.passwordMinLength',
-			});
-			
-			maxLength(schemaPath.displayName, DISPLAY_NAME_MAX_LENGTH, { message: 'users.createUser.errors.displayNameTooLong'})
-			required(schemaPath.displayName, {
-			message: 'users.createUser.errors.displayNameRequired',
-			});
+			required(p.password, { message: 'password is mandatory' });
+			minLength(p.password, 8, { message: 'minlength for password is 8' });
+
+			required(p.displayName, { message: 'displayName is mandatory' });
 		},
 		{
 			submission: {
@@ -56,34 +40,33 @@ export class CreateUserModal {
 					this.feedbackMsg.set(null);
 					try {
 						const formValues = field().value();
-		
-						await firstValueFrom(this.usersService.create(formValues));
+						const reponse = await firstValueFrom(this.usersService.create(formValues));
+
+						//const createdUser: UserInfo = {
+						//	id: reponse.id,
+						//	email: formValues.email,
+						//	displayName: formValues.displayName,
+						//	preferredLanguage: "en",
+						//	lastLogin: "null",
+						//	isActive: true,
+							//avatar: `https://api.dicebear.com/9.x/identicon/svg?seed=${formValues.displayName}`
+						//}
+
 						this.feedbackMsg.set('users.createUser.feedbackMsg');
 						await firstValueFrom(timer(500));
 						this.activeModal.close();
 						return;
-					} catch (error: unknown) {
-  						let message = 'users.createUser.errors.General';
-
-  						if (error instanceof HttpErrorResponse) {
-  						  switch (error.error?.code) {
-  						    case 'AUTH_EMAIL_ALREADY_REGISTERED':
-  						      message = 'errors.AUTH_EMAIL_ALREADY_REGISTERED';
-  						      break;
-  						    case 'USER_NAME_ALREADY_REGISTERED':
-  						      message = 'errors.USER_NAME_ALREADY_REGISTERED';
-  						      break;
-  						    case 'VALIDATION_FAILED':
-  						      message = 'errors.VALIDATION_FAILED';
-  						      break;
-  						    default:
-  						      if (error.status === 409) {
-  						        message = 'users.createUser.errors.Conflict';
-  						      }
-  							 }
+					} catch (error : any) {
+						let translocoKey = error.status == 409 ? "users.createUser.errorConflict" : "users.createUser.errorGeneral";
+						if (translocoKey == "users.createUser.errorConflict" && error.error?.message.toLowerCase().includes("mail")) {
+							translocoKey = "users.createUser.errorConflictMail"
+						} else if (translocoKey == "users.createUser.errorConflict" && error.error?.message.toLowerCase().includes("name")) {
+							translocoKey = "users.createUser.errorConflictName"
+						} else {
+							translocoKey = "users.createUser.errorGeneral";
 						}
-						return { kind: 'serverError', message };
-  					}
+						return { kind: 'serverError', message: translocoKey };
+					}
 				}
 			}
 		}
