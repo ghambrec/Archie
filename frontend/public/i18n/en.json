@@ -121,29 +121,42 @@
 		}
 	},
 	"ai-chat": {
-		"message": {
-			"sender": {
-				"user": "User",
-				"llm" : "KI"
-			}
-		},
-		"hint": {
-			"sending": "Your Question",
-			"ask" : "Ask about your documents... "
-		},
-		"botton": {
-			"send": "send", 
-			"Delete_chat": "Delete Chat",
-			"Delete_all_chats" : "Delete all Chats",
-			"new_chat": "New Chat"
-
-		},
-		"error": {
-			"createConversation": "Could not create the conversation. Please try again.",
-			"ask": "No answer could be received. Your question may already have been saved.",
-			"createFirst": "'Please create a new chat first.",
-			"noSources": "No Sources given"
-		}
+	  "message": {
+	    "sender": {
+	      "user": "User",
+	      "llm": "AI"
+	    }
+	  },
+	  "hint": {
+	    "sending": "Your question",
+	    "ask": "Ask about your documents..."
+	  },
+	  "button": {
+	    "send": "Send",
+	    "Delete_chat": "Delete Chat",
+	    "Delete_all_chats": "Delete All Chats",
+	    "new_chat": "New Chat"
+	  },
+	  "error": {
+	    "createConversation": "Could not create the conversation. Please try again.",
+	    "ask": "No answer could be received. Your question may already have been saved.",
+	    "createFirst": "Please create a new chat first.",
+	    "noSources": "No sources provided.",
+	    "deleteConversation": "Could not delete the conversation. Please try again."
+	  },
+	  "history": {
+	    "heading": "Chat History",
+	    "loading": "Loading conversations...",
+	    "loadError": "Could not load the conversations. Please try again.",
+	    "title": "Title",
+	    "updatedAt": "Last updated",
+	    "actions": "Actions",
+	    "untitled": "Untitled chat",
+	    "open": "Open",
+	    "empty": "No conversations yet.",
+	    "opening": "Opening conversation...",
+	    "openError": "Could not open the conversation. Please try again."
+	  }
 	},
 	"login": {
 		"title": "Archie - Login",
