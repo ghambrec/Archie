@@ -193,7 +193,7 @@
 				"ConflictMail": "E-Mail already registered",
 				"ConflictName": "Name already registered",
 				"Conflict": "A user with these details already exists.",
-				"displayNameTooLong" : " Display name is too long, 25 characters are maximum",
+				"displayNameTooLong" : " Display name is too long, 25 characters are maximum"
 			}
 		},
 		"userInfo": {
