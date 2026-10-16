@@ -56,7 +56,11 @@ async def ask_question(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, questio
 async def get_messages(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID):
     select = """
                 SELECT 
-                    am.sender, am."content" 
+                    am.id,
+                    am.conv_id,
+                    am.sender,
+                    am."content",
+                    am.created_at, 
                 FROM ai_messages AS am 
                 LEFT JOIN ai_conversations AS ac 
                     ON ac.id  = am.conv_id 

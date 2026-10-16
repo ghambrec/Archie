@@ -4,7 +4,7 @@ import { inject, signal} from "@angular/core";
 import { Service } from "@angular/core";
 import { environment } from "../../environments/environment";
 import { type CreateConversationResponse, type AskConversationResponse, DeleteConversation } from "./chat.models";
-import type { Conversation, ListResponse } from "./chat.models";
+import type { Conversation, ListResponse, ChatMessage } from "./chat.models";
 
 
 @Service()
@@ -41,6 +41,12 @@ export class ConversationsService  {
 			{withCredentials: true}
 		)
 
+	}
+	getMessages(conversationId: string){
+		return this.http.get<ListResponse<ChatMessage>>(
+			`${this.baseUrl}/${conversationId}/message`,
+			{withCredentials: true}
+		)
 	}
 
 
