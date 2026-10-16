@@ -105,4 +105,21 @@ export class Tags {
 		}
 		return parentIds;
 	});
+
+	// fuer brotkruemelnavigation: tag kette von root bis aktueller tag
+	readonly selectedTagPath = computed(() => {
+		const path: TagResponse[] = [];
+		const selectedId = this.selectedTagId();
+		if (!selectedId) {
+			return path;
+		}
+
+		const tagsById = this.tagsById();
+		let current = tagsById.get(selectedId);
+		while (current && !path.includes(current)) {
+			path.unshift(current);
+			current = current.parentId ? tagsById.get(current.parentId) : undefined;
+		}
+		return path;
+	});
 }

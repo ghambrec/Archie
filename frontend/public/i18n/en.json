@@ -10,6 +10,9 @@
 		}
 	},
 	"documents": {
+		"breadcrumb": {
+			"root": "My Documents"
+		},
 		"aiStatus": {
 			"notStarted": "NOT STARTED",
 			"pending": "PENDING",
@@ -19,7 +22,6 @@
 			"skipped": "ANALYSIS NOT POSSIBLE"
 		},
 		"list": {
-			"heading": "Documents",
 			"name": "Name",
 			"tags": "Tags",
 			"groups": "Groups",
