@@ -43,18 +43,16 @@
   @if (message.sources; as sources ){
     <div class="small">
       <strong>Quellen</strong>
-
-      <ul>
-      @for (source of sources; track $index) {
-        <li>Dokumentabschnitt: {{ source.chunk_Id }}</li>
-      } @empty {
-        <li>{{'ai-chat.error.noSources' | transloco }}</li>
-      }
-      </ul>
-  </div>
-  }
-}
-    </article>
+        <ul>
+        @for (source of sources; track $index) {
+          <li>Dokumentabschnitt: {{ source.chunk_Id }}</li>
+        } @empty {
+          <li>{{'ai-chat.error.noSources' | transloco }}</li>
+        }
+        </ul>
+    </div>
+    }}
+  </article>
     }
   </div>
 
@@ -78,7 +76,11 @@
       rows="2"
       placeholder="Ask about your documents..."
       maxlength="1000"
-      [disabled]="isSending() || isCreatingConversation() || isDeleting()"
+      [disabled]="
+              isSending() ||
+              isCreatingConversation() ||
+              isOpeningConversation() || 
+              isDeleting()"
       [value] = "draft()"
       (input) = draft.set(questionInput.value)
       
@@ -110,7 +112,8 @@
         !activeConversationId() ||
         isDeleting() ||
         isSending() ||
-        isCreatingConversation()
+        isCreatingConversation() ||
+        isOpeningConversation()
       "
       (click)="deleteChat()"
     >
@@ -127,10 +130,28 @@
   </div>
 
   </footer>
+    @if (isOpeningConversation()) {
+    <p role="status">
+      {{ 'ai-chat.history.opening' | transloco }}
+    </p>
+  }
+  
+  @if (openConversationError(); as errorKey) {
+    <div class="alert alert-danger" role="alert">
+      {{ errorKey | transloco }}
+    </div>
+  }
   <app-conversation-list
   [conversations]="conversations()"
   [activeConversationId]="activeConversationId()"
   [isLoadingHistory]="isLoadingHistory()"
   [historyError]="historyError()"
+  [busy]="
+    isOpeningConversation() ||
+    isSending() ||
+    isCreatingConversation() ||
+    isDeleting() 
+  "
+  (openConversation)="openConversation($event)"
 />
 </section>

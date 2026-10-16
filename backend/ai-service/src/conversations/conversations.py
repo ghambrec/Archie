@@ -60,7 +60,7 @@ async def get_messages(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID):
                     am.conv_id,
                     am.sender,
                     am."content",
-                    am.created_at, 
+                    am.created_at
                 FROM ai_messages AS am 
                 LEFT JOIN ai_conversations AS ac 
                     ON ac.id  = am.conv_id 

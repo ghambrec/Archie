@@ -44,7 +44,7 @@ export class ConversationsService  {
 	}
 	getMessages(conversationId: string){
 		return this.http.get<ListResponse<ChatMessage>>(
-			`${this.baseUrl}/${conversationId}/message`,
+			`${this.baseUrl}/${conversationId}/messages`,
 			{withCredentials: true}
 		)
 	}

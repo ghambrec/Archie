@@ -29,6 +29,9 @@ export class AIChat implements OnInit {
 
 	readonly isDeleting = signal(false);
 	readonly deleteError = signal<string | null>(null);
+
+	readonly isOpeningConversation = signal(false);
+	readonly openConversationError = signal<string | null>(null);
 	
 	readonly messages = signal<ChatMessage[]> ([]);
 
@@ -57,7 +60,11 @@ export class AIChat implements OnInit {
 }
 
 	async send(): Promise<void> {
-		if(this.isSending() || this.isCreatingConversation() || this.isDeleting())
+		if(
+			this.isSending() || 
+			this.isCreatingConversation() ||
+			this.isOpeningConversation() ||
+			this.isDeleting())
 			return;
 
 		
@@ -75,7 +82,7 @@ export class AIChat implements OnInit {
      			const conversation = await firstValueFrom(
      			  this.conversationService.createConversation()
      			);
-				
+
 				conversationId = conversation.id;
       			this.activeConversationId.set(conversationId);
       			this.messages.set([]);
@@ -125,12 +132,11 @@ export class AIChat implements OnInit {
   		}		
 	}		
 
-
-
 	async startNewChat(): Promise<void> {
 		if (this.isCreatingConversation() ||
 			this.isSending() ||
-			this.isDeleting() ) {
+			this.isDeleting() ||
+			this.isOpeningConversation() ) {
 			return;
 		}
 		this.isCreatingConversation.set(true);
@@ -185,4 +191,34 @@ export class AIChat implements OnInit {
 		    this.isDeleting.set(false);
 		  }
 		}
+
+	async openConversation(conversationID: string): Promise<void> {
+		if (
+			this.isOpeningConversation() ||
+			this.isSending() ||
+			this.isCreatingConversation() ||
+			this.isDeleting()
+		) {
+			return;
+		}
+		try {
+			const response = await firstValueFrom(
+				this.conversationService.getMessages(conversationID)
+			);
+
+			this.messages.set(response.data);
+			this.activeConversationId.set(conversationID);
+
+			this.sendError.set(null);
+			this.deleteError.set(null);
+			this.createConversationError.set(null);
+
+		} catch {
+			this.openConversationError.set('ai-chat.history.openError');
+		} finally {
+		    this.isOpeningConversation.set(false);
+		  }
+
 	}
+}
+
