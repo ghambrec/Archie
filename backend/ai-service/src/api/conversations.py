@@ -2,7 +2,8 @@
 
 from fastapi import APIRouter, Request, Security, Depends, HTTPException
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StringConstraints
+from typing import Annotated
 
 from src.api.auth import check_api_key, get_user_id
 from src.conversations import conversations
@@ -12,6 +13,12 @@ from pydantic_ai import UsageLimitExceeded
 
 class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=1000, examples=["ask your question here"])
+
+class PatchRequest(BaseModel):
+    titel: Annotated[
+            str, 
+            StringConstraints(strip_whitespace=True, min_length=1, max_length= 254)
+            ] = Field (examples= ["Untilted chat"])
 
 
 router = APIRouter(tags=["conversations"], dependencies=[Security(check_api_key)])
@@ -65,3 +72,12 @@ async def del_conversations(request: Request, user_id: UUID = Depends(get_user_i
 async def del_conversation(request: Request, conv_id: UUID, user_id: UUID = Depends(get_user_id)):
     pool = request.app.state.db_pool
     await conversations.del_conversation(pool, user_id, conv_id)
+
+@router.patch("/conversations/{conv_id}/", summary="rename titel of a conversation")
+async def patch_conversations(request: Request, body: PatchRequest, conv_id: UUID, user_id: UUID = Depends(get_user_id)):
+    pool = request.app.state.db_pool
+    try:
+        title = await conversations.patch_conversation(pool, user_id, conv_id, body.titel)
+    except conversations.ConversationNotFoundError:
+        raise HTTPException(status_code=400, detail="Conversation not found")
+    return {"user_id": title, "title": title, "updated_at": title }

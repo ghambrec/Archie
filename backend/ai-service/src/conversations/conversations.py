@@ -141,3 +141,25 @@ async def save_conversation(pool: asyncpg.Pool, question: str , answer:Generated
             except Exception:
                 logger.exception("saving answer sources failed")
                 raise
+
+
+async def patch_conversations(request: Request, body: PatchRequest, conv_id: UUID, user_id: UUID )-> any:
+    query = """
+            Update ai_conversation
+            set title = $3
+                updated_at = now()
+            where id = $2 AND 
+                user_id = $1
+            returning id, title, updated_at
+            """
+    pol = request.app.state.db_pool
+
+    try: 
+        row = await conversation.patch_conversation(query, user_id, conv_id, body.title)
+        if row is None:
+            raise ConversationNotFoundError(str(conv_id))
+    except Exception:
+        logger.exception("updating conversation title failed")
+        raise
+    finally:
+        return dict(row)

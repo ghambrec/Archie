@@ -48,6 +48,12 @@ export class ConversationsService  {
 			{withCredentials: true}
 		)
 	}
+	//patchConversationTitel(conversationId: string) {
+	//	return this.http.patch<PatchConversation> (
+	//		`${this.baseUrl}/${conversationId}/patch`,
+	//		{withCredentials: true}
+	//	)
+	//}
 
 
 	}
