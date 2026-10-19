@@ -143,23 +143,20 @@ async def save_conversation(pool: asyncpg.Pool, question: str , answer:Generated
                 raise
 
 
-async def patch_conversations(request: Request, body: PatchRequest, conv_id: UUID, user_id: UUID )-> any:
+async def patch_conversation(
+    pool: asyncpg.Pool, user_id: UUID, conv_id: UUID, title: str
+) -> dict:
     query = """
-            Update ai_conversation
-            set title = $3
-                updated_at = now()
-            where id = $2 AND 
-                user_id = $1
-            returning id, title, updated_at
-            """
-    pol = request.app.state.db_pool
-
-    try: 
-        row = await conversation.patch_conversation(query, user_id, conv_id, body.title)
-        if row is None:
-            raise ConversationNotFoundError(str(conv_id))
+        UPDATE ai_conversations
+        SET title = $3, updated_at = now()
+        WHERE user_id = $1 AND id = $2
+        RETURNING id, title, updated_at
+    """
+    try:
+        row = await pool.fetchrow(query, user_id, conv_id, title)
     except Exception:
         logger.exception("updating conversation title failed")
         raise
-    finally:
-        return dict(row)
+    if row is None:
+        raise ConversationNotFoundError(str(conv_id))
+    return dict(row)

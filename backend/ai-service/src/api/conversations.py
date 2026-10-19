@@ -73,11 +73,11 @@ async def del_conversation(request: Request, conv_id: UUID, user_id: UUID = Depe
     pool = request.app.state.db_pool
     await conversations.del_conversation(pool, user_id, conv_id)
 
-@router.patch("/conversations/{conv_id}/", summary="rename titel of a conversation")
+@router.patch("/conversations/{conv_id}/", summary="rename title of a conversation")
 async def patch_conversations(request: Request, body: PatchRequest, conv_id: UUID, user_id: UUID = Depends(get_user_id)):
     pool = request.app.state.db_pool
     try:
-        title = await conversations.patch_conversation(pool, user_id, conv_id, body.titel)
+        conversation = await conversations.patch_conversation(pool, user_id, conv_id, body.titel)
     except conversations.ConversationNotFoundError:
-        raise HTTPException(status_code=400, detail="Conversation not found")
-    return {"user_id": title, "title": title, "updated_at": title }
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return conversation
