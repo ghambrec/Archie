@@ -123,6 +123,16 @@
 		}
 	},
 	"ai-chat": {
+	  "renameModal": {
+	    "heading": "Rename chat",
+	    "title": "Chat title",
+	    "cancel": "Cancel",
+	    "save": "Save",
+	    "saving": "Saving...",
+	    "required": "Enter a chat title.",
+	    "tooLong": "The title must contain no more than 254 characters.",
+	    "saveError": "Could not rename the chat. Please try again."
+	  },
 	  "deleteModal": {
 	    "heading": "Delete chat",
 	    "question": "Delete this chat?",
