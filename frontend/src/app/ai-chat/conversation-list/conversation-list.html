@@ -35,7 +35,7 @@
             <i class="bi bi-pin-angle me-2" aria-hidden="true"></i>{{ 'ai-chat.menu.pin' | transloco }}
           </button>
           <div class="dropdown-divider"></div>
-          <button type="button" ngbDropdownItem [disabled]="true">
+          <button type="button" ngbDropdownItem [disabled]="busy()" (click)="openDeleteModal(conversation)">
             <i class="bi bi-trash me-2" aria-hidden="true"></i>{{ 'ai-chat.menu.delete' | transloco }}
           </button>
         </div>

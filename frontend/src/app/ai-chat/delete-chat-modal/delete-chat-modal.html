@@ -1,0 +1,20 @@
+<div class="modal-header">
+  <h2 class="modal-title fs-5" id="delete-chat-title">{{ 'ai-chat.deleteModal.heading' | transloco }}</h2>
+  <button type="button" class="btn-close" [disabled]="isDeleting()"
+    [attr.aria-label]="'ai-chat.deleteModal.cancel' | transloco" (click)="activeModal.dismiss()"></button>
+</div>
+<div class="modal-body" id="delete-chat-description" [attr.aria-busy]="isDeleting()">
+  <p>{{ 'ai-chat.deleteModal.question' | transloco }}</p>
+  <p class="fw-semibold text-break">{{ selectedChat.title || ('ai-chat.history.untitled' | transloco) }}</p>
+  <p>{{ 'ai-chat.deleteModal.warning' | transloco }}</p>
+  @if (errorKey(); as error) {
+    <div class="alert alert-danger" role="alert">{{ error | transloco }}</div>
+  }
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" ngbAutofocus [disabled]="isDeleting()"
+    (click)="activeModal.dismiss()">{{ 'ai-chat.deleteModal.cancel' | transloco }}</button>
+  <button type="button" class="btn btn-danger" [disabled]="isDeleting()" (click)="confirmDelete()">
+    {{ (isDeleting() ? 'ai-chat.deleteModal.deleting' : 'ai-chat.menu.delete') | transloco }}
+  </button>
+</div>

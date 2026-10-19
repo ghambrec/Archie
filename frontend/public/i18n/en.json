@@ -123,6 +123,13 @@
 		}
 	},
 	"ai-chat": {
+	  "deleteModal": {
+	    "heading": "Delete chat",
+	    "question": "Delete this chat?",
+	    "warning": "The chat and its messages will be permanently deleted.",
+	    "cancel": "Cancel",
+	    "deleting": "Deleting..."
+	  },
 	  "menu": {
 	    "label": "Options for {{ title }}",
 	    "rename": "Rename",
