@@ -15,7 +15,7 @@ class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=1000, examples=["ask your question here"])
 
 class PatchRequest(BaseModel):
-    titel: Annotated[
+    title: Annotated[
             str, 
             StringConstraints(strip_whitespace=True, min_length=1, max_length= 254)
             ] = Field (examples= ["Untilted chat"])
@@ -77,7 +77,7 @@ async def del_conversation(request: Request, conv_id: UUID, user_id: UUID = Depe
 async def patch_conversations(request: Request, body: PatchRequest, conv_id: UUID, user_id: UUID = Depends(get_user_id)):
     pool = request.app.state.db_pool
     try:
-        conversation = await conversations.patch_conversation(pool, user_id, conv_id, body.titel)
+        conversation = await conversations.patch_conversation(pool, user_id, conv_id, body.title)
     except conversations.ConversationNotFoundError:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return conversation
