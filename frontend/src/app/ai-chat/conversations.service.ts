@@ -1,6 +1,6 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, httpResource	 } from "@angular/common/http";
 
-import { inject, signal} from "@angular/core";
+import { inject, type Signal} from "@angular/core";
 import { Service } from "@angular/core";
 import { environment } from "../../environments/environment";
 import { type CreateConversationResponse, type AskConversationResponse, DeleteConversation } from "./chat.models";
@@ -21,12 +21,14 @@ export class ConversationsService  {
 			{withCredentials: true}
 		)
 	}
-	getConversations() {
-	  return this.http.get<ListResponse<Conversation>>(
-	    this.baseUrl,
-	    { withCredentials: true }
-	  );
+
+	conversationsResource() {
+	return httpResource<ListResponse<Conversation>>(() => ({
+		url: this.baseUrl,
+		withCredentials: true,
+	}));
 	}
+
 	ask(conversationId: string, question:string){
 		return this.http.post<AskConversationResponse> (
 			`${this.baseUrl}/${conversationId}/ask`,
@@ -42,11 +44,16 @@ export class ConversationsService  {
 		)
 
 	}
-	getMessages(conversationId: string){
-		return this.http.get<ListResponse<ChatMessage>>(
-			`${this.baseUrl}/${conversationId}/messages`,
-			{withCredentials: true}
-		)
+	messageResource(conversationId: Signal<string| null >){
+		return httpResource<ListResponse<ChatMessage>>(() =>  {
+			const id = conversationId();
+			if(!id) 
+				return undefined;
+			return {
+				url: `${this.baseUrl}/${id}/messages`,
+				withCredentials: true, 
+			};
+		})
 	}
 	//patchConversationTitel(conversationId: string) {
 	//	return this.http.patch<PatchConversation> (

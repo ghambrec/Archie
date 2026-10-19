@@ -1,6 +1,5 @@
-import { Component, inject, signal, OnInit} from '@angular/core';
+import { Component, computed, inject, signal} from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { ChatMessage, Conversation } from './chat.models';
 import { ConversationsService } from './conversations.service';
 import { firstValueFrom } from 'rxjs';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
@@ -12,7 +11,7 @@ import { ConversationList } from './conversation-list/conversation-list';
 	imports: [TranslocoPipe, NgbTooltip, ConversationList],
 	templateUrl: './ai-chat.html',
 })
-export class AIChat implements OnInit {
+export class AIChat {
 	readonly draft = signal('');
 	private readonly conversationService = inject (ConversationsService);
 
@@ -20,9 +19,20 @@ export class AIChat implements OnInit {
 	readonly isCreatingConversation = signal(false);
 	readonly createConversationError = signal<string | null>(null);
 
-	readonly conversations = signal<Conversation[]>([]);
-	readonly isLoadingHistory = signal(false);
-	readonly historyError = signal<string | null>(null);
+	readonly conversationsResource = this.conversationService.conversationsResource();
+	readonly conversations = computed(() => {
+		if (this.conversationsResource.hasValue()) {
+			return this.conversationsResource.value().data;
+		}
+		return [];
+	});
+	readonly isLoadingHistory = this.conversationsResource.isLoading;
+	readonly historyError = computed(() => {
+		if (this.conversationsResource.error()) {
+			return 'ai-chat.history.loadError';
+		}
+		return null;
+	});
 
 	readonly isSending = signal(false);
 	readonly sendError = signal<string | null>(null);
@@ -30,34 +40,24 @@ export class AIChat implements OnInit {
 	readonly isDeleting = signal(false);
 	readonly deleteError = signal<string | null>(null);
 
-	readonly isOpeningConversation = signal(false);
-	readonly openConversationError = signal<string | null>(null);
-	
-	readonly messages = signal<ChatMessage[]> ([]);
+	readonly messageResource = 
+		this.conversationService.messageResource(this.activeConversationId)
+	readonly messages = computed(() => {
+		if (this.messageResource.hasValue()){
+			return this.messageResource.value().data
+		} else {
+			return []
+		}
+		});
+	readonly isOpeningConversation = this.messageResource.isLoading;
 
-	ngOnInit(): void {
-		void this.loadConversations();
-	}
-	async loadConversations(): Promise<void> {
- 		 if (this.isLoadingHistory()) {
- 		   return;
- 		 }
-	 
- 		 this.isLoadingHistory.set(true);
- 		 this.historyError.set(null);
-	 
- 		 try {
- 		   const response = await firstValueFrom(
- 		     this.conversationService.getConversations()
- 		   );
-	   
- 		   this.conversations.set(response.data);
- 		 } catch {
- 		   this.historyError.set('ai-chat.history.loadError');
- 		 } finally {
- 		   this.isLoadingHistory.set(false);
- 		 }
-}
+	readonly openConversationError = computed(() => {
+		if(this.messageResource.error())
+			return 'ai-chat.history.openError'
+		else{
+			return null
+		}
+	});
 
 	async send(): Promise<void> {
 		if(
@@ -85,43 +85,16 @@ export class AIChat implements OnInit {
 
 				conversationId = conversation.id;
       			this.activeConversationId.set(conversationId);
-      			this.messages.set([]);
 
-				await this.loadConversations();
+				this.conversationsResource.reload();
     		}
 
-    		const response = await firstValueFrom(
-    		  this.conversationService.ask(conversationId, question),
-    		)
-		
-    		const userMessage: ChatMessage = {
-    			id: crypto.randomUUID(),
-    		 	conv_id: conversationId,
-    			sender: 'user',
-    			content: question,
-    			created_at: new Date().toISOString(),
-    		};
+			await firstValueFrom(
+				this.conversationService.ask(conversationId, question)
+			);
+			this.messageResource.reload();
+			this.conversationsResource.reload();
 
-		    const aiMessage: ChatMessage = {
-      			id: crypto.randomUUID(),
-      			conv_id: conversationId,
-      			sender: 'llm',
-      			content: response.answer,
-      			confidence_score: response.confidence_score,
-      			sources: response.sources,
-      			created_at: new Date().toISOString(),
-    		};			
-		
-    		this.messages.update((previous) => {
-				const updateMessage = [
-					... previous,
-					userMessage,
-					aiMessage,
-				];
-				return updateMessage 
-			});
-
-		
     		this.draft.set('');
   		} catch {
     		this.sendError.set(
@@ -147,7 +120,7 @@ export class AIChat implements OnInit {
 				this.conversationService.createConversation());
 		
 			this.activeConversationId.set(response.id);
-			this.messages.set([]);
+			this.conversationsResource.reload();
 			this.draft.set('');
 			}
 
@@ -181,7 +154,7 @@ export class AIChat implements OnInit {
 		    );
 		
 		    this.activeConversationId.set(null);
-		    this.messages.set([]);
+		    this.conversationsResource.reload();
 		    this.draft.set('');
 		    this.sendError.set(null);
 		    this.createConversationError.set(null);
@@ -192,7 +165,7 @@ export class AIChat implements OnInit {
 		  }
 		}
 
-	async openConversation(conversationID: string): Promise<void> {
+	openConversation(conversationID: string): void {
 		if (
 			this.isOpeningConversation() ||
 			this.isSending() ||
@@ -201,23 +174,10 @@ export class AIChat implements OnInit {
 		) {
 			return;
 		}
-		try {
-			const response = await firstValueFrom(
-				this.conversationService.getMessages(conversationID)
-			);
-
-			this.messages.set(response.data);
-			this.activeConversationId.set(conversationID);
-
-			this.sendError.set(null);
-			this.deleteError.set(null);
-			this.createConversationError.set(null);
-
-		} catch {
-			this.openConversationError.set('ai-chat.history.openError');
-		} finally {
-		    this.isOpeningConversation.set(false);
-		  }
+		this.sendError.set(null);
+		this.deleteError.set(null);
+		this.createConversationError.set(null);
+		this.activeConversationId.set(conversationID);
 
 	}
 }
