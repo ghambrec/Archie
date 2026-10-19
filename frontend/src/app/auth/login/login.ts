@@ -55,7 +55,7 @@ export class Login {
 							});
 
 							modalRef.closed.subscribe(() => {
-								this.router.navigateByUrl('/home');
+								this.router.navigateByUrl('/');
 							});
 
 							modalRef.dismissed.subscribe(() => {
@@ -65,7 +65,7 @@ export class Login {
 							return;
 						}
 
-						this.router.navigateByUrl('/home');
+						this.router.navigateByUrl('/');
 						
 						return;
 					} catch (error : any) {

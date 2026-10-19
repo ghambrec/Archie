@@ -51,5 +51,9 @@ export const routes: Routes = [
 				title: 'Settings',
 			}
 		]
+	},
+	{
+		path: '**',
+		redirectTo: ''
 	}
 ];
