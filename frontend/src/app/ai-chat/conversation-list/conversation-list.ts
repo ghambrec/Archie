@@ -4,6 +4,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { NgbModal, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem } from '@ng-bootstrap/ng-bootstrap';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DeleteChatModal } from '../delete-chat-modal/delete-chat-modal';
+import { RenameChatModal } from '../rename-chat-modal/rename-chat-modal';
 import type { Conversation } from '../chat.models';
 
 @Component({
@@ -23,6 +24,17 @@ export class ConversationList {
   readonly historyError = input(false);
   readonly busy = input(false);
   readonly retry = output<void>();
+
+  openRenameModal(conversation: Conversation): void {
+    if (this.busy()) return;
+    const modal = this.modalService.open(RenameChatModal, {
+      injector: this.injector,
+      centered: true,
+      ariaLabelledBy: 'rename-chat-heading',
+      beforeDismiss: () => !modal.componentInstance.isSaving(),
+    });
+    modal.componentInstance.initialize(conversation);
+  }
 
   openDeleteModal(conversation: Conversation): void {
     if (this.busy()) return;

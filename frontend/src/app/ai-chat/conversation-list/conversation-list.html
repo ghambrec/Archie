@@ -28,7 +28,7 @@
           <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
         </button>
         <div ngbDropdownMenu [attr.aria-labelledby]="'chat-menu-' + conversation.id">
-          <button type="button" ngbDropdownItem [disabled]="true">
+          <button type="button" ngbDropdownItem [disabled]="busy()" (click)="openRenameModal(conversation)">
             <i class="bi bi-pencil me-2" aria-hidden="true"></i>{{ 'ai-chat.menu.rename' | transloco }}
           </button>
           <button type="button" ngbDropdownItem [disabled]="true">

@@ -46,6 +46,12 @@ export class ConversationsService {
     ));
   }
 
+  renameConversation(conversationId: string, title: string) {
+    return this.mutate(this.http.patch<Conversation>(
+      `${this.baseUrl}/${conversationId}`, { title }, { withCredentials: true }
+    ));
+  }
+
   deleteConversation(conversationId: string) {
     return this.mutate(this.http.delete<DeleteConversation>(
       `${this.baseUrl}/${conversationId}`, { withCredentials: true }
