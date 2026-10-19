@@ -1,184 +1,120 @@
-import { Component, computed, inject, signal} from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { ConversationsService } from './conversations.service';
 import { firstValueFrom } from 'rxjs';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { ConversationList } from './conversation-list/conversation-list';
-
+import { ConversationsService } from './conversations.service';
 
 @Component({
-	selector: 'app-ai-chat',
-	imports: [TranslocoPipe, NgbTooltip, ConversationList],
-	templateUrl: './ai-chat.html',
+  selector: 'app-ai-chat',
+  imports: [TranslocoPipe, NgbTooltip],
+  templateUrl: './ai-chat.html',
 })
 export class AIChat {
-	readonly draft = signal('');
-	private readonly conversationService = inject (ConversationsService);
+  private readonly conversationService = inject(ConversationsService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly routeParams = toSignal(this.route.paramMap, {
+    initialValue: this.route.snapshot.paramMap,
+  });
 
-	readonly activeConversationId = signal<string | null>(null);
-	readonly isCreatingConversation = signal(false);
-	readonly createConversationError = signal<string | null>(null);
+  readonly activeConversationId = computed(() => this.routeParams().get('id'));
+  readonly draft = signal('');
+  readonly isCreatingConversation = signal(false);
+  readonly createConversationError = signal<string | null>(null);
+  readonly isSending = signal(false);
+  readonly sendError = signal<string | null>(null);
+  readonly isDeleting = signal(false);
+  readonly deleteError = signal<string | null>(null);
+  readonly messageResource = this.conversationService.messageResource(this.activeConversationId);
+  readonly messages = computed(() => {
+    if (this.messageResource.hasValue()) return this.messageResource.value().data;
+    return [];
+  });
+  readonly isOpeningConversation = this.messageResource.isLoading;
+  readonly openConversationError = computed(() =>
+    this.messageResource.error() ? 'ai-chat.history.openError' : null
+  );
 
-	readonly conversationsResource = this.conversationService.conversationsResource();
-	readonly conversations = computed(() => {
-		if (this.conversationsResource.hasValue()) {
-			return this.conversationsResource.value().data;
-		}
-		return [];
-	});
-	readonly isLoadingHistory = this.conversationsResource.isLoading;
-	readonly historyError = computed(() => {
-		if (this.conversationsResource.error()) {
-			return 'ai-chat.history.loadError';
-		}
-		return null;
-	});
+  constructor() {
+    effect(() => {
+      this.activeConversationId();
+      this.draft.set('');
+      this.sendError.set(null);
+      this.deleteError.set(null);
+      this.createConversationError.set(null);
+    });
+  }
 
-	readonly isSending = signal(false);
-	readonly sendError = signal<string | null>(null);
+  private busy(): boolean {
+    return this.conversationService.isMutating() || this.isSending() ||
+      this.isCreatingConversation() || this.isDeleting() || this.isOpeningConversation();
+  }
 
-	readonly isDeleting = signal(false);
-	readonly deleteError = signal<string | null>(null);
+  async send(): Promise<void> {
+    const question = this.draft().trim();
+    if (this.busy() || !question) return;
+    const selectedId = this.activeConversationId();
+    let conversationId = selectedId;
+    this.sendError.set(null);
+    this.isSending.set(true);
+    try {
+      if (!conversationId) {
+        const conversation = await firstValueFrom(this.conversationService.createConversation());
+        conversationId = conversation.id;
+      }
+      await firstValueFrom(this.conversationService.ask(conversationId, question));
+      if (this.destroyRef.destroyed || this.activeConversationId() !== selectedId) return;
+      this.draft.set('');
+      if (selectedId) {
+        this.messageResource.reload();
+      } else {
+        await this.router.navigate(['/ai-chat', conversationId]);
+      }
+    } catch {
+      if (!this.destroyRef.destroyed && this.activeConversationId() === selectedId) {
+        // Keep a newly created conversation accessible even if its first answer failed.
+        if (!selectedId && conversationId) {
+          await this.router.navigate(['/ai-chat', conversationId]);
+        } else {
+          this.sendError.set('ai-chat.error.ask');
+        }
+      }
+    } finally {
+      this.isSending.set(false);
+    }
+  }
 
-	readonly messageResource = 
-		this.conversationService.messageResource(this.activeConversationId)
-	readonly messages = computed(() => {
-		if (this.messageResource.hasValue()){
-			return this.messageResource.value().data
-		} else {
-			return []
-		}
-		});
-	readonly isOpeningConversation = this.messageResource.isLoading;
+  async startNewChat(): Promise<void> {
+    if (this.busy()) return;
+    this.isCreatingConversation.set(true);
+    this.createConversationError.set(null);
+    try {
+      const conversation = await firstValueFrom(this.conversationService.createConversation());
+      if (!this.destroyRef.destroyed) await this.router.navigate(['/ai-chat', conversation.id]);
+    } catch {
+      this.createConversationError.set('ai-chat.error.createConversation');
+    } finally {
+      this.isCreatingConversation.set(false);
+    }
+  }
 
-	readonly openConversationError = computed(() => {
-		if(this.messageResource.error())
-			return 'ai-chat.history.openError'
-		else{
-			return null
-		}
-	});
-
-	async send(): Promise<void> {
-		if(
-			this.isSending() || 
-			this.isCreatingConversation() ||
-			this.isOpeningConversation() ||
-			this.isDeleting())
-			return;
-
-		
-		const question = this.draft().trim();
-		if (!question) {
-			return;
-		}
-		this.sendError.set(null);
-		this.isSending.set(true);
-
-		let conversationId = this.activeConversationId();
-
-		try {
-			if (!conversationId) {
-     			const conversation = await firstValueFrom(
-     			  this.conversationService.createConversation()
-     			);
-
-				conversationId = conversation.id;
-      			this.activeConversationId.set(conversationId);
-
-				this.conversationsResource.reload();
-    		}
-
-			await firstValueFrom(
-				this.conversationService.ask(conversationId, question)
-			);
-			this.messageResource.reload();
-			this.conversationsResource.reload();
-
-    		this.draft.set('');
-  		} catch {
-    		this.sendError.set(
-    		  'ai-chat.error.ask',
-    		);
-  		} finally {
-    		this.isSending.set(false);
-  		}		
-	}		
-
-	async startNewChat(): Promise<void> {
-		if (this.isCreatingConversation() ||
-			this.isSending() ||
-			this.isDeleting() ||
-			this.isOpeningConversation() ) {
-			return;
-		}
-		this.isCreatingConversation.set(true);
-		this.createConversationError.set(null);
-
-		try{
-			const response = await firstValueFrom(
-				this.conversationService.createConversation());
-		
-			this.activeConversationId.set(response.id);
-			this.conversationsResource.reload();
-			this.draft.set('');
-			}
-
-		catch {
-			this.createConversationError.set('ai-chat.error.createConversation');
-			
-		}
-
-		finally {
-			this.isCreatingConversation.set(false);
-		}
-	}
-
-	async deleteChat(): Promise<void> {
-		const conversationId = this.activeConversationId();
-
-		if (
-			!conversationId ||
-			this.isDeleting() ||
-			this.isSending() ||
-			this.isCreatingConversation())	
-			{
-  			return;
-			}
-		this.isDeleting.set(true);
-  		this.deleteError.set(null);
-
-		  try {
-		    await firstValueFrom(
-		      this.conversationService.deleteConversation(conversationId)
-		    );
-		
-		    this.activeConversationId.set(null);
-		    this.conversationsResource.reload();
-		    this.draft.set('');
-		    this.sendError.set(null);
-		    this.createConversationError.set(null);
-		  } catch {
-		    this.deleteError.set('ai-chat.error.deleteConversation');
-		  } finally {
-		    this.isDeleting.set(false);
-		  }
-		}
-
-	openConversation(conversationID: string): void {
-		if (
-			this.isOpeningConversation() ||
-			this.isSending() ||
-			this.isCreatingConversation() ||
-			this.isDeleting()
-		) {
-			return;
-		}
-		this.sendError.set(null);
-		this.deleteError.set(null);
-		this.createConversationError.set(null);
-		this.activeConversationId.set(conversationID);
-
-	}
+  async deleteChat(): Promise<void> {
+    const id = this.activeConversationId();
+    if (!id || this.busy()) return;
+    this.isDeleting.set(true);
+    this.deleteError.set(null);
+    try {
+      await firstValueFrom(this.conversationService.deleteConversation(id));
+      if (!this.destroyRef.destroyed && this.activeConversationId() === id) {
+        await this.router.navigate(['/ai-chat']);
+      }
+    } catch {
+      this.deleteError.set('ai-chat.error.deleteConversation');
+    } finally {
+      this.isDeleting.set(false);
+    }
+  }
 }
-

@@ -1,67 +1,62 @@
-import { HttpClient, httpResource	 } from "@angular/common/http";
-
-import { inject, type Signal} from "@angular/core";
-import { Service } from "@angular/core";
-import { environment } from "../../environments/environment";
-import { type CreateConversationResponse, type AskConversationResponse, DeleteConversation } from "./chat.models";
-import type { Conversation, ListResponse, ChatMessage } from "./chat.models";
-
+import { HttpClient, httpResource } from '@angular/common/http';
+import { computed, inject, Service, signal, type Signal } from '@angular/core';
+import { defer, finalize, tap, type Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+import type { CreateConversationResponse, AskConversationResponse, DeleteConversation,
+  Conversation, ListResponse, ChatMessage } from './chat.models';
 
 @Service()
-export class ConversationsService  {
-	private readonly http = inject(HttpClient);
+export class ConversationsService {
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiUrl}/conversations`;
+  private readonly pendingMutations = signal(0);
+  readonly isMutating = computed(() => this.pendingMutations() > 0);
 
-	private readonly baseUrl =
-		`${environment.apiUrl}/conversations`;
-	
-	createConversation() {
-		return this.http.post<CreateConversationResponse> (
-			this.baseUrl,
-			{},
-			{withCredentials: true}
-		)
-	}
+  readonly conversationsResource = httpResource<ListResponse<Conversation>>(() => ({
+    url: this.baseUrl,
+    withCredentials: true,
+  }));
 
-	conversationsResource() {
-	return httpResource<ListResponse<Conversation>>(() => ({
-		url: this.baseUrl,
-		withCredentials: true,
-	}));
-	}
+  readonly conversations = computed(() => {
+    if (!this.conversationsResource.hasValue()) return [];
+    return [...this.conversationsResource.value().data].sort(
+      (a, b) => b.updated_at.localeCompare(a.updated_at)
+    );
+  });
 
-	ask(conversationId: string, question:string){
-		return this.http.post<AskConversationResponse> (
-			`${this.baseUrl}/${conversationId}/ask`,
-			{question: question},
-			{withCredentials: true}
-		)
-	}
+  private mutate<T>(request: Observable<T>): Observable<T> {
+    return defer(() => {
+      this.pendingMutations.update(count => count + 1);
+      return request.pipe(
+        tap(() => this.conversationsResource.reload()),
+        finalize(() => this.pendingMutations.update(count => count - 1)),
+      );
+    });
+  }
 
-	deleteConversation(conversationId: string){
-		return this.http.delete<DeleteConversation> (
-			`${this.baseUrl}/${conversationId}`,
-			{withCredentials: true}
-		)
+  createConversation() {
+    return this.mutate(this.http.post<CreateConversationResponse>(
+      this.baseUrl, {}, { withCredentials: true }
+    ));
+  }
 
-	}
-	messageResource(conversationId: Signal<string| null >){
-		return httpResource<ListResponse<ChatMessage>>(() =>  {
-			const id = conversationId();
-			if(!id) 
-				return undefined;
-			return {
-				url: `${this.baseUrl}/${id}/messages`,
-				withCredentials: true, 
-			};
-		})
-	}
-	//patchConversationTitel(conversationId: string) {
-	//	return this.http.patch<PatchConversation> (
-	//		`${this.baseUrl}/${conversationId}/patch`,
-	//		{withCredentials: true}
-	//	)
-	//}
+  ask(conversationId: string, question: string) {
+    return this.mutate(this.http.post<AskConversationResponse>(
+      `${this.baseUrl}/${conversationId}/ask`, { question }, { withCredentials: true }
+    ));
+  }
 
+  deleteConversation(conversationId: string) {
+    return this.mutate(this.http.delete<DeleteConversation>(
+      `${this.baseUrl}/${conversationId}`, { withCredentials: true }
+    ));
+  }
 
-	}
-
+  messageResource(conversationId: Signal<string | null>) {
+    return httpResource<ListResponse<ChatMessage>>(() => {
+      const id = conversationId();
+      if (!id) return undefined;
+      return { url: `${this.baseUrl}/${id}/messages`, withCredentials: true };
+    });
+  }
+}

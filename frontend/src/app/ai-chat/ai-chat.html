@@ -141,17 +141,5 @@
       {{ errorKey | transloco }}
     </div>
   }
-  <app-conversation-list
-  [conversations]="conversations()"
-  [activeConversationId]="activeConversationId()"
-  [isLoadingHistory]="isLoadingHistory()"
-  [historyError]="historyError()"
-  [busy]="
-    isOpeningConversation() ||
-    isSending() ||
-    isCreatingConversation() ||
-    isDeleting() 
-  "
-  (openConversation)="openConversation($event)"
-/>
+
 </section>

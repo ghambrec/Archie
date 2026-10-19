@@ -1,18 +1,17 @@
-import { Component, input, output} from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { Component, input, output } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { Conversation } from '../chat.models';
 
 @Component({
   selector: 'app-conversation-list',
-  imports: [DatePipe, TranslocoPipe],
+  imports: [RouterLink, RouterLinkActive, TranslocoPipe],
   templateUrl: './conversation-list.html',
 })
 export class ConversationList {
-	readonly conversations = input.required<Conversation[]>();
-	readonly activeConversationId = input<string | null>(null);
-	readonly isLoadingHistory = input(false);
-	readonly historyError = input<string | null>(null);
-	readonly busy = input(false)
-	readonly openConversation = output<string>();
+  readonly conversations = input.required<Conversation[]>();
+  readonly isLoadingHistory = input(false);
+  readonly historyError = input(false);
+  readonly busy = input(false);
+  readonly retry = output<void>();
 }

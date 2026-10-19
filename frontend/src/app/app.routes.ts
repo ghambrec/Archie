@@ -36,7 +36,7 @@ export const routes: Routes = [
 				title: 'Documents',
 			},
 			{
-				path: 'ai-chat',
+				path: 'ai-chat/:id',
 				component: AIChat,
 				title: 'AI Chat',
 			},

@@ -1,75 +1,29 @@
-
-<h2 class="mt-4">
-  {{ 'ai-chat.history.heading' | transloco }}
-</h2>
-
-
 @if (isLoadingHistory()) {
-  <p role="status">
-    {{ 'ai-chat.history.loading' | transloco }}
-  </p>
+  <p class="small text-body-secondary px-2" role="status">{{ 'sidebar.chats.loading' | transloco }}</p>
 }
-
-@if (historyError(); as errorKey) {
-  <div class="alert alert-danger" role="alert">
-    {{ errorKey | transloco }}
+@if (historyError()) {
+  <div class="small px-2" role="alert">
+    <p>{{ 'sidebar.chats.loadError' | transloco }}</p>
+    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="retry.emit()">
+      {{ 'sidebar.chats.retry' | transloco }}
+    </button>
   </div>
 }
-
-<div class="table-responsive">
-  <table class="table">
-    <thead>
-	<tr>
-    	<th scope="col">
-    	  {{ 'ai-chat.history.title' | transloco }}
-    	</th>
-    	<th scope="col">
-    	  {{ 'ai-chat.history.updatedAt' | transloco }}
-    	</th>
-    	<th scope="col">
-    	  {{ 'ai-chat.history.actions' | transloco }}
-    	</th>
-  	</tr>
-    </thead>
-
-    <tbody>
-      @for (conversation of conversations(); track conversation.id) {
-	  <tr
-	    [class.table-active]="
-	      conversation.id === activeConversationId()
-	    "
-	  >
-	    <td>
-	      {{
-	        conversation.title ||
-	        ('ai-chat.history.untitled' | transloco)
-	      }}
-	    </td>
-	
-	    <td>
-	      {{ conversation.updated_at | date: 'dd.MM.yyyy HH:mm' }}
-	    </td>
-	
-	    <td>
-	      <button
-	        type="button"
-	        class="btn btn-outline-primary btn-sm"
-	        [disabled]="busy()"
-	        (click)="openConversation.emit(conversation.id)"
-	      >
-	        {{ 'ai-chat.history.open' | transloco }}
-	      </button>
-	    </td>
-	  </tr>
-      } @empty {
-        @if (!isLoadingHistory() && !historyError()) {
-          <tr>
-            <td colspan="3">
-              {{ 'ai-chat.history.empty' | transloco }}
-            </td>
-          </tr>
-        }
-      }
-    </tbody>
-  </table>
-</div>
+<ul class="nav nav-pills flex-column gap-1">
+  @for (conversation of conversations(); track conversation.id) {
+    <li class="nav-item">
+      <a class="nav-link text-truncate" [class.disabled]="busy()"
+        [routerLink]="busy() ? null : ['/ai-chat', conversation.id]"
+        routerLinkActive="active" ariaCurrentWhenActive="page"
+        [attr.aria-disabled]="busy()" [attr.tabindex]="busy() ? -1 : 0"
+        [title]="conversation.title || ('sidebar.chats.untitled' | transloco)">
+        <i class="bi bi-chat-left-text me-2" aria-hidden="true"></i>
+        {{ conversation.title || ('sidebar.chats.untitled' | transloco) }}
+      </a>
+    </li>
+  } @empty {
+    @if (!isLoadingHistory() && !historyError()) {
+      <li class="small text-body-secondary px-2">{{ 'sidebar.chats.empty' | transloco }}</li>
+    }
+  }
+</ul>
