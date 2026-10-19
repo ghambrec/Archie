@@ -46,6 +46,12 @@ export class EditUserModal {
     required(schemaPath.displayName, { 
       message: 'users.updateUser.errors.displayNameRequired'
     })
+    required(schemaPath.email, {
+      message: 'users.updateUser.errors.emailRequired'
+    })
+    required(schemaPath.preferredLanguage, {
+      message: 'users.updateUser.errors.languageRequired'
+    })
   })
 
   initialize(user: UserInfo): void {
