@@ -33,17 +33,17 @@
         (click)="chatsExpanded.set(!chatsExpanded())">
         <i class="bi me-2" [class.bi-chevron-down]="chatsExpanded()"
           [class.bi-chevron-right]="!chatsExpanded()" aria-hidden="true"></i>
-        {{ 'sidebar.chats.heading' | transloco }}
+        {{ 'ai-chat.history.heading' | transloco }}
       </button>
       <button type="button" class="btn btn-sm btn-outline-secondary"
         [disabled]="isCreatingChat() || conversationsService.isMutating()"
-        [attr.aria-label]="'sidebar.chats.new' | transloco"
-        [title]="'sidebar.chats.new' | transloco" (click)="createChat()">
+        [attr.aria-label]="'ai-chat.button.new_chat' | transloco"
+        [title]="'ai-chat.button.new_chat' | transloco" (click)="createChat()">
         <i class="bi bi-plus-lg" aria-hidden="true"></i>
       </button>
     </div>
     @if (createChatError()) {
-      <p class="small text-danger" role="alert">{{ 'sidebar.chats.createError' | transloco }}</p>
+      <p class="small text-danger" role="alert">{{ 'ai-chat.error.createConversation' | transloco }}</p>
     }
     <div id="sidebar-chat-list" class="chat-list-scroll" [hidden]="!chatsExpanded()">
       <app-conversation-list

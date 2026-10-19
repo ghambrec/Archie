@@ -137,7 +137,8 @@
 	    "send": "Send",
 	    "Delete_chat": "Delete Chat",
 	    "Delete_all_chats": "Delete All Chats",
-	    "new_chat": "New Chat"
+	    "new_chat": "New Chat",
+	    "retry": "Try again"
 	  },
 	  "error": {
 	    "createConversation": "Could not create the conversation. Please try again.",
@@ -147,15 +148,11 @@
 	    "deleteConversation": "Could not delete the conversation. Please try again."
 	  },
 	  "history": {
-	    "heading": "Chat History",
-	    "loading": "Loading conversations...",
-	    "loadError": "Could not load the conversations. Please try again.",
-	    "title": "Title",
-	    "updatedAt": "Last updated",
-	    "actions": "Actions",
+	    "heading": "Chats",
+	    "loading": "Loading chats...",
+	    "loadError": "Could not load chats. Please try again.",
 	    "untitled": "Untitled chat",
-	    "open": "Open",
-	    "empty": "No conversations yet.",
+	    "empty": "No chats yet.",
 	    "opening": "Opening conversation...",
 	    "openError": "Could not open the conversation. Please try again."
 	  }
