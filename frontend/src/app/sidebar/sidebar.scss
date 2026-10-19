@@ -1,7 +1,41 @@
+:host {
+  display: block;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.sidebar {
+  overflow: hidden;
+}
+
+.sidebar > :not(.chat-section):not(app-tag-tree) {
+  flex-shrink: 0;
+}
+
+.chat-section {
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  min-height: 2.25rem;
+  max-height: 33%;
+}
+
+.chat-section-collapsed {
+  flex: 0 0 auto;
+}
+
+.chat-list-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
 app-tag-tree {
-	min-height: 0;
+  min-height: 0;
+  flex-basis: 0;
 }
 
 .nav-link {
-	color: var(--bs-dark);
+  color: var(--bs-dark);
 }
