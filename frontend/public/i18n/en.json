@@ -122,7 +122,6 @@
 		}
 	},
 	"login": {
-		"title": "Archie - Login",
 		"email": "E-Mail",
 		"password": "Password",
 		"submit": "Log in",
