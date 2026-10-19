@@ -11,8 +11,8 @@
 }
 <ul class="nav nav-pills flex-column gap-1">
   @for (conversation of conversations(); track conversation.id) {
-    <li class="nav-item">
-      <a class="nav-link text-truncate" [class.disabled]="busy()"
+    <li class="nav-item d-flex align-items-center">
+      <a class="nav-link text-truncate flex-grow-1 chat-link" [class.disabled]="busy()"
         [routerLink]="busy() ? null : ['/ai-chat', conversation.id]"
         routerLinkActive="active" ariaCurrentWhenActive="page"
         [attr.aria-disabled]="busy()" [attr.tabindex]="busy() ? -1 : 0"
@@ -20,6 +20,26 @@
         <i class="bi bi-chat-left-text me-2" aria-hidden="true"></i>
         {{ conversation.title || ('ai-chat.history.untitled' | transloco) }}
       </a>
+      <div ngbDropdown container="body" placement="bottom-end" class="flex-shrink-0">
+        <button type="button" class="btn btn-sm chat-menu-toggle" ngbDropdownToggle
+          [id]="'chat-menu-' + conversation.id"
+          [disabled]="busy()"
+          [attr.aria-label]="'ai-chat.menu.label' | transloco: { title: conversation.title || ('ai-chat.history.untitled' | transloco) }">
+          <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+        </button>
+        <div ngbDropdownMenu [attr.aria-labelledby]="'chat-menu-' + conversation.id">
+          <button type="button" ngbDropdownItem [disabled]="true">
+            <i class="bi bi-pencil me-2" aria-hidden="true"></i>{{ 'ai-chat.menu.rename' | transloco }}
+          </button>
+          <button type="button" ngbDropdownItem [disabled]="true">
+            <i class="bi bi-pin-angle me-2" aria-hidden="true"></i>{{ 'ai-chat.menu.pin' | transloco }}
+          </button>
+          <div class="dropdown-divider"></div>
+          <button type="button" ngbDropdownItem [disabled]="true">
+            <i class="bi bi-trash me-2" aria-hidden="true"></i>{{ 'ai-chat.menu.delete' | transloco }}
+          </button>
+        </div>
+      </div>
     </li>
   } @empty {
     @if (!isLoadingHistory() && !historyError()) {

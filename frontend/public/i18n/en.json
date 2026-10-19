@@ -123,6 +123,12 @@
 		}
 	},
 	"ai-chat": {
+	  "menu": {
+	    "label": "Options for {{ title }}",
+	    "rename": "Rename",
+	    "pin": "Pin",
+	    "delete": "Delete"
+	  },
 	  "message": {
 	    "sender": {
 	      "user": "User",
