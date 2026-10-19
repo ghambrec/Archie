@@ -1,12 +1,4 @@
 <section>
-	<h2 class="h5 fw-semibold d-flex align-items-center gap-2 mb-3">
-		{{ "documents.list.heading" | transloco }}
-		<span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">{{ docs.shownPage().total }}</span>
-		@if (docs.list.isLoading()) {
-		<span class="spinner-border spinner-border-sm text-secondary"></span>
-		}
-	</h2>
-
 	@if (docs.list.error()) {
 	<div class="alert alert-danger">{{ "documents.list.errorLoading" | transloco }}</div>
 	} @else {
