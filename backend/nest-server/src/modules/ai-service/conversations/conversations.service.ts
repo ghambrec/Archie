@@ -1,7 +1,9 @@
-import { Inject, Injectable, Post } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { Logger } from 'nestjs-pino';
 import aiServiceConfig from 'src/config/ai-service.config';
+import { ApplicationException } from 'src/common/errors/application.exception';
+import { ErrorCode } from 'src/common/errors/error-code';
 
 @Injectable()
 export class ConversationsService {
@@ -61,6 +63,32 @@ export class ConversationsService {
 			throw new Error('ai-service request failed');
 		return response.json();
 	}
+
+  async renameConversation(userId: string, conversationId: string, title: string) {
+    let response: Response;
+    try {
+      response = await fetch(`${this.baseUrl}/${conversationId}/`, {
+        method: 'PATCH',
+        headers: { ...this.headers(userId), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+      });
+    } catch {
+      this.logger.error('ai-service conversation rename request failed');
+      throw new ApplicationException(ErrorCode.AiServiceUnavailable);
+    }
+
+    if (response.status === 404) {
+      throw new NotFoundException('Conversation not found');
+    }
+    if (response.status === 400 || response.status === 422) {
+      throw new ApplicationException(ErrorCode.ValidationFailed);
+    }
+    if (!response.ok) {
+      this.logger.error({ status: response.status }, 'ai-service conversation rename failed');
+      throw new ApplicationException(ErrorCode.AiServiceUnavailable);
+    }
+    return response.json();
+  }
 
 	async deleteConversation(userId: string, conversationId: string) {
 		const url = `${this.baseUrl}/${conversationId}`;

@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { ConversationsService } from './conversations.service';
 import type { Request } from 'express';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/modules/auth/guards/session-auth.guard';
 import { AskConversationDto } from './dto/ask-conversation.dto';
+import { RenameConversationDto } from './dto/rename-conversation.dto';
 
 @ApiTags('conversations')
 @UseGuards(SessionAuthGuard)
@@ -47,6 +48,16 @@ export class ConversationsController {
 	getMessages(@Req() req: Request, @Param('convId') id: string) {
 		return this.conversations.getMessages(req.userId!, id);
 	}
+
+  @ApiOperation({ summary: 'rename a conversation for the current user' })
+  @Patch(':convId')
+  renameConversation(
+    @Req() req: Request,
+    @Param('convId', new ParseUUIDPipe()) id: string,
+    @Body() dto: RenameConversationDto,
+  ) {
+    return this.conversations.renameConversation(req.userId!, id, dto.title);
+  }
 
 	@ApiOperation({
 	summary: 'delete a conversation',
