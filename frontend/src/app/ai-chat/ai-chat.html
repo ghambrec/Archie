@@ -116,7 +116,7 @@
       {{ 'ai-chat.button.Delete_chat' | transloco }}
     </button>
 
-	  <button type="button" class="btn btn-secondary" disabled>
+	  <button type="button" class="btn btn-secondary" [disabled]="!canDeleteAll()" (click)="deleteAllChats()">
       {{'ai-chat.button.Delete_all_chats' | transloco}}
     </button>
   </div>

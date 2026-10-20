@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { ConversationsService } from './conversations.service';
 import { DeleteChatModal } from './delete-chat-modal/delete-chat-modal';
+import { DeleteAllChatsModal } from './delete-all-chats-modal/delete-all-chats-modal';
 
 @Component({
   selector: 'app-ai-chat',
@@ -38,6 +39,10 @@ export class AIChat {
   readonly isOpeningConversation = this.messageResource.isLoading;
   readonly openConversationError = computed(() =>
     this.messageResource.error() ? 'ai-chat.history.openError' : null
+  );
+
+  readonly canDeleteAll = computed(() =>
+    !this.busy() && (this.conversationService.conversations().length > 0 || this.activeConversationId() !== null)
   );
 
   constructor() {
@@ -100,6 +105,27 @@ export class AIChat {
     } finally {
       this.isCreatingConversation.set(false);
     }
+  }
+
+  deleteAllChats(): void {
+    if (!this.canDeleteAll()) return;
+    const modal = this.modalService.open(DeleteAllChatsModal, {
+      injector: this.injector,
+      centered: true,
+      ariaLabelledBy: 'delete-all-chats-title',
+      ariaDescribedBy: 'delete-all-chats-description',
+      beforeDismiss: () => !modal.componentInstance.isDeleting(),
+    });
+    this.isDeleting.set(true);
+    modal.hidden.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.isDeleting.set(false);
+    });
+    modal.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.draft.set('');
+      this.sendError.set(null);
+      this.createConversationError.set(null);
+      void this.router.navigate(['/ai-chat']);
+    });
   }
 
   deleteChat(): void {

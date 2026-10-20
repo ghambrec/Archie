@@ -58,6 +58,12 @@ export class ConversationsService {
     ));
   }
 
+  deleteAllConversations() {
+    return this.mutate(this.http.delete<void>(
+      this.baseUrl, { withCredentials: true }
+    ));
+  }
+
   messageResource(conversationId: Signal<string | null>) {
     return httpResource<ListResponse<ChatMessage>>(() => {
       const id = conversationId();
