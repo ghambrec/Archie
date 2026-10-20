@@ -28,6 +28,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { PatchAvatarResponseDto } from './dto/patch-avatar-response.dto';
 import { SelfOrAdminGuard } from '../permissions/guards/self-or-admin.guard';
 import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -45,16 +46,29 @@ export class UsersController {
     return {id: userEntity.id};
   }
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, SelfOrAdminGuard)
   @ApiOperation({
-    summary: 'TODO: Update user',
-    description: 'For Admin: Update a specific user.<br>For User: User can only update his own user'
+    summary: 'Update user',
+    description: 'User can only update his own user'
   })
   @Patch('me')
   async updateCurrentUser (
     @Req() req: Request, 
     @Body() dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
     return this.usersService.updateProfile(req.userId!, dto);
+  }
+
+
+  @UseGuards(SessionAuthGuard, SelfOrAdminGuard)
+  @ApiOperation({
+    summary: 'Update different users',
+    description: 'Admin can updae other users'
+  })
+  @Patch(':userId')
+  async updatetUser (
+    @Param('userId') userId: string,
+    @Body() dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
+    return this.usersService.updateProfile(userId, dto);
   }
 
   @UseGuards(SessionAuthGuard)
@@ -114,5 +128,17 @@ export class UsersController {
   @Get('me')
   async getCurrentUser( @Req() req: Request): Promise<UserSummaryDto> {
     return this.usersService.findProfileById(req.userId!);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('me/password')
+  async changeOwnPassword( @Req() req: Request, @Body() dto: ChangePasswordDto): Promise<void> {
+    await this.usersService.changeOwnPassword(req.userId!, dto);
+  }
+
+  @UseGuards(SessionAuthGuard, AdminRequiredGuard)
+  @Patch(':userId/password')
+  async resetPassword(@Param('userId') userId: string, @Body() dto: ChangePasswordDto): Promise<void> {
+    await this.usersService.resetPassword(userId, dto);
   }
 }

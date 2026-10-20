@@ -1,13 +1,21 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <title>Archie</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+	<meta charset="utf-8">
+	<title>Archie</title>
+	<base href="/">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- fallback fuer alte browser -->
+	<link rel="icon" href="favicon.ico" sizes="any">
+
+	<!-- hell/dunkel je nach system -->
+	<link rel="icon" type="image/svg+xml" href="favicon-light.svg" media="(prefers-color-scheme: dark)">
+	<link rel="icon" type="image/svg+xml" href="favicon.svg" media="(prefers-color-scheme: light)">
 </head>
+
 <body>
-  <app-root></app-root>
+	<app-root></app-root>
 </body>
+
 </html>

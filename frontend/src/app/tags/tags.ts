@@ -5,11 +5,14 @@ import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 
-export interface TagResponse {
+export interface Tag {
 	id: string;
 	name: string;
 	label: string;
 	parentId: string | null;
+}
+
+export interface TagResponse extends Tag {
 	documentCount: number;
 }
 
@@ -37,9 +40,33 @@ function buildTagTree(tags: TagResponse[]): TagNode[] {
 	return roots;
 }
 
+export function filterTagTree(nodes: TagNode[], matches: (node: TagNode) => boolean): TagNode[] {
+	const result: TagNode[] = [];
+	for (const node of nodes) {
+		// gefunden -> knoten mit allen kindern behalten
+		if (matches(node)) {
+			result.push(node);
+			continue;
+		}
+
+		// nicht gefunden -> nur behalten, wenn ein kind davon passt
+		const matchingChildren = filterTagTree(node.children, matches);
+		if (matchingChildren.length > 0) {
+			result.push({ ...node, children: matchingChildren });
+		}
+	}
+	return result;
+}
+
 @Service()
 export class Tags {
 	private readonly baseUrl = `${environment.apiUrl}/tags`;
+
+	// alle tags
+	readonly tags = httpResource<Tag[]>(
+		() => ({ url: this.baseUrl, withCredentials: true }),
+		{ defaultValue: [] }
+	);
 
 	// falche tag liste aller docs
 	readonly tagDocsList = httpResource<TagResponse[]>(
@@ -77,5 +104,22 @@ export class Tags {
 			current = tagsById.get(current.parentId);
 		}
 		return parentIds;
+	});
+
+	// fuer brotkruemelnavigation: tag kette von root bis aktueller tag
+	readonly selectedTagPath = computed(() => {
+		const path: TagResponse[] = [];
+		const selectedId = this.selectedTagId();
+		if (!selectedId) {
+			return path;
+		}
+
+		const tagsById = this.tagsById();
+		let current = tagsById.get(selectedId);
+		while (current && !path.includes(current)) {
+			path.unshift(current);
+			current = current.parentId ? tagsById.get(current.parentId) : undefined;
+		}
+		return path;
 	});
 }

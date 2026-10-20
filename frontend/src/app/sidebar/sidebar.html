@@ -1,19 +1,11 @@
 <div class="d-flex flex-column flex-shrink-0 p-3 bg-light h-100 overflow-x-hidden" style="width: 280px;">
-	<a routerLink="/home" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
-		<span class="fs-4">{{ "programName" | transloco }}</span>
+	<a routerLink="/documents" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none">
+		<img src="images/logo.png" [alt]="'programName' | transloco" height="50">
 	</a>
 	<hr>
 	<ul class="nav nav-pills flex-column">
 
 		<app-doc-upload></app-doc-upload>
-
-		<!-- home -->
-		<li>
-			<a routerLink="/home" class="nav-link" routerLinkActive="active">
-				<i class="bi bi-house-door-fill me-2"></i>
-				{{ "sidebar.home" | transloco }}
-			</a>
-		</li>
 
 		<!-- documents -->
 		<li>
@@ -34,7 +26,7 @@
 		}
 	</ul>
 	<hr>
-	<app-tag-tree class="flex-grow-1 overflow-y-auto"></app-tag-tree>
+	<app-tag-tree class="flex-grow-1 overflow-y-auto px-1"></app-tag-tree>
 	<hr>
 	<div class="dropdown" ngbDropdown>
 		<a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2" ngbDropdownToggle (click)="$event.preventDefault()">

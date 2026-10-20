@@ -2,12 +2,26 @@
 	{{ "tag.header" | transloco }}
 </h6>
 
+<input
+	type="search"
+	class="form-control form-control-sm mb-2"
+	[placeholder]="'tag.searchPlaceholder' | transloco"
+	[value]="searchString()"
+	(input)="searchString.set($event.target.value)"
+/>
+
 <ul class="nav flex-column">
-	@for (tag of tagsService.tagTree(); track tag.id) {
+	@for (tag of filteredTagTree(); track tag.id) {
 		<li class="nav-item">
-			<app-tag-tree-item [tagNode]="tag"></app-tag-tree-item>
+			<app-tag-tree-item [tagNode]="tag" [searchActive]="isSearching()"></app-tag-tree-item>
 		</li>
 	} @empty {
-		<li class="text-body-secondary small">{{ "tag.noData" | transloco }}</li>
+		<li class="text-body-secondary small">
+			@if (searchString()) {
+				{{ "tag.noSearchResults" | transloco }}
+			} @else {
+				{{ "tag.noData" | transloco }}
+			}
+		</li>
 	}
 </ul>

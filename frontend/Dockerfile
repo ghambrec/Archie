@@ -2,7 +2,9 @@ FROM node:24-alpine
 
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable
+
+ENV CI=true
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
@@ -23,7 +25,7 @@ CMD ["sh", "-c", "pnpm start --host 0.0.0.0"]
 
 	# FROM node:24-alpine AS build
 
-	# RUN corepack enable && corepack prepare pnpm@latest --activate
+	# RUN corepack enable
 
 	# ENV CI=true
 
