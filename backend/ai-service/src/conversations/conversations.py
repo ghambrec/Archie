@@ -78,7 +78,8 @@ async def get_messages(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID):
     source_rows = await pool.fetch(
         """
         SELECT ams.message_id, ch.id AS chunk_id,
-               d.id AS document_id, d.filename AS document_name
+               d.id AS document_id, d.filename AS document_name,
+               ams.similiary_score AS similarity_score
         FROM ai_message_sources AS ams
         JOIN ai_messages AS am ON am.id = ams.message_id
         JOIN ai_conversations AS ac ON ac.id = am.conv_id
@@ -107,6 +108,7 @@ async def get_messages(pool: asyncpg.Pool, user_id: UUID, conv_id: UUID):
                 chunk_Id=source["chunk_id"],
                 document_id=source["document_id"],
                 document_name=source["document_name"],
+                similarity_score=source["similarity_score"],
             ).model_dump()
         )
     return [
@@ -167,15 +169,16 @@ async def save_conversation(pool: asyncpg.Pool, question: str, answer: AnswerRes
         raise
     
     query=  """
-            INSERT INTO ai_message_sources (chunk_Id, message_Id)
-            Values 
-            ($1, $2)
+            INSERT INTO ai_message_sources (chunk_id, message_id, similiary_score)
+            VALUES ($1, $2, $3)
      """
     
     for row in answer.sources:
         if(row.chunk_Id):
             try:
-                StatusSaveSources  = await pool.execute(query, row.chunk_Id, message_id)
+                StatusSaveSources = await pool.execute(
+                    query, row.chunk_Id, message_id, row.similarity_score
+                )
       
     
                 logger.debug(f"ai_sources {StatusSaveSources} saved")

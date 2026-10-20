@@ -139,6 +139,7 @@ def enrich_answer(answer: GeneratedAnswer, context_chunks: list[asyncpg.Record])
             chunk_Id=chunk["id"],
             document_id=chunk["ai_document_id"],
             document_name=chunk["document_name"],
+            similarity_score=1.0 - float(chunk["distance"]),
         ))
     return AnswerResponse(
         answer=answer.answer,

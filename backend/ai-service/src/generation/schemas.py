@@ -18,6 +18,7 @@ class GeneratedAnswer(BaseModel):
 class SourceCitation(Citations):
     document_id: UUID
     document_name: str
+    similarity_score: float | None = None
 
 
 class AnswerResponse(BaseModel):
