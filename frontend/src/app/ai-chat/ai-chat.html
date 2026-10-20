@@ -47,7 +47,8 @@
         <ul>
         @for (source of message.sourceDocuments; track source.document_id) {
           <li>
-            {{ source.document_name }} ({{ source.chunkCount }})
+            <a [routerLink]="['/documents']" [queryParams]="{ doc: source.document_id }">{{ source.document_name }}</a>
+            ({{ source.chunkCount }})
             @if (source.medianSimilarity !== null) {
               ({{ source.medianSimilarity | percent: '1.0-0' }})
             }
