@@ -19,7 +19,8 @@
 
   </header>
 
-  <div class="chat-messages" role="log" aria-label="Chat messages">
+  <div #messageViewport class="chat-messages" role="log" aria-label="Chat messages"
+    tabindex="0" (scroll)="onMessagesScroll()">
     @for (message of messages(); track message.id) {
     <article
       class="message"
