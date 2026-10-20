@@ -7,6 +7,7 @@ from typing import Annotated
 
 from src.api.auth import check_api_key, get_user_id
 from src.conversations import conversations
+from src.generation.schemas import AnswerResponse
 
 from pydantic_ai import UsageLimitExceeded
 
@@ -41,7 +42,7 @@ async def get_conversations(request: Request, user_id: UUID = Depends(get_user_i
     return {"count": len(rows), "data": rows}
 
 
-@router.post("/conversations/{conv_id}/ask", summary="ask a question to a conversation from a user")
+@router.post("/conversations/{conv_id}/ask", response_model=AnswerResponse, summary="ask a question to a conversation from a user")
 async def ask(request: Request, body: AskRequest, conv_id: UUID, user_id: UUID = Depends(get_user_id)):
     pool = request.app.state.db_pool
     try:
