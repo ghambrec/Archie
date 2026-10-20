@@ -1,3 +1,4 @@
+import { PercentPipe } from '@angular/common';
 import { afterRenderEffect, Component, computed, DestroyRef, effect, ElementRef, Injector, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -11,7 +12,7 @@ import { DeleteAllChatsModal } from './delete-all-chats-modal/delete-all-chats-m
 
 @Component({
   selector: 'app-ai-chat',
-  imports: [TranslocoPipe, NgbTooltip],
+  imports: [TranslocoPipe, NgbTooltip, PercentPipe],
   templateUrl: './ai-chat.html',
   styleUrl: './ai-chat.scss',
 })

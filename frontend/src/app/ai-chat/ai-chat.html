@@ -46,7 +46,12 @@
       <strong>Quellen</strong>
         <ul>
         @for (source of message.sourceDocuments; track source.document_id) {
-          <li>{{ source.document_name }} ({{ source.chunkCount }})</li>
+          <li>
+            {{ source.document_name }} ({{ source.chunkCount }})
+            @if (source.medianSimilarity !== null) {
+              ({{ source.medianSimilarity | percent: '1.0-0' }})
+            }
+          </li>
         } @empty {
           <li>{{'ai-chat.error.noSources' | transloco }}</li>
         }

@@ -37,6 +37,7 @@ export interface Citation {
   chunk_Id: string;
   document_id: string;
   document_name: string;
+  similarity_score?: number | null;
 }
 
 export interface AskConversationResponse {
