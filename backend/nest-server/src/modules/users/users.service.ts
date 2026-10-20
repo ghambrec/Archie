@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException, OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, ForbiddenException, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Like, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -15,7 +15,7 @@ import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { GetUsersResponseDto } from './dto/get-users-response.dto';
 import { Logger } from 'nestjs-pino';
 import { UsersFileService } from './users-file.service';
-import { PermissionsService } from '../permissions/permissions.service';
+import { ADMIN_PERMISSION_KEY, PermissionsService } from '../permissions/permissions.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { Permission } from '../permissions/entities/permission.entity';
 import { UserPermission } from '../user_permission/entities/user_permission.entity';
@@ -34,7 +34,6 @@ export class UsersService implements OnApplicationBootstrap {
 	private readonly permissionsService: PermissionsService
   ) {}
 
-  // check on app start if theres a user without avatar, if yes create it
   async onApplicationBootstrap(): Promise<void> {
 	const usersWithoutAvatar: Array<{ id: string; display_name: string }> = 
 		await this.usersRepository.query(`SELECT id, display_name FROM users WHERE avatar_object_key IS NULL AND deleted_at IS NULL`);
@@ -92,7 +91,6 @@ export class UsersService implements OnApplicationBootstrap {
         groupId,
       });
 
-	  // user get all documents. permissions for his personal group
 	  const documentPermissions = await manager.find(Permission, {
 		where: { permKey: Like('documents.%') }
 	  });
@@ -121,6 +119,52 @@ export class UsersService implements OnApplicationBootstrap {
 
 	return user;
   };
+
+  async softDeleteUser(actorId: string, userId: string): Promise<void> {
+    if (actorId === userId) {
+      throw new ForbiddenException('You cannot delete your own account');
+    }
+
+    try {
+      await this.dataSource.transaction('SERIALIZABLE', async (manager) => {
+        const user = await manager.findOneBy(User, { id: userId });
+        if (!user) throw new ApplicationException(ErrorCode.UserNotFound);
+
+        // Re-check admin status inside the transaction to handle concurrent deletions.
+        const admins: Array<{ id: string }> = await manager.query(
+          `SELECT u.id FROM users AS u
+           WHERE u.deleted_at IS NULL AND u.is_active = true
+             AND EXISTS (
+               SELECT 1 FROM user_permission AS up
+               JOIN permissions AS p ON p.id = up.permission_id
+               WHERE up.user_id = u.id AND p.perm_key = $1
+             )`,
+          [ADMIN_PERMISSION_KEY],
+        );
+        if (admins.some(admin => admin.id === userId) && admins.length <= 1) {
+          throw new ConflictException('Cannot delete the last active admin');
+        }
+        if (!admins.some(admin => admin.id === actorId)) {
+          throw new ForbiddenException('An active admin account is required');
+        }
+
+        await manager.update(User, userId, { isActive: false });
+        await manager.softDelete(User, userId);
+      });
+    } catch (error) {
+      if ((error as { driverError?: { code?: string } }).driverError?.code === '40001') {
+        throw new ConflictException('User state changed during deletion. Please try again.');
+      }
+      throw error;
+    }
+
+    try {
+      await this.permissionsService.invalidateUserPermissions(userId);
+    } catch (error) {
+      this.logger.warn({ userId, error }, 'Could not invalidate deleted user permissions');
+    }
+    this.logger.log({ actorId, userId }, 'User soft deleted');
+  }
 
   async updateProfile(userID: string, dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
     this.logger.log('Execute updateProfile', userID);
@@ -172,8 +216,6 @@ export class UsersService implements OnApplicationBootstrap {
       id: updatedUser.id}
 
   };
-
-  //async updatePasswd(userID: stringify, dto )
 
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOneBy({email: email});

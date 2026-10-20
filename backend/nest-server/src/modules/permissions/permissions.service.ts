@@ -79,6 +79,8 @@ export class PermissionsService {
 		select exists (
 			select 1
 			from user_permission as up
+			inner join users as u
+				on u.id = up.user_id and u.deleted_at is null and u.is_active = true
 			inner join permissions as p
 				on p.id = up.permission_id
 			where
@@ -122,6 +124,8 @@ export class PermissionsService {
 		select exists (
 			select 1
 			from user_permission as up
+			inner join users as u
+				on u.id = up.user_id and u.deleted_at is null and u.is_active = true
 			inner join permissions as p
 				on p.id = up.permission_id
 			where

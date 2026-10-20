@@ -3,6 +3,10 @@ import {
   Res,
   Body,Get,
   Controller,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -44,6 +48,17 @@ export class UsersController {
   async create(@Body() dto: CreateUserDto): Promise<CreateUserResponseDto> {
     const userEntity = await this.usersService.create(dto);
     return {id: userEntity.id};
+  }
+
+  @UseGuards(SessionAuthGuard, AdminRequiredGuard)
+  @ApiOperation({ summary: 'Soft delete a user' })
+  @Delete(':userId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteUser(
+    @Req() req: Request,
+    @Param('userId', new ParseUUIDPipe()) userId: string,
+  ): Promise<void> {
+    await this.usersService.softDeleteUser(req.userId!, userId);
   }
 
   @UseGuards(SessionAuthGuard, SelfOrAdminGuard)
