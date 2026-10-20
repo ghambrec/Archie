@@ -1,0 +1,16 @@
+<div class="small">
+  <strong>{{ 'ai-chat.message.sources' | transloco }}</strong>
+  <ul>
+    @for (source of documents(); track source.document_id) {
+      <li>
+        <a [routerLink]="['/documents']" [queryParams]="{ doc: source.document_id }">{{ source.document_name }}</a>
+        ({{ source.chunkCount }})
+        @if (source.medianSimilarity !== null) {
+          ({{ source.medianSimilarity | percent: '1.0-0' }})
+        }
+      </li>
+    } @empty {
+      <li>{{ 'ai-chat.error.noSources' | transloco }}</li>
+    }
+  </ul>
+</div>

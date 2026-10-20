@@ -1,0 +1,23 @@
+<footer class="chat-composer">
+  <label for="chat-question" class="visually-hidden">{{ 'ai-chat.hint.sending' | transloco }}</label>
+  <textarea #questionInput id="chat-question" class="form-control" rows="2" maxlength="1000"
+    [placeholder]="'ai-chat.hint.ask' | transloco" [disabled]="busy()"
+    [value]="draft()" (input)="draft.set(questionInput.value)"></textarea>
+  <div class="d-flex flex-wrap align-items-start gap-3 pt-3">
+    <button type="button" class="btn btn-primary" [disabled]="!draft().trim() || busy()"
+      (click)="sendRequested.emit()">
+      {{ 'ai-chat.button.send' | transloco }}
+    </button>
+    <button type="button" class="btn btn-secondary" [disabled]="!canDeleteChat() || busy()"
+      (click)="deleteRequested.emit()">
+      {{ 'ai-chat.button.Delete_chat' | transloco }}
+    </button>
+    <button type="button" class="btn btn-secondary" [disabled]="!canDeleteAll() || busy()"
+      (click)="deleteAllRequested.emit()">
+      {{ 'ai-chat.button.Delete_all_chats' | transloco }}
+    </button>
+  </div>
+  @if (sendError(); as error) {
+    <div class="alert alert-danger mt-3" role="alert">{{ error | transloco }}</div>
+  }
+</footer>

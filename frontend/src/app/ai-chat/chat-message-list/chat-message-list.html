@@ -1,0 +1,17 @@
+<div #messageViewport class="chat-messages" role="log"
+  [attr.aria-label]="'ai-chat.message.label' | transloco" tabindex="0" (scroll)="onMessagesScroll()">
+  @for (message of messages(); track message.id) {
+    <app-chat-message [message]="message" />
+  }
+</div>
+<div class="chat-status" role="status">
+  @if (isSending()) {
+    <p>{{ 'ai-chat.status.thinking' | transloco }}</p>
+  }
+  @if (isLoading()) {
+    <p>{{ 'ai-chat.history.opening' | transloco }}</p>
+  }
+</div>
+@if (errorKey(); as error) {
+  <div class="alert alert-danger" role="alert">{{ error | transloco }}</div>
+}
