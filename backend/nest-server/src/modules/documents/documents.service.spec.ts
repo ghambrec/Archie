@@ -216,7 +216,7 @@ describe('DocumentsService', () => {
         filename: 'hello.txt',
         sizeBytes: 11,
         uploadedBy: { id: userId, name: 'John Doe' },
-        aiStatus: DocumentAiStatus.PENDING,
+        aiStatus: DocumentAiStatus.NOT_STARTED,
       });
       expect(permissionsService.getGroupIdsWithPermission).toHaveBeenCalledWith(userId, 'documents.read');
     });

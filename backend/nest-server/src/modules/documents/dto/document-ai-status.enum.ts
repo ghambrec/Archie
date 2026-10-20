@@ -4,4 +4,5 @@ export enum DocumentAiStatus {
   FINISHED = 'FINISHED',
   FAILED = 'FAILED',
   SKIPPED = 'SKIPPED',
+  NOT_STARTED = 'NOT_STARTED',
 }
