@@ -123,6 +123,12 @@
 		}
 	},
 	"ai-chat": {
+	  "deleteAllModal": {
+	    "heading": "Delete all chats",
+	    "question": "Delete all your chats?",
+	    "warning": "All your chats and their messages will be permanently deleted. This cannot be undone.",
+	    "error": "Could not delete all chats. Please try again."
+	  },
 	  "renameModal": {
 	    "heading": "Rename chat",
 	    "title": "Chat title",
