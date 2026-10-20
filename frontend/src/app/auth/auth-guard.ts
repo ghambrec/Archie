@@ -22,7 +22,7 @@ export const guestGuard: CanActivateFn = async () => {
 	if (!usersService.currentUser() && !(await auth.checkSession())) {
 		return true;
 	}
-	return router.parseUrl('/home');
+	return router.parseUrl('/');
 }
 
 export const adminGuard: CanActivateFn = async () => {
@@ -36,7 +36,7 @@ export const adminGuard: CanActivateFn = async () => {
 			return true;
 		}
 		// User is logged in but not admin => regular UI 
-		return router.parseUrl('/home');
+		return router.parseUrl('/');
 	}
 	// not logged in
 	return router.parseUrl('/login');
