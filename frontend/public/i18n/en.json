@@ -123,6 +123,10 @@
 		}
 	},
 	"ai-chat": {
+	  "heading": "Archie Chat",
+	  "status": {
+	    "thinking": "Thinking…"
+	  },
 	  "deleteAllModal": {
 	    "heading": "Delete all chats",
 	    "question": "Delete all your chats?",
@@ -153,6 +157,9 @@
 	    "delete": "Delete"
 	  },
 	  "message": {
+	    "label": "Chat messages",
+	    "sources": "Sources",
+	    "confidenceScore": "Confidence score",
 	    "sender": {
 	      "user": "User",
 	      "llm": "AI"

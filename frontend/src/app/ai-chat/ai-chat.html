@@ -1,6 +1,6 @@
 <section class="chat">
   <header class="chat-header">
-    <h1>Archie Chat</h1>
+    <h1>{{ 'ai-chat.heading' | transloco }}</h1>
     <!--<button
       type="button"
       class="btn btn-outline-secondary"
@@ -19,7 +19,7 @@
 
   </header>
 
-  <div #messageViewport class="chat-messages" role="log" aria-label="Chat messages"
+  <div #messageViewport class="chat-messages" role="log" [attr.aria-label]="'ai-chat.message.label' | transloco"
     tabindex="0" (scroll)="onMessagesScroll()">
     @for (message of messages(); track message.id) {
     <article
@@ -38,12 +38,12 @@
   @if (message.sender === 'llm') {
   @if (message.confidence_score !== undefined) {
     <p class="small text-muted">
-      Confidence Score: {{ message.confidence_score }}
+      {{ 'ai-chat.message.confidenceScore' | transloco }}: {{ message.confidence_score }}
     </p>
   }
   @if (message.sources) {
     <div class="small">
-      <strong>Quellen</strong>
+      <strong>{{ 'ai-chat.message.sources' | transloco }}</strong>
         <ul>
         @for (source of message.sourceDocuments; track source.document_id) {
           <li>
@@ -64,7 +64,7 @@
 
   <div class="chat-status" role="status">
      @if (isSending()) {
-    <p>Thinking…</p>
+    <p>{{ 'ai-chat.status.thinking' | transloco }}</p>
     }
   </div>
 
@@ -80,7 +80,7 @@
       id="chat-question"
       class="form-control"
       rows="2"
-      placeholder="Ask about your documents..."
+      [placeholder]="'ai-chat.hint.ask' | transloco"
       maxlength="1000"
       [disabled]="
               isSending() ||
