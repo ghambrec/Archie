@@ -25,11 +25,11 @@ export const routes: Routes = [
 				redirectTo: 'documents',
 				pathMatch: 'full',
 			},
-			 {
-			 	path: 'home',
-			 	component: Home,
-			 	title: 'Home',
-			 },
+			// {
+			// 	path: 'home',
+			// 	component: Home,
+			// 	title: 'Home',
+			// },
 			{
 				path: 'documents',
 				component: DocPage,
