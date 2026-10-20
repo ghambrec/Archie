@@ -1,58 +1,45 @@
-<h1> {{ "users.userList.heading" | transloco }} </h1>
-<input type="text" class="form-control mb-1" [placeholder]="'users.userList.searchPlaceholder' | transloco" (input)="searchString.set($event.target.value)"/>
-<table class="table align-middle">
-	<thead>
-		<tr>
-			<th scope="col" class="pe-0"></th>
-			<th scope="col" class="ps-0">{{ "users.userList.email" | transloco }}</th>
-			<th scope="col">{{ "users.userList.displayName" | transloco }}</th>
-			<th scope="col">{{ "users.userList.lastLogin" | transloco }}</th>
-			<th scope="col">{{ "users.userList.active" | transloco }}</th>
-			<th style="width: 1%"> <button type="button" class="btn btn-primary" (click)="openCreateUserModal()"><i class="bi bi-plus-circle-fill"></i></button> </th>
-		</tr>
-	</thead>
-	<tbody class="table-group-divider">
-		@for (user of filteredUserList(); track user.id) {
-			<tr>
-				<td class="pe-0"> 
-					<img [src]="usersService.getAvatarUrl(user.id)" alt="Avatar" width="32" height="32" class="rounded-circle"> 
-				</td>
-				<td class="ps-0">{{ user.email }}</td>
-				<td>{{ user.displayName }}</td>
-				<td>{{ user.lastLoginAt?? "-" }}</td>
-				<td> @if (user.isActive) {<i class="bi bi-check-square"></i>} @else {<i class="bi bi-square"></i>} </td>
-				<td>
-					<div class="d-flex">
-						<button
-							type="button"
-							class="btn btn-info me-2 d-flex align-items-center justify-content-center"
-							(click)="openUserInfoModal(user)"
-							title="User Information"
-							aria-label="User Information">
-							<i class="bi bi-info-circle-fill"></i>
-						</button>
-
-						<button
-							type="button"
-							class="btn btn-secondary me-2 d-flex align-items-center justify-content-center"
-							(click)="openEditUserModal(user)"
-							title="Edit user"
-							aria-label="Edit user">
-							<i class="bi bi-pencil-fill"></i>
-						</button>
-
-						<button
-							type="button"
-							class="btn btn-danger d-flex align-items-center justify-content-center"
-							(click)="openDeleteUserModal(user)"
-							[title]="'users.userList.delete' | transloco"
-							[attr.aria-label]="'users.userList.delete' | transloco">
-							<i class="bi bi-trash-fill" aria-hidden="true"></i>
-						</button>
-					</div>
-					
-				</td>
-			</tr>
-		}
-	</tbody>
-</table>
+<h1>{{ 'users.userList.heading' | transloco }}</h1>
+<ul class="nav nav-tabs mb-3">
+  <li class="nav-item">
+    <button type="button" class="nav-link" [class.active]="!showDeleted()"
+      [attr.aria-pressed]="!showDeleted()" (click)="showDeleted.set(false)">
+      {{ 'users.userList.tabs.users' | transloco }}
+    </button>
+  </li>
+  <li class="nav-item">
+    <button type="button" class="nav-link" [class.active]="showDeleted()"
+      [attr.aria-pressed]="showDeleted()" (click)="showDeleted.set(true)">
+      {{ 'users.userList.tabs.deleted' | transloco }}
+    </button>
+  </li>
+</ul>
+<input type="search" class="form-control mb-1"
+  [attr.aria-label]="'users.userList.searchPlaceholder' | transloco"
+  [placeholder]="'users.userList.searchPlaceholder' | transloco"
+  [value]="searchString()" (input)="searchString.set($event.target.value)" />
+@if (isLoadingList()) {
+  <p role="status">{{ 'users.userList.loading' | transloco }}</p>
+}
+@if (listError()) {
+  <div class="alert alert-danger" role="alert">
+    <p>{{ (showDeleted() ? 'users.userList.deletedLoadError' : 'users.userList.loadError') | transloco }}</p>
+    <button type="button" class="btn btn-sm btn-outline-danger" (click)="reloadDisplayedList()">
+      {{ 'users.userList.retry' | transloco }}
+    </button>
+  </div>
+}
+@if (showDeleted()) {
+  <app-deleted-user-list
+    [users]="filteredUserList()"
+    [showEmpty]="!isLoadingList() && !listError()"
+    (restoreRequested)="openRestoreUserModal($event)" />
+} @else {
+  <app-user-table
+    [users]="filteredUserList()"
+    [avatarUrl]="userAvatarUrl"
+    [showEmpty]="!isLoadingList() && !listError()"
+    (createRequested)="openCreateUserModal()"
+    (infoRequested)="openUserInfoModal($event)"
+    (editRequested)="openEditUserModal($event)"
+    (deleteRequested)="openDeleteUserModal($event)" />
+}

@@ -8,11 +8,14 @@ import { UserInfoModal } from '../user-info-modal/user-info-modal';
 import { Groups } from '../../groups/groups';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DeleteUserModal } from '../delete-user-modal/delete-user-modal';
+import { RestoreUserModal } from '../restore-user-modal/restore-user-modal';
+import { UserTable } from '../user-table/user-table';
+import { DeletedUserList } from '../deleted-user-list/deleted-user-list';
 
 
 @Component({
 	selector: 'app-user-list',
-	imports: [TranslocoPipe],
+	imports: [TranslocoPipe, UserTable, DeletedUserList],
 	templateUrl: './user-list.html',
 	styleUrl: './user-list.scss',
 })
@@ -22,14 +25,25 @@ export class UserList {
 	private readonly groupsService = inject(Groups);
   private readonly destroyRef = inject(DestroyRef);
 
+  protected readonly userAvatarUrl = (userId: string) => this.usersService.getAvatarUrl(userId);
+
 	protected readonly searchString = signal("");
+  protected readonly showDeleted = signal(false);
+  protected readonly deletedUsers = this.usersService.deletedUsersResource(this.showDeleted);
+  private readonly displayedResource = computed(() =>
+    this.showDeleted() ? this.deletedUsers : this.usersService.users
+  );
+  protected readonly isLoadingList = computed(() => this.displayedResource().isLoading());
+  protected readonly listError = computed(() => this.displayedResource().error());
+
 
 	protected readonly filteredUserList = computed(() => {
-		if (!this.usersService.users.hasValue()) {
+    const resource = this.displayedResource();
+		if (!resource.hasValue()) {
 			return [];
 		}
 		const searchStringLowercased = this.searchString().toLowerCase();
-		return this.usersService.users.value().filter((user) => 
+		return resource.value().filter((user) =>
 			user.displayName.toLowerCase().includes(searchStringLowercased) ||
 			user.email.toLowerCase().includes(searchStringLowercased)
 		)
@@ -66,8 +80,31 @@ export class UserList {
     });
     modal.componentInstance.selectedUser = user;
     modal.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.usersService.users.reload();
-      this.groupsService.groups.reload();
+      this.reloadUserLists();
+    });
+  }
+
+  protected reloadDisplayedList(): void {
+    this.displayedResource().reload();
+  }
+
+  private reloadUserLists(): void {
+    this.usersService.users.reload();
+    this.deletedUsers.reload();
+    this.groupsService.groups.reload();
+  }
+
+  openRestoreUserModal(user: UserInfo): void {
+    if (!this.showDeleted()) return;
+    const modal = this.modalService.open(RestoreUserModal, {
+      centered: true,
+      ariaLabelledBy: 'restore-user-title',
+      ariaDescribedBy: 'restore-user-description',
+      beforeDismiss: () => !modal.componentInstance.isRestoring(),
+    });
+    modal.componentInstance.selectedUser = user;
+    modal.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.reloadUserLists();
     });
   }
 

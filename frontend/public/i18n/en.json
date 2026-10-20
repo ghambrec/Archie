@@ -212,6 +212,20 @@
 		}
 	},
 	"users": {
+		"restoreUser": {
+			"heading": "Restore user",
+			"question": "Restore this user account?",
+			"description": "The account will be reactivated with its existing group memberships and permissions. The user will need to sign in again.",
+			"cancel": "Cancel",
+			"confirm": "Restore user",
+			"restoring": "Restoring...",
+			"errors": {
+				"general": "Could not restore the user. Please try again.",
+				"forbidden": "You are not allowed to restore users.",
+				"notFound": "This user is no longer available for restoration.",
+				"conflict": "The account cannot be restored in its current state. Refresh the list and try again."
+			}
+		},
 		"deleteUser": {
 			"heading": "Delete user",
 			"question": "Delete this user?",
@@ -229,6 +243,17 @@
 		},
 		"userList": {
 			"heading": "Users",
+			"tabs": { "users": "Users", "deleted": "Deleted users" },
+			"deletedAt": "Deleted on",
+			"actions": "Actions",
+			"inactive": "Inactive",
+			"restore": "Restore",
+			"loading": "Loading users...",
+			"loadError": "Could not load users. Please try again.",
+			"deletedLoadError": "Deleted users are currently unavailable. Please try again.",
+			"retry": "Try again",
+			"empty": "No matching users found.",
+			"deletedEmpty": "No matching deleted users found.",
 			"searchPlaceholder": "Search for name or email",
 			"email": "E-Mail",
 			"displayName": "Name",
