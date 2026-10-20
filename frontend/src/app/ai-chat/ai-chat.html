@@ -124,9 +124,7 @@
     @if (sendError(); as errorKey) {
       <div class="alert alert-danger mt-3" role="alert">{{ errorKey | transloco }}</div>
     }
-    @if (deleteError(); as errorKey) {
-      <div class="alert alert-danger mt-3" role="alert">{{ errorKey | transloco }}</div>
-    }
+
   </footer>
     @if (isOpeningConversation()) {
     <p role="status">

@@ -11,7 +11,7 @@ import { ConversationsService } from '../conversations.service';
   templateUrl: './delete-chat-modal.html',
 })
 export class DeleteChatModal {
-  selectedChat!: Conversation;
+  selectedChat!: Pick<Conversation, 'id' | 'title'>;
   protected readonly activeModal = inject(NgbActiveModal);
   private readonly conversationsService = inject(ConversationsService);
   readonly isDeleting = signal(false);

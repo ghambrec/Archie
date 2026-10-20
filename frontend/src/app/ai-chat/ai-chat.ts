@@ -1,10 +1,11 @@
-import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, computed, DestroyRef, effect, Injector, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
-import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { ConversationsService } from './conversations.service';
+import { DeleteChatModal } from './delete-chat-modal/delete-chat-modal';
 
 @Component({
   selector: 'app-ai-chat',
@@ -13,6 +14,8 @@ import { ConversationsService } from './conversations.service';
 })
 export class AIChat {
   private readonly conversationService = inject(ConversationsService);
+  private readonly modalService = inject(NgbModal);
+  private readonly injector = inject(Injector);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -27,7 +30,6 @@ export class AIChat {
   readonly isSending = signal(false);
   readonly sendError = signal<string | null>(null);
   readonly isDeleting = signal(false);
-  readonly deleteError = signal<string | null>(null);
   readonly messageResource = this.conversationService.messageResource(this.activeConversationId);
   readonly messages = computed(() => {
     if (this.messageResource.hasValue()) return this.messageResource.value().data;
@@ -43,7 +45,6 @@ export class AIChat {
       this.activeConversationId();
       this.draft.set('');
       this.sendError.set(null);
-      this.deleteError.set(null);
       this.createConversationError.set(null);
     });
   }
@@ -101,20 +102,26 @@ export class AIChat {
     }
   }
 
-  async deleteChat(): Promise<void> {
+  deleteChat(): void {
     const id = this.activeConversationId();
     if (!id || this.busy()) return;
+    const conversation = this.conversationService.conversations().find(chat => chat.id === id);
+    const modal = this.modalService.open(DeleteChatModal, {
+      injector: this.injector,
+      centered: true,
+      ariaLabelledBy: 'delete-chat-title',
+      ariaDescribedBy: 'delete-chat-description',
+      beforeDismiss: () => !modal.componentInstance.isDeleting(),
+    });
+    modal.componentInstance.selectedChat = conversation ?? { id, title: null };
     this.isDeleting.set(true);
-    this.deleteError.set(null);
-    try {
-      await firstValueFrom(this.conversationService.deleteConversation(id));
-      if (!this.destroyRef.destroyed && this.activeConversationId() === id) {
-        await this.router.navigate(['/ai-chat']);
-      }
-    } catch {
-      this.deleteError.set('ai-chat.error.deleteConversation');
-    } finally {
+    modal.hidden.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.isDeleting.set(false);
-    }
+    });
+    modal.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((deletedId: string) => {
+      if (this.activeConversationId() === deletedId) {
+        void this.router.navigate(['/ai-chat']);
+      }
+    });
   }
 }
