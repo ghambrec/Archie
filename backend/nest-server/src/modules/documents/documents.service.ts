@@ -107,7 +107,7 @@ export class DocumentsService {
   }
 
   async findAll(userId: string, query: GetDocumentsQueryDto): Promise<GetDocumentsResponseDto> {
-    const { page, limit } = query;
+    const { page, limit, tagId, includeDescendants} = query;
 
     this.logger.log({ userId, page, limit }, 'Listing documents');
 
@@ -116,6 +116,25 @@ export class DocumentsService {
     if (!baseQuery) {
       this.logger.log({ userId, total: 0 }, 'Documents listed successfully');
       return { data: [], page, limit, total: 0, totalPages: 0 };
+    }
+
+    if (tagId) {
+      baseQuery.andWhere((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select('1')
+          .from(DocumentTag, 'filterDocumentTag')
+          .innerJoin(Tag, 'filterTag', 'filterTag.id = filterDocumentTag.tagId')
+          .where('filterDocumentTag.documentId = document.id')
+          .andWhere(
+            includeDescendants
+              ? '(filterTag.id = :tagId OR filterTag.parentId = :tagId)'
+              : 'filterTag.id = :tagId',
+            { tagId },
+          )
+          .getQuery();
+        return `EXISTS ${subQuery}`;
+      });
     }
 
     const total = await baseQuery.getCount();
@@ -161,7 +180,8 @@ export class DocumentsService {
       .groupBy('document.id')
       .addGroupBy('uploader.id')
       .addGroupBy('"aiDocument"."id"')
-      .orderBy('document.createdAt', 'DESC')
+      .orderBy('LOWER(document.filename)', 'ASC')
+      .addOrderBy('document.id', 'ASC')
       .offset((page - 1) * limit)
       .limit(limit)
       .getRawMany();
