@@ -26,34 +26,7 @@
 		}
 	</ul>
 	<hr>
-  <section class="chat-section" [class.chat-section-collapsed]="!chatsExpanded()" aria-labelledby="chats-heading">
-    <div class="d-flex align-items-center flex-shrink-0 mb-2">
-      <button id="chats-heading" type="button" class="btn btn-sm text-start flex-grow-1 fw-semibold"
-        [attr.aria-expanded]="chatsExpanded()" aria-controls="sidebar-chat-list"
-        (click)="chatsExpanded.set(!chatsExpanded())">
-        <i class="bi me-2" [class.bi-chevron-down]="chatsExpanded()"
-          [class.bi-chevron-right]="!chatsExpanded()" aria-hidden="true"></i>
-        {{ 'ai-chat.history.heading' | transloco }}
-      </button>
-      <button type="button" class="btn btn-sm btn-outline-secondary"
-        [disabled]="isCreatingChat() || conversationsService.isMutating()"
-        [attr.aria-label]="'ai-chat.button.new_chat' | transloco"
-        [title]="'ai-chat.button.new_chat' | transloco" (click)="createChat()">
-        <i class="bi bi-plus-lg" aria-hidden="true"></i>
-      </button>
-    </div>
-    @if (createChatError()) {
-      <p class="small text-danger" role="alert">{{ 'ai-chat.error.createConversation' | transloco }}</p>
-    }
-    <div id="sidebar-chat-list" class="chat-list-scroll" [hidden]="!chatsExpanded()">
-      <app-conversation-list
-        [conversations]="conversationsService.conversations()"
-        [isLoadingHistory]="conversationsService.conversationsResource.isLoading()"
-        [historyError]="!!conversationsService.conversationsResource.error()"
-        [busy]="isCreatingChat() || conversationsService.isMutating()"
-        (retry)="conversationsService.conversationsResource.reload()" />
-    </div>
-  </section>
+	<app-chat-sidebar />
   <hr>
 	<app-tag-tree class="flex-grow-1 overflow-y-auto px-1"></app-tag-tree>
 	<hr>

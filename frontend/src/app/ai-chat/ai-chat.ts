@@ -63,8 +63,7 @@ export class AIChat {
       const viewport = this.messageViewport()?.nativeElement;
       const conversationId = this.activeConversationId();
       const latestMessageId = this.messages().at(-1)?.id;
-
-      // A different conversation always opens at its latest message.
+  
       if (conversationId !== this.lastScrollConversationId) {
         this.lastScrollConversationId = conversationId;
         this.lastRenderedMessageId = undefined;
