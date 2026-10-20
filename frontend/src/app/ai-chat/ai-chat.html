@@ -40,12 +40,12 @@
       Confidence Score: {{ message.confidence_score }}
     </p>
   }
-  @if (message.sources; as sources ){
+  @if (message.sources) {
     <div class="small">
       <strong>Quellen</strong>
         <ul>
-        @for (source of sources; track $index) {
-          <li>Dokumentabschnitt: {{ source.chunk_Id }}</li>
+        @for (source of message.sourceDocuments; track source.document_id) {
+          <li>{{ source.document_name }} ({{ source.chunkCount }})</li>
         } @empty {
           <li>{{'ai-chat.error.noSources' | transloco }}</li>
         }

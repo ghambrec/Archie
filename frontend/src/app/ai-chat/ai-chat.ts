@@ -5,6 +5,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
 import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { ConversationsService } from './conversations.service';
+import { groupSourceDocuments } from './source-documents';
 import { DeleteChatModal } from './delete-chat-modal/delete-chat-modal';
 import { DeleteAllChatsModal } from './delete-all-chats-modal/delete-all-chats-modal';
 
@@ -33,7 +34,12 @@ export class AIChat {
   readonly isDeleting = signal(false);
   readonly messageResource = this.conversationService.messageResource(this.activeConversationId);
   readonly messages = computed(() => {
-    if (this.messageResource.hasValue()) return this.messageResource.value().data;
+    if (this.messageResource.hasValue()) {
+      return this.messageResource.value().data.map(message => ({
+        ...message,
+        sourceDocuments: groupSourceDocuments(message.sources ?? []),
+      }));
+    }
     return [];
   });
   readonly isOpeningConversation = this.messageResource.isLoading;

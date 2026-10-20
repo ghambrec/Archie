@@ -35,6 +35,8 @@ export interface DeleteConversation {
 
 export interface Citation {
   chunk_Id: string;
+  document_id: string;
+  document_name: string;
 }
 
 export interface AskConversationResponse {
