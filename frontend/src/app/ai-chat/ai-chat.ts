@@ -1,18 +1,18 @@
-import { PercentPipe } from '@angular/common';
-import { afterRenderEffect, Component, computed, DestroyRef, effect, ElementRef, Injector, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, DestroyRef, effect, Injector, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
-import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ConversationsService } from './conversations.service';
-import { groupSourceDocuments } from './source-documents';
+import { ChatMessageList } from './chat-message-list/chat-message-list';
+import { ChatComposer } from './chat-composer/chat-composer';
 import { DeleteChatModal } from './delete-chat-modal/delete-chat-modal';
 import { DeleteAllChatsModal } from './delete-all-chats-modal/delete-all-chats-modal';
 
 @Component({
   selector: 'app-ai-chat',
-  imports: [TranslocoPipe, NgbTooltip, PercentPipe, RouterLink],
+  imports: [TranslocoPipe, ChatMessageList, ChatComposer],
   templateUrl: './ai-chat.html',
   styleUrl: './ai-chat.scss',
 })
@@ -27,11 +27,6 @@ export class AIChat {
     initialValue: this.route.snapshot.paramMap,
   });
 
-  private readonly messageViewport = viewChild<ElementRef<HTMLDivElement>>('messageViewport');
-  private followLatestMessages = true;
-  private lastScrollConversationId: string | null | undefined;
-  private lastRenderedMessageId: string | undefined;
-
   readonly activeConversationId = computed(() => this.routeParams().get('id'));
   readonly draft = signal('');
   readonly isCreatingConversation = signal(false);
@@ -41,12 +36,7 @@ export class AIChat {
   readonly isDeleting = signal(false);
   readonly messageResource = this.conversationService.messageResource(this.activeConversationId);
   readonly messages = computed(() => {
-    if (this.messageResource.hasValue()) {
-      return this.messageResource.value().data.map(message => ({
-        ...message,
-        sourceDocuments: groupSourceDocuments(message.sources ?? []),
-      }));
-    }
+    if (this.messageResource.hasValue()) return this.messageResource.value().data;
     return [];
   });
   readonly isOpeningConversation = this.messageResource.isLoading;
@@ -54,41 +44,19 @@ export class AIChat {
     this.messageResource.error() ? 'ai-chat.history.openError' : null
   );
 
+  readonly isBusy = computed(() => this.busy());
+
   readonly canDeleteAll = computed(() =>
     !this.busy() && (this.conversationService.conversations().length > 0 || this.activeConversationId() !== null)
   );
 
   constructor() {
-    afterRenderEffect(() => {
-      const viewport = this.messageViewport()?.nativeElement;
-      const conversationId = this.activeConversationId();
-      const latestMessageId = this.messages().at(-1)?.id;
-  
-      if (conversationId !== this.lastScrollConversationId) {
-        this.lastScrollConversationId = conversationId;
-        this.lastRenderedMessageId = undefined;
-        this.followLatestMessages = true;
-      }
-      if (!viewport || !latestMessageId || latestMessageId === this.lastRenderedMessageId) return;
-      this.lastRenderedMessageId = latestMessageId;
-      if (this.followLatestMessages) {
-        viewport.scrollTop = viewport.scrollHeight;
-      }
-    });
-
     effect(() => {
       this.activeConversationId();
       this.draft.set('');
       this.sendError.set(null);
       this.createConversationError.set(null);
     });
-  }
-
-  protected onMessagesScroll(): void {
-    const viewport = this.messageViewport()?.nativeElement;
-    if (!viewport) return;
-    const distanceFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
-    this.followLatestMessages = distanceFromBottom <= 80;
   }
 
   private busy(): boolean {

@@ -1,133 +1,22 @@
 <section class="chat">
   <header class="chat-header">
     <h1>{{ 'ai-chat.heading' | transloco }}</h1>
-
   </header>
 
-  <div #messageViewport class="chat-messages" role="log" [attr.aria-label]="'ai-chat.message.label' | transloco"
-    tabindex="0" (scroll)="onMessagesScroll()">
-    @for (message of messages(); track message.id) {
-    <article
-      class="message"
-      [class.message-user]="message.sender === 'user'"
-      [class.message-ai]="message.sender === 'llm'"
-    >
-      <strong>
-        {{ (message.sender === 'user'
-          ? 'ai-chat.message.sender.user'
-          : 'ai-chat.message.sender.llm') | transloco }}
-      </strong>
+  <app-chat-message-list
+    [messages]="messages()"
+    [conversationId]="activeConversationId()"
+    [isSending]="isSending()"
+    [isLoading]="isOpeningConversation()"
+    [errorKey]="openConversationError()" />
 
-  <p>{{ message.content }}</p>
-
-  @if (message.sender === 'llm') {
-  @if (message.confidence_score !== undefined) {
-    <p class="small text-muted">
-      {{ 'ai-chat.message.confidenceScore' | transloco }}: {{ message.confidence_score }}
-    </p>
-  }
-  @if (message.sources) {
-    <div class="small">
-      <strong>{{ 'ai-chat.message.sources' | transloco }}</strong>
-        <ul>
-        @for (source of message.sourceDocuments; track source.document_id) {
-          <li>
-            <a [routerLink]="['/documents']" [queryParams]="{ doc: source.document_id }">{{ source.document_name }}</a>
-            ({{ source.chunkCount }})
-            @if (source.medianSimilarity !== null) {
-              ({{ source.medianSimilarity | percent: '1.0-0' }})
-            }
-          </li>
-        } @empty {
-          <li>{{'ai-chat.error.noSources' | transloco }}</li>
-        }
-        </ul>
-    </div>
-    }}
-  </article>
-    }
-  </div>
-
-  <div class="chat-status" role="status">
-     @if (isSending()) {
-    <p>{{ 'ai-chat.status.thinking' | transloco }}</p>
-    }
-  </div>
-
-  <footer class="chat-composer">
-    <label 
-      for="chat-question" 
-      class="visually-hidden">  
-      {{ 'ai-chat.hint.sending' | transloco}}
-    </label>
-
-    <textarea
-      #questionInput
-      id="chat-question"
-      class="form-control"
-      rows="2"
-      [placeholder]="'ai-chat.hint.ask' | transloco"
-      maxlength="1000"
-      [disabled]="
-              isSending() ||
-              isCreatingConversation() ||
-              isOpeningConversation() || 
-              isDeleting()"
-      [value] = "draft()"
-      (input) = draft.set(questionInput.value)
-      
-    ></textarea>
-    
-  <div class="d-flex flex-wrap align-items-start gap-3 pt-3">
-    <button  
-      type="button" 
-      class="btn btn-primary"
-      [disabled] = "
-        !draft().trim() ||
-        isSending() ||
-        isCreatingConversation()
-        "
-      (click)= "send()"
-      >
-      {{'ai-chat.button.send' | transloco}}
-    </button>
-
-
-    <button
-      type="button"
-      class="btn btn-secondary"
-      [disabled]="
-        !activeConversationId() ||
-        isDeleting() ||
-        isSending() ||
-        isCreatingConversation() ||
-        isOpeningConversation()
-      "
-      (click)="deleteChat()"
-    >
-      {{ 'ai-chat.button.Delete_chat' | transloco }}
-    </button>
-
-	  <button type="button" class="btn btn-secondary" [disabled]="!canDeleteAll()" (click)="deleteAllChats()">
-      {{'ai-chat.button.Delete_all_chats' | transloco}}
-    </button>
-  </div>
-
-    @if (sendError(); as errorKey) {
-      <div class="alert alert-danger mt-3" role="alert">{{ errorKey | transloco }}</div>
-    }
-
-  </footer>
-    @if (isOpeningConversation()) {
-    <p role="status">
-      {{ 'ai-chat.history.opening' | transloco }}
-    </p>
-  }
-  
-  @if (openConversationError(); as errorKey) {
-    <div class="alert alert-danger" role="alert">
-      {{ errorKey | transloco }}
-    </div>
-  }
-
+  <app-chat-composer
+    [(draft)]="draft"
+    [busy]="isBusy()"
+    [canDeleteChat]="activeConversationId() !== null"
+    [canDeleteAll]="canDeleteAll()"
+    [sendError]="sendError()"
+    (sendRequested)="send()"
+    (deleteRequested)="deleteChat()"
+    (deleteAllRequested)="deleteAllChats()" />
 </section>
