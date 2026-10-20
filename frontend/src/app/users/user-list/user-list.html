@@ -40,6 +40,15 @@
 							aria-label="Edit user">
 							<i class="bi bi-pencil-fill"></i>
 						</button>
+
+						<button
+							type="button"
+							class="btn btn-danger d-flex align-items-center justify-content-center"
+							disabled
+							[title]="'users.userList.delete' | transloco"
+							[attr.aria-label]="'users.userList.delete' | transloco">
+							<i class="bi bi-trash-fill" aria-hidden="true"></i>
+						</button>
 					</div>
 					
 				</td>

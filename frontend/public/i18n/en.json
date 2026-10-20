@@ -218,7 +218,8 @@
 			"email": "E-Mail",
 			"displayName": "Name",
 			"lastLogin": "Last login",
-			"active": "Active"
+			"active": "Active",
+			"delete": "Delete user"
 		},
 		"createUser": {
 			"heading": "Create User",
