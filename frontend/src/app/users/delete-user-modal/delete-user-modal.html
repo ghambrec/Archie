@@ -1,0 +1,23 @@
+<div class="modal-header">
+  <h2 class="modal-title fs-5" id="delete-user-title">{{ 'users.deleteUser.heading' | transloco }}</h2>
+  <button type="button" class="btn-close" [disabled]="isDeleting()"
+    [attr.aria-label]="'users.deleteUser.cancel' | transloco" (click)="activeModal.dismiss()"></button>
+</div>
+<div class="modal-body" id="delete-user-description" [attr.aria-busy]="isDeleting()">
+  <p>{{ 'users.deleteUser.question' | transloco }}</p>
+  <p class="text-break">
+    <strong>{{ selectedUser.displayName }}</strong><br>
+    {{ selectedUser.email }}
+  </p>
+  <p>{{ 'users.deleteUser.description' | transloco }}</p>
+  @if (errorKey(); as error) {
+    <div class="alert alert-danger" role="alert">{{ error | transloco }}</div>
+  }
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" ngbAutofocus [disabled]="isDeleting()"
+    (click)="activeModal.dismiss()">{{ 'users.deleteUser.cancel' | transloco }}</button>
+  <button type="button" class="btn btn-danger" [disabled]="isDeleting()" (click)="confirmDelete()">
+    {{ (isDeleting() ? 'users.deleteUser.deleting' : 'users.deleteUser.confirm') | transloco }}
+  </button>
+</div>

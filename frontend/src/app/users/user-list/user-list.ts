@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal} from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal} from '@angular/core';
 import { UserInfo, Users } from '../users';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -6,6 +6,8 @@ import { CreateUserModal } from '../create-user-modal/create-user-modal';
 import { EditUserModal } from '../edit-user-modal/edit-user-modal';
 import { UserInfoModal } from '../user-info-modal/user-info-modal';
 import { Groups } from '../../groups/groups';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DeleteUserModal } from '../delete-user-modal/delete-user-modal';
 
 
 @Component({
@@ -18,6 +20,7 @@ export class UserList {
 	protected readonly usersService = inject(Users);
 	private readonly modalService = inject(NgbModal);
 	private readonly groupsService = inject(Groups);
+  private readonly destroyRef = inject(DestroyRef);
 
 	protected readonly searchString = signal("");
 
@@ -53,6 +56,20 @@ export class UserList {
 			this.usersService.users.reload()
 		})
 	}
+
+  openDeleteUserModal(user: UserInfo): void {
+    const modal = this.modalService.open(DeleteUserModal, {
+      centered: true,
+      ariaLabelledBy: 'delete-user-title',
+      ariaDescribedBy: 'delete-user-description',
+      beforeDismiss: () => !modal.componentInstance.isDeleting(),
+    });
+    modal.componentInstance.selectedUser = user;
+    modal.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.usersService.users.reload();
+      this.groupsService.groups.reload();
+    });
+  }
 
 	openUserInfoModal(user: UserInfo): void {
 		const modal = this.modalService.open(

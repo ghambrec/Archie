@@ -212,6 +212,21 @@
 		}
 	},
 	"users": {
+		"deleteUser": {
+			"heading": "Delete user",
+			"question": "Delete this user?",
+			"description": "The account will be deactivated and removed from the user list. Existing documents, chats and other stored data will be retained.",
+			"cancel": "Cancel",
+			"confirm": "Delete user",
+			"deleting": "Deleting...",
+			"errors": {
+				"general": "Could not delete the user. Please try again.",
+				"selfDelete": "You cannot delete your own account.",
+				"forbidden": "You are not allowed to delete this user. An active administrator account is required.",
+				"notFound": "This user no longer exists or has already been deleted.",
+				"conflict": "The user cannot be deleted in the current state. The last active administrator must be retained. Refresh the list and try again."
+			}
+		},
 		"userList": {
 			"heading": "Users",
 			"searchPlaceholder": "Search for name or email",

@@ -106,6 +106,10 @@ export class Users {
 
 	}
 
+  deleteUser(userId: string) {
+    return this.http.delete<void>(`${this.baseUrl}/${userId}`, { withCredentials: true });
+  }
+
 	getAvatarUrl(userId?: string | null) {
 		if (!userId) {
 			return '/avatar';
