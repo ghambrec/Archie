@@ -26,6 +26,8 @@ describe('AuthService', () => {
     passwordHash: 'hashed-password',
     preferredLanguage: 'EN',
     isActive: true,
+    mustChangePassword: false,
+    lastLoginAt: null,
   } as User;
 
   beforeEach(async () => {
@@ -44,7 +46,8 @@ describe('AuthService', () => {
           useValue: {
             findByEmail: jest.fn(),
             create: jest.fn(),
-            findProfileById: jest.fn()
+            findProfileById: jest.fn(),
+            recordSuccessfulLogin: jest.fn(),
           }
         },
         {
@@ -97,7 +100,20 @@ describe('AuthService', () => {
 
       expect(loginAttemptService.clearAttempts).toHaveBeenCalledWith(user.email);
       expect(sessionService.create).toHaveBeenCalledWith(user.id);
-      expect(result).toEqual({ user, sessionId: 'session-1' });
+      expect(result).toEqual({ user, sessionId: 'session-1', hasToChangePassword: false });
+      expect(userService.recordSuccessfulLogin).toHaveBeenCalledWith(user.id, expect.any(Date));
+    });
+
+    it.each([true, false])('uses mustChangePassword=%s independently of lastLoginAt', async (flag) => {
+      loginAttemptService.isLocked.mockResolvedValue(null);
+      const loginUser = { ...user, mustChangePassword: flag, lastLoginAt: flag ? new Date() : null };
+      userService.findByEmail.mockResolvedValue(loginUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      sessionService.create.mockResolvedValue('session-1');
+      const result = await service.login({ email: user.email, password: 'password1234' });
+      expect(result.hasToChangePassword).toBe(flag);
+      expect(loginUser.mustChangePassword).toBe(flag);
+      expect(userService.recordSuccessfulLogin).toHaveBeenCalledWith(user.id, expect.any(Date));
     });
 
     it('throws LockedException when the account is locked out', async () => {
@@ -108,6 +124,7 @@ describe('AuthService', () => {
       ).rejects.toThrow(LockedException);
 
       expect(userService.findByEmail).not.toHaveBeenCalled();
+      expect(userService.recordSuccessfulLogin).not.toHaveBeenCalled();
     });
 
     it('throws UnauthorizedException and registers a failure when the user does not exist', async () => {
@@ -120,6 +137,7 @@ describe('AuthService', () => {
 
       expect(loginAttemptService.registerFailure).toHaveBeenCalledWith(user.email);
       expect(sessionService.create).not.toHaveBeenCalled();
+      expect(userService.recordSuccessfulLogin).not.toHaveBeenCalled();
     });
 
     it('throws UnauthorizedException and registers a failure when the password is wrong', async () => {
@@ -133,6 +151,7 @@ describe('AuthService', () => {
 
       expect(loginAttemptService.registerFailure).toHaveBeenCalledWith(user.email);
       expect(sessionService.create).not.toHaveBeenCalled();
+      expect(userService.recordSuccessfulLogin).not.toHaveBeenCalled();
     });
   });
 

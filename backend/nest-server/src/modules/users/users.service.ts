@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException, OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, ForbiddenException, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Like, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -123,7 +123,6 @@ export class UsersService implements OnApplicationBootstrap {
 	return user;
   };
 
-  // Actor identity is passed for the password-change policy added in the next step.
   async updateProfile(actorUserId: string, userID: string, dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
     this.logger.log('Execute updateProfile', userID);
 
@@ -157,17 +156,17 @@ export class UsersService implements OnApplicationBootstrap {
           ErrorCode.UserNameAlreadyRegistered
         )
       }
+      user.displayName = newName;
     }
     if(dto.preferredLanguage !==undefined)
     {
-      const newLang = dto.preferredLanguage?.trim();
+      user.preferredLanguage = dto.preferredLanguage;
     }
     if(dto.password !==undefined)
     {
-      const newPassword = dto.password?.trim();
+      await this.applyPasswordChange(user, actorUserId, dto.password);
     }
 
-    Object.assign(user,dto);
     const updatedUser = await this.usersRepository.save(user)
     this.logger.log({ userId: updatedUser.id }, 'Profile updated successfully');
     return {
@@ -245,8 +244,7 @@ export class UsersService implements OnApplicationBootstrap {
       throw new NotFoundException();
     }
 
-    user.passwordHash = await bcrypt.hash(dto.password, PASSWORD_SALT_ROUNDS);
-    user.lastLoginAt = new Date();
+    await this.applyPasswordChange(user, userId, dto.password);
 
     await this.usersRepository.save(user);
     this.logger.log({ userId: user.id }, 'User changed password successfully');
@@ -262,8 +260,7 @@ export class UsersService implements OnApplicationBootstrap {
       throw new NotFoundException();
     }
 
-    user.passwordHash = await bcrypt.hash(dto.password, PASSWORD_SALT_ROUNDS);
-    user.lastLoginAt = null;
+    await this.applyPasswordChange(user, actorUserId, dto.password);
 
     await this.usersRepository.save(user);
     this.logger.log({ userId: user.id }, 'Admin reset user password successfully');
@@ -271,6 +268,20 @@ export class UsersService implements OnApplicationBootstrap {
 
   async findById(userId: string): Promise<User | null> {
     return this.usersRepository.findOneBy({ id: userId });
+  }
+
+  private async applyPasswordChange(user: User, actorUserId: string, password: string): Promise<void> {
+    const changesAnotherUser = actorUserId !== user.id;
+    if (changesAnotherUser && !(await this.permissionsService.isUserAdmin(actorUserId))) {
+      throw new ForbiddenException('An admin account is required to reset another user password');
+    }
+    user.passwordHash = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
+    user.mustChangePassword = changesAnotherUser;
+  }
+
+  async recordSuccessfulLogin(userId: string, lastLoginAt: Date): Promise<void> {
+    // Update only the timestamp; a concurrent password reset must keep its flag.
+    await this.usersRepository.update(userId, { lastLoginAt });
   }
 }
 
