@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { Home } from './home/home';
 import { Settings } from './settings/settings';
 import { Shell } from './shell/shell';
 import { Login } from './auth/login/login';
