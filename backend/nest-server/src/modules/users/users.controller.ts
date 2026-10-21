@@ -86,6 +86,13 @@ export class UsersController {
     return this.usersService.updateProfile(userId, dto);
   }
 
+  @UseGuards(SessionAuthGuard, AdminRequiredGuard)
+  @ApiOperation({ summary: 'Get list of soft-deleted users' })
+  @Get('deleted')
+  async getDeletedUsers(@Query() request: GetUsersQueryDto): Promise<GetUsersResponseDto> {
+    return this.usersService.getDeletedUsers(request);
+  }
+
   @UseGuards(SessionAuthGuard)
   @ApiOperation({ summary: 'Get list of all active users' })
   @Get()

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException, ForbiddenException, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Like, Repository } from 'typeorm';
+import { DataSource, IsNull, Like, Not, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { Group } from '../groups/entities/group.entity';
@@ -245,6 +245,34 @@ export class UsersService implements OnApplicationBootstrap {
 
 	const isAdmin = await this.permissionsService.isUserAdmin(userId);
     return {...user, isAdmin};
+  }
+
+  async getDeletedUsers(request: GetUsersQueryDto): Promise<GetUsersResponseDto> {
+    const { page, limit } = request;
+    const [users, total] = await this.usersRepository.findAndCount({
+      withDeleted: true,
+      where: { deletedAt: Not(IsNull()) },
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        preferredLanguage: true,
+        isActive: true,
+        lastLoginAt: true,
+        deletedAt: true,
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { deletedAt: 'DESC', id: 'ASC' },
+    });
+
+    return {
+      data: users,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async getAllUsers(request: GetUsersQueryDto): Promise<GetUsersResponseDto> {
