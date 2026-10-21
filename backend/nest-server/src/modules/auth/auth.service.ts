@@ -52,7 +52,7 @@ export class AuthService {
 			displayName: request.displayName,
 		}
 
-		const user = await this.userService.create(createUserDto);
+		const user = await this.userService.create(createUserDto, false);
 
 		const sessionId = await this.sessionService.create(user.id);
 		return sessionId;

@@ -52,7 +52,7 @@ export class UsersService implements OnApplicationBootstrap {
 	}
   }
 
-  async create(dto: CreateUserDto): Promise<User> {
+  async create(dto: CreateUserDto, mustChangePassword: boolean): Promise<User> {
     this.logger.log('Execute create', dto.email);
     const passwordHash = await bcrypt.hash(dto.password, PASSWORD_SALT_ROUNDS);
 
@@ -76,6 +76,7 @@ export class UsersService implements OnApplicationBootstrap {
       const userInsert = await manager.insert(User, {
         email: dto.email.trim().toLowerCase(),
         passwordHash,
+        mustChangePassword,
         displayName: dto.displayName,
       });
       const userId = userInsert.identifiers[0].id as string;
@@ -122,7 +123,8 @@ export class UsersService implements OnApplicationBootstrap {
 	return user;
   };
 
-  async updateProfile(userID: string, dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
+  // Actor identity is passed for the password-change policy added in the next step.
+  async updateProfile(actorUserId: string, userID: string, dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
     this.logger.log('Execute updateProfile', userID);
 
     const user = await this.usersRepository.findOneBy({id: userID,});
@@ -250,7 +252,7 @@ export class UsersService implements OnApplicationBootstrap {
     this.logger.log({ userId: user.id }, 'User changed password successfully');
   }
 
-  async resetPassword(userId: string, dto: ChangePasswordDto): Promise<void> {
+  async resetPassword(actorUserId: string, userId: string, dto: ChangePasswordDto): Promise<void> {
     this.logger.log('Execute resetPassword', userId);
 
     const user = await this.usersRepository.findOneBy({ id: userId });

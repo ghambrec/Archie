@@ -152,7 +152,7 @@ describe('AuthService', () => {
         email: user.email,
         password: 'password1234',
         displayName: 'Test User',
-      });
+      }, false);
       expect(sessionService.create).toHaveBeenCalledWith(user.id);
       expect(result).toBe('session-2');
     });

@@ -5,13 +5,14 @@ import { UsersFileService } from './users-file.service';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
 import { SelfOrAdminGuard } from '../permissions/guards/self-or-admin.guard';
+import type { Request } from 'express';
 
 describe('UsersController', () => {
   let controller: UsersController;
-  let usersService: { create: jest.Mock };
+  let usersService: { create: jest.Mock; updateProfile: jest.Mock; resetPassword: jest.Mock };
 
   beforeEach(async () => {
-    usersService = { create: jest.fn() };
+    usersService = { create: jest.fn(), updateProfile: jest.fn(), resetPassword: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
@@ -45,7 +46,28 @@ describe('UsersController', () => {
       email: 'test@example.com',
       password: 'password123',
       displayName: 'Test User',
-    });
+    }, true);
     expect(result).toEqual({ id: 'user-id-123' });
+  });
+
+  it('passes the session user as both actor and target for own profile updates', async () => {
+    const req = { userId: 'actor-id' } as Request;
+    const dto = { displayName: 'New Name' };
+    await controller.updateCurrentUser(req, dto);
+    expect(usersService.updateProfile).toHaveBeenCalledWith('actor-id', 'actor-id', dto);
+  });
+
+  it('passes the session actor separately from the target for profile updates', async () => {
+    const req = { userId: 'admin-id' } as Request;
+    const dto = { displayName: 'New Name' };
+    await controller.updatetUser(req, 'target-id', dto);
+    expect(usersService.updateProfile).toHaveBeenCalledWith('admin-id', 'target-id', dto);
+  });
+
+  it('passes the session actor separately from the target for password resets', async () => {
+    const req = { userId: 'admin-id' } as Request;
+    const dto = { password: 'new-password123' };
+    await controller.resetPassword(req, 'target-id', dto);
+    expect(usersService.resetPassword).toHaveBeenCalledWith('admin-id', 'target-id', dto);
   });
 });
