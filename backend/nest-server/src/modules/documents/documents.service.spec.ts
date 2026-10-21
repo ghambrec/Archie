@@ -65,7 +65,7 @@ describe('DocumentsService', () => {
     removeFromDocument: jest.Mock;
     confirmAiSuggestions: jest.Mock;
   };
-  let permissionsService: { getGroupIdsWithPermission: jest.Mock };
+  let permissionsService: { getGroupIdsWithPermission: jest.Mock; hasPermission: jest.Mock };
   let queryBuilder: QueryBuilderMock;
 
   const userId = 'user-1';
@@ -90,7 +90,10 @@ describe('DocumentsService', () => {
       confirmAiSuggestions: jest.fn(),
     };
 
-    permissionsService = { getGroupIdsWithPermission: jest.fn().mockResolvedValue(['group-1']) };
+    permissionsService = {
+      getGroupIdsWithPermission: jest.fn().mockResolvedValue(['group-1']),
+      hasPermission: jest.fn().mockResolvedValue(true),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

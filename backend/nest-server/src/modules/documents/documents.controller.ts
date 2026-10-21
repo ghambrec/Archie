@@ -195,21 +195,21 @@ export class DocumentsController {
     return this.documentsService.moveToGroup(req.userId!, id, dto.groupId);
   }
 
-  @ApiOperation({
-    summary: 'Remove a document from a group',
-    description: 'Removes the given document from the specified group.',
-  })
-  @UseGuards(SessionAuthGuard, DocumentPermissionsGuard)
-  @RequirePermission(DocumentPermission.Update)
-  @Delete(':id/groups/:groupId')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async removeGroup(
-    @Req() req: Request,
-    @Param('id') id: string,
-    @Param('groupId') groupId: string,
-  ): Promise<void> {
-    return this.documentsService.removeGroup(req.userId!, id, groupId);
-  }
+//   @ApiOperation({
+//     summary: 'Remove a document from a group',
+//     description: 'Removes the given document from the specified group.',
+//   })
+//   @UseGuards(SessionAuthGuard, DocumentPermissionsGuard)
+//   @RequirePermission(DocumentPermission.Update)
+//   @Delete(':id/groups/:groupId')
+//   @HttpCode(HttpStatus.NO_CONTENT)
+//   async removeGroup(
+//     @Req() req: Request,
+//     @Param('id') id: string,
+//     @Param('groupId') groupId: string,
+//   ): Promise<void> {
+//     return this.documentsService.removeGroup(req.userId!, id, groupId);
+//   }
 
   @ApiOperation({
     summary: 'Remove a tag from a document',
