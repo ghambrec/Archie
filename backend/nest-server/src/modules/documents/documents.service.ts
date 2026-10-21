@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { randomUUID, createHash } from 'crypto';
@@ -398,6 +398,13 @@ export class DocumentsService {
 
     // Check if group exists
     await this.groupsService.get(groupId, userId);
+
+	// pruefen ob upload berechtigung in zielgruppe vorhanden ist
+	const canUploadToTarget = await this.permissionsService.hasPermission(userId, groupId, DocumentPermission.Upload);
+	if (!canUploadToTarget) {
+		this.logger.warn({ userId, id, groupId }, 'Missing upload permission in target group');
+		throw new ForbiddenException();
+	}
 
     if (await this.existsInGroup(groupId, document.sha256, id)) {
       this.logger.warn({ userId, groupId, sha256: document.sha256 }, 'Document already exists in group');
