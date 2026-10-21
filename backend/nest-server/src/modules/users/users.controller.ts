@@ -61,6 +61,16 @@ export class UsersController {
     await this.usersService.softDeleteUser(req.userId!, userId);
   }
 
+  @UseGuards(SessionAuthGuard, AdminRequiredGuard)
+  @ApiOperation({ summary: 'Restore a soft-deleted user' })
+  @Patch(':userId/restore')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async restoreUser(
+    @Param('userId', new ParseUUIDPipe()) userId: string,
+  ): Promise<void> {
+    await this.usersService.restoreUser(userId);
+  }
+
   @UseGuards(SessionAuthGuard, SelfOrAdminGuard)
   @ApiOperation({
     summary: 'Update user',

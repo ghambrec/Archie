@@ -7,6 +7,7 @@ import { UsersFileService } from './users-file.service';
 import { PermissionsService } from '../permissions/permissions.service';
 import { User } from './entities/user.entity';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
+import { SessionService } from '../auth/session/session.service';
 
 describe('Deleted user listing', () => {
   let service: UsersService;
@@ -22,6 +23,7 @@ describe('Deleted user listing', () => {
         { provide: Logger, useValue: { log: jest.fn() } },
         { provide: UsersFileService, useValue: {} },
         { provide: PermissionsService, useValue: {} },
+        { provide: SessionService, useValue: {} },
       ],
     }).compile();
     service = module.get(UsersService);

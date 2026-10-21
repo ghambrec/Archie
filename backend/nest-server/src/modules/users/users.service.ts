@@ -19,6 +19,7 @@ import { ADMIN_PERMISSION_KEY, PermissionsService } from '../permissions/permiss
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { Permission } from '../permissions/entities/permission.entity';
 import { UserPermission } from '../user_permission/entities/user_permission.entity';
+import { SessionService } from '../auth/session/session.service';
 
 
 const PASSWORD_SALT_ROUNDS = 10;
@@ -31,7 +32,8 @@ export class UsersService implements OnApplicationBootstrap {
     private readonly usersRepository: Repository<User>,
     private readonly dataSource: DataSource,
 	private readonly usersFileService: UsersFileService,
-	private readonly permissionsService: PermissionsService
+	private readonly permissionsService: PermissionsService,
+    private readonly sessionService: SessionService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -164,6 +166,26 @@ export class UsersService implements OnApplicationBootstrap {
       this.logger.warn({ userId, error }, 'Could not invalidate deleted user permissions');
     }
     this.logger.log({ actorId, userId }, 'User soft deleted');
+  }
+
+  async restoreUser(userId: string): Promise<void> {
+    await this.dataSource.transaction(async (manager) => {
+      const user = await manager.findOne(User, {
+        where: { id: userId },
+        withDeleted: true,
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!user) throw new ApplicationException(ErrorCode.UserNotFound);
+      if (user.deletedAt === null) {
+        throw new ConflictException('User is not deleted');
+      }
+
+      // Both Redis operations must succeed before the account becomes accessible.
+      await this.sessionService.destroyAllForUser(userId);
+      await this.permissionsService.invalidateUserPermissions(userId);
+      await manager.update(User, userId, { deletedAt: null, isActive: true });
+    });
+    this.logger.log({ userId }, 'User restored');
   }
 
   async updateProfile(userID: string, dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
