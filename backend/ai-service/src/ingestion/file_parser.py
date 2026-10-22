@@ -10,6 +10,9 @@ from PIL import Image
 from docx import Document
 from docx.table import Table
 from docx.text.paragraph import Paragraph
+from odf.namespaces import TABLENS, TEXTNS
+from odf.opendocument import load as load_odf
+from odf.teletype import extractText as extract_odf_text
 from openpyxl import load_workbook
 from charset_normalizer import from_bytes
 # from pptx import Presentation
@@ -122,6 +125,63 @@ def docx_parser(document_bytes: bytes) -> str:
 
     except Exception:
         logging.exception("DOCX extraction failed")
+        raise
+
+
+def _odt_blocks(parent) -> list[str]:
+    """Extract blocks in order, including list items and nested table cells."""
+    results: list[str] = []
+    for child in parent.childNodes:
+        tag = getattr(child, "qname", None)
+        if tag in ((TEXTNS, "p"), (TEXTNS, "h")):
+            text = extract_odf_text(child)
+            if text.strip():
+                results.append(text)
+        elif tag == (TABLENS, "table"):
+            rows = _odt_table_rows(child)
+            if rows:
+                results.append("\n".join(rows))
+        elif tag is not None:
+            results.extend(_odt_blocks(child))
+    return results
+
+
+def _odt_table_rows(parent) -> list[str]:
+    results: list[str] = []
+    for child in parent.childNodes:
+        tag = getattr(child, "qname", None)
+        if tag == (TABLENS, "table-row"):
+            cells: list[str] = []
+            for cell in child.childNodes:
+                if getattr(cell, "qname", None) not in (
+                    (TABLENS, "table-cell"), (TABLENS, "covered-table-cell")
+                ):
+                    continue
+                text = "\n".join(_odt_blocks(cell))
+                repeat = int(cell.getAttribute("numbercolumnsrepeated") or 1)
+                cells.extend([text] * repeat)
+            if any(text.strip() for text in cells):
+                repeat = int(child.getAttribute("numberrowsrepeated") or 1)
+                results.extend(["\t".join(cells)] * repeat)
+        elif tag in (
+            (TABLENS, "table-header-rows"),
+            (TABLENS, "table-rows"),
+            (TABLENS, "table-row-group"),
+        ):
+            results.extend(_odt_table_rows(child))
+    return results
+
+
+def odt_parser(document_bytes: bytes) -> str:
+    """Extract ODT body text and tables; embedded images are not OCR processed."""
+    try:
+        with BytesIO(document_bytes) as stream:
+            document = load_odf(stream)
+            if document.mimetype != "application/vnd.oasis.opendocument.text":
+                raise ValueError("Expected an OpenDocument text document")
+            return "\n\n".join(_odt_blocks(document.text))
+    except Exception:
+        logging.exception("ODT extraction failed")
         raise
 
 
