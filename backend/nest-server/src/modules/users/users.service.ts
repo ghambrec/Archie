@@ -174,8 +174,6 @@ export class UsersService implements OnApplicationBootstrap {
 
   };
 
-  //async updatePasswd(userID: stringify, dto )
-
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOneBy({email: email});
   }
@@ -280,7 +278,6 @@ export class UsersService implements OnApplicationBootstrap {
   }
 
   async recordSuccessfulLogin(userId: string, lastLoginAt: Date): Promise<void> {
-    // Update only the timestamp; a concurrent password reset must keep its flag.
     await this.usersRepository.update(userId, { lastLoginAt });
   }
 }
