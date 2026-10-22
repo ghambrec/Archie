@@ -32,5 +32,32 @@ jobs:
       - name: build Angular frontend
         run: make build-front
 
+      - name: Validate translation JSON
+        run: |
+          node --input-type=module <<'NODE'
+          import { readdirSync, readFileSync } from 'node:fs';
+          import { join } from 'node:path';
+
+          function validate(directory) {
+            for (const entry of readdirSync(directory, { withFileTypes: true })) {
+              const path = join(directory, entry.name);
+
+              if (entry.isDirectory()) {
+                validate(path);
+              } else if (entry.name.endsWith('.json')) {
+                try {
+                  JSON.parse(readFileSync(path, 'utf8'));
+                  console.log(`Valid: ${path}`);
+                } catch (error) {
+                  console.error(`Invalid JSON: ${path}\n${error.message}`);
+                  process.exitCode = 1;
+                }
+              }
+            }
+          }
+
+          validate('frontend/public/i18n');
+          NODE
+
       # - name: run frontend unit tests
       #   run: cd frontend && pnpm run test
