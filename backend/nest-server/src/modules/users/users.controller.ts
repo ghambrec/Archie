@@ -3,6 +3,10 @@ import {
   Res,
   Body,Get,
   Controller,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -46,6 +50,27 @@ export class UsersController {
     return {id: userEntity.id};
   }
 
+  @UseGuards(SessionAuthGuard, AdminRequiredGuard)
+  @ApiOperation({ summary: 'Soft delete a user' })
+  @Delete(':userId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteUser(
+    @Req() req: Request,
+    @Param('userId', new ParseUUIDPipe()) userId: string,
+  ): Promise<void> {
+    await this.usersService.softDeleteUser(req.userId!, userId);
+  }
+
+  @UseGuards(SessionAuthGuard, AdminRequiredGuard)
+  @ApiOperation({ summary: 'Restore a soft-deleted user' })
+  @Patch(':userId/restore')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async restoreUser(
+    @Param('userId', new ParseUUIDPipe()) userId: string,
+  ): Promise<void> {
+    await this.usersService.restoreUser(userId);
+  }
+
   @UseGuards(SessionAuthGuard, SelfOrAdminGuard)
   @ApiOperation({
     summary: 'Update user',
@@ -69,6 +94,13 @@ export class UsersController {
     @Param('userId') userId: string,
     @Body() dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
     return this.usersService.updateProfile(userId, dto);
+  }
+
+  @UseGuards(SessionAuthGuard, AdminRequiredGuard)
+  @ApiOperation({ summary: 'Get list of soft-deleted users' })
+  @Get('deleted')
+  async getDeletedUsers(@Query() request: GetUsersQueryDto): Promise<GetUsersResponseDto> {
+    return this.usersService.getDeletedUsers(request);
   }
 
   @UseGuards(SessionAuthGuard)

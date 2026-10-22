@@ -212,13 +212,54 @@
 		}
 	},
 	"users": {
+		"restoreUser": {
+			"heading": "Restore user",
+			"question": "Restore this user account?",
+			"description": "The account will be reactivated with its existing group memberships and permissions. The user will need to sign in again.",
+			"cancel": "Cancel",
+			"confirm": "Restore user",
+			"restoring": "Restoring...",
+			"errors": {
+				"general": "Could not restore the user. Please try again.",
+				"forbidden": "You are not allowed to restore users.",
+				"notFound": "This user is no longer available for restoration.",
+				"conflict": "The account cannot be restored in its current state. Refresh the list and try again."
+			}
+		},
+		"deleteUser": {
+			"heading": "Delete user",
+			"question": "Delete this user?",
+			"description": "The account will be deactivated and removed from the user list. Existing documents, chats and other stored data will be retained.",
+			"cancel": "Cancel",
+			"confirm": "Delete user",
+			"deleting": "Deleting...",
+			"errors": {
+				"general": "Could not delete the user. Please try again.",
+				"selfDelete": "You cannot delete your own account.",
+				"forbidden": "You are not allowed to delete this user. An active administrator account is required.",
+				"notFound": "This user no longer exists or has already been deleted.",
+				"conflict": "The user cannot be deleted in the current state. The last active administrator must be retained. Refresh the list and try again."
+			}
+		},
 		"userList": {
 			"heading": "Users",
+			"tabs": { "users": "Users", "deleted": "Deleted users" },
+			"deletedAt": "Deleted on",
+			"actions": "Actions",
+			"inactive": "Inactive",
+			"restore": "Restore",
+			"loading": "Loading users...",
+			"loadError": "Could not load users. Please try again.",
+			"deletedLoadError": "Deleted users are currently unavailable. Please try again.",
+			"retry": "Try again",
+			"empty": "No matching users found.",
+			"deletedEmpty": "No matching deleted users found.",
 			"searchPlaceholder": "Search for name or email",
 			"email": "E-Mail",
 			"displayName": "Name",
 			"lastLogin": "Last login",
-			"active": "Active"
+			"active": "Active",
+			"delete": "Delete user"
 		},
 		"createUser": {
 			"heading": "Create User",
