@@ -1,1 +1,144 @@
-<p>profile works!</p>
+<!-- <p>profile works!</p> -->
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-xl-9">
+        
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="h3 mb-1">Profile</h1>
+          <p>Manage your personal account settings.</p>
+        </div>
+
+        <span
+          class="badge"
+          [class.text-bg-success]="profile?.isActive"
+          [class.text-bg-secondary]="!profile?.isActive">
+          {{ profile?.isActive ? 'Active' : 'Inactive' }}
+        </span>
+      </div>
+      
+      <ul ngbNav #nav="ngbNav" class="nav-tabs mb-4">
+        <li [ngbNavItem]="1">
+          <button ngbNavLink>Profile</button>
+
+          <ng-template ngbNavContent>
+            <div class="card shadow-sm">
+              <div class="card-body">
+                
+                <div class="row align-items-center mb-4">
+                  <div class="col-12 col-md-3 text-center">
+                    <div class="avatar-wrapper">
+                      <img
+                        [src]="users.getAvatarUrl(users.currentUser()?.id)"
+                        class="avatar"
+                        (error)="onAvatarError($event)">
+                    </div>
+                  </div>
+                  
+                  <div class="col-12 col-md-8 account-information">
+                    <h2 class="h5 mb-4">Account information</h2>
+
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <div class="text-muted small">Display name</div>
+                        <div>{{ profile.displayName }}</div>
+                      </div>
+
+                      <div class="col-md-6 mb-3">
+                        <div class="text-muted small">Email</div>
+                        <div>{{ profile.email }}</div>
+                      </div>
+
+                      <div class="col-md-6 mb-3">
+                        <div class="text-muted small">Language</div>
+                        <div>{{ profile.preferredLanguage }}</div>
+                      </div>
+
+                      <div class="col-md-6 mb-3">
+                        <div class="text-muted small">Role</div>
+                        <span class="badge text-bg-primary">
+                            {{ profile.isAdmin ? 'Administrator' : 'User' }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <hr>
+                
+                <h2 class="h5 mb-4">Edit profile</h2>
+                
+                <form>
+                  <div class="mb-3">
+                    <label for="displayName" class="form-label">
+                      Display Name
+                    </label>
+
+                    <input
+                      id="displayName"
+                      type="text"
+                      class="form-control"
+                      [value]="profile.displayName">
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="email" class="form-label">
+                      Email address
+                    </label>
+
+                    <input
+                      id="email"
+                      type="email"
+                      class="form-control"
+                      [value]="profile.email">
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="language" class="form-label">
+                      Preferred language
+                    </label>
+
+                    <select
+                      id="language"
+                      class="form-select"
+                      [value]="profile.preferredLanguage">
+                      <option value="en">Englisch</option>
+                      <option value="de">Deutsch</option>
+                    </select>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary">
+                    Save changes
+                  </button>
+                </form>
+
+              </div>
+            </div>
+          </ng-template>
+        </li>
+
+        <li [ngbNavItem]="2">
+          <button ngbNavLink>Security</button>
+
+          <ng-template ngbNavContent>
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <h2 class="h5 mb-3">Password</h2>
+                <p class="text-muted">
+                  Change your password here.
+                </p>
+              </div>
+            </div>
+          </ng-template>
+        </li>
+
+      </ul>
+      
+      <div [ngbNavOutlet]="nav"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ...existing code... -->
+<!--  -->
+
