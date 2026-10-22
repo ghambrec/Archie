@@ -8,6 +8,8 @@ import pylibheif
 from io import BytesIO
 from PIL import Image
 from docx import Document
+from docx.table import Table
+from docx.text.paragraph import Paragraph
 from openpyxl import load_workbook
 from charset_normalizer import from_bytes
 # from pptx import Presentation
@@ -93,26 +95,34 @@ def xlsx_parser(document_bytes: bytes) -> str:
 
 
 def docx_parser(document_bytes: bytes) -> str:
-    """
-    read docx documents, screenshots will be missed,
-      would require to create a pdf file with libreoffice and than only run the ocr modal  over it
-    """
     try:
-        results = []
-        logging.info("docx file gets read , but no screenshots will be missed")
+        results: list[str] = []
+
         with BytesIO(document_bytes) as stream:
             document = Document(stream)
-            paragraphs = document.paragraphs
 
-            logging.info("DOCX: found %d body paragraphs", len(paragraphs))
+            for block in document.iter_inner_content():
+                if isinstance(block, Paragraph):
+                    if block.text.strip():
+                        results.append(block.text)
 
-            results.append(paragraphs)
+                elif isinstance(block, Table):
+                    rows: list[str] = []
+
+                    for row in block.rows:
+                        cells = [cell.text for cell in row.cells]
+
+                        if any(text.strip() for text in cells):
+                            rows.append("\t".join(cells))
+
+                    if rows:
+                        results.append("\n".join(rows))
+
+        return "\n\n".join(results)
 
     except Exception:
-        logging.exception("docx extraction failed")
+        logging.exception("DOCX extraction failed")
         raise
-
-    return "\n\n".join(results)
 
 
 def pdf_parser(document_bytes: bytes) -> str:
