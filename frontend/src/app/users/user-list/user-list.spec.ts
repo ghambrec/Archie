@@ -9,6 +9,8 @@ import { Groups } from '../../groups/groups';
 import { EditUserModal } from '../edit-user-modal/edit-user-modal';
 import { UserInfo, Users } from '../users';
 import { UserList } from './user-list';
+import { UserTable } from '../user-table/user-table';
+import { DeletedUserList } from '../deleted-user-list/deleted-user-list';
 
 // Translation setup is irrelevant to this button test.
 @Pipe({
@@ -52,7 +54,12 @@ describe('UserList edit button', () => {
               hasValue: () => true,
               value: () => [user],
               reload: vi.fn(),
+              isLoading: () => false, error: () => undefined,
             },
+            deletedUsersResource: () => ({
+              hasValue: () => true, value: () => [], reload: vi.fn(),
+              isLoading: () => false, error: () => undefined,
+            }),
             getAvatarUrl: () => '/avatar',
           },
         },
@@ -62,6 +69,12 @@ describe('UserList edit button', () => {
       .overrideComponent(UserList, {
         remove: { imports: [TranslocoPipe] },
         add: { imports: [FakeTranslocoPipe] },
+      })
+       .overrideComponent(UserTable, {
+        remove: { imports: [TranslocoPipe] }, add: { imports: [FakeTranslocoPipe] },
+      })
+      .overrideComponent(DeletedUserList, {
+        remove: { imports: [TranslocoPipe] }, add: { imports: [FakeTranslocoPipe] },
       })
       .compileComponents();
 

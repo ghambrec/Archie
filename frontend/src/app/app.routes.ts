@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { Home } from './home/home';
 import { Settings } from './settings/settings';
 import { Shell } from './shell/shell';
 import { Login } from './auth/login/login';
@@ -25,11 +24,6 @@ export const routes: Routes = [
 				redirectTo: 'documents',
 				pathMatch: 'full',
 			},
-			// {
-			// 	path: 'home',
-			// 	component: Home,
-			// 	title: 'Home',
-			// },
 			{
 				path: 'documents',
 				component: DocPage,
@@ -50,19 +44,13 @@ export const routes: Routes = [
 				component: Profile,
 				title: 'Profile',
 			},
-		],
-	},
-	{
-		path: '',
-		component: Shell,
-		canActivate: [authGuard, adminGuard],
-		children: [
 			{
 				path: 'settings',
 				component: Settings,
-				title: 'Settings',
+				canActivate: [adminGuard],
+				title: 'Settings'
 			}
-		]
+		],
 	},
 	{
 		path: '**',

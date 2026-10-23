@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEmail, IsString, IsUUID } from 'class-validator';
 
 export class UserInfoDto {
@@ -27,4 +27,7 @@ export class UserInfoDto {
     example: '2026-08-06T12:30:00.000Z',
   })
   lastLoginAt!: Date | null;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  deletedAt?: Date | null;
 }
