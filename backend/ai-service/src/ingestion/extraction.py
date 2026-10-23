@@ -8,6 +8,7 @@ from src.ingestion.file_parser import (
     ocr_image,
     heic_image,
     docx_parser,
+    odt_parser,
     xlsx_parser,
     xls_parser
 )
@@ -42,6 +43,7 @@ PARSERS: dict[str, Parser] = {
     "image/jpeg": ocr_image,
     "image/heic": heic_image,
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": docx_parser,
+    "application/vnd.oasis.opendocument.text": odt_parser,
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": xlsx_parser,
     "application/vnd.ms-excel": xls_parser,
 }

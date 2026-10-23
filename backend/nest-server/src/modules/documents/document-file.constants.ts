@@ -5,6 +5,7 @@ export interface AllowedFileType {
 }
 
 const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+const ODT = 'application/vnd.oasis.opendocument.text';
 const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const CFB = 'application/x-cfb';
 
@@ -16,6 +17,7 @@ export const ALLOWED_FILE_TYPES = new Map<string, AllowedFileType>([
 	['jpeg',	{ mimeType: 'image/jpeg',				detectedMimeType: 'image/jpeg',			aiSupported: true }],
 	['heic',	{ mimeType: 'image/heic',				detectedMimeType: 'image/heic',			aiSupported: true }],
 	['docx',	{ mimeType: DOCX,						detectedMimeType: DOCX,					aiSupported: true }],
+	['odt', { mimeType: ODT, detectedMimeType: ODT, aiSupported: true }],
 	['xlsx',	{ mimeType: XLSX,						detectedMimeType: XLSX,					aiSupported: true }],
 	['doc',		{ mimeType: 'application/msword',		detectedMimeType: CFB,					aiSupported: false }],
 	['xls',		{ mimeType: 'application/vnd.ms-excel',	detectedMimeType: 'application/x-cfb',	aiSupported: true }],
