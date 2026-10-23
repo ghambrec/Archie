@@ -37,9 +37,15 @@ export class AuthService {
 
 		await this.loginAttemptService.clearAttempts(request.email);
 		
-		const hasToChangePassword = user.lastLoginAt === null;
+		const hasToChangePassword = user.mustChangePassword;
 
 		const sessionId = await this.sessionService.create(user.id);
+		try {
+			await this.userService.recordSuccessfulLogin(user.id, new Date());
+		} catch (error) {
+			await this.sessionService.destroy(sessionId);
+			throw error;
+		}
 		return { user, sessionId, hasToChangePassword };
 	}
 
@@ -52,7 +58,7 @@ export class AuthService {
 			displayName: request.displayName,
 		}
 
-		const user = await this.userService.create(createUserDto);
+		const user = await this.userService.create(createUserDto, false);
 
 		const sessionId = await this.sessionService.create(user.id);
 		return sessionId;

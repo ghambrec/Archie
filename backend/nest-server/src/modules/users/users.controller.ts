@@ -46,7 +46,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Create new user' })
   @Post('create')
   async create(@Body() dto: CreateUserDto): Promise<CreateUserResponseDto> {
-    const userEntity = await this.usersService.create(dto);
+    const userEntity = await this.usersService.create(dto, true);
     return {id: userEntity.id};
   }
 
@@ -80,7 +80,7 @@ export class UsersController {
   async updateCurrentUser (
     @Req() req: Request, 
     @Body() dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
-    return this.usersService.updateProfile(req.userId!, dto);
+    return this.usersService.updateProfile(req.userId!, req.userId!, dto);
   }
 
 
@@ -91,9 +91,10 @@ export class UsersController {
   })
   @Patch(':userId')
   async updatetUser (
+    @Req() req: Request,
     @Param('userId') userId: string,
     @Body() dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
-    return this.usersService.updateProfile(userId, dto);
+    return this.usersService.updateProfile(req.userId!, userId, dto);
   }
 
   @UseGuards(SessionAuthGuard, AdminRequiredGuard)
@@ -170,7 +171,7 @@ export class UsersController {
 
   @UseGuards(SessionAuthGuard, AdminRequiredGuard)
   @Patch(':userId/password')
-  async resetPassword(@Param('userId') userId: string, @Body() dto: ChangePasswordDto): Promise<void> {
-    await this.usersService.resetPassword(userId, dto);
+  async resetPassword(@Req() req: Request, @Param('userId') userId: string, @Body() dto: ChangePasswordDto): Promise<void> {
+    await this.usersService.resetPassword(req.userId!, userId, dto);
   }
 }
