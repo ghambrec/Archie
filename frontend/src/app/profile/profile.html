@@ -11,12 +11,18 @@
 
         <span
           class="badge"
-          [class.text-bg-success]="profile?.isActive"
-          [class.text-bg-secondary]="!profile?.isActive">
-          {{ profile?.isActive ? 'Active' : 'Inactive' }}
+          [class.text-bg-success]="profile().isActive"
+          [class.text-bg-secondary]="!profile().isActive">
+          {{ profile().isActive ? 'Active' : 'Inactive' }}
         </span>
       </div>
-      
+<!--       
+      <div class="text-center mb-4">
+        <div class="avatar-wrapper mx-auto" style="width: 140px; height: 140px;">
+          <img [src]="avatarUrl" class="avatar" (error)="onAvatarError($event)">
+        </div>
+      </div> -->
+
       <ul ngbNav #nav="ngbNav" class="nav-tabs mb-4">
         <li [ngbNavItem]="1">
           <button ngbNavLink>Profile</button>
@@ -29,7 +35,7 @@
                   <div class="col-12 col-md-3 text-center">
                     <div class="avatar-wrapper">
                       <img
-                        [src]="users.getAvatarUrl(users.currentUser()?.id)"
+                        [src]="avatarUrl"
                         class="avatar"
                         (error)="onAvatarError($event)">
                     </div>
@@ -41,23 +47,23 @@
                     <div class="row">
                       <div class="col-md-6 mb-3">
                         <div class="text-muted small">Display name</div>
-                        <div>{{ profile.displayName }}</div>
+                        <div>{{ profile().displayName }}</div>
                       </div>
 
                       <div class="col-md-6 mb-3">
                         <div class="text-muted small">Email</div>
-                        <div>{{ profile.email }}</div>
+                        <div>{{ profile().email }}</div>
                       </div>
 
                       <div class="col-md-6 mb-3">
                         <div class="text-muted small">Language</div>
-                        <div>{{ profile.preferredLanguage }}</div>
+                        <div>{{ profile().preferredLanguage }}</div>
                       </div>
 
                       <div class="col-md-6 mb-3">
                         <div class="text-muted small">Role</div>
                         <span class="badge text-bg-primary">
-                            {{ profile.isAdmin ? 'Administrator' : 'User' }}
+                            {{ profile().isAdmin ? 'Administrator' : 'User' }}
                         </span>
                       </div>
                     </div>
@@ -78,7 +84,7 @@
                       id="displayName"
                       type="text"
                       class="form-control"
-                      [value]="profile.displayName">
+                      [value]="profile().displayName">
                   </div>
 
                   <div class="mb-3">
@@ -90,7 +96,7 @@
                       id="email"
                       type="email"
                       class="form-control"
-                      [value]="profile.email">
+                      [value]="profile().email">
                   </div>
 
                   <div class="mb-3">
@@ -101,7 +107,7 @@
                     <select
                       id="language"
                       class="form-select"
-                      [value]="profile.preferredLanguage">
+                      [value]="profile().preferredLanguage">
                       <option value="en">Englisch</option>
                       <option value="de">Deutsch</option>
                     </select>
