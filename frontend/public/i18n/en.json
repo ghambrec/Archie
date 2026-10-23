@@ -266,6 +266,7 @@
 			"password": "Password",
 			"btnClose": "Close",
 			"btnSubmit": "Edit User",
+			"btnSubmitPending": "Saving...",
 			"preferredLanguage": "Preferred Language",
 			"languageHint": "Supported languages: en, de and es.",
 			"errors": {
