@@ -26,9 +26,9 @@ export class SetPassword {
     setPasswordForm = form(
         this.model,
         (p) => {
-            required(p.password, { message: 'Password is required' });
-            minLength(p.password, 8, { message: 'Minimum 8 characters' });
-            required(p.confirmPassword, { message: 'Please confirm password' });
+            required(p.password, { message: 'auth.setPassword.errors.passwordRequired' });
+            minLength(p.password, 8, { message: 'auth.setPassword.errors.passwordMinLength' });
+            required(p.confirmPassword, { message: 'auth.setPassword.errors.confirmPasswordRequired' });
         },
         {
             submission: {
@@ -37,7 +37,7 @@ export class SetPassword {
                     const { password, confirmPassword } = field().value();
 
                     if (password !== confirmPassword) {
-                        return { kind: 'serverError', message: 'Passwords do not match' };
+                        return { kind: 'serverError', message: 'auth.setPassword.errors.passwordMismatch' };
                     }
 
                     try {
@@ -46,7 +46,7 @@ export class SetPassword {
                         return;
                     } catch {
                         this.feedbackMsg.set('auth.setPassword.errorGeneral');
-                        return { kind: 'serverError', message: 'Failed to set password' };
+                        return { kind: 'serverError', message: 'auth.setPassword.errorGeneral' };
                     }
                 }
             }
