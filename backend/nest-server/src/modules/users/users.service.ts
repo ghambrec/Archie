@@ -15,7 +15,7 @@ import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { GetUsersResponseDto } from './dto/get-users-response.dto';
 import { Logger } from 'nestjs-pino';
 import { UsersFileService } from './users-file.service';
-import { ADMIN_PERMISSION_KEY, PermissionsService } from '../permissions/permissions.service';
+import { PermissionsService } from '../permissions/permissions.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { Permission } from '../permissions/entities/permission.entity';
 import { UserPermission } from '../user_permission/entities/user_permission.entity';
@@ -134,16 +134,7 @@ export class UsersService implements OnApplicationBootstrap {
         if (!user) throw new ApplicationException(ErrorCode.UserNotFound);
 
         // Re-check admin status inside the transaction to handle concurrent deletions.
-        const admins: Array<{ id: string }> = await manager.query(
-          `SELECT u.id FROM users AS u
-           WHERE u.deleted_at IS NULL AND u.is_active = true
-             AND EXISTS (
-               SELECT 1 FROM user_permission AS up
-               JOIN permissions AS p ON p.id = up.permission_id
-               WHERE up.user_id = u.id AND p.perm_key = $1
-             )`,
-          [ADMIN_PERMISSION_KEY],
-        );
+        const admins = await this.permissionsService.getActiveAdmins(manager);
         if (admins.some(admin => admin.id === userId) && admins.length <= 1) {
           throw new ConflictException('Cannot delete the last active admin');
         }
