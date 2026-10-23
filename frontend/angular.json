@@ -32,7 +32,6 @@
             ],
             "styles": ["node_modules/bootstrap-icons/font/bootstrap-icons.css", "src/styles.scss"],
             "polyfills": [
-              "zone.js",
               "@angular/localize/init"]
           },
           "configurations": {
