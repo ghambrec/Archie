@@ -120,6 +120,46 @@
 
               </div>
             </div>
+
+            <!-- Group Memberships Section -->
+            <div class="card shadow-sm mt-4">
+              <div class="card-header">
+                <h2 class="h5 mb-0">Group memberships</h2>
+              </div>
+              <div class="card-body">
+                @if (userGroups().length === 0) {
+                 <p class="text-muted">No group memberships found.</p>
+                } @else {
+                  <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                      <thead>
+                        <tr>
+                          <th scope="col">Group name</th>
+                          <th scope="col">Permissions</th>
+                          <th scope="col">Joined at</th>
+                          <th scope="col" style="width: 1%;"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (group of userGroups(); track group.groupId) {
+                          <tr>
+                            <td>{{ group.name }}</td>
+                            <td>Not implemented yet</td>
+                            <td>{{ group.joinedAt | date: 'short' }}</td>
+                            <!-- <td>
+                               <button class="btn btn-sm btn-outline-secondary" disabled>
+                                <i class="bi bi-info-circle"></i>
+                               </button>
+                            </td> -->
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              </div>
+            </div>
+
           </ng-template>
         </li>
 
