@@ -1,7 +1,9 @@
-import { Component, computed, effect, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { Users } from '../users/users';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { DatePipe } from '@angular/common';
 
 interface ProfileUser {
   id: string;
@@ -14,13 +16,19 @@ interface ProfileUser {
 
 @Component({
   selector: 'app-profile',
-  imports: [NgbNavModule],
+  imports: [NgbNavModule, DatePipe],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
 })
-export class Profile implements OnInit, OnDestroy {
+export class Profile implements OnDestroy {
   private readonly users = inject(Users);
   private readonly http = inject(HttpClient);
+
+  readonly userGroups = signal<Array<{
+    groupId: string;
+    name: string;
+    joinedAt: string;
+  }>>([]);
 
   private avatarObjectUrl?: string;
 
@@ -58,23 +66,33 @@ export class Profile implements OnInit, OnDestroy {
       if (user) {
         console.log('[Profile] Effect triggered for user:', user.id);
         this.loadAvatar(user.id);
+        this.loadUserGroups(user.id)
       } else {
-        this.avatarUrl = 'images/default-avatar/svg';
+        this.avatarUrl = 'images/default-avatar.svg';
+        this.userGroups.set([]);
       }
     });
-  }
 
-  ngOnInit(): void {
+    // 2. inital user load -  bei coldstart
     if (!this.users.currentUser()) {
       this.users.getCurrentUser().subscribe({
-        next: (user) => {
-          this.users.currentUser.set(user);
-          // this.loadAvatar(user.id);
-        },
+        next: (user) => this.users.currentUser.set(user),
         error: () => this.avatarUrl = 'images/default-avatar.svg',
       });
     }
   }
+
+  // ngOnInit(): void {
+  //   if (!this.users.currentUser()) {
+  //     this.users.getCurrentUser().subscribe({
+  //       next: (user) => {
+  //         this.users.currentUser.set(user);
+  //         // this.loadAvatar(user.id);
+  //       },
+  //       error: () => this.avatarUrl = 'images/default-avatar.svg',
+  //     });
+  //   }
+  // }
 
   private loadAvatar(userId: string): void {
     const url = this.users.getAvatarUrl(userId);
@@ -93,26 +111,15 @@ export class Profile implements OnInit, OnDestroy {
     });
   }
 
-  // private loadAvatar(userId: string): void {
-  //   const url = this.users.getAvatarUrl(userId);
-  //   console.log('[Profile] Loading avatar for:', userId, 'URL:', url);
-
-  //   this.http.get(url, {
-  //     responseType: 'blob',
-  //     withCredentials: true,
-  //   }).subscribe({
-  //     next: (blob) => {
-  //       console.log('[Profile] Avatar blob received:', blob.type, blob.size);
-  //       this.avatarObjectUrl = URL.createObjectURL(blob);
-  //       this.avatarUrl = this.avatarObjectUrl;
-  //       console.log('[Profile] avatarUrl set to:', this.avatarUrl);
-  //     },
-  //     error: (err) => {
-  //       console.error('[Profile] Avatar request failed:', err);
-  //       this.avatarUrl = 'images/default-avatar.svg';
-  //     },
-  //   });
-  // }
+  private async loadUserGroups(userId: string): Promise<void> {
+    try {
+      const response = await firstValueFrom(this.users.getUserGroups(userId));
+      this.userGroups.set(response.groups);
+    } catch (error) {
+      console.error('[Profile] Failed to load user groups:', error);
+      this.userGroups.set([]);
+    }
+  }
 
   onAvatarError(event: Event): void {
     (event.target as HTMLImageElement).src = 'images/default-avatar.svg';
