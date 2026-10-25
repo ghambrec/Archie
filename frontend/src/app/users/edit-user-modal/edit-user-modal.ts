@@ -1,17 +1,14 @@
-import { Component, inject, signal} from '@angular/core';
-import { minLength, form, FormField,FormRoot, maxLength, pattern, email, required } from '@angular/forms/signals';
+import { TextFormField } from '../../shared/form-field/form-field';
+import { Component, inject, signal } from '@angular/core';
+import { email, form, FormRoot, maxLength, minLength, pattern, required } from '@angular/forms/signals';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { SupportedLanguage } from '../../core/i18n/supported-language';
-import { PatchUser, Users, UserInfo, EditUserForm } from '../users';
-import { UserInfoModal } from '../user-info-modal/user-info-modal';
-import { environment } from '../../../environments/environment';
-import { PrefixNot } from '@angular/compiler';
 import { firstValueFrom } from 'rxjs';
-import { HttpErrorResponse } from '@angular/common/http';
-import { PASSWORD_POLICY } from '../../validation/password-policy';
 import { SUPPORTED_LANGUAGE_PATTERN } from '../../core/i18n/supported-language';
-import { DISPLAY_NAME_MAX_LENGTH  } from '../../validation/display-name-policy';
+import { DISPLAY_NAME_MAX_LENGTH } from '../../validation/display-name-policy';
+import { PASSWORD_POLICY } from '../../validation/password-policy';
+import { Users, type EditUserForm, type PatchUser, type UserInfo } from '../users';
 
 type EditUserFormInput = Omit<EditUserForm, 'preferredLanguage'> & {
   preferredLanguage: string;
@@ -19,118 +16,76 @@ type EditUserFormInput = Omit<EditUserForm, 'preferredLanguage'> & {
 
 @Component({
   selector: 'app-edit-user-modal',
-  imports: [FormRoot, FormField, TranslocoPipe],
+  imports: [FormRoot, TextFormField, TranslocoPipe],
   templateUrl: './edit-user-modal.html',
   styleUrl: './edit-user-modal.scss',
 })
 export class EditUserModal {
   selectedUser!: UserInfo;
-  readonly saveErrorKey = signal<string | null>(null);
   protected readonly activeModal = inject(NgbActiveModal);
+  private readonly usersService = inject(Users);
 
-  protected readonly user = inject(Users)
-
-  editUserModal = signal<EditUserFormInput>({
+  readonly editUserModal = signal<EditUserFormInput>({
     email: '',
-	  displayName: '',
-	  preferredLanguage: 'en',
+    displayName: '',
+    preferredLanguage: 'en',
     password: '',
-  })
+  });
 
-  editUserForm = form(this.editUserModal, (schemaPath) =>{
-    minLength(schemaPath.password, PASSWORD_POLICY.minLength, {  message: 'users.updateUser.errors.passwordError'})
-    maxLength(schemaPath.displayName, DISPLAY_NAME_MAX_LENGTH, { message: 'users.updateUser.errors.displayNameTooLong'})
-    email(schemaPath.email,   {message: 'users.updateUser.errors.emailFormat'})
-    pattern(schemaPath.preferredLanguage, SUPPORTED_LANGUAGE_PATTERN,{
-      message: 'users.updateUser.errors.unsupportedLanguage'})
-    required(schemaPath.displayName, { 
-      message: 'users.updateUser.errors.displayNameRequired'
-    })
-    required(schemaPath.email, {
-      message: 'users.updateUser.errors.emailRequired'
-    })
-    required(schemaPath.preferredLanguage, {
-      message: 'users.updateUser.errors.languageRequired'
-    })
-  })
+  readonly editUserForm = form(this.editUserModal, (path) => {
+    minLength(path.password, PASSWORD_POLICY.minLength, { message: 'users.updateUser.errors.passwordError' });
+    maxLength(path.displayName, DISPLAY_NAME_MAX_LENGTH, { message: 'users.updateUser.errors.displayNameTooLong' });
+    email(path.email, { message: 'users.updateUser.errors.emailFormat' });
+    pattern(path.preferredLanguage, SUPPORTED_LANGUAGE_PATTERN, { message: 'users.updateUser.errors.unsupportedLanguage' });
+    required(path.displayName, { message: 'users.updateUser.errors.displayNameRequired' });
+    required(path.email, { message: 'users.updateUser.errors.emailRequired' });
+    required(path.preferredLanguage, { message: 'users.updateUser.errors.languageRequired' });
+  }, {
+    submission: {
+      action: async (field) => this.save(field().value()),
+    },
+  });
 
   initialize(user: UserInfo): void {
     this.selectedUser = user;
-
     this.editUserModal.set({
       email: user.email,
       displayName: user.displayName,
       preferredLanguage: user.preferredLanguage,
       password: '',
-
     });
-  };
+  }
 
+  private async save(values: EditUserFormInput) {
+    const changes: PatchUser = {};
+    const email = values.email.trim().toLowerCase();
+    const displayName = values.displayName.trim();
+    const preferredLanguage = values.preferredLanguage.trim().toLowerCase();
 
-  async save(): Promise <void> {
-    this.saveErrorKey.set(null);
+    if (email !== this.selectedUser.email.trim().toLowerCase()) changes.email = email;
+    if (displayName !== this.selectedUser.displayName.trim()) changes.displayName = displayName;
+    if (preferredLanguage !== this.selectedUser.preferredLanguage) changes.preferredLanguage = preferredLanguage;
+    if (values.password.trim() !== '') changes.password = values.password;
 
-    const values = this.editUserModal();
-  
-    const changes: PatchUser = {}
-
-    const newEmail =  values.email.trim().toLowerCase();
-    const origEmail = this.selectedUser.email.trim().toLocaleLowerCase();
-    if (newEmail !== origEmail)
-      changes.email = newEmail;
-
-    const newDisplayName =  values.displayName.trim();
-    const origDisplayName = this.selectedUser.displayName.trim();
-    if (newDisplayName !== origDisplayName)
-      changes.displayName = newDisplayName;
-
-    const newLanguage = values.preferredLanguage.trim().toLowerCase(); 
-    const origLanguage = this.selectedUser.preferredLanguage;
-    if ( newLanguage !== origLanguage)
-        changes.preferredLanguage = newLanguage
-      
-    if (values.password.trim() !== '' ) 
-    {
-  
-      changes.password = values.password;
-    }
-
-    this.editUserForm.password().markAsTouched();
-    this.editUserForm.displayName().markAsTouched();
-    if (this.editUserForm().invalid()) {
-        return 
-      }
     try {
-      await firstValueFrom ( 
-        this.user.update(this.selectedUser.id, changes)
-      )
-    
-    this.activeModal.close();
-    } catch (error : unknown) {
-      let code: string | undefined;
-      if (error instanceof HttpErrorResponse) 
-      {
-        code = error.error?.code;
-      }else {
-        code = undefined;
-
-      }
-
+      await firstValueFrom(this.usersService.update(this.selectedUser.id, changes));
+      this.activeModal.close();
+      return;
+    } catch (error: unknown) {
+      const code = error instanceof HttpErrorResponse ? error.error?.code : undefined;
+      let message = 'errors.UNKNOWN';
       switch (code) {
         case 'AUTH_EMAIL_ALREADY_REGISTERED':
         case 'USER_NAME_ALREADY_REGISTERED':
         case 'VALIDATION_FAILED':
         case 'INTERNAL_SERVER_ERROR':
+          message = `errors.${code}`;
+          break;
         case 'UNSUPPORTED_LANGUAGE':
-          this.saveErrorKey.set(`errors.${code}`);
-          break;
-  
-        default:
-          this.saveErrorKey.set('errors.UNKNOWN');
+          message = 'users.updateUser.errors.unsupportedLanguage';
           break;
       }
-      
-      }
+      return { kind: 'serverError', message };
     }
+  }
 }
-

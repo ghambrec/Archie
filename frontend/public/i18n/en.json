@@ -208,7 +208,13 @@
 			"btnCancel": "Cancel",
 			"btnSubmit": "Save",
 			"btnSubmitPending": "Sending...",
-			"errorGeneral": "Failed to set password. Please try again"
+			"errorGeneral": "Failed to set password. Please try again",
+			"errors": {
+				"passwordRequired": "Password is required.",
+				"passwordMinLength": "Password must contain at least 8 characters.",
+				"confirmPasswordRequired": "Please confirm your password.",
+				"passwordMismatch": "Passwords do not match."
+			}
 		}
 	},
 	"users": {
@@ -301,6 +307,7 @@
 			"password": "Password",
 			"btnClose": "Close",
 			"btnSubmit": "Edit User",
+			"btnSubmitPending": "Saving...",
 			"preferredLanguage": "Preferred Language",
 			"languageHint": "Supported languages: en, de and es.",
 			"errors": {
