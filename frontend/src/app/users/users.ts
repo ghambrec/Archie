@@ -1,4 +1,4 @@
-import { Service, computed, inject, signal } from '@angular/core';
+import { Service, computed, inject, signal, type Signal } from '@angular/core';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { SupportedLanguage } from '../core/i18n/supported-language';
@@ -52,6 +52,7 @@ export interface UserInfo {
 	preferredLanguage: SupportedLanguage;
 	isActive: boolean;
 	lastLoginAt: string | null;
+  deletedAt?: string | null;
 	//avatar: string;
 
 }
@@ -96,6 +97,28 @@ export class Users {
 		}
 	)
 
+  // Frontend contract: the admin-only endpoint returns GetUsersResponse including deletedAt.
+  deletedUsersResource(enabled: Signal<boolean>) {
+    return httpResource<UserInfo[]>(
+      () => enabled() && this.currentUser()
+        ? {
+            url: `${this.baseUrl}/deleted`,
+            params: { limit: 100 },
+            withCredentials: true,
+          }
+        : undefined,
+      {
+        defaultValue: [],
+        parse: (raw: unknown) => (raw as GetUsersResponse).data,
+      },
+    );
+  }
+
+  // The backend must revoke old sessions before reactivating the account.
+  restoreUser(userId: string) {
+    return this.http.patch<void>(`${this.baseUrl}/${userId}/restore`, {}, { withCredentials: true });
+  }
+
 	getCurrentUser() {
 		const url = `${this.baseUrl}/me`;
 		return this.http.get<CurrentUser>(url, { withCredentials: true });
@@ -107,6 +130,10 @@ export class Users {
 		return this.http.post<CreateUserResponse>(url, body, { withCredentials: true });
 
 	}
+
+  deleteUser(userId: string) {
+    return this.http.delete<void>(`${this.baseUrl}/${userId}`, { withCredentials: true });
+  }
 
 	getAvatarUrl(userId?: string | null) {
 		if (!userId) {

@@ -1,7 +1,22 @@
+:host {
+  display: block;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.sidebar {
+  overflow: hidden;
+}
+
+.sidebar > :not(app-chat-sidebar):not(app-tag-tree) {
+  flex-shrink: 0;
+}
+
 app-tag-tree {
-	min-height: 0;
+  min-height: 0;
+  flex-basis: 0;
 }
 
 .nav-link {
-	color: var(--bs-dark);
+  color: var(--bs-dark);
 }

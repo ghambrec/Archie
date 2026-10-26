@@ -34,6 +34,9 @@ export class User {
   @Column({ type: 'boolean', name: 'is_active', default: true })
   isActive!: boolean;
 
+  @Column({ type: 'boolean', name: 'must_change_password', default: false })
+  mustChangePassword!: boolean;
+
   @Column({ type: 'timestamptz', name: 'email_verified_at', nullable: true })
   emailVerifiedAt!: Date | null;
 

@@ -27,6 +27,20 @@ export class PermissionsService {
 		return this.permissionsRepository.find();
 	}
 
+  async getActiveAdmins(manager: EntityManager): Promise<Array<{ id: string }>> {
+    // Use the caller's transaction instead of the permission cache.
+    return manager.query(
+      `SELECT u.id FROM users AS u
+       WHERE u.deleted_at IS NULL AND u.is_active = true
+         AND EXISTS (
+           SELECT 1 FROM user_permission AS up
+           JOIN permissions AS p ON p.id = up.permission_id
+           WHERE up.user_id = u.id AND p.perm_key = $1
+         )`,
+      [ADMIN_PERMISSION_KEY],
+    );
+  }
+
 	async hasPermission(userId: string, groupId: string, permKey: string): Promise<boolean> {
 		const permissionsByGroup = await this.getUserPermissionsByGroupId(userId);
 		return permissionsByGroup[groupId]?.includes(permKey) ?? false;
@@ -79,6 +93,8 @@ export class PermissionsService {
 		select exists (
 			select 1
 			from user_permission as up
+			inner join users as u
+				on u.id = up.user_id and u.deleted_at is null and u.is_active = true
 			inner join permissions as p
 				on p.id = up.permission_id
 			where
@@ -122,6 +138,8 @@ export class PermissionsService {
 		select exists (
 			select 1
 			from user_permission as up
+			inner join users as u
+				on u.id = up.user_id and u.deleted_at is null and u.is_active = true
 			inner join permissions as p
 				on p.id = up.permission_id
 			where

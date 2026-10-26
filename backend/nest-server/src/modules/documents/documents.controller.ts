@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Delete,
+  Put,
   Param,
   ParseUUIDPipe,
   Query,
@@ -27,11 +28,17 @@ import { GetDocumentsResponseDto } from './dto/get-documents-response.dto';
 import { DocumentSummaryDto } from './dto/document-summary.dto';
 import { SetDocumentTagDto } from './dto/set-document-tag.dto';
 import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
+import { SetDocumentGroupDto } from './dto/set-document-group.dto';
+import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-response.dto';
 import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
 import { DocumentFileValidationService } from './document-file-validation.service';
 import { UploadConfigResponseDto } from './dto/upload-config-response.dto';
+import { DocumentPermissionsGuard } from './guards/document-permissions.guard';
+import { PermissionsGuard } from '../permissions/guards/permissions.guard';
+import { RequirePermission } from '../permissions/decorators/require-permission.decorator';
+import { DocumentPermission } from '../permissions/permission-keys';
 
 @ApiTags('documents')
 @Controller('documents')
@@ -46,7 +53,8 @@ export class DocumentsController {
     description:
       'Uploads a file, stores it as a new document owned by the current user and assigns it to the given group.',
   })
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, PermissionsGuard)
+  @RequirePermission(DocumentPermission.Upload)
   @Post('upload/:groupId')
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
@@ -75,7 +83,7 @@ export class DocumentsController {
 
   @ApiOperation({
     summary: 'List documents',
-    description: "Returns a paginated, filterable list of the current user's documents.",
+    description: 'Returns a paginated, filterable list of documents in groups where the current user has the documents.read permission.',
   })
   @UseGuards(SessionAuthGuard)
   @Get()
@@ -99,7 +107,8 @@ export class DocumentsController {
     summary: 'Get a document',
     description: 'Returns the metadata summary of a single document by its ID.',
   })
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, DocumentPermissionsGuard)
+  @RequirePermission(DocumentPermission.Read)
   @Get(':id')
   async findOne(@Req() req: Request, @Param('id') id: string): Promise<DocumentSummaryDto> {
     return this.documentsService.findOne(req.userId!, id);
@@ -109,7 +118,8 @@ export class DocumentsController {
     summary: 'Assign a tag to a document',
     description: 'Adds the given tag to the document.',
   })
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, DocumentPermissionsGuard)
+  @RequirePermission(DocumentPermission.Update)
   @Post(':id/tags')
   async setTag(
     @Req() req: Request,
@@ -124,7 +134,8 @@ export class DocumentsController {
     description:
       'Assigns all tags suggested by the AI to the document. Proposals for new tags are ignored.',
   })
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, DocumentPermissionsGuard)
+  @RequirePermission(DocumentPermission.Update)
   @Post(':id/tags/confirm-suggestions')
   @HttpCode(HttpStatus.OK)
   async confirmSuggestedTags(
@@ -134,7 +145,8 @@ export class DocumentsController {
     return this.documentsService.confirmSuggestedTags(req.userId!, documentId);
   }
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, DocumentPermissionsGuard)
+  @RequirePermission(DocumentPermission.Read)
   @Get(':id/download')
   @ApiOperation({
     summary: 'Download a document',
@@ -151,7 +163,7 @@ export class DocumentsController {
       id,
     );
 
-    res.attachment(documentDownloadStream.filename);
+  res.attachment(documentDownloadStream.filename);
 	res.setHeader('Content-Type', documentDownloadStream.mimeType);
 	res.setHeader('Content-Length', documentDownloadStream.sizeBytes.toString());
 	res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -168,26 +180,43 @@ export class DocumentsController {
 
 
   @ApiOperation({
-    summary: 'Remove a document from a group',
-    description: 'Removes the given document from the specified group.',
+    summary: 'Move a document to another group',
+    description:
+      'Removes the document from its current group and assigns it to the given group.',
   })
-  @UseGuards(SessionAuthGuard)
-  @Delete(':id/groups/:groupId')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  // There is no check on permision for user. If user can delete it.
-  async removeGroup(
+  @UseGuards(SessionAuthGuard, DocumentPermissionsGuard)
+  @RequirePermission(DocumentPermission.Update)
+  @Put(':id/group')
+  async moveToGroup(
     @Req() req: Request,
     @Param('id') id: string,
-    @Param('groupId') groupId: string,
-  ): Promise<void> {
-    return this.documentsService.removeGroup(req.userId!, id, groupId);
+    @Body() dto: SetDocumentGroupDto,
+  ): Promise<DocumentGroupResponseDto> {
+    return this.documentsService.moveToGroup(req.userId!, id, dto.groupId);
   }
+
+//   @ApiOperation({
+//     summary: 'Remove a document from a group',
+//     description: 'Removes the given document from the specified group.',
+//   })
+//   @UseGuards(SessionAuthGuard, DocumentPermissionsGuard)
+//   @RequirePermission(DocumentPermission.Update)
+//   @Delete(':id/groups/:groupId')
+//   @HttpCode(HttpStatus.NO_CONTENT)
+//   async removeGroup(
+//     @Req() req: Request,
+//     @Param('id') id: string,
+//     @Param('groupId') groupId: string,
+//   ): Promise<void> {
+//     return this.documentsService.removeGroup(req.userId!, id, groupId);
+//   }
 
   @ApiOperation({
     summary: 'Remove a tag from a document',
     description: 'Removes the given tag from the specified document.',
   })
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, DocumentPermissionsGuard)
+  @RequirePermission(DocumentPermission.Update)
   @Delete(':id/tags/:tagId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeTag(
@@ -202,7 +231,8 @@ export class DocumentsController {
     summary: 'Delete a document',
     description: 'Soft-deletes the document by its ID.',
   })
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, DocumentPermissionsGuard)
+  @RequirePermission(DocumentPermission.Delete)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Req() req: Request, @Param('id') id: string): Promise<void> {

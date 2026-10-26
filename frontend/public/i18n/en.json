@@ -4,6 +4,7 @@
 		"home": "Home",
 		"settings": "Settings",
 		"documents": "Documents",
+		"ai-chat" : "ai-chat",
 		"dropdown": {
 			"profile": "Profile",
 			"logOut": "Log out"
@@ -121,6 +122,90 @@
 			"manual": "Manual & Warranty"
 		}
 	},
+	"ai-chat": {
+	  "heading": "Archie Chat",
+	  "status": {
+	    "thinking": "Thinking…"
+	  },
+	  "deleteAllModal": {
+	    "heading": "Delete all chats",
+	    "question": "Delete all your chats?",
+	    "warning": "All your chats and their messages will be permanently deleted. This cannot be undone.",
+	    "error": "Could not delete all chats. Please try again."
+	  },
+	  "renameModal": {
+	    "heading": "Rename chat",
+	    "title": "Chat title",
+	    "cancel": "Cancel",
+	    "save": "Save",
+	    "saving": "Saving...",
+	    "required": "Enter a chat title.",
+	    "tooLong": "The title must contain no more than 254 characters.",
+	    "saveError": "Could not rename the chat. Please try again."
+	  },
+	  "deleteModal": {
+	    "heading": "Delete chat",
+	    "question": "Delete this chat?",
+	    "warning": "The chat and its messages will be permanently deleted.",
+	    "cancel": "Cancel",
+	    "deleting": "Deleting..."
+	  },
+	  "menu": {
+	    "label": "Options for {{ title }}",
+	    "rename": "Rename",
+	    "pin": "Pin",
+	    "delete": "Delete"
+	  },
+	  "message": {
+	    "label": "Chat messages",
+	    "sources": "Sources",
+	    "confidenceScore": "Confidence score",
+	    "sender": {
+	      "user": "User",
+	      "llm": "AI"
+	    }
+	  },
+	  "hint": {
+	    "sending": "Your question",
+	    "ask": "Ask about your documents..."
+	  },
+	  "button": {
+	    "send": "Send",
+	    "Delete_chat": "Delete Chat",
+	    "Delete_all_chats": "Delete All Chats",
+	    "new_chat": "New Chat",
+	    "retry": "Try again"
+	  },
+	  "error": {
+	    "createConversation": "Could not create the conversation. Please try again.",
+	    "ask": "No answer could be received. Your question may already have been saved.",
+        "serviceUnavailable": "The AI service is currently unavailable or its connection was interrupted. Please try again later.",
+        "timeout": "The request timed out. Your question or answer may already have been saved. Check the chat before trying again.",
+        "connectionLost": "The connection to the server was lost. Your question or answer may already have been saved. Check the chat before trying again.",
+        "cancelled": "The request was cancelled. Your question or answer may already have been saved.",
+        "conversationBusy": "An answer is already being generated for this chat. Please wait.",
+        "conversationNotFound": "This chat is no longer available.",
+        "rateLimited": "Too many requests. Please wait before trying again.",
+        "contextLimit": "The question and chat history exceed the model limit. Try a shorter question or a new chat.",
+        "invalidResponse": "The AI service returned an invalid answer. Please try again later.",
+        "generationFailed": "The answer could not be generated. Please try again later.",
+        "saveFailed": "The answer could not be saved. Check the chat before trying again.",
+        "sessionExpired": "Your session has expired. Please log in again.",
+        "forbidden": "You do not have permission to use this chat.",
+	    "createFirst": "Please create a new chat first.",
+	    "noSources": "No sources provided.",
+	    "deleteConversation": "Could not delete the conversation. Please try again."
+	  },
+	  "history": {
+	    "heading": "Chats",
+	    "loading": "Loading chats...",
+	    "loadError": "Could not load chats. Please try again.",
+	    "untitled": "Untitled chat",
+	    "empty": "No chats yet.",
+	    "opening": "Opening conversation...",
+	    "openError": "Could not open the conversation. Please try again."
+	  }
+	},
 	"login": {
 		"email": "E-Mail",
 		"password": "Password",
@@ -136,17 +221,64 @@
 			"btnCancel": "Cancel",
 			"btnSubmit": "Save",
 			"btnSubmitPending": "Sending...",
-			"errorGeneral": "Failed to set password. Please try again"
+			"errorGeneral": "Failed to set password. Please try again",
+			"errors": {
+				"passwordRequired": "Password is required.",
+				"passwordMinLength": "Password must contain at least 8 characters.",
+				"confirmPasswordRequired": "Please confirm your password.",
+				"passwordMismatch": "Passwords do not match."
+			}
 		}
 	},
 	"users": {
+		"restoreUser": {
+			"heading": "Restore user",
+			"question": "Restore this user account?",
+			"description": "The account will be reactivated with its existing group memberships and permissions. The user will need to sign in again.",
+			"cancel": "Cancel",
+			"confirm": "Restore user",
+			"restoring": "Restoring...",
+			"errors": {
+				"general": "Could not restore the user. Please try again.",
+				"forbidden": "You are not allowed to restore users.",
+				"notFound": "This user is no longer available for restoration.",
+				"conflict": "The account cannot be restored in its current state. Refresh the list and try again."
+			}
+		},
+		"deleteUser": {
+			"heading": "Delete user",
+			"question": "Delete this user?",
+			"description": "The account will be deactivated and removed from the user list. Existing documents, chats and other stored data will be retained.",
+			"cancel": "Cancel",
+			"confirm": "Delete user",
+			"deleting": "Deleting...",
+			"errors": {
+				"general": "Could not delete the user. Please try again.",
+				"selfDelete": "You cannot delete your own account.",
+				"forbidden": "You are not allowed to delete this user. An active administrator account is required.",
+				"notFound": "This user no longer exists or has already been deleted.",
+				"conflict": "The user cannot be deleted in the current state. The last active administrator must be retained. Refresh the list and try again."
+			}
+		},
 		"userList": {
 			"heading": "Users",
+			"tabs": { "users": "Users", "deleted": "Deleted users" },
+			"deletedAt": "Deleted on",
+			"actions": "Actions",
+			"inactive": "Inactive",
+			"restore": "Restore",
+			"loading": "Loading users...",
+			"loadError": "Could not load users. Please try again.",
+			"deletedLoadError": "Deleted users are currently unavailable. Please try again.",
+			"retry": "Try again",
+			"empty": "No matching users found.",
+			"deletedEmpty": "No matching deleted users found.",
 			"searchPlaceholder": "Search for name or email",
 			"email": "E-Mail",
 			"displayName": "Name",
 			"lastLogin": "Last login",
-			"active": "Active"
+			"active": "Active",
+			"delete": "Delete user"
 		},
 		"createUser": {
 			"heading": "Create User",
@@ -188,6 +320,7 @@
 			"password": "Password",
 			"btnClose": "Close",
 			"btnSubmit": "Edit User",
+			"btnSubmitPending": "Saving...",
 			"preferredLanguage": "Preferred Language",
 			"languageHint": "Supported languages: en, de and es.",
 			"errors": {

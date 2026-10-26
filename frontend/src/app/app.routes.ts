@@ -1,11 +1,12 @@
 import { Routes } from '@angular/router';
-import { Home } from './home/home';
 import { Settings } from './settings/settings';
 import { Shell } from './shell/shell';
 import { Login } from './auth/login/login';
 import { adminGuard, authGuard, guestGuard } from './auth/auth-guard';
 // import { Profile } from './profile/profile';
 import { DocPage } from './documents/doc-page/doc-page';
+import { AIChat } from './ai-chat/ai-chat';
+
 export const routes: Routes = [
 	{
 		path: 'login',
@@ -23,11 +24,6 @@ export const routes: Routes = [
 				redirectTo: 'documents',
 				pathMatch: 'full',
 			},
-			// {
-			// 	path: 'home',
-			// 	component: Home,
-			// 	title: 'Home',
-			// },
 			{
 				path: 'documents',
 				loadComponent: () =>
@@ -35,25 +31,28 @@ export const routes: Routes = [
 				title: 'Documents',
 			},
 			{
+				path: 'ai-chat',
+				component: AIChat,
+				title: 'AI Chat',
+			},
+			{
+				path: 'ai-chat/:id',
+				component: AIChat,
+				title: 'AI Chat',
+			},
+			{
 				path: 'profile',
 				loadComponent: () =>
 					import('./profile/profile').then((m) => m.Profile),
 				title: 'Profile',
 			},
-		],
-	},
-	{
-		path: '',
-		component: Shell,
-		canActivate: [authGuard, adminGuard],
-		children: [
 			{
 				path: 'settings',
-				loadComponent: () =>
-					import('./settings/settings').then((m) => m.Settings),
-				title: 'Settings',
+				component: Settings,
+				canActivate: [adminGuard],
+				title: 'Settings'
 			}
-		]
+		],
 	},
 	{
 		path: '**',

@@ -9,7 +9,10 @@ import { GroupsService } from '../groups/groups.service';
 import { DocumentGroupsService } from '../document-groups/document-groups.service';
 import { IngestionService } from '../ai-service/ingestion/ingestion.service';
 import { TagsService } from '../tags/tags.service';
+import { PermissionsService } from '../permissions/permissions.service';
+import { DocumentFileValidationService } from './document-file-validation.service';
 import { Document } from './entities/document.entity';
+import { DocumentGroup } from '../document-groups/entities/document-group.entity';
 import { DocumentAiStatus } from './dto/document-ai-status.enum';
 import { ApplicationException } from 'src/common/errors/application.exception';
 import { ErrorCode } from 'src/common/errors/error-code';
@@ -55,13 +58,14 @@ describe('DocumentsService', () => {
   };
   let storageService: { putObject: jest.Mock; getObject: jest.Mock };
   let groupsService: { get: jest.Mock };
-  let documentGroupsService: { setGroup: jest.Mock; removeGroup: jest.Mock };
+  let documentGroupsService: { setGroup: jest.Mock; moveToGroup: jest.Mock; removeGroup: jest.Mock };
   let aiIngestionService: { triggerIngestion: jest.Mock };
   let tagsService: {
     assignToDocument: jest.Mock;
     removeFromDocument: jest.Mock;
     confirmAiSuggestions: jest.Mock;
   };
+  let permissionsService: { getGroupIdsWithPermission: jest.Mock; hasPermission: jest.Mock };
   let queryBuilder: QueryBuilderMock;
 
   const userId = 'user-1';
@@ -78,12 +82,17 @@ describe('DocumentsService', () => {
     };
     storageService = { putObject: jest.fn(), getObject: jest.fn() };
     groupsService = { get: jest.fn() };
-    documentGroupsService = { setGroup: jest.fn(), removeGroup: jest.fn() };
+    documentGroupsService = { setGroup: jest.fn(), moveToGroup: jest.fn(), removeGroup: jest.fn() };
     aiIngestionService = { triggerIngestion: jest.fn().mockResolvedValue(undefined) };
     tagsService = {
       assignToDocument: jest.fn(),
       removeFromDocument: jest.fn(),
       confirmAiSuggestions: jest.fn(),
+    };
+
+    permissionsService = {
+      getGroupIdsWithPermission: jest.fn().mockResolvedValue(['group-1']),
+      hasPermission: jest.fn().mockResolvedValue(true),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -95,6 +104,14 @@ describe('DocumentsService', () => {
         { provide: DocumentGroupsService, useValue: documentGroupsService },
         { provide: IngestionService, useValue: aiIngestionService },
         { provide: TagsService, useValue: tagsService },
+        { provide: PermissionsService, useValue: permissionsService },
+        {
+          provide: DocumentFileValidationService,
+          useValue: {
+            normalizeFilename: jest.fn((filename: string) => filename),
+            validate: jest.fn((file: Express.Multer.File) => Promise.resolve(file.mimetype)),
+          },
+        },
         { provide: Logger, useValue: { log: jest.fn(), warn: jest.fn(), error: jest.fn() } },
       ],
     }).compile();
@@ -202,8 +219,18 @@ describe('DocumentsService', () => {
         filename: 'hello.txt',
         sizeBytes: 11,
         uploadedBy: { id: userId, name: 'John Doe' },
-        aiStatus: DocumentAiStatus.PENDING,
+        aiStatus: DocumentAiStatus.NOT_STARTED,
       });
+      expect(permissionsService.getGroupIdsWithPermission).toHaveBeenCalledWith(userId, 'documents.read');
+    });
+
+    it('returns an empty page without querying when the user has no documents.read group', async () => {
+      permissionsService.getGroupIdsWithPermission.mockResolvedValue([]);
+
+      const result = await service.findAll(userId, { page: 1, limit: 20, includeDescendants: false });
+
+      expect(result).toEqual({ data: [], page: 1, limit: 20, total: 0, totalPages: 0 });
+      expect(documentsRepository.createQueryBuilder).not.toHaveBeenCalled();
     });
   });
 
@@ -225,6 +252,35 @@ describe('DocumentsService', () => {
       const result = await service.findOne(userId, documentId);
 
       expect(result).toMatchObject({ id: documentId, filename: 'hello.txt', sizeBytes: 11 });
+      expect(queryBuilder.where).toHaveBeenCalledWith('document.id = :id', { id: documentId });
+    });
+
+    it('returns the AI fields from ai_documents when present', async () => {
+      queryBuilder.getRawOne.mockResolvedValue({
+        id: documentId,
+        filename: 'hello.txt',
+        mimeType: 'text/plain',
+        sizeBytes: '11',
+        createdAt: new Date('2026-01-01'),
+        updatedAt: new Date('2026-01-01'),
+        uploaderId: userId,
+        uploaderName: 'John Doe',
+        groups: [],
+        tags: [],
+        aiStatus: DocumentAiStatus.FINISHED,
+        aiSummary: 'A summary',
+        language: 'de',
+        aiErrorKey: null,
+      });
+
+      const result = await service.findOne(userId, documentId);
+
+      expect(result).toMatchObject({
+        aiStatus: DocumentAiStatus.FINISHED,
+        aiSummary: 'A summary',
+        language: 'de',
+        aiErrorKey: null,
+      });
     });
 
     it('throws DocumentNotFound when the document does not exist', async () => {
@@ -233,6 +289,156 @@ describe('DocumentsService', () => {
       await expect(service.findOne(userId, documentId)).rejects.toMatchObject({
         code: ErrorCode.DocumentNotFound,
       });
+    });
+  });
+
+  describe('findAll documents.read filter', () => {
+    const readableGroupIds = ['group-1', 'group-2'];
+    const otherUserId = 'user-2';
+
+    const documentRow = {
+      id: documentId,
+      filename: 'hello.txt',
+      mimeType: 'text/plain',
+      sizeBytes: '11',
+      createdAt: new Date('2026-01-01'),
+      updatedAt: new Date('2026-01-01'),
+      uploaderId: otherUserId,
+      uploaderName: 'Jane Doe',
+      groups: [{ id: 'group-1', name: 'Group 1' }],
+      tags: [],
+    };
+
+    // Runs the callback passed to queryBuilder.where() against a fake subquery builder
+    // and returns the generated condition plus the subquery calls.
+    const runAccessFilter = () => {
+      const subQueryBuilder: QueryBuilderMock = {};
+      ['select', 'from', 'where', 'andWhere'].forEach((method) => {
+        subQueryBuilder[method] = jest.fn().mockReturnValue(subQueryBuilder);
+      });
+      subQueryBuilder.getQuery = jest.fn().mockReturnValue('(SUBQUERY)');
+
+      const whereCallback = queryBuilder.where.mock.calls
+        .map(([condition]) => condition)
+        .find((condition) => typeof condition === 'function');
+      expect(whereCallback).toBeDefined();
+
+      const condition = whereCallback({ subQuery: () => subQueryBuilder });
+      return { condition, subQueryBuilder };
+    };
+
+    beforeEach(() => {
+      permissionsService.getGroupIdsWithPermission.mockResolvedValue(readableGroupIds);
+    });
+
+    it('restricts documents to groups where the user has documents.read', async () => {
+      queryBuilder.getCount.mockResolvedValue(1);
+      queryBuilder.getRawMany.mockResolvedValue([documentRow]);
+
+      await service.findAll(userId, { page: 1, limit: 20, includeDescendants: false });
+
+      expect(permissionsService.getGroupIdsWithPermission).toHaveBeenCalledWith(userId, 'documents.read');
+
+      const { condition, subQueryBuilder } = runAccessFilter();
+      expect(condition).toBe('EXISTS (SUBQUERY)');
+      expect(subQueryBuilder.from).toHaveBeenCalledWith(DocumentGroup, 'readableDocumentGroup');
+      expect(subQueryBuilder.where).toHaveBeenCalledWith('readableDocumentGroup.documentId = document.id');
+      expect(subQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'readableDocumentGroup.groupId IN (:...readableGroupIds)',
+        { readableGroupIds },
+      );
+    });
+
+    it.each([
+      ['findAll', () => service.findAll(userId, { page: 1, limit: 20, includeDescendants: false })],
+      ['findOne', () => service.findOne(userId, documentId)],
+    ])('%s does not filter by uploader anymore', async (_, call) => {
+      queryBuilder.getCount.mockResolvedValue(1);
+      queryBuilder.getRawMany.mockResolvedValue([documentRow]);
+      queryBuilder.getRawOne.mockResolvedValue(documentRow);
+
+      await call();
+
+      const allConditions = [...queryBuilder.where.mock.calls, ...queryBuilder.andWhere.mock.calls].map(
+        ([condition]) => condition,
+      );
+      expect(allConditions).not.toContainEqual(expect.stringContaining('uploadedBy'));
+    });
+
+    it('findAll returns documents uploaded by other users in readable groups', async () => {
+      queryBuilder.getCount.mockResolvedValue(1);
+      queryBuilder.getRawMany.mockResolvedValue([documentRow]);
+
+      const result = await service.findAll(userId, { page: 1, limit: 20, includeDescendants: false });
+
+      expect(result.total).toBe(1);
+      expect(result.data[0].uploadedBy).toEqual({ id: otherUserId, name: 'Jane Doe' });
+    });
+
+    it('findOne returns a document uploaded by another user', async () => {
+      queryBuilder.getRawOne.mockResolvedValue(documentRow);
+
+      const result = await service.findOne(userId, documentId);
+
+      expect(result.uploadedBy).toEqual({ id: otherUserId, name: 'Jane Doe' });
+    });
+
+    it('findAll returns an empty page when no document is in a readable group', async () => {
+      queryBuilder.getCount.mockResolvedValue(0);
+      queryBuilder.getRawMany.mockResolvedValue([]);
+
+      const result = await service.findAll(userId, { page: 1, limit: 20, includeDescendants: false });
+
+      expect(result).toEqual({ data: [], page: 1, limit: 20, total: 0, totalPages: 0 });
+    });
+  });
+
+  describe('moveToGroup', () => {
+    const groupId = 'group-2';
+
+    it('moves the document to the given group', async () => {
+      documentsRepository.findOne.mockResolvedValue({ id: documentId, sha256: 'hash' });
+      groupsService.get.mockResolvedValue(undefined);
+      queryBuilder.getExists.mockResolvedValue(false);
+
+      const result = await service.moveToGroup(userId, documentId, groupId);
+
+      expect(groupsService.get).toHaveBeenCalledWith(groupId, userId);
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith('document.id != :excludeDocumentId', {
+        excludeDocumentId: documentId,
+      });
+      expect(documentGroupsService.moveToGroup).toHaveBeenCalledWith(documentId, groupId);
+      expect(result).toEqual({ documentId, groupId });
+    });
+
+    it('throws DocumentNotFound when the document does not belong to the user', async () => {
+      documentsRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.moveToGroup(userId, documentId, groupId)).rejects.toMatchObject({
+        code: ErrorCode.DocumentNotFound,
+      });
+      expect(documentGroupsService.moveToGroup).not.toHaveBeenCalled();
+    });
+
+    it('does not move the document when the user has no access to the group', async () => {
+      documentsRepository.findOne.mockResolvedValue({ id: documentId, sha256: 'hash' });
+      groupsService.get.mockRejectedValue(new NotFoundException());
+
+      await expect(service.moveToGroup(userId, documentId, groupId)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(documentGroupsService.moveToGroup).not.toHaveBeenCalled();
+    });
+
+    it('throws DocumentAlreadyExistsInGroup when the same file already exists in the group', async () => {
+      documentsRepository.findOne.mockResolvedValue({ id: documentId, sha256: 'hash' });
+      groupsService.get.mockResolvedValue(undefined);
+      queryBuilder.getExists.mockResolvedValue(true);
+
+      await expect(service.moveToGroup(userId, documentId, groupId)).rejects.toMatchObject({
+        code: ErrorCode.DocumentAlreadyExistsInGroup,
+      });
+      expect(documentGroupsService.moveToGroup).not.toHaveBeenCalled();
     });
   });
 
@@ -320,7 +526,7 @@ describe('DocumentsService', () => {
       const result = await service.confirmSuggestedTags(userId, documentId);
 
       expect(documentsRepository.findOne).toHaveBeenCalledWith({
-        where: { id: documentId, uploadedBy: userId },
+        where: { id: documentId },
         select: { id: true },
       });
       expect(tagsService.confirmAiSuggestions).toHaveBeenCalledWith(documentId);

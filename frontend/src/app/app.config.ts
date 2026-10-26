@@ -4,6 +4,7 @@ import { provideHttpClient, withXhr } from '@angular/common/http';
 import { routes } from './app.routes';
 import { TranslocoHttpLoader } from './transloco-loader';
 import { provideTransloco } from '@jsverse/transloco';
+import { provideMarkdown } from 'ngx-markdown'
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,5 +22,6 @@ export const appConfig: ApplicationConfig = {
       },
       loader: TranslocoHttpLoader,
     }),
+	provideMarkdown(),
   ]
 };
