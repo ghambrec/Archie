@@ -1,8 +1,8 @@
 import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
-import { Documents } from '../documents';
+import { Documents, DocumentSummary } from '../documents';
 import { DatePipe, UpperCasePipe } from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { FileSizePipe } from '../../core/file-size-pipe';
 import { DocStatusBadge } from '../doc-status-badge/doc-status-badge';
 import { DocumentsReview, isAiProcessing } from '../documents-review';
@@ -11,18 +11,20 @@ import { Observable } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { toErrorKey } from '../../core/error-key';
 import { TagPicker } from '../../tags/tag-picker/tag-picker';
+import { DocPreviewModal } from '../doc-preview-modal/doc-preview-modal';
 
 @Component({
 	selector: 'app-doc-detail',
 	imports: [DatePipe, UpperCasePipe, TranslocoPipe, NgbTooltip, FileSizePipe, DocStatusBadge, TagPicker],
 	templateUrl: './doc-detail.html',
 	styleUrl: './doc-detail.scss',
-	host: { '(document:keydown.escape)': 'docs.closeDetail()' }
+	host: { '(document:keydown.escape)': 'onEscape()' }
 })
 export class DocDetail {
 	protected readonly docs = inject(Documents);
 	private readonly review = inject(DocumentsReview);
 	private readonly tags = inject(Tags);
+	private readonly modalService = inject(NgbModal);
 
 	protected readonly busy = signal(false);
 
@@ -85,10 +87,22 @@ export class DocDetail {
 		});
 	}
 
+	protected openPreview(doc: DocumentSummary) {
+		const modal = this.modalService.open(DocPreviewModal, { size: 'xl', centered: true });
+		modal.componentInstance.doc.set(doc);
+	}
+
 	private refreshAfterTagChange() {
 		this.docs.detail.reload();
 		this.docs.list.reload();
 		this.tags.tagDocsList.reload();
+	}
+
+	// bei escape nur schliessen wenn kein preview offen
+	protected onEscape() {
+		if (!this.modalService.hasOpenModals()) {
+			this.docs.closeDetail();
+		}
 	}
 
 	// fuer alle aktionen gleich: busy setzen, reset error, subscript
