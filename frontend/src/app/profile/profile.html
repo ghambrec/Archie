@@ -225,19 +225,19 @@
                   <button
                     type="submit"
                     class="btn btn-primary"
-                    [disabled]="isPasswordSaving">
-                    {{ isPasswordSaving ? 'Saving...' : 'Save password' }}
+                    [disabled]="isPasswordSaving()">
+                    {{ isPasswordSaving() ? 'Saving...' : 'Save password' }}
                   </button>
 
-                  @if (passwordSaveMessage) {
+                  @if (passwordSaveMessage()) {
                     <div class="alert alert-success mb-3">
-                      {{ passwordSaveMessage }}
+                      {{ passwordSaveMessage() }}
                     </div>
                   }
 
-                  @if (passwordSaveError) {
+                  @if (passwordSaveError()) {
                     <div class="alert alert-danger mb-3">
-                      {{ passwordSaveError }}
+                      {{ passwordSaveError() }}
                     </div>
                   }
                 </form>
