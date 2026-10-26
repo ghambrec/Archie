@@ -25,9 +25,10 @@ re:
 	make clean
 	make up
 
-monitor: 
+monitoring: 
 
-	${COMPOSE} --profile monitoring up -d
+	${COMPOSE} --profile monitoring up -d \
+	grafana prometheus cadvisor node-exporter
 
 unit:
 	cd $(NEST_DIR) && $(PNPM) test || echo -n
