@@ -280,7 +280,7 @@
         "kind": "Panel",
         "spec": {
           "id": 3,
-          "title": "Laptop CPU",
+          "title": "Machine CPU",
           "description": "Overall utilization across all CPU cores, from 0–100%. Metrics provided by Node Exporter.",
           "links": [],
           "data": {
@@ -404,7 +404,7 @@
         "kind": "Panel",
         "spec": {
           "id": 4,
-          "title": "Available Laptop RAM",
+          "title": "Available Machine RAM",
           "description": "MemAvailable includes memory that Linux can reclaim when needed.",
           "links": [],
           "data": {
