@@ -1,9 +1,11 @@
 import { Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
-import { Users } from '../users/users';
+import { PatchUser, Users } from '../users/users';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { SupportedLanguage } from '../core/i18n/supported-language';
 
 interface ProfileUser {
   id: string;
@@ -16,13 +18,26 @@ interface ProfileUser {
 
 @Component({
   selector: 'app-profile',
-  imports: [NgbNavModule, DatePipe],
+  imports: [NgbNavModule, DatePipe, FormsModule],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
 })
 export class Profile implements OnDestroy {
   private readonly users = inject(Users);
   private readonly http = inject(HttpClient);
+
+  editDisplayName = '';
+  editEmail = '';
+  editPreferredLanguage = 'en';
+  editPassword = '';
+
+  isSaving = false;
+  saveMessage: string | null = null;
+  saveError: string | null = null;
+
+  isPasswordSaving = false;
+  passwordSaveMessage: string | null = null;
+  passwordSaveError: string | null = null;
 
   readonly userGroups = signal<Array<{
     groupId: string;
@@ -65,7 +80,11 @@ export class Profile implements OnDestroy {
     effect(() => {
       const user = this.users.currentUser();
       if (user) {
-        console.log('[Profile] Effect triggered for user:', user.id);
+        this.editDisplayName = user.displayName;
+        this.editEmail = user.email;
+        this.editPreferredLanguage = user.preferredLanguage;
+
+        // console.log('[Profile] Effect triggered for user:', user.id);
         this.loadAvatar(user.id);
         this.loadUserGroups();
       } else {
@@ -109,6 +128,65 @@ export class Profile implements OnDestroy {
       console.error('[Profile] Failed to load user groups and permissions:', error);
 
       this.userGroups.set([]);
+    }
+  }
+
+  async saveProfile(): Promise<void> {
+    this.isSaving = true;
+    this.saveMessage = null;
+    this.saveError = null; 
+
+    const changes: PatchUser = {
+      displayName: this.editDisplayName.trim(),
+      email: this.editEmail.trim(),
+      preferredLanguage: this.editPreferredLanguage as SupportedLanguage,
+    };
+
+    const password = this.editPassword.trim();
+    if (password) {
+      changes.password = password;
+    }
+
+    try {
+      await firstValueFrom(this.users.updateCurrentUser(changes));
+
+      const updatedUser = await firstValueFrom(this.users.getCurrentUser());
+
+      this.users.currentUser.set(updatedUser);
+      this.editPassword = '';
+      this.saveMessage = 'Profile updated successfully';
+    } catch (error) {
+      console.error('[Profile] Failed to update profile:', error);
+      this.saveError = 'Profile could not be updated';
+    } finally {
+      this.isSaving = false;
+    }
+  }
+
+  async savePassword(): Promise<void> {
+    const password = this.editPassword.trim();
+
+    this.passwordSaveMessage = null;
+    this.passwordSaveError = null;
+
+    if (password.length < 8) {
+      this.passwordSaveError = 'Password must be at least 8 characters long.';
+      
+      return;
+    }
+
+    this.isPasswordSaving = true;
+
+    try {
+      await firstValueFrom(this.users.changeOwnPassword(password));
+
+      this.editPassword = '';
+      this.passwordSaveMessage = 'Password has ben updated successfully.';
+    } catch (error) {
+      console.error('[Profile] Failed to update password:', error);
+      this.passwordSaveError = 'Password could not be updated.';
+    } finally {
+      this.isPasswordSaving = false;
     }
   }
 
