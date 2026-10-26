@@ -8,7 +8,7 @@ import { MarkdownComponent } from 'ngx-markdown';
   selector: 'app-chat-message',
   imports: [TranslocoPipe, ChatSources, MarkdownComponent],
   templateUrl: './chat-message.html',
-  styles: [':host { display: block; }'],
+  styleUrl: './chat-message.scss',
 })
 export class ChatMessage {
   readonly message = input.required<ChatMessageData>();

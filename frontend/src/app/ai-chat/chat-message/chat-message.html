@@ -1,13 +1,8 @@
-<article class="message"
-  [class.message-user]="message().sender === 'user'"
-  [class.message-ai]="message().sender === 'llm'">
-  <strong>
-    {{ (message().sender === 'user'
-      ? 'ai-chat.message.sender.user'
-      : 'ai-chat.message.sender.llm') | transloco }}
-  </strong>
-  @if (message().sender === 'llm') {
-	<markdown class="message-content" [data]="message().content"></markdown>
+<article class="message" [class.message-user]="message().sender === 'user'"
+	[class.message-ai]="message().sender === 'llm'">
+	@if (message().sender === 'llm') {
+		<span class="message-sender">{{ 'ai-chat.message.sender.llm' | transloco }}</span>
+		<markdown class="message-content" [data]="message().content" />
     @if (message().confidence_score !== undefined) {
       <p class="small text-muted">
         {{ 'ai-chat.message.confidenceScore' | transloco }}: {{ message().confidence_score }}
@@ -16,7 +11,8 @@
     @if (message().sources) {
       <app-chat-sources [sources]="message().sources ?? []" />
     }
-  } @else {
-    <p>{{ message().content }}</p>
-  }
+	} @else {
+		<span class="visually-hidden">{{ 'ai-chat.message.sender.user' | transloco }}</span>
+		<p class="message-bubble mb-0">{{ message().content }}</p>
+	}
 </article>
