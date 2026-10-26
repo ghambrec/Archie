@@ -74,7 +74,7 @@
                 
                 <h2 class="h5 mb-4">Edit profile</h2>
                 
-                <form>
+                <form (ngSubmit)="saveProfile()">
                   <div class="mb-3">
                     <label for="displayName" class="form-label">
                       Display Name
@@ -82,9 +82,12 @@
 
                     <input
                       id="displayName"
+                      name="displayName"
                       type="text"
                       class="form-control"
-                      [value]="profile().displayName">
+                      [(ngModel)]="editDisplayName"
+                      required
+                      maxlength="25">
                   </div>
 
                   <div class="mb-3">
@@ -94,9 +97,11 @@
 
                     <input
                       id="email"
+                      name="email"
                       type="email"
                       class="form-control"
-                      [value]="profile().email">
+                      [(ngModel)]="editEmail"
+                      required>
                   </div>
 
                   <div class="mb-3">
@@ -106,16 +111,31 @@
 
                     <select
                       id="language"
+                      name="preferredLanguage"
                       class="form-select"
-                      [value]="profile().preferredLanguage">
+                      [(ngModel)]="editPreferredLanguage">
                       <option value="en">Englisch</option>
                       <option value="de">Deutsch</option>
                     </select>
                   </div>
 
-                  <button type="submit" class="btn btn-primary">
-                    Save changes
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="isSaving">
+                    {{ isSaving ? 'Saving...' : 'Save changes' }}
                   </button>
+                  @if (saveMessage) {
+                    <div class="alert alert-success mt-3">
+                      {{ saveMessage }}
+                    </div>
+                  }
+
+                  @if (saveError) {
+                    <div class="alert alert-danger mt-3">
+                      {{ saveError }}
+                    </div>
+                  }
                 </form>
 
               </div>
@@ -179,6 +199,48 @@
                 <p class="text-muted">
                   Change your password here.
                 </p>
+
+                <form (ngSubmit)="savePassword()">
+                  <div class="mb-3">
+                    <label for="password" class="form-label">
+                      New password
+                    </label>
+
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      class="form-control"
+                      [(ngModel)]="editPassword"
+                      minlength="8"
+                      maxlength="25"
+                      autocomplete="new-password"
+                      required>
+
+                      <div class="form-text">
+                        The password must contain at least 8 characters.
+                      </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="isPasswordSaving">
+                    {{ isPasswordSaving ? 'Saving...' : 'Save password' }}
+                  </button>
+
+                  @if (passwordSaveMessage) {
+                    <div class="alert alert-success mb-3">
+                      {{ passwordSaveMessage }}
+                    </div>
+                  }
+
+                  @if (passwordSaveError) {
+                    <div class="alert alert-danger mb-3">
+                      {{ passwordSaveError }}
+                    </div>
+                  }
+                </form>
               </div>
             </div>
           </ng-template>
