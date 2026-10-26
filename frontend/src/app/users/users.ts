@@ -131,4 +131,16 @@ export class Users {
 
 		return this.http.get<UserGroupsResponse>(url, { withCredentials: true });
 	}
+
+	updateCurrentUser(changes: PatchUser) {
+		const url = `${this.baseUrl}/me`
+
+		return this.http.patch<UpdateUserResponse>(url, changes, { withCredentials: true });
+	}
+
+	changeOwnPassword(password: string) {
+		const url = `${this.baseUrl}/me/password`;
+
+		return this.http.patch<void>(url, { password }, {withCredentials: true });
+	}
 }
