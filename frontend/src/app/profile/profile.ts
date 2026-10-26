@@ -83,18 +83,6 @@ export class Profile implements OnDestroy {
     }
   }
 
-  // ngOnInit(): void {
-  //   if (!this.users.currentUser()) {
-  //     this.users.getCurrentUser().subscribe({
-  //       next: (user) => {
-  //         this.users.currentUser.set(user);
-  //         // this.loadAvatar(user.id);
-  //       },
-  //       error: () => this.avatarUrl = 'images/default-avatar.svg',
-  //     });
-  //   }
-  // }
-
   private loadAvatar(userId: string): void {
     const url = this.users.getAvatarUrl(userId);
     console.log('[Profile] Loading avatar:', url);
@@ -111,34 +99,6 @@ export class Profile implements OnDestroy {
       },
     });
   }
-
-  // private async loadUserGroups(userId: string): Promise<void> {
-  //   try {
-  //     const response = await firstValueFrom(this.users.getUserGroups(userId));
-
-  //     const groupsWithPermissions = await Promise.all(response.groups.map(async group => {
-  //       const permissions = await firstValueFrom(
-  //         this.http.get<UserPermission[]>(
-  //           `${environment.apiUrl}/user-permission/${group.groupId}/permissions`,
-  //           {
-  //             withCredentials: true,
-  //           }
-  //         )
-  //       );
-  //       return {
-  //         ...group,
-  //         permissions: permissions.filter(permission => permission.userId === userId)
-  //         .map(permission => permission.permKey),
-  //       };
-  //     })
-  //   );
-
-  //   this.userGroups.set(groupsWithPermissions);
-  //   } catch (error) {
-  //     console.error('[Profile] Failed to load user groups:', error);
-  //     this.userGroups.set([]);
-  //   }
-  // }
 
   private async loadUserGroups(): Promise<void> {
     try {
