@@ -5,8 +5,6 @@ import { environment } from '../../environments/environment';
 import type { CreateConversationResponse, AskConversationResponse, DeleteConversation,
   Conversation, ListResponse, ChatMessage } from './chat.models';
 
-const CHAT_REQUEST_TIMEOUT_MS = 200000;
-
 @Service()
 export class ConversationsService {
   private readonly http = inject(HttpClient);
@@ -39,13 +37,13 @@ export class ConversationsService {
   createConversation() {
     return this.mutate(this.http.post<CreateConversationResponse>(
       this.baseUrl, {}, { withCredentials: true }
-    ).pipe(timeout(CHAT_REQUEST_TIMEOUT_MS)));
+    ).pipe(timeout(environment.chatRequestTimeoutMs)));
   }
 
   ask(conversationId: string, question: string) {
     return this.mutate(this.http.post<AskConversationResponse>(
       `${this.baseUrl}/${conversationId}/ask`, { question }, { withCredentials: true }
-    ).pipe(timeout(CHAT_REQUEST_TIMEOUT_MS)));
+    ).pipe(timeout(environment.chatRequestTimeoutMs)));
   }
 
   renameConversation(conversationId: string, title: string) {
