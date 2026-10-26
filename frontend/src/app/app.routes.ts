@@ -30,7 +30,8 @@ export const routes: Routes = [
 			// },
 			{
 				path: 'documents',
-				component: DocPage,
+				loadComponent: () =>
+        			import('./documents/doc-page/doc-page').then((m) => m.DocPage),
 				title: 'Documents',
 			},
 			{
@@ -48,7 +49,8 @@ export const routes: Routes = [
 		children: [
 			{
 				path: 'settings',
-				component: Settings,
+				loadComponent: () =>
+					import('./settings/settings').then((m) => m.Settings),
 				title: 'Settings',
 			}
 		]
