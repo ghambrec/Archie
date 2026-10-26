@@ -292,10 +292,7 @@ export class DocumentsService {
 
     this.logger.log({ userId, id }, 'Stream document download');
 
-    const document = await this.documentsRepository.findOne({
-      where: { id },
-      select: { objectKey: true, filename: true, mimeType: true, sizeBytes: true },
-    });
+    const document = await this.findDocumentFile(id);
 
     if (!document) {
       throw new ApplicationException(ErrorCode.DocumentNotFound);
@@ -311,6 +308,27 @@ export class DocumentsService {
       mimeType: document.mimeType,
       sizeBytes: document.sizeBytes,
     };
+  }
+
+  async previewStream(userId: string, id: string): Promise<DocumentDownloadStreamDto> {
+	this.logger.log({ userId, id }, 'stream document preview');
+
+	const document = await this.findDocumentFile(id);
+
+	if (!PREVIEWABLE_MIME_TYPES.has(document.mimeType)) {
+		throw new ApplicationException(ErrorCode.DocumentNotPreviewable);
+	}
+
+	const stream = await this.storageService.getObject(DOCUMENTS_BUCKET, document.objectKey);
+
+	this.logger.log({ userId, id }, 'document preview stream opened');
+
+	return {
+		stream,
+		filename: document.filename,
+		mimeType: document.mimeType,
+		sizeBytes: document.sizeBytes
+	}
   }
 
   async setTag(
@@ -500,5 +518,18 @@ export class DocumentsService {
     }
 
     return query.getExists();
+  }
+
+  private async findDocumentFile(id: string) {
+	const document = await this.documentsRepository.findOne({
+		where: { id },
+		select: { objectKey: true, filename: true, mimeType: true, sizeBytes: true },
+	});
+
+	if (!document) {
+		throw new ApplicationException(ErrorCode.DocumentNotFound);
+	}
+
+	return document;
   }
 }

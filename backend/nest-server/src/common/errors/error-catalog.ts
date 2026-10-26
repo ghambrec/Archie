@@ -121,5 +121,9 @@ export const ERROR_CATALOG ={
 	status: HttpStatus.SERVICE_UNAVAILABLE,
 	message: 'AI Service is currently unavailable.'
   },
+  [ErrorCode.DocumentNotPreviewable] : {
+	status: HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+	message: 'Document file type cannot be previewed.'
+  },
 
   } satisfies Record<ErrorCode, ErrorDefinition>;
