@@ -35,9 +35,9 @@ export class Profile implements OnDestroy {
   saveMessage: string | null = null;
   saveError: string | null = null;
 
-  isPasswordSaving = false;
-  passwordSaveMessage: string | null = null;
-  passwordSaveError: string | null = null;
+  readonly isPasswordSaving = signal(false);
+  readonly passwordSaveMessage = signal<string | null>(null);
+  readonly passwordSaveError = signal<string | null>(null);
 
   readonly userGroups = signal<Array<{
     groupId: string;
@@ -142,11 +142,6 @@ export class Profile implements OnDestroy {
       preferredLanguage: this.editPreferredLanguage as SupportedLanguage,
     };
 
-    const password = this.editPassword.trim();
-    if (password) {
-      changes.password = password;
-    }
-
     try {
       await firstValueFrom(this.users.updateCurrentUser(changes));
 
@@ -166,27 +161,27 @@ export class Profile implements OnDestroy {
   async savePassword(): Promise<void> {
     const password = this.editPassword.trim();
 
-    this.passwordSaveMessage = null;
-    this.passwordSaveError = null;
+    this.passwordSaveMessage.set(null);
+    this.passwordSaveError.set(null);
 
     if (password.length < 8) {
-      this.passwordSaveError = 'Password must be at least 8 characters long.';
+      this.passwordSaveError.set('Password must be at least 8 characters long.');
       
       return;
     }
 
-    this.isPasswordSaving = true;
+    this.isPasswordSaving.set(true);
 
     try {
       await firstValueFrom(this.users.changeOwnPassword(password));
 
       this.editPassword = '';
-      this.passwordSaveMessage = 'Password has ben updated successfully.';
+      this.passwordSaveMessage.set('Password has been updated successfully.');
     } catch (error) {
       console.error('[Profile] Failed to update password:', error);
-      this.passwordSaveError = 'Password could not be updated.';
+      this.passwordSaveError.set('Password could not be updated.');
     } finally {
-      this.isPasswordSaving = false;
+      this.isPasswordSaving.set(false);
     }
   }
 
