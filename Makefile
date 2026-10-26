@@ -25,6 +25,10 @@ re:
 	make clean
 	make up
 
+monitor: 
+
+	${COMPOSE} --profile monitoring up -d
+
 unit:
 	cd $(NEST_DIR) && $(PNPM) test || echo -n
 
