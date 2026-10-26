@@ -23,6 +23,10 @@
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
+    "katex": "~0.18.10",
+    "marked": "^18.1.1",
+    "marked-katex-extension": "^5.1.13",
+    "ngx-markdown": "^22.1.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

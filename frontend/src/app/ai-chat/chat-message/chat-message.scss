@@ -1,0 +1,36 @@
+:host {
+	display: block;
+	margin-bottom: 1.25rem;
+}
+
+.message {
+	display: flex;
+	flex-direction: column;
+}
+
+// user nachricht
+.message-user {
+	align-items: flex-end;
+
+	.message-bubble {
+		max-width: 75%;
+		padding: 0.5rem 0.875rem;
+		background-color: var(--bs-primary-bg-subtle);
+		color: var(--bs-primary-text-emphasis);
+		border-radius: var(--bs-border-radius-xl);
+		border-bottom-right-radius: var(--bs-border-radius-sm);
+		white-space: pre-wrap;
+	}
+}
+
+// llm nachricht
+.message-ai {
+	align-items: stretch;
+}
+
+.message-sender {
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: var(--bs-secondary-color);
+	margin-bottom: 0.25rem;
+}
