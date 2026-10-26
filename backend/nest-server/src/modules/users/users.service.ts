@@ -136,7 +136,7 @@ export class UsersService implements OnApplicationBootstrap {
     {
       const newEmail = dto.email?.trim().toLowerCase();
       const duplicate = await this.usersRepository.findOneBy({email: newEmail});
-      if (duplicate) {
+      if (duplicate && duplicate.id !== userID) {
         this.logger.warn(`UpdateProfile failed for ${userID}, email already registered`);
         throw new ApplicationException(
           ErrorCode.EmailAlreadyRegistered
@@ -149,7 +149,7 @@ export class UsersService implements OnApplicationBootstrap {
     {
       const newName = dto.displayName.trim();
       const duplicate = await this.usersRepository.findOneBy({displayName: newName});
-      if(duplicate) {
+      if(duplicate && duplicate.id !== userID) {
         this.logger.warn(`UpdateProfile failed for ${userID}, display name already registered`);
         throw new ApplicationException(
           ErrorCode.UserNameAlreadyRegistered
