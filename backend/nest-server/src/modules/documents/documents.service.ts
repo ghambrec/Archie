@@ -28,6 +28,7 @@ import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-re
 import { DocumentFileValidationService } from './document-file-validation.service';
 import { PermissionsService } from '../permissions/permissions.service';
 import { DocumentPermission } from '../permissions/permission-keys';
+import { PREVIEWABLE_MIME_TYPES } from './document-file.constants';
 
 const DOCUMENTS_BUCKET = 'documents';
 
@@ -200,6 +201,7 @@ export class DocumentsService {
       aiSummary: row.aiSummary ?? undefined,
       language: row.language ?? '',
       aiErrorKey: row.aiErrorKey ?? null,
+	  previewable: PREVIEWABLE_MIME_TYPES.has(row.mimeType),
     }));
 
     this.logger.log({ userId, total }, 'Documents listed successfully');
@@ -282,6 +284,7 @@ export class DocumentsService {
       aiSummary: raw.aiSummary ?? undefined,
       language: raw.language ?? '',
       aiErrorKey: raw.aiErrorKey ?? null,
+	  previewable: PREVIEWABLE_MIME_TYPES.has(raw.mimeType),
     };
   }
 

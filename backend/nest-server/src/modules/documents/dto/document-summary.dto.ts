@@ -43,4 +43,7 @@ export class DocumentSummaryDto {
 
   @ApiPropertyOptional({ nullable: true })
   aiErrorKey?: string | null;
+
+  @ApiProperty()
+  previewable!: boolean;
 }
