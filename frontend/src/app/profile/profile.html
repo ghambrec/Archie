@@ -144,7 +144,13 @@
                         @for (group of userGroups(); track group.groupId) {
                           <tr>
                             <td>{{ group.name }}</td>
-                            <td>Not implemented yet</td>
+                            <td>
+                              @for (permission of group.permissions; track permission) {
+                                <div>{{ permission }}</div>
+                              } @empty {
+                                <span>-</span>
+                              }
+                            </td>
                             <td>{{ group.joinedAt | date: 'short' }}</td>
                             <!-- <td>
                                <button class="btn btn-sm btn-outline-secondary" disabled>
