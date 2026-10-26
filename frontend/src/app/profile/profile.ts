@@ -4,8 +4,6 @@ import { Users } from '../users/users';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { DatePipe } from '@angular/common';
-import { UserPermission } from '../groups/groups';
-import { environment } from '../../environments/environment';
 
 interface ProfileUser {
   id: string;
@@ -69,7 +67,7 @@ export class Profile implements OnDestroy {
       if (user) {
         console.log('[Profile] Effect triggered for user:', user.id);
         this.loadAvatar(user.id);
-        this.loadUserGroups(user.id)
+        this.loadUserGroups();
       } else {
         this.avatarUrl = 'images/default-avatar.svg';
         this.userGroups.set([]);
@@ -114,30 +112,42 @@ export class Profile implements OnDestroy {
     });
   }
 
-  private async loadUserGroups(userId: string): Promise<void> {
+  // private async loadUserGroups(userId: string): Promise<void> {
+  //   try {
+  //     const response = await firstValueFrom(this.users.getUserGroups(userId));
+
+  //     const groupsWithPermissions = await Promise.all(response.groups.map(async group => {
+  //       const permissions = await firstValueFrom(
+  //         this.http.get<UserPermission[]>(
+  //           `${environment.apiUrl}/user-permission/${group.groupId}/permissions`,
+  //           {
+  //             withCredentials: true,
+  //           }
+  //         )
+  //       );
+  //       return {
+  //         ...group,
+  //         permissions: permissions.filter(permission => permission.userId === userId)
+  //         .map(permission => permission.permKey),
+  //       };
+  //     })
+  //   );
+
+  //   this.userGroups.set(groupsWithPermissions);
+  //   } catch (error) {
+  //     console.error('[Profile] Failed to load user groups:', error);
+  //     this.userGroups.set([]);
+  //   }
+  // }
+
+  private async loadUserGroups(): Promise<void> {
     try {
-      const response = await firstValueFrom(this.users.getUserGroups(userId));
+      const response = await firstValueFrom(this.users.getMyGroups());
 
-      const groupsWithPermissions = await Promise.all(response.groups.map(async group => {
-        const permissions = await firstValueFrom(
-          this.http.get<UserPermission[]>(
-            `${environment.apiUrl}/user-permission/${group.groupId}/permissions`,
-            {
-              withCredentials: true,
-            }
-          )
-        );
-        return {
-          ...group,
-          permissions: permissions.filter(permission => permission.userId === userId)
-          .map(permission => permission.permKey),
-        };
-      })
-    );
-
-    this.userGroups.set(groupsWithPermissions);
+      this.userGroups.set(response.groups);
     } catch (error) {
-      console.error('[Profile] Failed to load user groups:', error);
+      console.error('[Profile] Failed to load user groups and permissions:', error);
+
       this.userGroups.set([]);
     }
   }
