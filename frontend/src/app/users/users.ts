@@ -7,6 +7,7 @@ export interface UserGroupMembership {
 	groupId: string;
 	name: string;
 	joinedAt: string;
+	permissions: string[];
 }
 
 export interface UserGroupsResponse {
@@ -122,6 +123,12 @@ export class Users {
 
 	getUserGroups(userId: string) {
 		const url = `${this.userGroupsUrl}/userId/${userId}/groups`;
+		return this.http.get<UserGroupsResponse>(url, { withCredentials: true });
+	}
+
+	getMyGroups() {
+		const url = `${this.userGroupsUrl}/me`;
+
 		return this.http.get<UserGroupsResponse>(url, { withCredentials: true });
 	}
 }
