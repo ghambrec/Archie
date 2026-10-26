@@ -218,8 +218,12 @@ services:
     - "3001:3000"
     volumes:
     - grafana_data:/var/lib/grafana
+    - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    - ./monitoring/grafana/dashboards:/etc/grafana/dashboards:ro
     networks:
       - archie
+    env_file:
+      - "./env/.env"
 
   prometheus:
     image: prom/prometheus:latest
