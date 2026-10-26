@@ -798,7 +798,7 @@
         "spec": {
           "id": 7,
           "title": "Chat Outcomes in the Selected Time Range",
-          "description": "Prepared: requires the archie_chat_requests_total counter with outcome=success, error or timeout. These categories should be mutually exclusive. increase accounts for counter resets and returns estimated increases. Missing metrics are not displayed as 0.",
+          "description": "Prepared: requires the archie_chat_requests_total ",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -878,35 +878,6 @@
           }
         }
       },
-      "panel-8": {
-        "kind": "Panel",
-        "spec": {
-          "id": 8,
-          "title": "Application Metrics Coverage",
-          "description": "",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "text",
-            "version": "13.2.4",
-            "spec": {
-              "options": {
-                "mode": "markdown",
-                "content": "### Available metrics\nCPU/RAM per container, laptop CPU and available RAM come from **cAdvisor** and **Node Exporter**. 100% container CPU represents one CPU core.\n\n**Chat Request Duration** uses the NestJS histogram `archie_chat_request_duration_seconds`, collected from `/metrics`. It measures server processing time including AI service latency and unsuccessful requests, not browser/network latency. Running requests are recorded when processing finishes. Wait for at least two Prometheus scrapes before interpreting the mean/P95 chart.\n\n### Metrics still requiring instrumentation\nAI stage duration and chat outcome counters remain prepared queries. They require `archie_ai_stage_duration_seconds` (Python; `stage=embedding|retrieval|generation`) and `archie_chat_requests_total` (`outcome=success|error|timeout`). **No data does not mean zero requests or zero errors.**\n\nWith OpenRouter, text generation runs remotely. This local dashboard cannot measure the provider's CPU/GPU utilization."
-              }
-            }
-          }
-        }
-      }
-    },
     "layout": {
       "kind": "GridLayout",
       "spec": {
