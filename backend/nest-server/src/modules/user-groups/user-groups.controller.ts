@@ -1,4 +1,4 @@
-import { Controller, Param, Post, UseGuards, Body, Delete, Req, Get, Query } from '@nestjs/common';
+import { Controller, Param, Post, UseGuards, Body, Delete, Req, Get } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserGroupsService } from './user-groups.service';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
@@ -7,7 +7,7 @@ import { GetGroupsMembersResponseDto } from './dto/group-members-response.dto';
 import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-response.dto';
 import type { Request } from 'express';
 import { AdminRequiredGuard } from '../permissions/guards/admin-required.guard';
-import { GetUserGroupsQueryDto } from './dto/user-groups-query.dto';
+import { GetMyGroupsResponseDto } from './dto/my-groups-response.dto';
 
 @ApiTags('user-groups')
 @Controller('user-groups')
@@ -62,14 +62,16 @@ export class UserGroupsController {
 		return this.userGroupsService.getGroupsByUserId(userId, req.userId!);
 	}
 
-	// GHA - deactivated, never used
-	// @Get()
-	// @UseGuards(SessionAuthGuard, AdminRequiredGuard)
-	// @ApiOperation({
-	// 	summary: 'Gets all user-groups that exist',
-	// 	description: 'Only Admin can call this endpoint: Showing every group with every user that is a member of the group.'
-	// })
-	// async getAll(@Query() query: GetUserGroupsQueryDto) {
-	// 	return this.userGroupsService.getAllUserGroups(query);
-	// }
+	@Get('me')
+	@UseGuards(SessionAuthGuard)
+	@ApiOperation({
+		summary: 'Gets the groups and permissions of the current user',
+		description: 'Returns the group memberships and permissions of the logged in user'
+	})
+	async getMyGroups(
+		@Req() req: Request,
+	): Promise<GetMyGroupsResponseDto> {
+		return this.userGroupsService.getMyGroups(req.userId!);
+	}
+
 }
