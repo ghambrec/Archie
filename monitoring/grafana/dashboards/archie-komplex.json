@@ -528,7 +528,7 @@
         "spec": {
           "id": 5,
           "title": "Chat Request Duration – Mean and P95",
-          "description": "Prepared: requires the archie_chat_request_duration_seconds histogram at the NestJS entry point. Measures server processing time, not total browser/network latency. Shows No data until instrumentation is added. P95 is a bucket-based estimate.",
+          "description": "Mean and estimated P95 server processing time of completed NestJS chat requests, including AI service waiting time and unsuccessful requests. Browser/network latency is not included. New observations appear after a request finishes; rate-based queries need at least two scrapes. P95 is a bucket-based estimate.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -882,7 +882,7 @@
         "kind": "Panel",
         "spec": {
           "id": 8,
-          "title": "Note: Application Metrics Not Yet Instrumented",
+          "title": "Application Metrics Coverage",
           "description": "",
           "links": [],
           "data": {
@@ -900,7 +900,7 @@
             "spec": {
               "options": {
                 "mode": "markdown",
-                "content": "### Metrics already available\nCPU/RAM per container, laptop CPU and available RAM come from **cAdvisor** and **Node Exporter**. 100% container CPU represents one CPU core.\n\n### Duration and outcome metrics still need instrumentation\nThe three chat panels contain prepared PromQL queries. Application metrics and the corresponding Prometheus scrape jobs have not been added yet. **No data does not mean zero requests or zero errors.**\n\nRequired metrics: `archie_chat_request_duration_seconds` (histogram, NestJS), `archie_ai_stage_duration_seconds` (histogram, Python; `stage=embedding|retrieval|generation`) and `archie_chat_requests_total` (counter; `outcome=success|error|timeout`).\n\nWith OpenRouter, text generation runs remotely. This local dashboard cannot measure the provider's CPU/GPU utilization."
+                "content": "### Available metrics\nCPU/RAM per container, laptop CPU and available RAM come from **cAdvisor** and **Node Exporter**. 100% container CPU represents one CPU core.\n\n**Chat Request Duration** uses the NestJS histogram `archie_chat_request_duration_seconds`, collected from `/metrics`. It measures server processing time including AI service latency and unsuccessful requests, not browser/network latency. Running requests are recorded when processing finishes. Wait for at least two Prometheus scrapes before interpreting the mean/P95 chart.\n\n### Metrics still requiring instrumentation\nAI stage duration and chat outcome counters remain prepared queries. They require `archie_ai_stage_duration_seconds` (Python; `stage=embedding|retrieval|generation`) and `archie_chat_requests_total` (`outcome=success|error|timeout`). **No data does not mean zero requests or zero errors.**\n\nWith OpenRouter, text generation runs remotely. This local dashboard cannot measure the provider's CPU/GPU utilization."
               }
             }
           }
