@@ -6,8 +6,8 @@
       ? 'ai-chat.message.sender.user'
       : 'ai-chat.message.sender.llm') | transloco }}
   </strong>
-  <p>{{ message().content }}</p>
   @if (message().sender === 'llm') {
+	<markdown class="message-content" [data]="message().content"></markdown>
     @if (message().confidence_score !== undefined) {
       <p class="small text-muted">
         {{ 'ai-chat.message.confidenceScore' | transloco }}: {{ message().confidence_score }}
@@ -16,5 +16,7 @@
     @if (message().sources) {
       <app-chat-sources [sources]="message().sources ?? []" />
     }
+  } @else {
+    <p>{{ message().content }}</p>
   }
 </article>
