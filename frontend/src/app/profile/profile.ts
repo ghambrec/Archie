@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupportedLanguage } from '../core/i18n/supported-language';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 interface ProfileUser {
   id: string;
@@ -18,7 +19,12 @@ interface ProfileUser {
 
 @Component({
   selector: 'app-profile',
-  imports: [NgbNavModule, DatePipe, FormsModule],
+  imports: [
+    NgbNavModule,
+    DatePipe,
+    FormsModule,
+    TranslocoPipe,
+  ],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
 })
@@ -31,9 +37,9 @@ export class Profile implements OnDestroy {
   editPreferredLanguage = 'en';
   editPassword = '';
 
-  isSaving = false;
-  saveMessage: string | null = null;
-  saveError: string | null = null;
+  readonly isSaving = signal(false);
+  readonly saveMessage = signal<string | null>(null);
+  readonly saveError = signal<string | null>(null);
 
   readonly isPasswordSaving = signal(false);
   readonly passwordSaveMessage = signal<string | null>(null);
@@ -132,9 +138,9 @@ export class Profile implements OnDestroy {
   }
 
   async saveProfile(): Promise<void> {
-    this.isSaving = true;
-    this.saveMessage = null;
-    this.saveError = null; 
+    this.isSaving.set(true);
+    this.saveMessage.set(null);
+    this.saveError.set(null); 
 
     const changes: PatchUser = {
       displayName: this.editDisplayName.trim(),
@@ -149,12 +155,12 @@ export class Profile implements OnDestroy {
 
       this.users.currentUser.set(updatedUser);
       this.editPassword = '';
-      this.saveMessage = 'Profile updated successfully';
+      this.saveMessage.set('profile.edit.success');
     } catch (error) {
       console.error('[Profile] Failed to update profile:', error);
-      this.saveError = 'Profile could not be updated';
+      this.saveError.set('profile.edit.error');
     } finally {
-      this.isSaving = false;
+      this.isSaving.set(false);
     }
   }
 
@@ -165,7 +171,7 @@ export class Profile implements OnDestroy {
     this.passwordSaveError.set(null);
 
     if (password.length < 8) {
-      this.passwordSaveError.set('Password must be at least 8 characters long.');
+      this.passwordSaveError.set('profile.security.minLength');
       
       return;
     }
@@ -176,10 +182,10 @@ export class Profile implements OnDestroy {
       await firstValueFrom(this.users.changeOwnPassword(password));
 
       this.editPassword = '';
-      this.passwordSaveMessage.set('Password has been updated successfully.');
+      this.passwordSaveMessage.set('profile.security.success');
     } catch (error) {
       console.error('[Profile] Failed to update password:', error);
-      this.passwordSaveError.set('Password could not be updated.');
+      this.passwordSaveError.set('profile.security.error');
     } finally {
       this.isPasswordSaving.set(false);
     }
