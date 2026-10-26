@@ -4,7 +4,7 @@ import { Settings } from './settings/settings';
 import { Shell } from './shell/shell';
 import { Login } from './auth/login/login';
 import { adminGuard, authGuard, guestGuard } from './auth/auth-guard';
-import { Profile } from './profile/profile';
+// import { Profile } from './profile/profile';
 import { DocPage } from './documents/doc-page/doc-page';
 export const routes: Routes = [
 	{
@@ -35,7 +35,8 @@ export const routes: Routes = [
 			},
 			{
 				path: 'profile',
-				component: Profile,
+				loadComponent: () =>
+					import('./profile/profile').then((m) => m.Profile),
 				title: 'Profile',
 			},
 		],
