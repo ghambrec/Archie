@@ -5,15 +5,22 @@
         
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h1 class="h3 mb-1">Profile</h1>
-          <p>Manage your personal account settings.</p>
+          <h1 class="h3 mb-1">
+            {{ 'profile.heading' | transloco }}
+          </h1>
+          <p>
+            {{ 'profile.description' | transloco }}
+          </p>
         </div>
 
         <span
           class="badge"
           [class.text-bg-success]="profile().isActive"
           [class.text-bg-secondary]="!profile().isActive">
-          {{ profile().isActive ? 'Active' : 'Inactive' }}
+          {{ profile().isActive
+            ? ('profile.active' | transloco)
+            : ('profile.inactive' | transloco)
+          }}
         </span>
       </div>
 <!--       
@@ -25,7 +32,9 @@
 
       <ul ngbNav #nav="ngbNav" class="nav-tabs mb-4">
         <li [ngbNavItem]="1">
-          <button ngbNavLink>Profile</button>
+          <button ngbNavLink>
+            {{ 'profile.tabs.profile' | transloco }}
+          </button>
 
           <ng-template ngbNavContent>
             <div class="card shadow-sm">
@@ -42,28 +51,45 @@
                   </div>
                   
                   <div class="col-12 col-md-8 account-information">
-                    <h2 class="h5 mb-4">Account information</h2>
+                    <h2 class="h5 mb-4">
+                      {{'profile.accountInformation.heading' | transloco }}
+                    </h2>
 
                     <div class="row">
                       <div class="col-md-6 mb-3">
-                        <div class="text-muted small">Display name</div>
+                        <div class="text-muted small">
+                          {{ 'profile.accountInformation.displayName' | transloco }}
+                        </div>
                         <div>{{ profile().displayName }}</div>
                       </div>
 
                       <div class="col-md-6 mb-3">
-                        <div class="text-muted small">Email</div>
+                        <div class="text-muted small">
+                          {{ 'profile.accountInformation.email' | transloco }}
+                        </div>
                         <div>{{ profile().email }}</div>
                       </div>
 
                       <div class="col-md-6 mb-3">
-                        <div class="text-muted small">Language</div>
-                        <div>{{ profile().preferredLanguage }}</div>
+                        <div class="text-muted small">
+                          {{ 'profile.accountInformation.language' | transloco }}
+                        </div>
+                          <div>{{ profile().preferredLanguage === 'en'
+                            ? ('profile.edit.english' | transloco)
+                            : ('profile.edit.german' | transloco)
+                          }}
+                        </div>
                       </div>
 
                       <div class="col-md-6 mb-3">
-                        <div class="text-muted small">Role</div>
+                        <div class="text-muted small">
+                          {{ 'profile.accountInformation.role' | transloco }}
+                        </div>
                         <span class="badge text-bg-primary">
-                            {{ profile().isAdmin ? 'Administrator' : 'User' }}
+                            {{ profile().isAdmin
+                              ? ('profile.accountInformation.administrator' | transloco)
+                              : ('profile.accountInformation.user' | transloco)
+                            }}
                         </span>
                       </div>
                     </div>
@@ -72,12 +98,14 @@
 
                 <hr>
                 
-                <h2 class="h5 mb-4">Edit profile</h2>
+                <h2 class="h5 mb-4">
+                  {{ 'profile.edit.heading' | transloco }}
+                </h2>
                 
                 <form (ngSubmit)="saveProfile()">
                   <div class="mb-3">
                     <label for="displayName" class="form-label">
-                      Display Name
+                      {{ 'profile.edit.displayName' | transloco }}
                     </label>
 
                     <input
@@ -92,7 +120,7 @@
 
                   <div class="mb-3">
                     <label for="email" class="form-label">
-                      Email address
+                      {{ 'profile.edit.email' | transloco }}
                     </label>
 
                     <input
@@ -106,7 +134,7 @@
 
                   <div class="mb-3">
                     <label for="language" class="form-label">
-                      Preferred language
+                      {{ 'profile.edit.preferredLanguage' | transloco }}
                     </label>
 
                     <select
@@ -114,26 +142,33 @@
                       name="preferredLanguage"
                       class="form-select"
                       [(ngModel)]="editPreferredLanguage">
-                      <option value="en">Englisch</option>
-                      <option value="de">Deutsch</option>
+                      <option value="en">
+                        {{ 'profile.edit.english' | transloco }}
+                      </option>
+                      <option value="de">
+                        {{ 'profile.edit.german' | transloco }}
+                      </option>
                     </select>
                   </div>
 
                   <button
                     type="submit"
                     class="btn btn-primary"
-                    [disabled]="isSaving">
-                    {{ isSaving ? 'Saving...' : 'Save changes' }}
+                    [disabled]="isSaving()">
+                    {{ isSaving()
+                      ? ('profile.edit.saving' | transloco)
+                      : ('profile.edit.save' | transloco)
+                    }}
                   </button>
-                  @if (saveMessage) {
+                  @if (saveMessage()) {
                     <div class="alert alert-success mt-3">
-                      {{ saveMessage }}
+                      {{ saveMessage() | transloco }}
                     </div>
                   }
 
-                  @if (saveError) {
+                  @if (saveError()) {
                     <div class="alert alert-danger mt-3">
-                      {{ saveError }}
+                      {{ saveError() | transloco }}
                     </div>
                   }
                 </form>
@@ -144,19 +179,29 @@
             <!-- Group Memberships Section -->
             <div class="card shadow-sm mt-4">
               <div class="card-header">
-                <h2 class="h5 mb-0">Group memberships</h2>
+                <h2 class="h5 mb-0">
+                  {{ 'profile.groups.heading' | transloco }}
+                </h2>
               </div>
               <div class="card-body">
                 @if (userGroups().length === 0) {
-                 <p class="text-muted">No group memberships found.</p>
+                  <p class="text-muted">
+                    {{ 'profile.groups.empty' | transloco }}
+                  </p>
                 } @else {
                   <div class="table-responsive">
                     <table class="table align-middle mb-0">
                       <thead>
                         <tr>
-                          <th scope="col">Group name</th>
-                          <th scope="col">Permissions</th>
-                          <th scope="col">Joined at</th>
+                          <th scope="col">
+                            {{ 'profile.groups.groupName'| transloco }}
+                          </th>
+                          <th scope="col">
+                            {{ 'profile.groups.permissions' | transloco }}
+                          </th>
+                          <th scope="col">
+                            {{ 'profile.groups.joinedAt' | transloco }}
+                          </th>
                           <th scope="col" style="width: 1%;"></th>
                         </tr>
                       </thead>
@@ -168,7 +213,9 @@
                               @for (permission of group.permissions; track permission) {
                                 <div>{{ permission }}</div>
                               } @empty {
-                                <span>-</span>
+                                <span>
+                                  {{ 'profile.groups.noPermissions' | transloco }}
+                                </span>
                               }
                             </td>
                             <td>{{ group.joinedAt | date: 'short' }}</td>
@@ -190,20 +237,24 @@
         </li>
 
         <li [ngbNavItem]="2">
-          <button ngbNavLink>Security</button>
+          <button ngbNavLink>
+            {{ 'profile.tabs.security' | transloco }}
+          </button>
 
           <ng-template ngbNavContent>
             <div class="card shadow-sm">
               <div class="card-body">
-                <h2 class="h5 mb-3">Password</h2>
+                <h2 class="h5 mb-3">
+                  {{ 'profile.security.heading' | transloco }}
+                </h2>
                 <p class="text-muted">
-                  Change your password here.
+                  {{ 'profile.security.description' | transloco }}
                 </p>
 
                 <form (ngSubmit)="savePassword()">
                   <div class="mb-3">
                     <label for="password" class="form-label">
-                      New password
+                      {{ 'profile.security.newPassword' | transloco }}
                     </label>
 
                     <input
@@ -218,7 +269,7 @@
                       required>
 
                       <div class="form-text">
-                        The password must contain at least 8 characters.
+                        {{ 'profile.security.passwordHint' | transloco }}
                       </div>
                   </div>
 
@@ -226,18 +277,21 @@
                     type="submit"
                     class="btn btn-primary"
                     [disabled]="isPasswordSaving()">
-                    {{ isPasswordSaving() ? 'Saving...' : 'Save password' }}
+                    {{ isPasswordSaving()
+                      ? ('profile.security.saving' | transloco)
+                      : ('profile.security.save' | transloco)
+                    }}  
                   </button>
 
                   @if (passwordSaveMessage()) {
                     <div class="alert alert-success mb-3">
-                      {{ passwordSaveMessage() }}
+                      {{ passwordSaveMessage() | transloco }}
                     </div>
                   }
 
                   @if (passwordSaveError()) {
                     <div class="alert alert-danger mb-3">
-                      {{ passwordSaveError() }}
+                      {{ passwordSaveError() | transloco }}
                     </div>
                   }
                 </form>
