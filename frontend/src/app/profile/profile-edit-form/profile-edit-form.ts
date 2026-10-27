@@ -1,13 +1,19 @@
-import { Component, effect, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { email, form, FormRoot, maxLength, pattern, required } from '@angular/forms/signals';
 import { HttpErrorResponse } from '@angular/common/http';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
 import { TextFormField } from '../../shared/form-field/form-field';
 import { SUPPORTED_LANGUAGE_PATTERN } from '../../core/i18n/supported-language';
 import { DISPLAY_NAME_MAX_LENGTH } from '../../validation/display-name-policy';
 import { Users, type EditUserForm, type PatchUser } from '../../users/users';
 import type { ProfileUser } from '../profile';
+
+const LANGUAGE_LABEL_KEYS: Readonly<Record<string, string>> = {
+  en: 'profile.edit.english',
+  de: 'profile.edit.german',
+  es: 'profile.edit.spanish',
+};
 
 type ProfileEditFormInput = Pick<EditUserForm, 'email' | 'displayName'> & {
   preferredLanguage: string;
@@ -21,7 +27,9 @@ type ProfileEditFormInput = Pick<EditUserForm, 'email' | 'displayName'> & {
 })
 export class ProfileEditForm {
   private readonly usersService = inject(Users);
+  private readonly translocoService = inject(TranslocoService);
   readonly profile = input.required<ProfileUser>();
+  readonly preferredLanguageKey = computed(() => LANGUAGE_LABEL_KEYS[this.profile().preferredLanguage]);
   readonly avatarUrl = input('images/default-avatar.svg');
   readonly avatarError = output<Event>();
   readonly saveMessage = signal<string | null>(null);
@@ -72,6 +80,7 @@ export class ProfileEditForm {
       await firstValueFrom(this.usersService.update(user.id, changes));
       const updatedUser = await firstValueFrom(this.usersService.getCurrentUser());
       this.usersService.currentUser.set(updatedUser);
+      this.translocoService.setActiveLang(updatedUser.preferredLanguage);
       this.saveMessage.set('profile.edit.success');
       return;
     } catch (error: unknown) {

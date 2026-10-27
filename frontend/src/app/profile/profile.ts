@@ -55,10 +55,6 @@ export class Profile implements OnDestroy {
       }
     }
 
-
-
-    
-    // CurrentUser hat kein isActive --> Default false
     return {
       id: u.id,
       email: u.email,
