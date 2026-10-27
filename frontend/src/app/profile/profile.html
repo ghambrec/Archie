@@ -34,13 +34,6 @@
             <app-profile-edit-form
               [profile]="profile()"
               [avatarUrl]="avatarUrl"
-              [(editDisplayName)]="editDisplayName"
-              [(editEmail)]="editEmail"
-              [(editPreferredLanguage)]="editPreferredLanguage"
-              [isSaving]="isSaving()"
-              [saveMessage]="saveMessage()"
-              [saveError]="saveError()"
-              (saveRequested)="saveProfile()"
               (avatarError)="onAvatarError($event)" />
 
             <app-profile-groups [userGroups]="userGroups()" />

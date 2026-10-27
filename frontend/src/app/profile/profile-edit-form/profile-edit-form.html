@@ -63,75 +63,26 @@
       {{ 'profile.edit.heading' | transloco }}
     </h2>
 
-    <form (ngSubmit)="saveRequested.emit()">
-      <div class="mb-3">
-        <label for="displayName" class="form-label">
-          {{ 'profile.edit.displayName' | transloco }}
-        </label>
+    <form [formRoot]="profileEditForm">
+      <fieldset [disabled]="profileEditForm().submitting()">
+        <app-form-field inputId="profile-displayName" autocomplete="nickname"
+          labelKey="profile.edit.displayName" [field]="profileEditForm.displayName" />
+        <app-form-field inputId="profile-email" type="email" autocomplete="email"
+          labelKey="profile.edit.email" [field]="profileEditForm.email" />
+        <app-form-field inputId="profile-language" labelKey="profile.edit.preferredLanguage"
+          hintKey="users.updateUser.languageHint" [field]="profileEditForm.preferredLanguage" />
 
-        <input
-          id="displayName"
-          name="displayName"
-          type="text"
-          class="form-control"
-          [(ngModel)]="editDisplayName"
-          required
-          maxlength="25">
-      </div>
+        @if (profileEditForm().errors()[0]?.message; as errorKey) {
+          <div class="alert alert-danger" role="alert">{{ errorKey | transloco }}</div>
+        }
 
-      <div class="mb-3">
-        <label for="email" class="form-label">
-          {{ 'profile.edit.email' | transloco }}
-        </label>
-
-        <input
-          id="email"
-          name="email"
-          type="email"
-          class="form-control"
-          [(ngModel)]="editEmail"
-          required>
-      </div>
-
-      <div class="mb-3">
-        <label for="language" class="form-label">
-          {{ 'profile.edit.preferredLanguage' | transloco }}
-        </label>
-
-        <select
-          id="language"
-          name="preferredLanguage"
-          class="form-select"
-          [(ngModel)]="editPreferredLanguage">
-          <option value="en">
-            {{ 'profile.edit.english' | transloco }}
-          </option>
-          <option value="de">
-            {{ 'profile.edit.german' | transloco }}
-          </option>
-        </select>
-      </div>
-
-      <button
-        type="submit"
-        class="btn btn-primary"
-        [disabled]="isSaving()">
-        {{ isSaving()
-          ? ('profile.edit.saving' | transloco)
-          : ('profile.edit.save' | transloco)
-        }}
-      </button>
-      @if (saveMessage()) {
-        <div class="alert alert-success mt-3">
-          {{ saveMessage() | transloco }}
-        </div>
-      }
-
-      @if (saveError()) {
-        <div class="alert alert-danger mt-3">
-          {{ saveError() | transloco }}
-        </div>
-      }
+        <button type="submit" class="btn btn-primary" [disabled]="profileEditForm().submitting()">
+          {{ (profileEditForm().submitting() ? 'profile.edit.saving' : 'profile.edit.save') | transloco }}
+        </button>
+        @if (saveMessage(); as messageKey) {
+          <div class="alert alert-success mt-3" role="status">{{ messageKey | transloco }}</div>
+        }
+      </fieldset>
     </form>
 
   </div>
