@@ -249,6 +249,7 @@ export class UsersService implements OnApplicationBootstrap {
         displayName : true,
         preferredLanguage: true,
         isActive: true,
+        mustChangePassword: true,
       }
     })
     if(!user) {
@@ -258,7 +259,8 @@ export class UsersService implements OnApplicationBootstrap {
     )}
 
 	const isAdmin = await this.permissionsService.isUserAdmin(userId);
-    return {...user, isAdmin};
+    const { mustChangePassword, ...profile } = user;
+    return {...profile, isAdmin, hasToChangePassword: mustChangePassword};
   }
 
   async getDeletedUsers(request: GetUsersQueryDto): Promise<GetUsersResponseDto> {
