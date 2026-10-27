@@ -67,16 +67,6 @@
 			"delete": "Delete",
 			"deleteConfirm": "Confirm delete",
 			"cancel": "Cancel"
-		},
-		"aiError": {
-			"unsupported_mime_type": "Analysis is not available for this file type",
-			"no_text": "No text could be extracted from this document",
-			"not_found": "File could not be found in storage",
-			"minio_error": "Error on reading the file from storage",
-			"minio_connection": "Storage is currently not reachable",
-			"llm_error": "The AI model returned an error",
-			"timeout": "Analysis took too long and was cancelled",
-			"unknown": "An unknown error occurred during analysis"
 		}
 	},
 	"tag": {
@@ -436,5 +426,17 @@
 		"AI_SERVICE_UNAVAILABLE": "The AI service is currently unavailable. Please try again later.",
 		"TAG_NOT_FOUND": "Tag was not found.",
 		"FORBIDDEN": "You don't have permission for this action."
+	},
+	"ais": {
+		"error": {
+			"unsupported_mime_type": "Analysis is not available for this file type",
+			"no_text": "No text could be extracted from this document",
+			"not_found": "File could not be found in storage",
+			"minio_error": "Error on reading the file from storage",
+			"minio_connection": "Storage is currently not reachable",
+			"llm_error": "The AI model returned an error",
+			"timeout": "Analysis took too long and was cancelled",
+			"unknown": "An unknown error occurred during analysis"
+		}
 	}
 }
