@@ -17,6 +17,11 @@
 					<a class="btn btn-sm btn-primary" [href]="docs.downloadUrl(doc.id)">
 						<i class="bi bi-download me-1"></i>{{ "documents.detail.download" | transloco }}
 					</a>
+					@if (doc.previewable) {
+						<button type="button" class="btn btn-sm btn-outline-primary" (click)="openPreview(doc)">
+							<i class="bi bi-eye me-1"></i>{{ "documents.detail.preview" | transloco }}
+						</button>
+					}
 
 					<div class="ms-auto d-flex gap-2">
 						@if (confirmDelete()) {

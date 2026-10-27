@@ -32,6 +32,7 @@ export interface DocumentSummary {
 	aiSummary?: string;
 	language: string;
 	aiErrorKey?: string | null;
+	previewable: boolean;
 }
 
 export interface DocumentsPage {
@@ -118,6 +119,10 @@ export class Documents {
 
 	downloadUrl(id: string) {
 		return `${this.baseUrl}/${id}/download`;
+	}
+
+	previewUrl(id: string) {
+		return `${this.baseUrl}/${id}/preview`;
 	}
 
 	addTag(docId: string, tagId: string) {

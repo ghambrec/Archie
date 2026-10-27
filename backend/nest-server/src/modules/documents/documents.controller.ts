@@ -39,6 +39,7 @@ import { DocumentPermissionsGuard } from './guards/document-permissions.guard';
 import { PermissionsGuard } from '../permissions/guards/permissions.guard';
 import { RequirePermission } from '../permissions/decorators/require-permission.decorator';
 import { DocumentPermission } from '../permissions/permission-keys';
+import { DocumentDownloadStreamDto } from './dto/document-download-stream.dto';
 
 @ApiTags('documents')
 @Controller('documents')
@@ -47,6 +48,29 @@ export class DocumentsController {
 	private readonly documentsService: DocumentsService,
 	private readonly documentFileValidationService: DocumentFileValidationService
   ) {}
+
+  private sendFile(res: Response, file: DocumentDownloadStreamDto, inline: boolean): void {
+	res.attachment(file.filename);
+	if (inline) {
+		const disposition = res.getHeader('Content-Disposition')!.toString();
+		res.setHeader('Content-Disposition', disposition.replace(/^attachment/, 'inline'));
+	}
+
+	const contentType = inline && file.mimeType.startsWith('text/') ? 'text/plain; charset=utf-8' : file.mimeType;
+
+	res.setHeader('Content-Type', contentType);
+	res.setHeader('Content-Length', file.sizeBytes.toString());
+	res.setHeader('X-Content-Type-Options', 'nosniff');
+
+	file.stream.on('error', () => {
+		if (!res.headersSent) {
+			res.status(500);
+		}
+		res.end();
+	});
+
+	file.stream.pipe(res);
+  }
 
   @ApiOperation({
     summary: 'Upload a document',
@@ -157,25 +181,24 @@ export class DocumentsController {
     @Param('id') id: string,
     @Res() res: Response,
   ): Promise<void> {
-    // DocumentDownloadStreamDto
-    const documentDownloadStream = await this.documentsService.downloadStream(
-      req.userId!,
-      id,
-    );
+    const file = await this.documentsService.downloadStream(req.userId!, id);
+	this.sendFile(res, file, false);
+  }
 
-  res.attachment(documentDownloadStream.filename);
-	res.setHeader('Content-Type', documentDownloadStream.mimeType);
-	res.setHeader('Content-Length', documentDownloadStream.sizeBytes.toString());
-	res.setHeader('X-Content-Type-Options', 'nosniff');
-
-    documentDownloadStream.stream.on('error', () => {
-      if (!res.headersSent) {
-        res.status(500);
-      }
-      res.end();
-    });
-
-    documentDownloadStream.stream.pipe(res);
+  @UseGuards(SessionAuthGuard, DocumentPermissionsGuard)
+  @RequirePermission(DocumentPermission.Read)
+  @Get(':id/preview')
+  @ApiOperation({
+    summary: 'Preview a document',
+    description: 'Streams the file contents inline for browser preview. Only available for docs with flag previewable true.',
+  })
+  async preview(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const file = await this.documentsService.previewStream(req.userId!, id);
+	this.sendFile(res, file, true);
   }
 
 
