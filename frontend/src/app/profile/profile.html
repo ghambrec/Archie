@@ -47,12 +47,7 @@
           </button>
 
           <ng-template ngbNavContent>
-            <app-profile-security
-              [(editPassword)]="editPassword"
-              [isPasswordSaving]="isPasswordSaving()"
-              [passwordSaveMessage]="passwordSaveMessage()"
-              [passwordSaveError]="passwordSaveError()"
-              (saveRequested)="savePassword()" />
+            <app-profile-security />
           </ng-template>
         </li>
 

@@ -470,12 +470,15 @@
 			"heading": "Password",
 			"description": "Change your password here.",
 			"newPassword": "New password",
-			"passwordHint": "The password must contain at least 8 characters.",
+			"passwordHint": "Use 8–25 characters with an uppercase letter, a lowercase letter, a number, and at least one of !@#$%^&*.",
 			"save": "Save password",
 			"saving": "Saving...",
 			"success": "Password has been updated successfully.",
 			"error": "Password could not be updated.",
-			"minLength": "Password must be at least 8 characters long."
+			"minLength": "Password must be at least 8 characters long.",
+			"required": "Enter a new password.",
+			"maxLength": "Password must be at most 25 characters long.",
+			"pattern": "Include an uppercase letter, a lowercase letter, a number, and at least one of !@#$%^&*."
 		}
 	},
 	"errors": {

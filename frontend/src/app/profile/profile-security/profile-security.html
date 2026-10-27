@@ -1,55 +1,26 @@
 <div class="card shadow-sm">
   <div class="card-body">
-    <h2 class="h5 mb-3">
-      {{ 'profile.security.heading' | transloco }}
-    </h2>
-    <p class="text-muted">
-      {{ 'profile.security.description' | transloco }}
-    </p>
+    <h2 class="h5 mb-3">{{ 'profile.security.heading' | transloco }}</h2>
+    <p class="text-muted">{{ 'profile.security.description' | transloco }}</p>
 
-    <form (ngSubmit)="saveRequested.emit()">
-      <div class="mb-3">
-        <label for="password" class="form-label">
-          {{ 'profile.security.newPassword' | transloco }}
-        </label>
+    <form [formRoot]="passwordForm">
+      <fieldset [disabled]="passwordForm().submitting()">
+        <app-form-field inputId="profile-password" type="password" autocomplete="new-password"
+          labelKey="profile.security.newPassword" hintKey="profile.security.passwordHint"
+          [field]="passwordForm.password" />
 
-        <input
-          id="password"
-          name="password"
-          type="password"
-          class="form-control"
-          [(ngModel)]="editPassword"
-          minlength="8"
-          maxlength="25"
-          autocomplete="new-password"
-          required>
+        @if (passwordForm().errors()[0]?.message; as errorKey) {
+          <div class="alert alert-danger" role="alert">{{ errorKey | transloco }}</div>
+        }
 
-          <div class="form-text">
-            {{ 'profile.security.passwordHint' | transloco }}
-          </div>
-      </div>
+        <button type="submit" class="btn btn-primary" [disabled]="passwordForm().submitting()">
+          {{ (passwordForm().submitting() ? 'profile.security.saving' : 'profile.security.save') | transloco }}
+        </button>
 
-      <button
-        type="submit"
-        class="btn btn-primary"
-        [disabled]="isPasswordSaving()">
-        {{ isPasswordSaving()
-          ? ('profile.security.saving' | transloco)
-          : ('profile.security.save' | transloco)
-        }}  
-      </button>
-
-      @if (passwordSaveMessage()) {
-        <div class="alert alert-success mb-3">
-          {{ passwordSaveMessage() | transloco }}
-        </div>
-      }
-
-      @if (passwordSaveError()) {
-        <div class="alert alert-danger mb-3">
-          {{ passwordSaveError() | transloco }}
-        </div>
-      }
+        @if (passwordSaveMessage(); as messageKey) {
+          <div class="alert alert-success mt-3" role="status">{{ messageKey | transloco }}</div>
+        }
+      </fieldset>
     </form>
   </div>
 </div>

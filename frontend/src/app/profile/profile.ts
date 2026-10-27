@@ -32,12 +32,6 @@ export class Profile implements OnDestroy {
   private readonly users = inject(Users);
   private readonly http = inject(HttpClient);
 
-  editPassword = '';
-
-  readonly isPasswordSaving = signal(false);
-  readonly passwordSaveMessage = signal<string | null>(null);
-  readonly passwordSaveError = signal<string | null>(null);
-
   readonly userGroups = signal<Array<{
     groupId: string;
     name: string;
@@ -60,6 +54,9 @@ export class Profile implements OnDestroy {
         isAdmin: false,
       }
     }
+
+
+
     
     // CurrentUser hat kein isActive --> Default false
     return {
@@ -73,8 +70,6 @@ export class Profile implements OnDestroy {
   });
 
   avatarUrl = `images/default-avatar.svg`;
-
-  
 
   constructor() {
     // laeuft jedes mal wenn currentUser() sich aendert (auch initial)
@@ -129,33 +124,6 @@ export class Profile implements OnDestroy {
     }
   }
 
-  async savePassword(): Promise<void> {
-    const password = this.editPassword.trim();
-
-    this.passwordSaveMessage.set(null);
-    this.passwordSaveError.set(null);
-
-    if (password.length < 8) {
-      this.passwordSaveError.set('profile.security.minLength');
-      
-      return;
-    }
-
-    this.isPasswordSaving.set(true);
-
-    try {
-      await firstValueFrom(this.users.changeOwnPassword(password));
-
-      this.editPassword = '';
-      this.passwordSaveMessage.set('profile.security.success');
-    } catch (error) {
-      console.error('[Profile] Failed to update password:', error);
-      this.passwordSaveError.set('profile.security.error');
-    } finally {
-      this.isPasswordSaving.set(false);
-    }
-  }
-
   onAvatarError(event: Event): void {
     (event.target as HTMLImageElement).src = 'images/default-avatar.svg';
   }
@@ -163,4 +131,4 @@ export class Profile implements OnDestroy {
   ngOnDestroy(): void {
     this.avatarObjectUrl && URL.revokeObjectURL(this.avatarObjectUrl);
   }
-} 
+}
