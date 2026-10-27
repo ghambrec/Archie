@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { DocumentsReview, isAiProcessing } from '../documents-review';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { DocReviewCard } from '../doc-review-card/doc-review-card';
 import { Tags } from '../../tags/tags';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -27,6 +27,7 @@ export class DocReview {
 
 	protected readonly reviewService = inject(DocumentsReview);
 	private readonly tags = inject(Tags);
+	private readonly transloco = inject(TranslocoService);
 	private readonly documentsService = inject(Documents);
 
 	protected readonly busyIds = signal<Set<string>>(new Set());
@@ -61,7 +62,7 @@ export class DocReview {
 			},
 			error: (err: HttpErrorResponse) => {
 				this.setBusy(docId, false);
-				this.actionError.set(toErrorKey(err));
+				this.actionError.set(toErrorKey(err, this.transloco));
 			},
 		});
 	}
@@ -78,7 +79,7 @@ export class DocReview {
 			},
 			error: (err: HttpErrorResponse) => {
 				this.setBusy(docId, false);
-				this.actionError.set(toErrorKey(err));
+				this.actionError.set(toErrorKey(err, this.transloco));
 			},
 		});
 	}
