@@ -3,12 +3,13 @@ import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { PatchUser, Users } from '../users/users';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { SupportedLanguage } from '../core/i18n/supported-language';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { ProfileEditForm } from './profile-edit-form/profile-edit-form';
+import { ProfileGroups } from './profile-groups/profile-groups';
+import { ProfileSecurity } from './profile-security/profile-security';
 
-interface ProfileUser {
+export interface ProfileUser {
   id: string;
   email: string;
   displayName: string;
@@ -21,12 +22,12 @@ interface ProfileUser {
   selector: 'app-profile',
   imports: [
     NgbNavModule,
-    DatePipe,
-    FormsModule,
+    ProfileEditForm,
+    ProfileGroups,
+    ProfileSecurity,
     TranslocoPipe,
   ],
   templateUrl: './profile.html',
-  styleUrl: './profile.scss',
 })
 export class Profile implements OnDestroy {
   private readonly users = inject(Users);

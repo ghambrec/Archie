@@ -23,12 +23,6 @@
           }}
         </span>
       </div>
-<!--       
-      <div class="text-center mb-4">
-        <div class="avatar-wrapper mx-auto" style="width: 140px; height: 140px;">
-          <img [src]="avatarUrl" class="avatar" (error)="onAvatarError($event)">
-        </div>
-      </div> -->
 
       <ul ngbNav #nav="ngbNav" class="nav-tabs mb-4">
         <li [ngbNavItem]="1">
@@ -37,201 +31,19 @@
           </button>
 
           <ng-template ngbNavContent>
-            <div class="card shadow-sm">
-              <div class="card-body">
-                
-                <div class="row align-items-center mb-4">
-                  <div class="col-12 col-md-3 text-center">
-                    <div class="avatar-wrapper">
-                      <img
-                        [src]="avatarUrl"
-                        class="avatar"
-                        (error)="onAvatarError($event)">
-                    </div>
-                  </div>
-                  
-                  <div class="col-12 col-md-8 account-information">
-                    <h2 class="h5 mb-4">
-                      {{'profile.accountInformation.heading' | transloco }}
-                    </h2>
+            <app-profile-edit-form
+              [profile]="profile()"
+              [avatarUrl]="avatarUrl"
+              [(editDisplayName)]="editDisplayName"
+              [(editEmail)]="editEmail"
+              [(editPreferredLanguage)]="editPreferredLanguage"
+              [isSaving]="isSaving()"
+              [saveMessage]="saveMessage()"
+              [saveError]="saveError()"
+              (saveRequested)="saveProfile()"
+              (avatarError)="onAvatarError($event)" />
 
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <div class="text-muted small">
-                          {{ 'profile.accountInformation.displayName' | transloco }}
-                        </div>
-                        <div>{{ profile().displayName }}</div>
-                      </div>
-
-                      <div class="col-md-6 mb-3">
-                        <div class="text-muted small">
-                          {{ 'profile.accountInformation.email' | transloco }}
-                        </div>
-                        <div>{{ profile().email }}</div>
-                      </div>
-
-                      <div class="col-md-6 mb-3">
-                        <div class="text-muted small">
-                          {{ 'profile.accountInformation.language' | transloco }}
-                        </div>
-                          <div>{{ profile().preferredLanguage === 'en'
-                            ? ('profile.edit.english' | transloco)
-                            : ('profile.edit.german' | transloco)
-                          }}
-                        </div>
-                      </div>
-
-                      <div class="col-md-6 mb-3">
-                        <div class="text-muted small">
-                          {{ 'profile.accountInformation.role' | transloco }}
-                        </div>
-                        <span class="badge text-bg-primary">
-                            {{ profile().isAdmin
-                              ? ('profile.accountInformation.administrator' | transloco)
-                              : ('profile.accountInformation.user' | transloco)
-                            }}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <hr>
-                
-                <h2 class="h5 mb-4">
-                  {{ 'profile.edit.heading' | transloco }}
-                </h2>
-                
-                <form (ngSubmit)="saveProfile()">
-                  <div class="mb-3">
-                    <label for="displayName" class="form-label">
-                      {{ 'profile.edit.displayName' | transloco }}
-                    </label>
-
-                    <input
-                      id="displayName"
-                      name="displayName"
-                      type="text"
-                      class="form-control"
-                      [(ngModel)]="editDisplayName"
-                      required
-                      maxlength="25">
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="email" class="form-label">
-                      {{ 'profile.edit.email' | transloco }}
-                    </label>
-
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      class="form-control"
-                      [(ngModel)]="editEmail"
-                      required>
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="language" class="form-label">
-                      {{ 'profile.edit.preferredLanguage' | transloco }}
-                    </label>
-
-                    <select
-                      id="language"
-                      name="preferredLanguage"
-                      class="form-select"
-                      [(ngModel)]="editPreferredLanguage">
-                      <option value="en">
-                        {{ 'profile.edit.english' | transloco }}
-                      </option>
-                      <option value="de">
-                        {{ 'profile.edit.german' | transloco }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <button
-                    type="submit"
-                    class="btn btn-primary"
-                    [disabled]="isSaving()">
-                    {{ isSaving()
-                      ? ('profile.edit.saving' | transloco)
-                      : ('profile.edit.save' | transloco)
-                    }}
-                  </button>
-                  @if (saveMessage()) {
-                    <div class="alert alert-success mt-3">
-                      {{ saveMessage() | transloco }}
-                    </div>
-                  }
-
-                  @if (saveError()) {
-                    <div class="alert alert-danger mt-3">
-                      {{ saveError() | transloco }}
-                    </div>
-                  }
-                </form>
-
-              </div>
-            </div>
-
-            <!-- Group Memberships Section -->
-            <div class="card shadow-sm mt-4">
-              <div class="card-header">
-                <h2 class="h5 mb-0">
-                  {{ 'profile.groups.heading' | transloco }}
-                </h2>
-              </div>
-              <div class="card-body">
-                @if (userGroups().length === 0) {
-                  <p class="text-muted">
-                    {{ 'profile.groups.empty' | transloco }}
-                  </p>
-                } @else {
-                  <div class="table-responsive">
-                    <table class="table align-middle mb-0">
-                      <thead>
-                        <tr>
-                          <th scope="col">
-                            {{ 'profile.groups.groupName'| transloco }}
-                          </th>
-                          <th scope="col">
-                            {{ 'profile.groups.permissions' | transloco }}
-                          </th>
-                          <th scope="col">
-                            {{ 'profile.groups.joinedAt' | transloco }}
-                          </th>
-                          <th scope="col" style="width: 1%;"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @for (group of userGroups(); track group.groupId) {
-                          <tr>
-                            <td>{{ group.name }}</td>
-                            <td>
-                              @for (permission of group.permissions; track permission) {
-                                <div>{{ permission }}</div>
-                              } @empty {
-                                <span>
-                                  {{ 'profile.groups.noPermissions' | transloco }}
-                                </span>
-                              }
-                            </td>
-                            <td>{{ group.joinedAt | date: 'short' }}</td>
-                            <!-- <td>
-                               <button class="btn btn-sm btn-outline-secondary" disabled>
-                                <i class="bi bi-info-circle"></i>
-                               </button>
-                            </td> -->
-                          </tr>
-                        }
-                      </tbody>
-                    </table>
-                  </div>
-                }
-              </div>
-            </div>
+            <app-profile-groups [userGroups]="userGroups()" />
 
           </ng-template>
         </li>
@@ -242,61 +54,12 @@
           </button>
 
           <ng-template ngbNavContent>
-            <div class="card shadow-sm">
-              <div class="card-body">
-                <h2 class="h5 mb-3">
-                  {{ 'profile.security.heading' | transloco }}
-                </h2>
-                <p class="text-muted">
-                  {{ 'profile.security.description' | transloco }}
-                </p>
-
-                <form (ngSubmit)="savePassword()">
-                  <div class="mb-3">
-                    <label for="password" class="form-label">
-                      {{ 'profile.security.newPassword' | transloco }}
-                    </label>
-
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      class="form-control"
-                      [(ngModel)]="editPassword"
-                      minlength="8"
-                      maxlength="25"
-                      autocomplete="new-password"
-                      required>
-
-                      <div class="form-text">
-                        {{ 'profile.security.passwordHint' | transloco }}
-                      </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    class="btn btn-primary"
-                    [disabled]="isPasswordSaving()">
-                    {{ isPasswordSaving()
-                      ? ('profile.security.saving' | transloco)
-                      : ('profile.security.save' | transloco)
-                    }}  
-                  </button>
-
-                  @if (passwordSaveMessage()) {
-                    <div class="alert alert-success mb-3">
-                      {{ passwordSaveMessage() | transloco }}
-                    </div>
-                  }
-
-                  @if (passwordSaveError()) {
-                    <div class="alert alert-danger mb-3">
-                      {{ passwordSaveError() | transloco }}
-                    </div>
-                  }
-                </form>
-              </div>
-            </div>
+            <app-profile-security
+              [(editPassword)]="editPassword"
+              [isPasswordSaving]="isPasswordSaving()"
+              [passwordSaveMessage]="passwordSaveMessage()"
+              [passwordSaveError]="passwordSaveError()"
+              (saveRequested)="savePassword()" />
           </ng-template>
         </li>
 
@@ -306,7 +69,4 @@
     </div>
   </div>
 </div>
-
-<!-- ...existing code... -->
-<!--  -->
 
