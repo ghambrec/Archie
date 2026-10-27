@@ -1,8 +1,10 @@
-@if (queue().length > 0) {
+@if (queue().length > 0 || reviewService.queue.error()) {
 	<section class="mb-4">
 		<h2 class="h5 fw-semibold d-flex align-items-center gap-2 mb-3">
 			{{ "documents.review.heading" | transloco }}
-			<span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">{{ queue().length }}</span>
+			@if (queue().length > 0) {
+				<span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">{{ queue().length }}</span>
+			}
 		</h2>
 		@if (actionError(); as key) {
 				<div class="alert alert-danger">{{ key | transloco }}</div>
