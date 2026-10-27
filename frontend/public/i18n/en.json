@@ -347,7 +347,10 @@
 			"btnCancel": "Cancel",
 			"feedbackMsg": "Group successfully created",
 			"errorGeneral": "Unable to create Group",
-			"errorConflictName": "Name already registered"
+			"errorConflictName": "Name already registered",
+			"errors": {
+				"nameRequired": "Name is required."
+			}
 		},
 		"deleteGroupAdmin": {
 			"heading": "Delete Group",
@@ -408,8 +411,10 @@
 			"documentsDelete": "Delete documents",
 			"btnCancel": "Cancel",
 			"btnSave": "Save",
-			"errorGeneral": "Unable to update permissions.",
-			"errorLastAdmin": "The admin permission cannot be removed because this is the last admin."
+			"errors": {
+				"General": "Unable to update permissions.",
+				"LastAdmin": "The admin permission cannot be removed because this is the last admin."
+			}
 		}
 	},
 	"errors": {
