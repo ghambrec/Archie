@@ -37,5 +37,6 @@ export enum ErrorCode {
 	DocumentStillProcessing = 'DOCUMENT_STILL_PROCESSING',
 	DocumentIngestionNotRetryable = 'DOCUMENT_INGESTION_NOT_RETRYABLE',
 	DocumentNotPreviewable = 'DOCUMENT_NOT_PREVIEWABLE',
+	DocumentFilenameInvalid = 'DOCUMENT_FILENAME_INVALID',
 	AiServiceUnavailable = 'AI_SERVICE_UNAVAILABLE',
   }
