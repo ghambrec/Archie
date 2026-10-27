@@ -34,6 +34,8 @@ export class EditUserModal {
 
   readonly editUserForm = form(this.editUserModal, (path) => {
     minLength(path.password, PASSWORD_POLICY.minLength, { message: 'users.updateUser.errors.passwordError' });
+    pattern(path.password, PASSWORD_POLICY.pattern, {message: 'users.updateUser.erros.passwordError'});
+    maxLength(path.password, PASSWORD_POLICY.maxLength, {message: 'users.updateUser.erros.passwordError'})
     maxLength(path.displayName, DISPLAY_NAME_MAX_LENGTH, { message: 'users.updateUser.errors.displayNameTooLong' });
     email(path.email, { message: 'users.updateUser.errors.emailFormat' });
     pattern(path.preferredLanguage, SUPPORTED_LANGUAGE_PATTERN, { message: 'users.updateUser.errors.unsupportedLanguage' });
