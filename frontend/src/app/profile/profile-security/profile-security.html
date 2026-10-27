@@ -1,0 +1,55 @@
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h2 class="h5 mb-3">
+      {{ 'profile.security.heading' | transloco }}
+    </h2>
+    <p class="text-muted">
+      {{ 'profile.security.description' | transloco }}
+    </p>
+
+    <form (ngSubmit)="saveRequested.emit()">
+      <div class="mb-3">
+        <label for="password" class="form-label">
+          {{ 'profile.security.newPassword' | transloco }}
+        </label>
+
+        <input
+          id="password"
+          name="password"
+          type="password"
+          class="form-control"
+          [(ngModel)]="editPassword"
+          minlength="8"
+          maxlength="25"
+          autocomplete="new-password"
+          required>
+
+          <div class="form-text">
+            {{ 'profile.security.passwordHint' | transloco }}
+          </div>
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="isPasswordSaving()">
+        {{ isPasswordSaving()
+          ? ('profile.security.saving' | transloco)
+          : ('profile.security.save' | transloco)
+        }}  
+      </button>
+
+      @if (passwordSaveMessage()) {
+        <div class="alert alert-success mb-3">
+          {{ passwordSaveMessage() | transloco }}
+        </div>
+      }
+
+      @if (passwordSaveError()) {
+        <div class="alert alert-danger mb-3">
+          {{ passwordSaveError() | transloco }}
+        </div>
+      }
+    </form>
+  </div>
+</div>
