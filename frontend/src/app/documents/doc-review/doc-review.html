@@ -1,8 +1,8 @@
-@if (reviewService.queue.value().length > 0) {
+@if (queue().length > 0) {
 	<section class="mb-4">
 		<h2 class="h5 fw-semibold d-flex align-items-center gap-2 mb-3">
 			{{ "documents.review.heading" | transloco }}
-			<span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">{{ reviewService.queue.value().length }}</span>
+			<span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">{{ queue().length }}</span>
 		</h2>
 		@if (actionError(); as key) {
 				<div class="alert alert-danger">{{ key | transloco }}</div>
@@ -10,11 +10,11 @@
 
 		@if (reviewService.queue.error()) {
 			<div class="alert alert-danger">{{ "documents.review.errorLoadingQueue" | transloco }}</div>
-		} @else if (reviewService.queue.isLoading() && reviewService.queue.value().length === 0) {
+		} @else if (reviewService.queue.isLoading() && queue().length === 0) {
 			<div class="spinner-border spinner-border-sm" role="status"></div>
 		} @else {
 		<div class="review-grid">
-			@for (doc of reviewService.queue.value(); track doc.id) {
+			@for (doc of queue(); track doc.id) {
 				<app-doc-review-card
 					[doc]="doc"
 					[busy]="busyIds().has(doc.id)"

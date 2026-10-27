@@ -33,7 +33,9 @@ export class DocReview {
 	protected readonly busyIds = signal<Set<string>>(new Set());
 	protected readonly actionError = signal<string | null>(null); // transloco
 
-	private readonly hasProcessingDocs = computed(() => this.reviewService.queue.value().some(doc => isAiProcessing(doc.aiStatus)));
+	protected readonly queue = computed(() => this.reviewService.queue.hasValue() ? this.reviewService.queue.value() : []);
+
+	private readonly hasProcessingDocs = computed(() => this.queue().some(doc => isAiProcessing(doc.aiStatus)));
 
 	// doc auf busy setzen damit nicht zwei mal hintereinander buttons gedrueckt werden koennen
 	private setBusy(docId: string, busy: boolean) {

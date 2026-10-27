@@ -75,7 +75,9 @@ export class Tags {
 	);
 
 	// tag baum
-	readonly tagTree = computed(() => buildTagTree(this.tagDocsList.value()));
+	private readonly tagDocs = computed(() => this.tagDocsList.hasValue() ? this.tagDocsList.value() : []);
+
+	readonly tagTree = computed(() => buildTagTree(this.tagDocs()));
 
 	// aktuell ausgewaehlte tag id
 	private readonly route = inject(ActivatedRoute);
@@ -86,7 +88,7 @@ export class Tags {
 
 	// map mit id und TagResponse, zum nachschlagen fuer parents
 	private readonly tagsById = computed(
-		() => new Map<string, TagResponse>(this.tagDocsList.value().map(tag => [tag.id, tag]))
+		() => new Map<string, TagResponse>(this.tagDocs().map(tag => [tag.id, tag]))
 	)
 
 	// return all parent ids from the current selected tag
