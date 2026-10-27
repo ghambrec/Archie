@@ -1,9 +1,8 @@
 import { Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
-import { PatchUser, Users } from '../users/users';
+import { Users } from '../users/users';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { SupportedLanguage } from '../core/i18n/supported-language';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ProfileEditForm } from './profile-edit-form/profile-edit-form';
 import { ProfileGroups } from './profile-groups/profile-groups';
@@ -33,14 +32,7 @@ export class Profile implements OnDestroy {
   private readonly users = inject(Users);
   private readonly http = inject(HttpClient);
 
-  editDisplayName = '';
-  editEmail = '';
-  editPreferredLanguage = 'en';
   editPassword = '';
-
-  readonly isSaving = signal(false);
-  readonly saveMessage = signal<string | null>(null);
-  readonly saveError = signal<string | null>(null);
 
   readonly isPasswordSaving = signal(false);
   readonly passwordSaveMessage = signal<string | null>(null);
@@ -82,14 +74,13 @@ export class Profile implements OnDestroy {
 
   avatarUrl = `images/default-avatar.svg`;
 
+  
+
   constructor() {
     // laeuft jedes mal wenn currentUser() sich aendert (auch initial)
     effect(() => {
       const user = this.users.currentUser();
       if (user) {
-        this.editDisplayName = user.displayName;
-        this.editEmail = user.email;
-        this.editPreferredLanguage = user.preferredLanguage;
 
         // console.log('[Profile] Effect triggered for user:', user.id);
         this.loadAvatar(user.id);
@@ -135,33 +126,6 @@ export class Profile implements OnDestroy {
       console.error('[Profile] Failed to load user groups and permissions:', error);
 
       this.userGroups.set([]);
-    }
-  }
-
-  async saveProfile(): Promise<void> {
-    this.isSaving.set(true);
-    this.saveMessage.set(null);
-    this.saveError.set(null); 
-
-    const changes: PatchUser = {
-      displayName: this.editDisplayName.trim(),
-      email: this.editEmail.trim(),
-      preferredLanguage: this.editPreferredLanguage as SupportedLanguage,
-    };
-
-    try {
-      await firstValueFrom(this.users.updateCurrentUser(changes));
-
-      const updatedUser = await firstValueFrom(this.users.getCurrentUser());
-
-      this.users.currentUser.set(updatedUser);
-      this.editPassword = '';
-      this.saveMessage.set('profile.edit.success');
-    } catch (error) {
-      console.error('[Profile] Failed to update profile:', error);
-      this.saveError.set('profile.edit.error');
-    } finally {
-      this.isSaving.set(false);
     }
   }
 
