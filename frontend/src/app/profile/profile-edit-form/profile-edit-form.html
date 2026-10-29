@@ -35,11 +35,7 @@
             <div class="text-muted small">
               {{ 'profile.accountInformation.language' | transloco }}
             </div>
-              <div>{{ profile().preferredLanguage === 'en'
-                ? ('profile.edit.english' | transloco)
-                : ('profile.edit.german' | transloco)
-              }}
-            </div>
+            <div>{{ preferredLanguageKey() | transloco }}</div>
           </div>
 
           <div class="col-md-6 mb-3">

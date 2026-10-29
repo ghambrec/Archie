@@ -33,7 +33,7 @@
           <ng-template ngbNavContent>
             <app-profile-edit-form
               [profile]="profile()"
-              [avatarUrl]="avatarUrl"
+              [avatarUrl]="avatarUrl()"
               (avatarError)="onAvatarError($event)" />
 
             <app-profile-groups [userGroups]="userGroups()" />
