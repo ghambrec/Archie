@@ -1,8 +1,8 @@
-import { Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
-import { Users } from '../users/users';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { Users, type CurrentUser, type UserGroupsResponse } from '../users/users';
+import { httpResource } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ProfileEditForm } from './profile-edit-form/profile-edit-form';
 import { ProfileGroups } from './profile-groups/profile-groups';
@@ -28,20 +28,34 @@ export interface ProfileUser {
   ],
   templateUrl: './profile.html',
 })
-export class Profile implements OnDestroy {
+export class Profile {
   private readonly users = inject(Users);
-  private readonly http = inject(HttpClient);
+  private readonly userId = computed(() => this.users.currentUser()?.id);
 
-  readonly userGroups = signal<Array<{
-    groupId: string;
-    name: string;
-    joinedAt: string;
-    permissions: string[];
-  }>>([]);
+  readonly currentUserResource = httpResource<CurrentUser>(() => ({
+    url: `${environment.apiUrl}/users/me`,
+    withCredentials: true,
+  }));
 
-  private avatarObjectUrl?: string;
+  readonly userGroupsResource = httpResource<UserGroupsResponse>(() => this.userId()
+    ? { url: `${environment.apiUrl}/user-groups/me`, withCredentials: true }
+    : undefined,
+  );
 
-  // Expliziter Return-Type: ProfileUser
+  readonly avatarResource = httpResource.blob(() => {
+    const userId = this.userId();
+    return userId
+      ? { url: this.users.getAvatarUrl(userId), withCredentials: true }
+      : undefined;
+  });
+
+  readonly userGroups = computed(() => this.userGroupsResource.hasValue()
+    ? this.userGroupsResource.value().groups
+    : [],
+  );
+
+  readonly avatarUrl = signal('images/default-avatar.svg');
+
   readonly profile = computed<ProfileUser>(() => {
     const u = this.users.currentUser();
     if (!u) {
@@ -60,71 +74,35 @@ export class Profile implements OnDestroy {
       email: u.email,
       displayName: u.displayName,
       preferredLanguage: u.preferredLanguage,
-      isActive: true, // oder false, falls backend es nicht liefert
+      isActive: true,
       isAdmin: u.isAdmin,
     };
   });
 
-  avatarUrl = `images/default-avatar.svg`;
-
+  // Keep the shared user state in sync;
   constructor() {
-    // laeuft jedes mal wenn currentUser() sich aendert (auch initial)
     effect(() => {
-      const user = this.users.currentUser();
-      if (user) {
-
-        // console.log('[Profile] Effect triggered for user:', user.id);
-        this.loadAvatar(user.id);
-        this.loadUserGroups();
-      } else {
-        this.avatarUrl = 'images/default-avatar.svg';
-        this.userGroups.set([]);
+      if (this.currentUserResource.hasValue()) {
+        this.users.currentUser.set(this.currentUserResource.value());
       }
     });
 
-    // 2. inital user load -  bei coldstart
-    if (!this.users.currentUser()) {
-      this.users.getCurrentUser().subscribe({
-        next: (user) => this.users.currentUser.set(user),
-        error: () => this.avatarUrl = 'images/default-avatar.svg',
-      });
-    }
-  }
+    effect((onCleanup) => {
+      if (!this.avatarResource.hasValue()) {
+        this.avatarUrl.set('images/default-avatar.svg');
+        return;
+      }
 
-  private loadAvatar(userId: string): void {
-    const url = this.users.getAvatarUrl(userId);
-    console.log('[Profile] Loading avatar:', url);
-
-    this.http.get(url, { responseType: 'blob', withCredentials: true }).subscribe({
-      next: (blob) => {
-        console.log('[Profile] Blob:', blob.type, blob.size);
-        this.avatarObjectUrl = URL.createObjectURL(blob);
-        this.avatarUrl = this.avatarObjectUrl;
-      },
-      error: (err) => {
-        console.error('[Profile] Avatar error:', err);
-        this.avatarUrl = 'images/default-avatar.svg';
-      },
+      const objectUrl = URL.createObjectURL(this.avatarResource.value());
+      this.avatarUrl.set(objectUrl);
+      onCleanup(() => URL.revokeObjectURL(objectUrl));
     });
   }
 
-  private async loadUserGroups(): Promise<void> {
-    try {
-      const response = await firstValueFrom(this.users.getMyGroups());
-
-      this.userGroups.set(response.groups);
-    } catch (error) {
-      console.error('[Profile] Failed to load user groups and permissions:', error);
-
-      this.userGroups.set([]);
-    }
-  }
-
   onAvatarError(event: Event): void {
-    (event.target as HTMLImageElement).src = 'images/default-avatar.svg';
-  }
-
-  ngOnDestroy(): void {
-    this.avatarObjectUrl && URL.revokeObjectURL(this.avatarObjectUrl);
+    const image = event.target as HTMLImageElement;
+    if (image.getAttribute('src') !== 'images/default-avatar.svg') {
+      image.src = 'images/default-avatar.svg';
+    }
   }
 }
