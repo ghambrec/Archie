@@ -674,7 +674,7 @@
         "spec": {
           "id": 6,
           "title": "AI Stages – Mean Duration",
-          "description": "Prepared: requires archie_ai_stage_duration_seconds with stage=embedding, retrieval and generation in the Python service. Retrieval covers the search for matching chunks; generation covers the entire LLM call, including waiting time and possible internal retries. The provider can be OpenRouter or Ollama.",
+          "description": "Mean duration per chat stage, including failed and cancelled attempts. Embedding covers vector creation; retrieval covers chunk search and context construction; generation covers the entire LLM call, including waiting time and internal retries. Metrics are recorded when each stage finishes. The provider can be OpenRouter or Ollama.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -792,91 +792,6 @@
             }
           }
         }
-      },
-      "panel-7": {
-        "kind": "Panel",
-        "spec": {
-          "id": 7,
-          "title": "Chat Outcomes in the Selected Time Range",
-          "description": "Prepared: requires the archie_chat_requests_total ",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "eg2e6077ivm68a"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "sum by (outcome) (increase(archie_chat_requests_total{outcome=~\"success|error|timeout\"}[$__range]))",
-                        "legendFormat": "{{outcome}}",
-                        "range": false,
-                        "instant": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "stat",
-            "version": "13.2.4",
-            "spec": {
-              "options": {
-                "reduceOptions": {
-                  "values": false,
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": ""
-                },
-                "orientation": "auto",
-                "textMode": "auto",
-                "colorMode": "value",
-                "graphMode": "none",
-                "justifyMode": "auto"
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "percentage",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "palette-classic",
-                    "seriesBy": "max"
-                  },
-                  "unit": "short",
-                  "min": 0
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
       }
     },
     "layout": {
@@ -958,19 +873,6 @@
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-6"
-              }
-            }
-          },
-          {
-            "kind": "GridLayoutItem",
-            "spec": {
-              "x": 0,
-              "y": 34,
-              "width": 24,
-              "height": 8,
-              "element": {
-                "kind": "ElementReference",
-                "name": "panel-7"
               }
             }
           }
