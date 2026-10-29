@@ -45,6 +45,7 @@ export class ProfileEditForm {
     email(path.email, { message: 'users.updateUser.errors.emailFormat' });
     pattern(path.preferredLanguage, SUPPORTED_LANGUAGE_PATTERN, { message: 'users.updateUser.errors.unsupportedLanguage' });
     required(path.displayName, { message: 'users.updateUser.errors.displayNameRequired' });
+    pattern(path.displayName, /\S/, { message: 'users.updateUser.errors.displayNameRequired' });
     required(path.email, { message: 'users.updateUser.errors.emailRequired' });
     required(path.preferredLanguage, { message: 'users.updateUser.errors.languageRequired' });
   }, {
