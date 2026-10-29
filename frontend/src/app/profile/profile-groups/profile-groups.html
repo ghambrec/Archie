@@ -6,7 +6,7 @@
     </h2>
   </div>
   <div class="card-body">
-    @if (userGroups().length === 0) {
+    @if (displayGroups().length === 0) {
       <p class="text-muted">
         {{ 'profile.groups.empty' | transloco }}
       </p>
@@ -28,12 +28,18 @@
             </tr>
           </thead>
           <tbody>
-            @for (group of userGroups(); track group.groupId) {
+            @for (group of displayGroups(); track group.groupId) {
               <tr>
                 <td>{{ group.name }}</td>
                 <td>
-                  @for (permission of group.permissions; track permission) {
-                    <div>{{ permission }}</div>
+                  @for (permission of group.permissions; track permission.key) {
+                    <div>
+                      @if (permission.labelKey; as labelKey) {
+                        {{ labelKey | transloco }}
+                      } @else {
+                        {{ permission.key }}
+                      }
+                    </div>
                   } @empty {
                     <span>
                       {{ 'profile.groups.noPermissions' | transloco }}
@@ -41,11 +47,6 @@
                   }
                 </td>
                 <td>{{ group.joinedAt | date: 'short' }}</td>
-                <!-- <td>
-                   <button class="btn btn-sm btn-outline-secondary" disabled>
-                    <i class="bi bi-info-circle"></i>
-                   </button>
-                </td> -->
               </tr>
             }
           </tbody>
