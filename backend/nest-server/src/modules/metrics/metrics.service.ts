@@ -7,7 +7,7 @@ export class MetricsService {
   private readonly chatDuration = new Histogram({
     name: 'archie_chat_request_duration_seconds',
     help: 'Server processing time of chat requests, including AI service latency and unsuccessful requests.',
-    buckets: [0.1, 0.5, 1, 2, 5, 10, 20, 30, 60, 120, 180, 300, 600],
+    buckets: [0.5, 1, 2, 5, 8, 10, 12, 15, 20, 30, 60, 120, 300, 600],
     registers: [this.registry],
   });
 
