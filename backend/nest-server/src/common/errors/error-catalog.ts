@@ -125,5 +125,9 @@ export const ERROR_CATALOG ={
 	status: HttpStatus.UNSUPPORTED_MEDIA_TYPE,
 	message: 'Document file type cannot be previewed.'
   },
+  [ErrorCode.DocumentFilenameInvalid] : {
+	status: HttpStatus.BAD_REQUEST,
+	message: 'Document filename is invalid.'
+  },
 
   } satisfies Record<ErrorCode, ErrorDefinition>;

@@ -56,6 +56,16 @@ export class DocumentFileValidationService {
 		return this.trimFilename(filename, FILENAME_MAX_LENGTH)
 	}
 
+	buildRenamedFilename(currentFilename: string, newBasename: string): string {
+		const extension = extname(currentFilename);
+		const basename = newBasename.normalize('NFC').replace(FILENAME_CONTROL_CHARS, '').trim();
+		if (basename === '' || basename === '.' || basename === '..' || /[/\\]/.test(basename)) {
+			throw new ApplicationException(ErrorCode.DocumentFilenameInvalid);
+		}
+
+		return this.trimFilename(basename + extension, FILENAME_MAX_LENGTH);
+	}
+
 	trimFilename(name: string, maxLength: number): string {
 		const chars = Array.from(name);
 		if (chars.length <= maxLength) {
