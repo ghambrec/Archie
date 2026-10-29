@@ -1,3 +1,4 @@
+from src.metrics import measure_chat_stage
 from src.config import settings
 from src.embedding.embedder import embed
 from pgvector import Vector
@@ -20,22 +21,21 @@ async def retrieval(user_id: UUID,
 	try:
 		message_history = await load_conversation_messages(pool, conv_id)
 
-		question_embedding = await embed(question)
+		with measure_chat_stage("embedding"):
+			question_embedding = await embed(question)
 		#logging.debug(f"vector: {question_embedding}")
 
 		logging.debug( f"embedding dimensions: {len(question_embedding)}")
 		
-		chunks = await search_chunks(pool,
-							   user_id=user_id,
-							   question_embedding=question_embedding,
-	
-							   limit= result_limit)
-		
-		context, context_chunks = build_context(chunks, context_budget)
+		with measure_chat_stage("retrieval"):
+			chunks = await search_chunks(
+				pool, user_id=user_id, question_embedding=question_embedding,
+				limit=result_limit,
+			)
+			context, context_chunks = build_context(chunks, context_budget)
 
-		answer = await generate(question,
-						context,
-						message_history)
+		with measure_chat_stage("generation"):
+			answer = await generate(question, context, message_history)
 	except Exception:
 		logging.exception("embedding, question, and context failed")
 		raise

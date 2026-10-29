@@ -13,3 +13,7 @@ scrape_configs:
   - job_name: nest-server
     static_configs:
       - targets: ["nest-server:3000"]
+
+  - job_name: ai-service
+    static_configs:
+      - targets: ["ai-service:5001"]
