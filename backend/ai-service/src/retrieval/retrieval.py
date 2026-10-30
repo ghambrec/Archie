@@ -14,7 +14,7 @@ import logging
 async def retrieval(user_id: UUID,
 					conv_id: UUID, 
 					question: str, 
-					pool: asyncpg.Pool, 
+					pool: asyncpg.Pool | asyncpg.Connection,
 					result_limit: int = settings.limit,
 					context_budget: int = settings.context_budget 
 					) -> AnswerResponse :
@@ -43,7 +43,7 @@ async def retrieval(user_id: UUID,
 	return enrich_answer(answer, context_chunks)
 	
 
-async def load_conversation_messages(pool: asyncpg.Pool, conv_id: UUID) -> list[asyncpg.Record]:
+async def load_conversation_messages(pool: asyncpg.Pool | asyncpg.Connection, conv_id: UUID) -> list[asyncpg.Record]:
 
 
 	previous_messages = await pool.fetch(
@@ -59,7 +59,7 @@ async def load_conversation_messages(pool: asyncpg.Pool, conv_id: UUID) -> list[
 	return previous_messages
 
 
-async def search_chunks(pool: asyncpg.Pool,
+async def search_chunks(pool: asyncpg.Pool | asyncpg.Connection,
                         user_id: UUID, 
                         question_embedding: list[asyncpg.Record], 
 						limit:int) ->list[asyncpg.Record]:

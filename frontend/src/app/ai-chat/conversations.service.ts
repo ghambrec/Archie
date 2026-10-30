@@ -1,6 +1,6 @@
 import { HttpClient, httpResource } from '@angular/common/http';
 import { computed, inject, Service, signal, type Signal } from '@angular/core';
-import { defer, finalize, tap, type Observable } from 'rxjs';
+import { defer, finalize, tap, timeout, type Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import type { CreateConversationResponse, AskConversationResponse, DeleteConversation,
   Conversation, ListResponse, ChatMessage } from './chat.models';
@@ -37,13 +37,13 @@ export class ConversationsService {
   createConversation() {
     return this.mutate(this.http.post<CreateConversationResponse>(
       this.baseUrl, {}, { withCredentials: true }
-    ));
+    ).pipe(timeout(environment.chatRequestTimeoutMs)));
   }
 
   ask(conversationId: string, question: string) {
     return this.mutate(this.http.post<AskConversationResponse>(
       `${this.baseUrl}/${conversationId}/ask`, { question }, { withCredentials: true }
-    ));
+    ).pipe(timeout(environment.chatRequestTimeoutMs)));
   }
 
   renameConversation(conversationId: string, title: string) {

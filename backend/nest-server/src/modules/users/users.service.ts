@@ -194,7 +194,7 @@ export class UsersService implements OnApplicationBootstrap {
     {
       const newEmail = dto.email?.trim().toLowerCase();
       const duplicate = await this.usersRepository.findOneBy({email: newEmail});
-      if (duplicate) {
+      if (duplicate && duplicate.id !== userID) {
         this.logger.warn(`UpdateProfile failed for ${userID}, email already registered`);
         throw new ApplicationException(
           ErrorCode.EmailAlreadyRegistered
@@ -207,7 +207,7 @@ export class UsersService implements OnApplicationBootstrap {
     {
       const newName = dto.displayName.trim();
       const duplicate = await this.usersRepository.findOneBy({displayName: newName});
-      if(duplicate) {
+      if(duplicate && duplicate.id !== userID) {
         this.logger.warn(`UpdateProfile failed for ${userID}, display name already registered`);
         throw new ApplicationException(
           ErrorCode.UserNameAlreadyRegistered
@@ -249,6 +249,7 @@ export class UsersService implements OnApplicationBootstrap {
         displayName : true,
         preferredLanguage: true,
         isActive: true,
+        mustChangePassword: true,
       }
     })
     if(!user) {
@@ -258,7 +259,8 @@ export class UsersService implements OnApplicationBootstrap {
     )}
 
 	const isAdmin = await this.permissionsService.isUserAdmin(userId);
-    return {...user, isAdmin};
+    const { mustChangePassword, ...profile } = user;
+    return {...profile, isAdmin, hasToChangePassword: mustChangePassword};
   }
 
   async getDeletedUsers(request: GetUsersQueryDto): Promise<GetUsersResponseDto> {

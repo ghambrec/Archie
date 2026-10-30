@@ -4,6 +4,7 @@ import { provideHttpClient, withXhr } from '@angular/common/http';
 import { routes } from './app.routes';
 import { TranslocoHttpLoader } from './transloco-loader';
 import { provideTransloco } from '@jsverse/transloco';
+import { provideMarkdown } from 'ngx-markdown'
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,10 +17,12 @@ export const appConfig: ApplicationConfig = {
         availableLangs: ['en', 'de', 'es'],
         defaultLang: 'en',
         fallbackLang: 'en',
+		missingHandler: { useFallbackTranslation: true },
         reRenderOnLangChange: true,
         prodMode: !isDevMode(),
       },
       loader: TranslocoHttpLoader,
     }),
+	provideMarkdown(),
   ]
 };

@@ -1,8 +1,8 @@
-import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
-import { Documents } from '../documents';
+import { Component, computed, effect, ElementRef, inject, linkedSignal, signal, viewChild } from '@angular/core';
+import { Documents, DocumentSummary } from '../documents';
 import { DatePipe, UpperCasePipe } from '@angular/common';
-import { TranslocoPipe } from '@jsverse/transloco';
-import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { FileSizePipe } from '../../core/file-size-pipe';
 import { DocStatusBadge } from '../doc-status-badge/doc-status-badge';
 import { DocumentsReview, isAiProcessing } from '../documents-review';
@@ -11,18 +11,21 @@ import { Observable } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { toErrorKey } from '../../core/error-key';
 import { TagPicker } from '../../tags/tag-picker/tag-picker';
+import { DocPreviewModal } from '../doc-preview-modal/doc-preview-modal';
 
 @Component({
 	selector: 'app-doc-detail',
 	imports: [DatePipe, UpperCasePipe, TranslocoPipe, NgbTooltip, FileSizePipe, DocStatusBadge, TagPicker],
 	templateUrl: './doc-detail.html',
 	styleUrl: './doc-detail.scss',
-	host: { '(document:keydown.escape)': 'docs.closeDetail()' }
+	host: { '(document:keydown.escape)': 'onEscape()' }
 })
 export class DocDetail {
 	protected readonly docs = inject(Documents);
 	private readonly review = inject(DocumentsReview);
 	private readonly tags = inject(Tags);
+	private readonly transloco = inject(TranslocoService);
+	private readonly modalService = inject(NgbModal);
 
 	protected readonly busy = signal(false);
 
@@ -35,6 +38,20 @@ export class DocDetail {
 		source: this.docs.selectedDocId,
 		computation: () => false,
 	});
+
+	// edit modus zuruecksetzen wenn anderes doc geoeffnet wird
+	protected readonly editingName = linkedSignal({
+		source: this.docs.selectedDocId,
+		computation: () => false,
+	});
+	protected readonly nameDraft = signal('');
+
+	// endung bleibt fix, wird nur angezeigt
+	protected readonly fileExtension = computed(() =>
+		this.docs.detail.hasValue() ? splitFilename(this.docs.detail.value().filename).extension : ''
+	);
+
+	private readonly nameInput = viewChild<ElementRef<HTMLInputElement>>('nameInput');
 
 	// tags die doc schon hat im picker ausblenden
 	protected readonly usedTagIds = computed(() =>
@@ -54,14 +71,17 @@ export class DocDetail {
 			const intervalId = setInterval(() => this.docs.detail.reload(), 3000);
 			onCleanup(() => clearInterval(intervalId));
 		});
+
+		// input fokussieren + text markieren sobald edit modus an ist
+		effect(() => this.nameInput()?.nativeElement.select());
 	}
 
 	protected onAddTag(docId: string, tag: Tag) {
-		this.run(this.docs.addTag(docId, tag.id), () => this.refreshAfterTagChange());
+		this.run(this.docs.addTag(docId, tag.id), () => this.refreshDoc());
 	}
 
 	protected onRemoveTag(docId: string, tagId: string) {
-		this.run(this.docs.removeTag(docId, tagId), () => this.refreshAfterTagChange());
+		this.run(this.docs.removeTag(docId, tagId), () => this.refreshDoc());
 	}
 
 	protected onRetry(docId: string) {
@@ -85,10 +105,48 @@ export class DocDetail {
 		});
 	}
 
-	private refreshAfterTagChange() {
+	protected openPreview(doc: DocumentSummary) {
+		const modal = this.modalService.open(DocPreviewModal, { size: 'xl', centered: true });
+		modal.componentInstance.doc.set(doc);
+	}
+
+	protected startRename(filename: string) {
+		this.nameDraft.set(splitFilename(filename).basename);
+		this.actionError.set(null);
+		this.editingName.set(true);
+	}
+
+	protected saveRename(doc: DocumentSummary) {
+		const name = this.nameDraft().trim();
+		if (!name) {
+			return;
+		}
+		if (name === splitFilename(doc.filename).basename) {
+			this.editingName.set(false);
+			return;
+		}
+		this.run(this.docs.renameDocument(doc.id, name), () => {
+			this.editingName.set(false);
+			this.refreshDoc();
+		});
+	}
+
+	// name + tags werden in liste und tag ansicht angezeigt
+	private refreshDoc() {
 		this.docs.detail.reload();
 		this.docs.list.reload();
 		this.tags.tagDocsList.reload();
+	}
+
+	// bei escape: erst edit abbrechen, sonst schliessen wenn kein preview offen
+	protected onEscape() {
+		if (this.editingName()) {
+			this.editingName.set(false);
+			return;
+		}
+		if (!this.modalService.hasOpenModals()) {
+			this.docs.closeDetail();
+		}
 	}
 
 	// fuer alle aktionen gleich: busy setzen, reset error, subscript
@@ -102,8 +160,15 @@ export class DocDetail {
 			},
 			error: (err: HttpErrorResponse) => {
 				this.busy.set(false);
-				this.actionError.set(toErrorKey(err));
+				this.actionError.set(toErrorKey(err, this.transloco));
 			},
 		});
 	}
+}
+
+function splitFilename(filename: string) {
+	const dot = filename.lastIndexOf('.');
+	return dot > 0
+		? { basename: filename.slice(0, dot), extension: filename.slice(dot) }
+		: { basename: filename, extension: '' };
 }

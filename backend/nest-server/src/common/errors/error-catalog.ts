@@ -7,6 +7,17 @@ export interface ErrorDefinition{
 }
 
 export const ERROR_CATALOG ={
+  [ErrorCode.AiRateLimited]: { status: HttpStatus.TOO_MANY_REQUESTS, message: 'Too many chat requests. Please wait before trying again.' },
+  [ErrorCode.AiRequestTimeout]: { status: HttpStatus.GATEWAY_TIMEOUT, message: 'The chat request timed out.' },
+  [ErrorCode.AiRequestCancelled]: { status: HttpStatus.REQUEST_TIMEOUT, message: 'The chat request was cancelled.' },
+  [ErrorCode.AiConversationBusy]: { status: HttpStatus.CONFLICT, message: 'An answer is already being generated for this chat.' },
+  [ErrorCode.AiConversationNotFound]: { status: HttpStatus.NOT_FOUND, message: 'Conversation was not found.' },
+  [ErrorCode.AiContextLimit]: { status: HttpStatus.UNPROCESSABLE_ENTITY, message: 'The model context or output limit was exceeded.' },
+  [ErrorCode.AiInvalidResponse]: { status: HttpStatus.BAD_GATEWAY, message: 'The AI service returned an invalid response.' },
+  [ErrorCode.AiGenerationFailed]: { status: HttpStatus.BAD_GATEWAY, message: 'An answer could not be generated.' },
+  [ErrorCode.AiSaveFailed]: { status: HttpStatus.SERVICE_UNAVAILABLE, message: 'The answer could not be saved.' },
+  [ErrorCode.AiStreamInterrupted]: { status: HttpStatus.BAD_GATEWAY, message: 'The answer stream ended before completion.' },
+
 	[ErrorCode.EmailAlreadyRegistered]: {
       status: HttpStatus.CONFLICT,
       message: 'Email is already registered.',
@@ -109,6 +120,14 @@ export const ERROR_CATALOG ={
     [ErrorCode.AiServiceUnavailable] : {
 	status: HttpStatus.SERVICE_UNAVAILABLE,
 	message: 'AI Service is currently unavailable.'
+  },
+  [ErrorCode.DocumentNotPreviewable] : {
+	status: HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+	message: 'Document file type cannot be previewed.'
+  },
+  [ErrorCode.DocumentFilenameInvalid] : {
+	status: HttpStatus.BAD_REQUEST,
+	message: 'Document filename is invalid.'
   },
 
   } satisfies Record<ErrorCode, ErrorDefinition>;

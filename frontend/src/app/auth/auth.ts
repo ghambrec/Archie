@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { firstValueFrom } from 'rxjs';
 import type { SupportedLanguage } from '../core/i18n/supported-language'
-import { Users } from '../users/users';
+import { CurrentUser, Users } from '../users/users';
 
 export interface LoginRequest {
 	email: string;
@@ -40,9 +40,9 @@ export class Auth {
 
 	async checkSession(): Promise<boolean> {
 		try {
-			const user = await firstValueFrom(this.usersService.getCurrentUser());
+			const { user } = await firstValueFrom(this.http.get<{ user: CurrentUser | null}>(`${this.baseUrl}/session`, { withCredentials: true}));
 			this.usersService.currentUser.set(user);
-			return true;
+			return user !== null;
 		} catch {
 			this.usersService.currentUser.set(null);
 			return false;

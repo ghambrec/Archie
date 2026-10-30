@@ -11,7 +11,7 @@
 
   <span class="member-count">
     {{ "users.userInfo.groupCount" | transloco: {
-      count: memberships.value()?.groups?.length ?? 0
+      count: memberships.hasValue() ? memberships.value().groups.length : 0
     } }}
   </span>
 

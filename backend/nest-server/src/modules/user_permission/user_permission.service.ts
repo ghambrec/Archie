@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Permission } from '../permissions/entities/permission.entity';
@@ -88,5 +88,18 @@ export class UserPermissionService {
     }
 
     return permission;
+  }
+
+  async listUserPermissions(userId: string): Promise<Array<{ groupId: string; permKey: string }>> {
+    return this.userPermissionRepository.createQueryBuilder('userPermission')
+    .innerJoin(
+      'permissions',
+      'permission',
+      'permission.id = userPermission.permission_id',
+    )
+    .where('userPermission.user_id = :userId', { userId })
+    .select('userPermission.group_id', 'groupId')
+    .addSelect('permission.perm_key', 'permKey')
+    .getRawMany<{ groupId: string; permKey: string }>();
   }
 }

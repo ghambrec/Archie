@@ -8,7 +8,7 @@ import { ErrorCode } from './error-code';
   export class ApplicationException extends HttpException {
     public readonly fallbackMessage: string;
 
-    constructor(public readonly code: ErrorCode) {
+    constructor(public readonly code: ErrorCode, public readonly retryAfterSeconds?: number) {
       const definition = ERROR_CATALOG[code];
 
       super(

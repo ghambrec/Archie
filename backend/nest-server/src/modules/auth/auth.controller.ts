@@ -7,6 +7,7 @@ import { LoginRequestDto } from './dto/login-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { SessionAuthGuard } from './guards/session-auth.guard';
+import { UserSummaryDto } from '../users/dto/user-summary.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -61,5 +62,14 @@ export class AuthController {
 		const sessionId = this.sessionCookieService.extract(req)!;
 		await this.authService.logout(sessionId);
 		this.sessionCookieService.clear(res);
+	}
+
+	@ApiOperation({
+		summary: 'Get current session state (never error)'
+	})
+	@Get('session')
+	async getSession(@Req() req: Request): Promise<{ user: UserSummaryDto | null }> {
+		const user = await this.authService.getSessionUser(req);
+		return { user };
 	}
 }

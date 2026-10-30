@@ -55,6 +55,7 @@ export class Login {
 							});
 
 							modalRef.closed.subscribe(() => {
+								this.usersService.currentUser.update(u => u && { ...u, hasToChangePassword: false });
 								this.router.navigateByUrl('/');
 							});
 

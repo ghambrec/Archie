@@ -2,7 +2,8 @@ import { Component, computed, DestroyRef, effect, Injector, inject, signal } fro
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject, takeUntil } from 'rxjs';
+import { chatErrorKey } from './chat-errors';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ConversationsService } from './conversations.service';
 import { ChatMessageList } from './chat-message-list/chat-message-list';
@@ -26,6 +27,9 @@ export class AIChat {
   private readonly routeParams = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,
   });
+
+  private activeRequest: Subject<void> | undefined;
+  private draftConversationId: string | null = null;
 
   readonly activeConversationId = computed(() => this.routeParams().get('id'));
   readonly draft = signal('');
@@ -51,12 +55,21 @@ export class AIChat {
   );
 
   constructor() {
+    this.destroyRef.onDestroy(() => this.cancelActiveRequest());
     effect(() => {
       this.activeConversationId();
+      this.cancelActiveRequest();
+      this.draftConversationId = null;
       this.draft.set('');
       this.sendError.set(null);
       this.createConversationError.set(null);
     });
+  }
+
+  private cancelActiveRequest(): void {
+    this.activeRequest?.next();
+    this.activeRequest?.complete();
+    this.activeRequest = undefined;
   }
 
   private busy(): boolean {
@@ -68,15 +81,19 @@ export class AIChat {
     const question = this.draft().trim();
     if (this.busy() || !question) return;
     const selectedId = this.activeConversationId();
-    let conversationId = selectedId;
+    let conversationId = selectedId ?? this.draftConversationId;
     this.sendError.set(null);
     this.isSending.set(true);
+    const cancelled = new Subject<void>();
+    this.activeRequest = cancelled;
     try {
       if (!conversationId) {
-        const conversation = await firstValueFrom(this.conversationService.createConversation());
+        const conversation = await firstValueFrom(this.conversationService.createConversation().pipe(takeUntil(cancelled)));
         conversationId = conversation.id;
+        this.draftConversationId = conversation.id;
       }
-      await firstValueFrom(this.conversationService.ask(conversationId, question));
+      if (this.destroyRef.destroyed || this.activeRequest !== cancelled) return;
+      await firstValueFrom(this.conversationService.ask(conversationId, question).pipe(takeUntil(cancelled)));
       if (this.destroyRef.destroyed || this.activeConversationId() !== selectedId) return;
       this.draft.set('');
       if (selectedId) {
@@ -84,15 +101,15 @@ export class AIChat {
       } else {
         await this.router.navigate(['/ai-chat', conversationId]);
       }
-    } catch {
-      if (!this.destroyRef.destroyed && this.activeConversationId() === selectedId) {
-        if (!selectedId && conversationId) {
-          await this.router.navigate(['/ai-chat', conversationId]);
-        } else {
-          this.sendError.set('ai-chat.error.ask');
-        }
+    } catch (error) {
+      if (!this.destroyRef.destroyed && this.activeRequest === cancelled && this.activeConversationId() === selectedId) {
+        this.sendError.set(chatErrorKey(error));
+        this.conversationService.conversationsResource.reload();
+        if (selectedId) this.messageResource.reload();
       }
     } finally {
+      if (this.activeRequest === cancelled) this.activeRequest = undefined;
+      cancelled.complete();
       this.isSending.set(false);
     }
   }

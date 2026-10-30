@@ -7,7 +7,27 @@
 
 			<div class="offcanvas-header gap-2 border-bottom">
 				<i class="bi bi-file-earmark-text text-secondary fs-5"></i>
-				<h2 class="h6 fw-semibold mb-0 text-truncate flex-grow-1" [ngbTooltip]="doc.filename" container="body" [openDelay]="400">{{ doc.filename }}</h2>
+				@if (editingName()) {
+					<div class="input-group input-group-sm flex-grow-1">
+						<input #nameInput type="text" class="form-control"
+							[value]="nameDraft()" (input)="nameDraft.set($any($event.target).value)"
+							(keydown.enter)="saveRename(doc)" [disabled]="busy()" />
+						@if (fileExtension()) {
+							<span class="input-group-text">{{ fileExtension() }}</span>
+						}
+						<button type="button" class="btn btn-outline-success" [disabled]="busy() || !nameDraft().trim()" (click)="saveRename(doc)">
+							<i class="bi bi-check-lg"></i>
+						</button>
+						<button type="button" class="btn btn-outline-secondary" [disabled]="busy()" (click)="editingName.set(false)">
+							<i class="bi bi-x-lg"></i>
+						</button>
+					</div>
+				} @else {
+					<h2 class="h6 fw-semibold mb-0 text-truncate flex-grow-1" [ngbTooltip]="doc.filename" container="body" [openDelay]="400">{{ doc.filename }}</h2>
+					<button type="button" class="btn btn-sm btn-link text-secondary p-0" [ngbTooltip]="'documents.detail.rename' | transloco" container="body" (click)="startRename(doc.filename)">
+						<i class="bi bi-pencil"></i>
+					</button>
+				}
 				<button type="button" class="btn-close" (click)="docs.closeDetail()"></button>
 			</div>
 
@@ -17,6 +37,11 @@
 					<a class="btn btn-sm btn-primary" [href]="docs.downloadUrl(doc.id)">
 						<i class="bi bi-download me-1"></i>{{ "documents.detail.download" | transloco }}
 					</a>
+					@if (doc.previewable) {
+						<button type="button" class="btn btn-sm btn-outline-primary" (click)="openPreview(doc)">
+							<i class="bi bi-eye me-1"></i>{{ "documents.detail.preview" | transloco }}
+						</button>
+					}
 
 					<div class="ms-auto d-flex gap-2">
 						@if (confirmDelete()) {
@@ -51,13 +76,13 @@
 							}
 						}
 						@case ('FAILED') {
-							<p class="text-danger small mb-2">{{ "documents.aiError." + (doc.aiErrorKey ?? 'unknown') | transloco }}</p>
+							<p class="text-danger small mb-2">{{ (doc.aiErrorKey ?? 'ais.error.unknown') | transloco }}</p>
 							<button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="busy()" (click)="onRetry(doc.id)">
 								<i class="bi bi-arrow-clockwise me-1"></i>{{ "documents.review.btnRetry" | transloco }}
 							</button>
 						}
 						@case ('SKIPPED') {
-							<p class="text-secondary small mb-0">{{ "documents.aiError." + (doc.aiErrorKey ?? 'unknown') | transloco }}</p>
+							<p class="text-secondary small mb-0">{{ (doc.aiErrorKey ?? 'ais.error.unknown') | transloco }}</p>
 						}
 						@default {
 							<p class="text-secondary small mb-0">{{ "documents.review.suggestionsPending" | transloco }}</p>

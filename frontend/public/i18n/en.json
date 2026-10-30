@@ -56,6 +56,7 @@
 		},
 		"detail": {
 			"download": "Download",
+			"preview": "Preview",
 			"ai": "AI analysis",
 			"language": "Language",
 			"info": "Details",
@@ -66,7 +67,8 @@
 			"errorLoading": "Error on loading document",
 			"delete": "Delete",
 			"deleteConfirm": "Confirm delete",
-			"cancel": "Cancel"
+			"cancel": "Cancel",
+			"rename": "Rename"
 		},
 		"aiError": {
 			"unsupported_mime_type": "Analysis is not available for this file type",
@@ -179,6 +181,19 @@
 	  "error": {
 	    "createConversation": "Could not create the conversation. Please try again.",
 	    "ask": "No answer could be received. Your question may already have been saved.",
+        "serviceUnavailable": "The AI service is currently unavailable or its connection was interrupted. Please try again later.",
+        "timeout": "The request timed out. Your question or answer may already have been saved. Check the chat before trying again.",
+        "connectionLost": "The connection to the server was lost. Your question or answer may already have been saved. Check the chat before trying again.",
+        "cancelled": "The request was cancelled. Your question or answer may already have been saved.",
+        "conversationBusy": "An answer is already being generated for this chat. Please wait.",
+        "conversationNotFound": "This chat is no longer available.",
+        "rateLimited": "Too many requests. Please wait before trying again.",
+        "contextLimit": "The question and chat history exceed the model limit. Try a shorter question or a new chat.",
+        "invalidResponse": "The AI service returned an invalid answer. Please try again later.",
+        "generationFailed": "The answer could not be generated. Please try again later.",
+        "saveFailed": "The answer could not be saved. Check the chat before trying again.",
+        "sessionExpired": "Your session has expired. Please log in again.",
+        "forbidden": "You do not have permission to use this chat.",
 	    "createFirst": "Please create a new chat first.",
 	    "noSources": "No sources provided.",
 	    "deleteConversation": "Could not delete the conversation. Please try again."
@@ -344,7 +359,10 @@
 			"btnCancel": "Cancel",
 			"feedbackMsg": "Group successfully created",
 			"errorGeneral": "Unable to create Group",
-			"errorConflictName": "Name already registered"
+			"errorConflictName": "Name already registered",
+			"errors": {
+				"nameRequired": "Name is required."
+			}
 		},
 		"deleteGroupAdmin": {
 			"heading": "Delete Group",
@@ -405,8 +423,70 @@
 			"documentsDelete": "Delete documents",
 			"btnCancel": "Cancel",
 			"btnSave": "Save",
-			"errorGeneral": "Unable to update permissions.",
-			"errorLastAdmin": "The admin permission cannot be removed because this is the last admin."
+			"errors": {
+				"General": "Unable to update permissions.",
+				"LastAdmin": "The admin permission cannot be removed because this is the last admin."
+			}
+		}
+	},
+	"profile": {
+		"heading": "Profile",
+		"description": "Manage your personal account settings.",
+		"active": "Active",
+		"inactive": "Inactive",
+
+		"tabs": {
+			"profile": "Profile",
+			"security": "Security"
+		},
+
+		"accountInformation": {
+			"heading": "Account information",
+			"displayName": "Display name",
+			"email": "E-Mail",
+			"language": "Language",
+			"role": "Role",
+			"administrator": "Administrator",
+			"user": "User"
+		},
+
+		"edit": {
+			"heading": "Edit profile",
+			"displayName": "Display name",
+			"email": "Email address",
+			"preferredLanguage": "Preferred language",
+			"english": "English",
+			"german": "German",
+			"spanish": "Spanish",
+			"save": "Save changes",
+			"saving": "Saving...",
+			"success": "Profile updated successfully",
+			"error": "Profile could not be updated"
+		},
+
+		"groups": {
+			"heading": "Group memberships",
+			"empty": "No group memberships found.",
+			"groupName": "Group name",
+			"permissions": "Permissions",
+			"joinedAt": "Joined at",
+			"noPermissions": "-",
+			"actions": "Actions"
+		},
+
+		"security": {
+			"heading": "Password",
+			"description": "Change your password here.",
+			"newPassword": "New password",
+			"passwordHint": "Use 8–25 characters with an uppercase letter, a lowercase letter, a number, and at least one of !@#$%^&*.",
+			"save": "Save password",
+			"saving": "Saving...",
+			"success": "Password has been updated successfully.",
+			"error": "Password could not be updated.",
+			"minLength": "Password must be at least 8 characters long.",
+			"required": "Enter a new password.",
+			"maxLength": "Password must be at most 25 characters long.",
+			"pattern": "Include an uppercase letter, a lowercase letter, a number, and at least one of !@#$%^&*."
 		}
 	},
 	"errors": {
@@ -418,10 +498,23 @@
 		"INTERNAL_SERVER_ERROR": "An unexpected error occurred.",
 		"UNKNOWN": "An unexpected error occurred.",
 		"DOCUMENT_NOT_FOUND": "Document was not found.",
+		"DOCUMENT_FILENAME_INVALID": "The filename is invalid.",
 		"DOCUMENT_STILL_PROCESSING": "The document is still being analyzed.",
 		"DOCUMENT_INGESTION_NOT_RETRYABLE": "The analysis can only be restarted if it failed or was never started.",
 		"AI_SERVICE_UNAVAILABLE": "The AI service is currently unavailable. Please try again later.",
 		"TAG_NOT_FOUND": "Tag was not found.",
 		"FORBIDDEN": "You don't have permission for this action."
+	},
+	"ais": {
+		"error": {
+			"unsupported_mime_type": "Analysis is not available for this file type",
+			"no_text": "No text could be extracted from this document",
+			"not_found": "File could not be found in storage",
+			"minio_error": "Error on reading the file from storage",
+			"minio_connection": "Storage is currently not reachable",
+			"llm_error": "The AI model returned an error",
+			"timeout": "Analysis took too long and was cancelled",
+			"unknown": "An unknown error occurred during analysis"
+		}
 	}
 }

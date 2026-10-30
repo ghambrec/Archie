@@ -71,7 +71,7 @@ export class UsersController {
     await this.usersService.restoreUser(userId);
   }
 
-  @UseGuards(SessionAuthGuard, SelfOrAdminGuard)
+  @UseGuards(SessionAuthGuard)
   @ApiOperation({
     summary: 'Update user',
     description: 'User can only update his own user'

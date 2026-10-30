@@ -9,6 +9,7 @@ import { AuthModule } from '../auth/auth.module';
 import { Group } from '../groups/entities/group.entity';
 import { User } from '../users/entities/user.entity';
 import { PermissionsModule } from '../permissions/permissions.module';
+import { UserPermissionModule } from '../user_permission/user_permission.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PermissionsModule } from '../permissions/permissions.module';
     GroupsModule,
     AuthModule,
     PermissionsModule,
+    UserPermissionModule,
   ],
   providers: [UserGroupsService],
   controllers: [UserGroupsController],
