@@ -1,0 +1,56 @@
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead>
+      <tr>
+        <th scope="col" class="pe-0"></th>
+        <th scope="col" class="ps-0">{{ 'users.userList.email' | transloco }}</th>
+        <th scope="col">{{ 'users.userList.displayName' | transloco }}</th>
+        <th scope="col">{{ 'users.userList.lastLogin' | transloco }}</th>
+        <th scope="col">{{ 'users.userList.active' | transloco }}</th>
+        <th scope="col" style="width: 1%">
+          <button type="button" class="btn btn-primary" (click)="createRequested.emit()"
+            [attr.aria-label]="'users.createUser.heading' | transloco">
+            <i class="bi bi-plus-circle-fill" aria-hidden="true"></i>
+          </button>
+        </th>
+      </tr>
+    </thead>
+    <tbody class="table-group-divider">
+      @for (user of users(); track user.id) {
+        <tr>
+          <td class="pe-0">
+            <img [src]="avatarUrl()(user.id)" alt="" width="32" height="32" class="rounded-circle">
+          </td>
+          <td class="ps-0">{{ user.email }}</td>
+          <td>{{ user.displayName }}</td>
+          <td>{{ user.lastLoginAt ?? '-' }}</td>
+          <td>
+            <i class="bi" [class.bi-check-square]="user.isActive" [class.bi-square]="!user.isActive"
+              [attr.aria-label]="(user.isActive ? 'users.userList.active' : 'users.userList.inactive') | transloco"></i>
+          </td>
+          <td>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-info d-flex align-items-center justify-content-center"
+                (click)="infoRequested.emit(user)" title="User Information" aria-label="User Information">
+                <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="btn btn-secondary d-flex align-items-center justify-content-center"
+                (click)="editRequested.emit(user)" title="Edit user" aria-label="Edit user">
+                <i class="bi bi-pencil-fill" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="btn btn-danger d-flex align-items-center justify-content-center"
+                (click)="deleteRequested.emit(user)" [title]="'users.userList.delete' | transloco"
+                [attr.aria-label]="'users.userList.delete' | transloco">
+                <i class="bi bi-trash-fill" aria-hidden="true"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        @if (showEmpty()) {
+          <tr><td colspan="6" class="text-body-secondary">{{ 'users.userList.empty' | transloco }}</td></tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>

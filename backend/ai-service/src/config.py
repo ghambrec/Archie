@@ -1,6 +1,7 @@
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Literal
+from pydantic import Field
 
 try:
     REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -64,6 +65,8 @@ class Settings(BaseSettings):
     # --- CHUNKING
     chunk_size_chars: int
     chunk_overlap_chars: int
+
+    chat_timeout_seconds: float = Field(default=180, gt=0)
 
     # --- Retrieval
     context_budget: int = 10000

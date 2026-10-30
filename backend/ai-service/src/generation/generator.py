@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 import logging
-from pydantic import BaseModel, Field
 from pydantic_ai import Agent, UsageLimitExceeded, UsageLimits
 from pydantic_ai.messages import ModelRequest, ModelResponse, TextPart, UserPromptPart
 from src.generation.model import get_output_type
 from src.generation.model import build_model
-from uuid import UUID
+from src.generation.schemas import GeneratedAnswer
 
 import asyncpg
 from src.config import settings 
@@ -27,16 +26,6 @@ SYSTEM_PROMPT = """ You analyze documents for a document management system
                     it with a low confidence score. 
 """
 
-class Citations(BaseModel):
-    chunk_Id: UUID
-    #similary_score
-
-class GeneratedAnswer(BaseModel):
-    answer: str
-    confidence_score: float = Field(ge=0, le = 1)
-    sources: list[Citations]
-   
-
 model = build_model()
 agent = Agent(
             model, 
@@ -45,7 +34,7 @@ agent = Agent(
             retries={"output": 3},
             )
 
-async def generate(question: str, context: str, previous_messages: list[asyncpg.Record]) -> str:
+async def generate(question: str, context: str, previous_messages: list[asyncpg.Record]) -> GeneratedAnswer:
     history = []
     try: 
         for row in previous_messages[-10:]:

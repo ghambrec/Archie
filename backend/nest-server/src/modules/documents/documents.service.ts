@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { randomUUID, createHash } from 'crypto';
 import { Logger } from 'nestjs-pino';
 import { StorageService, DEFAULT_PRESIGNED_URL_EXPIRY_SECONDS } from '../storage/storage.service';
@@ -23,8 +23,13 @@ import { DocumentGroupsService } from '../document-groups/document-groups.servic
 import { IngestionService } from '../ai-service/ingestion/ingestion.service';
 import { TagsService } from '../tags/tags.service';
 import { DocumentTagResponseDto } from './dto/document-tag-response.dto';
+import { DocumentGroupResponseDto } from './dto/document-group-response.dto';
 import { ConfirmSuggestedTagsResponseDto } from './dto/confirm-suggested-tags-response.dto';
 import { DocumentFileValidationService } from './document-file-validation.service';
+import { PermissionsService } from '../permissions/permissions.service';
+import { DocumentPermission } from '../permissions/permission-keys';
+import { PREVIEWABLE_MIME_TYPES } from './document-file.constants';
+import { RenameDocumentResponseDto } from './dto/rename-document-response.dto';
 
 const DOCUMENTS_BUCKET = 'documents';
 
@@ -40,6 +45,7 @@ export class DocumentsService {
     private readonly tagsService: TagsService,
     private readonly logger: Logger,
 	private readonly documentFileValidationService: DocumentFileValidationService,
+    private readonly permissionsService: PermissionsService,
   ) {}
 
   async upload(
@@ -61,14 +67,7 @@ export class DocumentsService {
 
     const sha256 = createHash('sha256').update(file.buffer).digest('hex');
 
-    const duplicateExists = await this.documentsRepository
-      .createQueryBuilder('document')
-      .innerJoin(DocumentGroup, 'documentGroup', 'documentGroup.documentId = document.id')
-      .where('documentGroup.groupId = :groupId', { groupId })
-      .andWhere('document.sha256 = :sha256', { sha256 })
-      .getExists();
-
-    if (duplicateExists) {
+    if (await this.existsInGroup(groupId, sha256)) {
       this.logger.warn({ userId, groupId, sha256 }, 'Document already exists in group');
       throw new ApplicationException(ErrorCode.DocumentAlreadyExistsInGroup);
     }
@@ -110,13 +109,35 @@ export class DocumentsService {
   }
 
   async findAll(userId: string, query: GetDocumentsQueryDto): Promise<GetDocumentsResponseDto> {
-    const { page, limit } = query;
+    const { page, limit, tagId, includeDescendants} = query;
 
     this.logger.log({ userId, page, limit }, 'Listing documents');
 
-    const baseQuery = this.documentsRepository
-      .createQueryBuilder('document')
-      .where('document.uploadedBy = :userId', { userId });
+    const baseQuery = await this.createReadableDocumentsQuery(userId);
+
+    if (!baseQuery) {
+      this.logger.log({ userId, total: 0 }, 'Documents listed successfully');
+      return { data: [], page, limit, total: 0, totalPages: 0 };
+    }
+
+    if (tagId) {
+      baseQuery.andWhere((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select('1')
+          .from(DocumentTag, 'filterDocumentTag')
+          .innerJoin(Tag, 'filterTag', 'filterTag.id = filterDocumentTag.tagId')
+          .where('filterDocumentTag.documentId = document.id')
+          .andWhere(
+            includeDescendants
+              ? '(filterTag.id = :tagId OR filterTag.parentId = :tagId)'
+              : 'filterTag.id = :tagId',
+            { tagId },
+          )
+          .getQuery();
+        return `EXISTS ${subQuery}`;
+      });
+    }
 
     const total = await baseQuery.getCount();
 
@@ -127,6 +148,7 @@ export class DocumentsService {
       .leftJoin(Group, 'group', 'group.id = documentGroup.groupId')
       .leftJoin(DocumentTag, 'documentTag', 'documentTag.documentId = document.id')
       .leftJoin(Tag, 'tag', 'tag.id = documentTag.tagId')
+      .leftJoin('ai_documents', 'aiDocument', '"aiDocument"."id" = document.id')
       .select([
         'document.id AS "id"',
         'document.filename AS "filename"',
@@ -136,6 +158,10 @@ export class DocumentsService {
         'document.updatedAt AS "updatedAt"',
         'uploader.id AS "uploaderId"',
         'uploader.displayName AS "uploaderName"',
+        '"aiDocument"."status" AS "aiStatus"',
+        '"aiDocument"."ai_summary" AS "aiSummary"',
+        '"aiDocument"."language" AS "language"',
+        '"aiDocument"."error_key" AS "aiErrorKey"',
       ])
       .addSelect(
         `COALESCE(
@@ -155,7 +181,9 @@ export class DocumentsService {
       )
       .groupBy('document.id')
       .addGroupBy('uploader.id')
-      .orderBy('document.createdAt', 'DESC')
+      .addGroupBy('"aiDocument"."id"')
+      .orderBy('LOWER(document.filename)', 'ASC')
+      .addOrderBy('document.id', 'ASC')
       .offset((page - 1) * limit)
       .limit(limit)
       .getRawMany();
@@ -170,8 +198,11 @@ export class DocumentsService {
       uploadedBy: { id: row.uploaderId, name: row.uploaderName },
       groups: row.groups,
       tags: row.tags,
-      aiStatus: DocumentAiStatus.PENDING,
-      language: '',
+      aiStatus: row.aiStatus ?? DocumentAiStatus.NOT_STARTED,
+      aiSummary: row.aiSummary ?? undefined,
+      language: row.language ?? '',
+      aiErrorKey: row.aiErrorKey ?? null,
+	  previewable: PREVIEWABLE_MIME_TYPES.has(row.mimeType),
     }));
 
     this.logger.log({ userId, total }, 'Documents listed successfully');
@@ -189,6 +220,7 @@ export class DocumentsService {
 
     this.logger.log({ userId, id }, 'Find one document');
 
+    // Access is checked by DocumentPermissionsGuard (documents.read)
     const raw = await this.documentsRepository
       .createQueryBuilder('document')
       .innerJoin(User, 'uploader', 'uploader.id = document.uploadedBy')
@@ -196,8 +228,8 @@ export class DocumentsService {
       .leftJoin(Group, 'group', 'group.id = documentGroup.groupId')
       .leftJoin(DocumentTag, 'documentTag', 'documentTag.documentId = document.id')
       .leftJoin(Tag, 'tag', 'tag.id = documentTag.tagId')
+      .leftJoin('ai_documents', 'aiDocument', '"aiDocument"."id" = document.id')
       .where('document.id = :id', { id })
-      .andWhere('document.uploadedBy = :userId', { userId })
       .select([
         'document.id AS "id"',
         'document.filename AS "filename"',
@@ -207,6 +239,10 @@ export class DocumentsService {
         'document.updatedAt AS "updatedAt"',
         'uploader.id AS "uploaderId"',
         'uploader.displayName AS "uploaderName"',
+        '"aiDocument"."status" AS "aiStatus"',
+        '"aiDocument"."ai_summary" AS "aiSummary"',
+        '"aiDocument"."language" AS "language"',
+        '"aiDocument"."error_key" AS "aiErrorKey"',
       ])
       .addSelect(
         `COALESCE(
@@ -226,6 +262,7 @@ export class DocumentsService {
       )
       .groupBy('document.id')
       .addGroupBy('uploader.id')
+      .addGroupBy('"aiDocument"."id"')
       .getRawOne();
 
     if (!raw) {
@@ -244,8 +281,11 @@ export class DocumentsService {
       uploadedBy: { id: raw.uploaderId, name: raw.uploaderName },
       groups: raw.groups,
       tags: raw.tags,
-      aiStatus: DocumentAiStatus.PENDING,
-      language: '',
+      aiStatus: raw.aiStatus ?? DocumentAiStatus.NOT_STARTED,
+      aiSummary: raw.aiSummary ?? undefined,
+      language: raw.language ?? '',
+      aiErrorKey: raw.aiErrorKey ?? null,
+	  previewable: PREVIEWABLE_MIME_TYPES.has(raw.mimeType),
     };
   }
 
@@ -253,10 +293,7 @@ export class DocumentsService {
 
     this.logger.log({ userId, id }, 'Stream document download');
 
-    const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
-      select: { objectKey: true, filename: true, mimeType: true, sizeBytes: true },
-    });
+    const document = await this.findDocumentFile(id);
 
     if (!document) {
       throw new ApplicationException(ErrorCode.DocumentNotFound);
@@ -274,6 +311,27 @@ export class DocumentsService {
     };
   }
 
+  async previewStream(userId: string, id: string): Promise<DocumentDownloadStreamDto> {
+	this.logger.log({ userId, id }, 'stream document preview');
+
+	const document = await this.findDocumentFile(id);
+
+	if (!PREVIEWABLE_MIME_TYPES.has(document.mimeType)) {
+		throw new ApplicationException(ErrorCode.DocumentNotPreviewable);
+	}
+
+	const stream = await this.storageService.getObject(DOCUMENTS_BUCKET, document.objectKey);
+
+	this.logger.log({ userId, id }, 'document preview stream opened');
+
+	return {
+		stream,
+		filename: document.filename,
+		mimeType: document.mimeType,
+		sizeBytes: document.sizeBytes
+	}
+  }
+
   async setTag(
     userId: string,
     id: string,
@@ -283,7 +341,7 @@ export class DocumentsService {
     this.logger.log({ userId, id, tagId }, 'Assign tag to document');
 
     const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
+      where: { id },
       select: { id: true },
     });
 
@@ -306,7 +364,7 @@ export class DocumentsService {
     this.logger.log({ userId, id }, 'Confirm suggested tags for document');
 
     const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
+      where: { id },
       select: { id: true },
     });
 
@@ -330,7 +388,7 @@ export class DocumentsService {
     this.logger.log({ userId, id, tagId }, 'Remove tag from document');
 
     const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
+      where: { id },
       select: { id: true },
     });
 
@@ -343,6 +401,66 @@ export class DocumentsService {
     this.logger.log({ userId, id, tagId }, 'Tag removed from document');
   }
 
+  async rename(
+    userId: string,
+    id: string,
+    filename: string,
+  ): Promise<RenameDocumentResponseDto> {
+    this.logger.log({ userId, id }, 'Rename document');
+
+    const document = await this.documentsRepository.findOne({
+      where: { id },
+      select: { id: true, filename: true },
+    });
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    const newFilename = this.documentFileValidationService.buildRenamedFilename(document.filename, filename);
+    await this.documentsRepository.update(id, { filename: newFilename });
+    this.logger.log({ userId, id, oldFilename: document.filename, newFilename }, 'Document renamed');
+    return { documentId: id, filename: newFilename };
+  }
+
+  async moveToGroup(
+    userId: string,
+    id: string,
+    groupId: string,
+  ): Promise<DocumentGroupResponseDto> {
+
+    this.logger.log({ userId, id, groupId }, 'Move document to group');
+
+    const document = await this.documentsRepository.findOne({
+      where: { id },
+      select: { id: true, sha256: true },
+    });
+
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    // Check if group exists
+    await this.groupsService.get(groupId, userId);
+
+	// pruefen ob upload berechtigung in zielgruppe vorhanden ist
+	const canUploadToTarget = await this.permissionsService.hasPermission(userId, groupId, DocumentPermission.Upload);
+	if (!canUploadToTarget) {
+		this.logger.warn({ userId, id, groupId }, 'Missing upload permission in target group');
+		throw new ForbiddenException();
+	}
+
+    if (await this.existsInGroup(groupId, document.sha256, id)) {
+      this.logger.warn({ userId, groupId, sha256: document.sha256 }, 'Document already exists in group');
+      throw new ApplicationException(ErrorCode.DocumentAlreadyExistsInGroup);
+    }
+
+    await this.documentGroupsService.moveToGroup(id, groupId);
+
+    this.logger.log({ userId, id, groupId }, 'Document moved to group');
+
+    return { documentId: id, groupId };
+  }
+
   async removeGroup(
     userId: string,
     id: string,
@@ -352,7 +470,7 @@ export class DocumentsService {
     this.logger.log({ userId, id, groupId }, 'Remove document from group');
 
     const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
+      where: { id },
       select: { id: true },
     });
 
@@ -370,7 +488,7 @@ export class DocumentsService {
     this.logger.log({ userId, id }, 'Delete document');
 
     const document = await this.documentsRepository.findOne({
-      where: { id, uploadedBy: userId },
+      where: { id },
       select: { id: true },
     });
 
@@ -381,5 +499,59 @@ export class DocumentsService {
     await this.documentsRepository.softDelete(id);
 
     this.logger.log({ userId, id }, 'Document deleted');
+  }
+
+
+  private async createReadableDocumentsQuery(
+    userId: string,
+  ): Promise<SelectQueryBuilder<Document> | null> {
+    const readableGroupIds = await this.permissionsService.getGroupIdsWithPermission(
+      userId,
+      DocumentPermission.Read,
+    );
+
+    if (readableGroupIds.length === 0) {
+      return null;
+    }
+
+    return this.documentsRepository
+      .createQueryBuilder('document')
+      .where((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select('1')
+          .from(DocumentGroup, 'readableDocumentGroup')
+          .where('readableDocumentGroup.documentId = document.id')
+          .andWhere('readableDocumentGroup.groupId IN (:...readableGroupIds)', { readableGroupIds })
+          .getQuery();
+        return `EXISTS ${subQuery}`;
+      });
+  }
+
+  private existsInGroup(groupId: string, sha256: string, excludeDocumentId?: string): Promise<boolean> {
+    const query = this.documentsRepository
+      .createQueryBuilder('document')
+      .innerJoin(DocumentGroup, 'documentGroup', 'documentGroup.documentId = document.id')
+      .where('documentGroup.groupId = :groupId', { groupId })
+      .andWhere('document.sha256 = :sha256', { sha256 });
+
+    if (excludeDocumentId) {
+      query.andWhere('document.id != :excludeDocumentId', { excludeDocumentId });
+    }
+
+    return query.getExists();
+  }
+
+  private async findDocumentFile(id: string) {
+	const document = await this.documentsRepository.findOne({
+		where: { id },
+		select: { objectKey: true, filename: true, mimeType: true, sizeBytes: true },
+	});
+
+	if (!document) {
+		throw new ApplicationException(ErrorCode.DocumentNotFound);
+	}
+
+	return document;
   }
 }

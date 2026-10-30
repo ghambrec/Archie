@@ -1,0 +1,20 @@
+<div class="mb-3">
+  <label [for]="inputId()" class="form-label">{{ labelKey() | transloco }}</label>
+  <input
+    [id]="inputId()"
+    [type]="type()"
+    class="form-control"
+    [formField]="field()"
+    [attr.autocomplete]="autocomplete()"
+    [class.is-invalid]="showError()"
+    [attr.aria-invalid]="showError() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()" />
+  @if (showError()) {
+    @if (errorKey(); as key) {
+      <div class="invalid-feedback" [id]="inputId() + '-error'">{{ key | transloco }}</div>
+    }
+  }
+  @if (hintKey(); as key) {
+    <div class="form-text" [id]="inputId() + '-hint'">{{ key | transloco }}</div>
+  }
+</div>

@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { DocumentsReview, isAiProcessing } from '../documents-review';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { DocReviewCard } from '../doc-review-card/doc-review-card';
 import { Tags } from '../../tags/tags';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -27,12 +27,15 @@ export class DocReview {
 
 	protected readonly reviewService = inject(DocumentsReview);
 	private readonly tags = inject(Tags);
+	private readonly transloco = inject(TranslocoService);
 	private readonly documentsService = inject(Documents);
 
 	protected readonly busyIds = signal<Set<string>>(new Set());
 	protected readonly actionError = signal<string | null>(null); // transloco
 
-	private readonly hasProcessingDocs = computed(() => this.reviewService.queue.value().some(doc => isAiProcessing(doc.aiStatus)));
+	protected readonly queue = computed(() => this.reviewService.queue.hasValue() ? this.reviewService.queue.value() : []);
+
+	private readonly hasProcessingDocs = computed(() => this.queue().some(doc => isAiProcessing(doc.aiStatus)));
 
 	// doc auf busy setzen damit nicht zwei mal hintereinander buttons gedrueckt werden koennen
 	private setBusy(docId: string, busy: boolean) {
@@ -61,7 +64,7 @@ export class DocReview {
 			},
 			error: (err: HttpErrorResponse) => {
 				this.setBusy(docId, false);
-				this.actionError.set(toErrorKey(err));
+				this.actionError.set(toErrorKey(err, this.transloco));
 			},
 		});
 	}
@@ -78,7 +81,7 @@ export class DocReview {
 			},
 			error: (err: HttpErrorResponse) => {
 				this.setBusy(docId, false);
-				this.actionError.set(toErrorKey(err));
+				this.actionError.set(toErrorKey(err, this.transloco));
 			},
 		});
 	}

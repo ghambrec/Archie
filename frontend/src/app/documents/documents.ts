@@ -32,6 +32,7 @@ export interface DocumentSummary {
 	aiSummary?: string;
 	language: string;
 	aiErrorKey?: string | null;
+	previewable: boolean;
 }
 
 export interface DocumentsPage {
@@ -94,7 +95,7 @@ export class Documents {
 
 	// zuletzt geladene seite, bleibt beim laden der naehsten stehen
 	readonly shownPage = linkedSignal<{ value: DocumentsPage; loading: boolean }, DocumentsPage>({
-		source: () => ({ value: this.list.value(), loading: this.list.isLoading() }),
+		source: () => ({ value: this.list.hasValue() ? this.list.value() : EMPTY_PAGE, loading: this.list.isLoading() }),
 		computation: (current, previous) =>
 			current.loading && previous ? previous.value : current.value,
 	});
@@ -120,6 +121,10 @@ export class Documents {
 		return `${this.baseUrl}/${id}/download`;
 	}
 
+	previewUrl(id: string) {
+		return `${this.baseUrl}/${id}/preview`;
+	}
+
 	addTag(docId: string, tagId: string) {
 		return this.http.post<void>(`${this.baseUrl}/${docId}/tags`, { tagId }, { withCredentials: true });
 	}
@@ -130,6 +135,12 @@ export class Documents {
 
 	deleteDocument(docId: string) {
 		return this.http.delete<void>(`${this.baseUrl}/${docId}`, { withCredentials: true });
+	}
+
+	renameDocument(docId: string, filename: string) {
+		return this.http.patch<{ documentId: string; filename: string }>(
+			`${this.baseUrl}/${docId}/filename`, { filename }, { withCredentials: true }
+		);
 	}
 
 	// drin lassen, vielleicht noch mal benoetigt?

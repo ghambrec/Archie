@@ -1,7 +1,6 @@
 {
 	"programName": "Archie",
 	"sidebar": {
-		"home": "Home",
 		"settings": "Settings",
 		"documents": "Documents",
 		"dropdown": {
@@ -55,6 +54,7 @@
 		},
 		"detail": {
 			"download": "Download",
+			"preview": "Preview",
 			"ai": "AI analysis",
 			"language": "Language",
 			"info": "Details",
@@ -65,17 +65,8 @@
 			"errorLoading": "Error on loading document",
 			"delete": "Delete",
 			"deleteConfirm": "Confirm delete",
-			"cancel": "Cancel"
-		},
-		"aiError": {
-			"unsupported_mime_type": "Analysis is not available for this file type",
-			"no_text": "No text could be extracted from this document",
-			"not_found": "File could not be found in storage",
-			"minio_error": "Error on reading the file from storage",
-			"minio_connection": "Storage is currently not reachable",
-			"llm_error": "The AI model returned an error",
-			"timeout": "Analysis took too long and was cancelled",
-			"unknown": "An unknown error occurred during analysis"
+			"cancel": "Cancel",
+			"rename": "Rename"
 		}
 	},
 	"tag": {
@@ -121,12 +112,100 @@
 			"manual": "Manual & Warranty"
 		}
 	},
+	"ai-chat": {
+	  "heading": "Archie Chat",
+	  "status": {
+	    "thinking": "Thinking…"
+	  },
+	  "deleteAllModal": {
+	    "heading": "Delete all chats",
+	    "question": "Delete all your chats?",
+	    "warning": "All your chats and their messages will be permanently deleted. This cannot be undone.",
+	    "error": "Could not delete all chats. Please try again."
+	  },
+	  "renameModal": {
+	    "heading": "Rename chat",
+	    "title": "Chat title",
+	    "cancel": "Cancel",
+	    "save": "Save",
+	    "saving": "Saving...",
+	    "required": "Enter a chat title.",
+	    "tooLong": "The title must contain no more than 254 characters.",
+	    "saveError": "Could not rename the chat. Please try again."
+	  },
+	  "deleteModal": {
+	    "heading": "Delete chat",
+	    "question": "Delete this chat?",
+	    "warning": "The chat and its messages will be permanently deleted.",
+	    "cancel": "Cancel",
+	    "deleting": "Deleting..."
+	  },
+	  "menu": {
+	    "label": "Options for {{ title }}",
+	    "rename": "Rename",
+	    "pin": "Pin",
+	    "delete": "Delete"
+	  },
+	  "message": {
+	    "label": "Chat messages",
+	    "sources": "Sources",
+	    "confidenceScore": "Confidence score",
+	    "sender": {
+	      "user": "User",
+	      "llm": "AI"
+	    }
+	  },
+	  "hint": {
+	    "sending": "Your question",
+	    "ask": "Ask about your documents..."
+	  },
+	  "button": {
+	    "send": "Send",
+	    "Delete_chat": "Delete Chat",
+	    "Delete_all_chats": "Delete All Chats",
+	    "new_chat": "New Chat",
+	    "retry": "Try again"
+	  },
+	  "error": {
+	    "createConversation": "Could not create the conversation. Please try again.",
+	    "ask": "No answer could be received. Your question may already have been saved.",
+        "serviceUnavailable": "The AI service is currently unavailable or its connection was interrupted. Please try again later.",
+        "timeout": "The request timed out. Your question or answer may already have been saved. Check the chat before trying again.",
+        "connectionLost": "The connection to the server was lost. Your question or answer may already have been saved. Check the chat before trying again.",
+        "cancelled": "The request was cancelled. Your question or answer may already have been saved.",
+        "conversationBusy": "An answer is already being generated for this chat. Please wait.",
+        "conversationNotFound": "This chat is no longer available.",
+        "rateLimited": "Too many requests. Please wait before trying again.",
+        "contextLimit": "The question and chat history exceed the model limit. Try a shorter question or a new chat.",
+        "invalidResponse": "The AI service returned an invalid answer. Please try again later.",
+        "generationFailed": "The answer could not be generated. Please try again later.",
+        "saveFailed": "The answer could not be saved. Check the chat before trying again.",
+        "sessionExpired": "Your session has expired. Please log in again.",
+        "forbidden": "You do not have permission to use this chat.",
+	    "noSources": "No sources provided.",
+	    "deleteConversation": "Could not delete the conversation. Please try again."
+	  },
+	  "history": {
+	    "heading": "Chats",
+	    "loading": "Loading chats...",
+	    "loadError": "Could not load chats. Please try again.",
+	    "untitled": "Untitled chat",
+	    "empty": "No chats yet.",
+	    "opening": "Opening conversation...",
+	    "openError": "Could not open the conversation. Please try again."
+	  }
+	},
 	"login": {
 		"email": "E-Mail",
 		"password": "Password",
 		"submit": "Log in",
 		"errorGeneral": "Error on log in",
-		"errorInvalidCred": "Invalid email or password"
+		"errorInvalidCred": "Invalid email or password",
+		"errors": {
+			"emailRequired": "Email is required.",
+			"emailFormat": "Please enter a valid email address.",
+			"passwordRequired": "Password is required."
+		}
 	},
 	"auth": {
 		"setPassword": {
@@ -136,17 +215,64 @@
 			"btnCancel": "Cancel",
 			"btnSubmit": "Save",
 			"btnSubmitPending": "Sending...",
-			"errorGeneral": "Failed to set password. Please try again"
+			"errorGeneral": "Failed to set password. Please try again",
+			"errors": {
+				"passwordRequired": "Password is required.",
+				"passwordMinLength": "Password must contain at least 8 characters.",
+				"confirmPasswordRequired": "Please confirm your password.",
+				"passwordMismatch": "Passwords do not match."
+			}
 		}
 	},
 	"users": {
+		"restoreUser": {
+			"heading": "Restore user",
+			"question": "Restore this user account?",
+			"description": "The account will be reactivated with its existing group memberships and permissions. The user will need to sign in again.",
+			"cancel": "Cancel",
+			"confirm": "Restore user",
+			"restoring": "Restoring...",
+			"errors": {
+				"general": "Could not restore the user. Please try again.",
+				"forbidden": "You are not allowed to restore users.",
+				"notFound": "This user is no longer available for restoration.",
+				"conflict": "The account cannot be restored in its current state. Refresh the list and try again."
+			}
+		},
+		"deleteUser": {
+			"heading": "Delete user",
+			"question": "Delete this user?",
+			"description": "The account will be deactivated and removed from the user list. Existing documents, chats and other stored data will be retained.",
+			"cancel": "Cancel",
+			"confirm": "Delete user",
+			"deleting": "Deleting...",
+			"errors": {
+				"general": "Could not delete the user. Please try again.",
+				"selfDelete": "You cannot delete your own account.",
+				"forbidden": "You are not allowed to delete this user. An active administrator account is required.",
+				"notFound": "This user no longer exists or has already been deleted.",
+				"conflict": "The user cannot be deleted in the current state. The last active administrator must be retained. Refresh the list and try again."
+			}
+		},
 		"userList": {
 			"heading": "Users",
+			"tabs": { "users": "Users", "deleted": "Deleted users" },
+			"deletedAt": "Deleted on",
+			"actions": "Actions",
+			"inactive": "Inactive",
+			"restore": "Restore",
+			"loading": "Loading users...",
+			"loadError": "Could not load users. Please try again.",
+			"deletedLoadError": "Deleted users are currently unavailable. Please try again.",
+			"retry": "Try again",
+			"empty": "No matching users found.",
+			"deletedEmpty": "No matching deleted users found.",
 			"searchPlaceholder": "Search for name or email",
 			"email": "E-Mail",
 			"displayName": "Name",
 			"lastLogin": "Last login",
-			"active": "Active"
+			"active": "Active",
+			"delete": "Delete user"
 		},
 		"createUser": {
 			"heading": "Create User",
@@ -157,7 +283,6 @@
 			"btnSubmitPending": "Sending...",
 			"btnCancel": "Cancel",
 			"feedbackMsg": "User successfully created",
-			"displayNameRequired":"Display name is mandatory",
 			"errors": {
   				"emailRequired": "Email is required.",
   				"emailFormat": "Please enter a valid email address.",
@@ -165,10 +290,8 @@
   				"passwordMinLength": "Password must contain at least 8 characters.",
   				"displayNameRequired": "Name is required.",
 				"General": "Unable to create user",
-				"ConflictMail": "E-Mail already registered",
-				"ConflictName": "Name already registered",
 				"Conflict": "A user with these details already exists.",
-				"displayNameTooLong" : " Display name is too long, 25 characters are maximum"
+				"displayNameTooLong" : "Display name is too long, 25 characters are maximum"
 			}
 		},
 		"userInfo": {
@@ -188,19 +311,16 @@
 			"password": "Password",
 			"btnClose": "Close",
 			"btnSubmit": "Edit User",
+			"btnSubmitPending": "Saving...",
 			"preferredLanguage": "Preferred Language",
 			"languageHint": "Supported languages: en, de and es.",
 			"errors": {
-				"displayNameError": "Name already given, not available",
-				"emailError": "Email already in use, not available",
-				"preferredlangaugeError": "en, de or es are available, only",
 				"emailFormat": "Enter a valid Email",
 				"passwordError": "Password must contain between 8 and 25 characters.",
-				"passwordPattern": "Password must include an uppercase letter, a lowercase letter, a number, and a special character from !@#$%^&*",
 				"displayNameRequired": "Display name is mandatory",
 				"languageRequired" : "Language settings are mandatory", 
 				"emailRequired": "Email is mandatory",
-				"displayNameTooLong" : " Display name is too long, 25 characters are maximum",
+				"displayNameTooLong" : "Display name is too long, 25 characters are maximum",
 				"unsupportedLanguage": "Please enter en, de or es."
 			}
 		}
@@ -224,14 +344,16 @@
 			"btnCancel": "Cancel",
 			"feedbackMsg": "Group successfully created",
 			"errorGeneral": "Unable to create Group",
-			"errorConflictName": "Name already registered"
+			"errorConflictName": "Name already registered",
+			"errors": {
+				"nameRequired": "Name is required."
+			}
 		},
 		"deleteGroupAdmin": {
 			"heading": "Delete Group",
 			"question": "Do you really want to delete the group:",
 			"btnDelete": "Delete",
 			"btnCancel": "Cancel",
-			"btnDeletePending": "Deleting...",
 			"errorForbidden": "Deleting this group is forbidden.",
 			"errorNotFound": "Group not found.",
 			"errorGeneral": "Unable to delete group",
@@ -269,7 +391,6 @@
 			"errorRemovingUser": "The user could not be removed from the group.",
 			"actions": "Actions",
 			"btnRemoveUser": "Delete",
-			"errorLoadingUsers": "Unable to load users",
 			"editUserPermission": "Edit Permissions",
 			"userPermissions": "Permissions",
 			"errorLoadingPermissions": "Unable to load permissions",
@@ -285,8 +406,69 @@
 			"documentsDelete": "Delete documents",
 			"btnCancel": "Cancel",
 			"btnSave": "Save",
-			"errorGeneral": "Unable to update permissions.",
-			"errorLastAdmin": "The admin permission cannot be removed because this is the last admin."
+			"errors": {
+				"General": "Unable to update permissions.",
+				"LastAdmin": "The admin permission cannot be removed because this is the last admin."
+			}
+		}
+	},
+	"profile": {
+		"heading": "Profile",
+		"description": "Manage your personal account settings.",
+		"active": "Active",
+		"inactive": "Inactive",
+
+		"tabs": {
+			"profile": "Profile",
+			"security": "Security"
+		},
+
+		"accountInformation": {
+			"heading": "Account information",
+			"displayName": "Display name",
+			"email": "E-Mail",
+			"language": "Language",
+			"role": "Role",
+			"administrator": "Administrator",
+			"user": "User"
+		},
+
+		"edit": {
+			"heading": "Edit profile",
+			"displayName": "Display name",
+			"email": "Email address",
+			"preferredLanguage": "Preferred language",
+			"english": "English",
+			"german": "German",
+			"spanish": "Spanish",
+			"save": "Save changes",
+			"saving": "Saving...",
+			"success": "Profile updated successfully",
+			"error": "Profile could not be updated"
+		},
+
+		"groups": {
+			"heading": "Group memberships",
+			"empty": "No group memberships found.",
+			"groupName": "Group name",
+			"permissions": "Permissions",
+			"joinedAt": "Joined at",
+			"noPermissions": "-"
+		},
+
+		"security": {
+			"heading": "Password",
+			"description": "Change your password here.",
+			"newPassword": "New password",
+			"passwordHint": "Use 8–25 characters with an uppercase letter, a lowercase letter, a number, and at least one of !@#$%^&*.",
+			"save": "Save password",
+			"saving": "Saving...",
+			"success": "Password has been updated successfully.",
+			"error": "Password could not be updated.",
+			"minLength": "Password must be at least 8 characters long.",
+			"required": "Enter a new password.",
+			"maxLength": "Password must be at most 25 characters long.",
+			"pattern": "Include an uppercase letter, a lowercase letter, a number, and at least one of !@#$%^&*."
 		}
 	},
 	"errors": {
@@ -298,10 +480,23 @@
 		"INTERNAL_SERVER_ERROR": "An unexpected error occurred.",
 		"UNKNOWN": "An unexpected error occurred.",
 		"DOCUMENT_NOT_FOUND": "Document was not found.",
+		"DOCUMENT_FILENAME_INVALID": "The filename is invalid.",
 		"DOCUMENT_STILL_PROCESSING": "The document is still being analyzed.",
 		"DOCUMENT_INGESTION_NOT_RETRYABLE": "The analysis can only be restarted if it failed or was never started.",
 		"AI_SERVICE_UNAVAILABLE": "The AI service is currently unavailable. Please try again later.",
 		"TAG_NOT_FOUND": "Tag was not found.",
 		"FORBIDDEN": "You don't have permission for this action."
+	},
+	"ais": {
+		"error": {
+			"unsupported_mime_type": "Analysis is not available for this file type",
+			"no_text": "No text could be extracted from this document",
+			"not_found": "File could not be found in storage",
+			"minio_error": "Error on reading the file from storage",
+			"minio_connection": "Storage is currently not reachable",
+			"llm_error": "The AI model returned an error",
+			"timeout": "Analysis took too long and was cancelled",
+			"unknown": "An unknown error occurred during analysis"
+		}
 	}
 }

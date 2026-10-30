@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException, ConflictException, OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, ForbiddenException, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Like, Repository } from 'typeorm';
+import { DataSource, IsNull, Like, Not, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { Group } from '../groups/entities/group.entity';
@@ -19,6 +19,7 @@ import { PermissionsService } from '../permissions/permissions.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { Permission } from '../permissions/entities/permission.entity';
 import { UserPermission } from '../user_permission/entities/user_permission.entity';
+import { SessionService } from '../auth/session/session.service';
 
 
 const PASSWORD_SALT_ROUNDS = 10;
@@ -31,10 +32,10 @@ export class UsersService implements OnApplicationBootstrap {
     private readonly usersRepository: Repository<User>,
     private readonly dataSource: DataSource,
 	private readonly usersFileService: UsersFileService,
-	private readonly permissionsService: PermissionsService
+	private readonly permissionsService: PermissionsService,
+    private readonly sessionService: SessionService,
   ) {}
 
-  // check on app start if theres a user without avatar, if yes create it
   async onApplicationBootstrap(): Promise<void> {
 	const usersWithoutAvatar: Array<{ id: string; display_name: string }> = 
 		await this.usersRepository.query(`SELECT id, display_name FROM users WHERE avatar_object_key IS NULL AND deleted_at IS NULL`);
@@ -52,7 +53,7 @@ export class UsersService implements OnApplicationBootstrap {
 	}
   }
 
-  async create(dto: CreateUserDto): Promise<User> {
+  async create(dto: CreateUserDto, mustChangePassword: boolean): Promise<User> {
     this.logger.log('Execute create', dto.email);
     const passwordHash = await bcrypt.hash(dto.password, PASSWORD_SALT_ROUNDS);
 
@@ -76,6 +77,7 @@ export class UsersService implements OnApplicationBootstrap {
       const userInsert = await manager.insert(User, {
         email: dto.email.trim().toLowerCase(),
         passwordHash,
+        mustChangePassword,
         displayName: dto.displayName,
       });
       const userId = userInsert.identifiers[0].id as string;
@@ -92,7 +94,6 @@ export class UsersService implements OnApplicationBootstrap {
         groupId,
       });
 
-	  // user get all documents. permissions for his personal group
 	  const documentPermissions = await manager.find(Permission, {
 		where: { permKey: Like('documents.%') }
 	  });
@@ -122,7 +123,64 @@ export class UsersService implements OnApplicationBootstrap {
 	return user;
   };
 
-  async updateProfile(userID: string, dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
+  async softDeleteUser(actorId: string, userId: string): Promise<void> {
+    if (actorId === userId) {
+      throw new ForbiddenException('You cannot delete your own account');
+    }
+
+    try {
+      await this.dataSource.transaction('SERIALIZABLE', async (manager) => {
+        const user = await manager.findOneBy(User, { id: userId });
+        if (!user) throw new ApplicationException(ErrorCode.UserNotFound);
+
+        // Re-check admin status inside the transaction to handle concurrent deletions.
+        const admins = await this.permissionsService.getActiveAdmins(manager);
+        if (admins.some(admin => admin.id === userId) && admins.length <= 1) {
+          throw new ConflictException('Cannot delete the last active admin');
+        }
+        if (!admins.some(admin => admin.id === actorId)) {
+          throw new ForbiddenException('An active admin account is required');
+        }
+
+        await manager.update(User, userId, { isActive: false });
+        await manager.softDelete(User, userId);
+      });
+    } catch (error) {
+      if ((error as { driverError?: { code?: string } }).driverError?.code === '40001') {
+        throw new ConflictException('User state changed during deletion. Please try again.');
+      }
+      throw error;
+    }
+
+    try {
+      await this.permissionsService.invalidateUserPermissions(userId);
+    } catch (error) {
+      this.logger.warn({ userId, error }, 'Could not invalidate deleted user permissions');
+    }
+    this.logger.log({ actorId, userId }, 'User soft deleted');
+  }
+
+  async restoreUser(userId: string): Promise<void> {
+    await this.dataSource.transaction(async (manager) => {
+      const user = await manager.findOne(User, {
+        where: { id: userId },
+        withDeleted: true,
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!user) throw new ApplicationException(ErrorCode.UserNotFound);
+      if (user.deletedAt === null) {
+        throw new ConflictException('User is not deleted');
+      }
+
+      // Both Redis operations must succeed before the account becomes accessible.
+      await this.sessionService.destroyAllForUser(userId);
+      await this.permissionsService.invalidateUserPermissions(userId);
+      await manager.update(User, userId, { deletedAt: null, isActive: true });
+    });
+    this.logger.log({ userId }, 'User restored');
+  }
+
+   async updateProfile(actorUserId: string, userID: string, dto: UpdateUserDto): Promise<UpdateUserResponseDto> {
     this.logger.log('Execute updateProfile', userID);
 
     const user = await this.usersRepository.findOneBy({id: userID,});
@@ -136,7 +194,7 @@ export class UsersService implements OnApplicationBootstrap {
     {
       const newEmail = dto.email?.trim().toLowerCase();
       const duplicate = await this.usersRepository.findOneBy({email: newEmail});
-      if (duplicate) {
+      if (duplicate && duplicate.id !== userID) {
         this.logger.warn(`UpdateProfile failed for ${userID}, email already registered`);
         throw new ApplicationException(
           ErrorCode.EmailAlreadyRegistered
@@ -149,31 +207,29 @@ export class UsersService implements OnApplicationBootstrap {
     {
       const newName = dto.displayName.trim();
       const duplicate = await this.usersRepository.findOneBy({displayName: newName});
-      if(duplicate) {
+      if(duplicate && duplicate.id !== userID) {
         this.logger.warn(`UpdateProfile failed for ${userID}, display name already registered`);
         throw new ApplicationException(
           ErrorCode.UserNameAlreadyRegistered
         )
       }
+      user.displayName = newName;
     }
     if(dto.preferredLanguage !==undefined)
     {
-      const newLang = dto.preferredLanguage?.trim();
+      user.preferredLanguage = dto.preferredLanguage;
     }
     if(dto.password !==undefined)
     {
-      const newPassword = dto.password?.trim();
+      await this.applyPasswordChange(user, actorUserId, dto.password);
     }
 
-    Object.assign(user,dto);
     const updatedUser = await this.usersRepository.save(user)
     this.logger.log({ userId: updatedUser.id }, 'Profile updated successfully');
     return {
       id: updatedUser.id}
 
   };
-
-  //async updatePasswd(userID: stringify, dto )
 
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOneBy({email: email});
@@ -193,6 +249,7 @@ export class UsersService implements OnApplicationBootstrap {
         displayName : true,
         preferredLanguage: true,
         isActive: true,
+        mustChangePassword: true,
       }
     })
     if(!user) {
@@ -202,7 +259,36 @@ export class UsersService implements OnApplicationBootstrap {
     )}
 
 	const isAdmin = await this.permissionsService.isUserAdmin(userId);
-    return {...user, isAdmin};
+    const { mustChangePassword, ...profile } = user;
+    return {...profile, isAdmin, hasToChangePassword: mustChangePassword};
+  }
+
+  async getDeletedUsers(request: GetUsersQueryDto): Promise<GetUsersResponseDto> {
+    const { page, limit } = request;
+    const [users, total] = await this.usersRepository.findAndCount({
+      withDeleted: true,
+      where: { deletedAt: Not(IsNull()) },
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        preferredLanguage: true,
+        isActive: true,
+        lastLoginAt: true,
+        deletedAt: true,
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { deletedAt: 'DESC', id: 'ASC' },
+    });
+
+    return {
+      data: users,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async getAllUsers(request: GetUsersQueryDto): Promise<GetUsersResponseDto> {
@@ -243,14 +329,13 @@ export class UsersService implements OnApplicationBootstrap {
       throw new NotFoundException();
     }
 
-    user.passwordHash = await bcrypt.hash(dto.password, PASSWORD_SALT_ROUNDS);
-    user.lastLoginAt = new Date();
+    await this.applyPasswordChange(user, userId, dto.password);
 
     await this.usersRepository.save(user);
     this.logger.log({ userId: user.id }, 'User changed password successfully');
   }
 
-  async resetPassword(userId: string, dto: ChangePasswordDto): Promise<void> {
+  async resetPassword(actorUserId: string, userId: string, dto: ChangePasswordDto): Promise<void> {
     this.logger.log('Execute resetPassword', userId);
 
     const user = await this.usersRepository.findOneBy({ id: userId });
@@ -260,8 +345,7 @@ export class UsersService implements OnApplicationBootstrap {
       throw new NotFoundException();
     }
 
-    user.passwordHash = await bcrypt.hash(dto.password, PASSWORD_SALT_ROUNDS);
-    user.lastLoginAt = null;
+    await this.applyPasswordChange(user, actorUserId, dto.password);
 
     await this.usersRepository.save(user);
     this.logger.log({ userId: user.id }, 'Admin reset user password successfully');
@@ -269,6 +353,19 @@ export class UsersService implements OnApplicationBootstrap {
 
   async findById(userId: string): Promise<User | null> {
     return this.usersRepository.findOneBy({ id: userId });
+  }
+
+  private async applyPasswordChange(user: User, actorUserId: string, password: string): Promise<void> {
+    const changesAnotherUser = actorUserId !== user.id;
+    if (changesAnotherUser && !(await this.permissionsService.isUserAdmin(actorUserId))) {
+      throw new ForbiddenException('An admin account is required to reset another user password');
+    }
+    user.passwordHash = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
+    user.mustChangePassword = changesAnotherUser;
+  }
+
+  async recordSuccessfulLogin(userId: string, lastLoginAt: Date): Promise<void> {
+    await this.usersRepository.update(userId, { lastLoginAt });
   }
 }
 

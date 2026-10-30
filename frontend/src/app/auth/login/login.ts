@@ -29,10 +29,10 @@ export class Login {
 	loginForm = form (
 		this.loginModel,
 		(p) => {
-			required(p.email, { message: 'email is mandatory' });
-			email(p.email, { message: 'please enter valid email' });
+			required(p.email, { message: 'login.errors.emailRequired' });
+			email(p.email, { message: 'login.errors.emailFormat' });
 
-			required(p.password, { message: 'password is mandatory' });
+			required(p.password, { message: 'login.errors.passwordRequired' });
 		},
 		{
 			submission: {
@@ -55,6 +55,7 @@ export class Login {
 							});
 
 							modalRef.closed.subscribe(() => {
+								this.usersService.currentUser.update(u => u && { ...u, hasToChangePassword: false });
 								this.router.navigateByUrl('/');
 							});
 

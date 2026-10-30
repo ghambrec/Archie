@@ -2,5 +2,7 @@ export enum DocumentAiStatus {
   PENDING = 'PENDING',
   PROCESSING = 'PROCESSING',
   FINISHED = 'FINISHED',
-  ERROR = 'ERROR',
+  FAILED = 'FAILED',
+  SKIPPED = 'SKIPPED',
+  NOT_STARTED = 'NOT_STARTED',
 }

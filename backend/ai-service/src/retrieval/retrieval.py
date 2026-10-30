@@ -1,7 +1,9 @@
+from src.metrics import measure_chat_stage
 from src.config import settings
 from src.embedding.embedder import embed
 from pgvector import Vector
 from src.generation.generator import generate
+from src.generation.schemas import AnswerResponse, GeneratedAnswer, SourceCitation
 
 
 from uuid import UUID
@@ -12,37 +14,36 @@ import logging
 async def retrieval(user_id: UUID,
 					conv_id: UUID, 
 					question: str, 
-					pool: asyncpg.Pool, 
+					pool: asyncpg.Pool | asyncpg.Connection,
 					result_limit: int = settings.limit,
 					context_budget: int = settings.context_budget 
-					) -> str :
+					) -> AnswerResponse :
 	try:
 		message_history = await load_conversation_messages(pool, conv_id)
 
-		question_embedding = await embed(question)
+		with measure_chat_stage("embedding"):
+			question_embedding = await embed(question)
 		#logging.debug(f"vector: {question_embedding}")
 
 		logging.debug( f"embedding dimensions: {len(question_embedding)}")
 		
-		chunks = await search_chunks(pool,
-							   user_id=user_id,
-							   question_embedding=question_embedding,
-	
-							   limit= result_limit)
-		
-		context = build_context(chunks, context_budget)
+		with measure_chat_stage("retrieval"):
+			chunks = await search_chunks(
+				pool, user_id=user_id, question_embedding=question_embedding,
+				limit=result_limit,
+			)
+			context, context_chunks = build_context(chunks, context_budget)
 
-		answer = await generate(question,
-						context,
-						message_history)
+		with measure_chat_stage("generation"):
+			answer = await generate(question, context, message_history)
 	except Exception:
 		logging.exception("embedding, question, and context failed")
 		raise
 	
-	return answer
+	return enrich_answer(answer, context_chunks)
 	
 
-async def load_conversation_messages(pool: asyncpg.Pool, conv_id: UUID) -> list[asyncpg.Record]:
+async def load_conversation_messages(pool: asyncpg.Pool | asyncpg.Connection, conv_id: UUID) -> list[asyncpg.Record]:
 
 
 	previous_messages = await pool.fetch(
@@ -58,7 +59,7 @@ async def load_conversation_messages(pool: asyncpg.Pool, conv_id: UUID) -> list[
 	return previous_messages
 
 
-async def search_chunks(pool: asyncpg.Pool,
+async def search_chunks(pool: asyncpg.Pool | asyncpg.Connection,
                         user_id: UUID, 
                         question_embedding: list[asyncpg.Record], 
 						limit:int) ->list[asyncpg.Record]:
@@ -83,7 +84,7 @@ async def search_chunks(pool: asyncpg.Pool,
 					inner join user_groups ug on 
 						ug.group_id = dg.group_id 
 					inner join user_permission up on 
-						up.user_id = ug.user_id 
+						up.user_id = ug.user_id AND up.group_id = dg.group_id
 					inner join permissions p on 
 						up.permission_id = p.id 
 					where
@@ -99,13 +100,14 @@ async def search_chunks(pool: asyncpg.Pool,
 	logging.debug("Retrieved %d chunks ", len(rows))
 	return rows
 
-def build_context(chunks: list[asyncpg.Record] , context_budget: int)-> str:
+def build_context(chunks: list[asyncpg.Record], context_budget: int) -> tuple[str, list[asyncpg.Record]]:
 	"""
-	build context appends the content of the found chunks the filneame of the origin. 
+	Return the context and exactly the chunks included within its token budget.
 
 	"""
 	used_tokens = 0
-	selected =[]
+	selected = []
+	context_chunks = []
 
 	for row in chunks:
 		chunked_tokens = row["token_count"]
@@ -113,6 +115,7 @@ def build_context(chunks: list[asyncpg.Record] , context_budget: int)-> str:
 		logging.debug("row=%s", row["content"])
 		if used_tokens + chunked_tokens <= context_budget:
 			used_tokens += chunked_tokens
+			context_chunks.append(row)
 			selected.append(
 				f"Chunk_Id: {row['id']}\n"
 				f"Content: {row['content']}"
@@ -120,5 +123,26 @@ def build_context(chunks: list[asyncpg.Record] , context_budget: int)-> str:
 
 	context ="\n\n".join(selected)
 
-	return context
-	
+	return context, context_chunks
+
+def enrich_answer(answer: GeneratedAnswer, context_chunks: list[asyncpg.Record]) -> AnswerResponse:
+    """Resolve filenames from database records; omit unknown or repeated citations."""
+    chunks_by_id = {row["id"]: row for row in context_chunks}
+    sources = []
+    seen = set()
+    for citation in answer.sources:
+        chunk = chunks_by_id.get(citation.chunk_Id)
+        if chunk is None or citation.chunk_Id in seen:
+            continue
+        seen.add(citation.chunk_Id)
+        sources.append(SourceCitation(
+            chunk_Id=chunk["id"],
+            document_id=chunk["ai_document_id"],
+            document_name=chunk["document_name"],
+            similarity_score=1.0 - float(chunk["distance"]),
+        ))
+    return AnswerResponse(
+        answer=answer.answer,
+        confidence_score=answer.confidence_score,
+        sources=sources,
+    )

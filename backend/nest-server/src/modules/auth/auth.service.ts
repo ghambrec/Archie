@@ -9,6 +9,9 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { Logger } from 'nestjs-pino';
 import { LoginAttemptService } from './login-attempt.service';
 import { LockedException } from './exceptions/locked.exception';
+import { UserSummaryDto } from '../users/dto/user-summary.dto';
+import { SessionCookieService } from './session/session-cookie.service';
+import type { Request } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +20,7 @@ export class AuthService {
 		private readonly userService: UsersService,
 		private readonly sessionService: SessionService,
 		private readonly loginAttemptService: LoginAttemptService,
+		private readonly sessionCookieService: SessionCookieService
 	) { }
 
 	async login(request: LoginRequestDto): Promise<LoginResult> {
@@ -37,9 +41,15 @@ export class AuthService {
 
 		await this.loginAttemptService.clearAttempts(request.email);
 		
-		const hasToChangePassword = user.lastLoginAt === null;
+		const hasToChangePassword = user.mustChangePassword;
 
 		const sessionId = await this.sessionService.create(user.id);
+		try {
+			await this.userService.recordSuccessfulLogin(user.id, new Date());
+		} catch (error) {
+			await this.sessionService.destroy(sessionId);
+			throw error;
+		}
 		return { user, sessionId, hasToChangePassword };
 	}
 
@@ -52,7 +62,7 @@ export class AuthService {
 			displayName: request.displayName,
 		}
 
-		const user = await this.userService.create(createUserDto);
+		const user = await this.userService.create(createUserDto, false);
 
 		const sessionId = await this.sessionService.create(user.id);
 		return sessionId;
@@ -62,5 +72,23 @@ export class AuthService {
 		this.logger.log('Execute logout', sessionId);
 
 		return this.sessionService.destroy(sessionId);
+	}
+
+	async getSessionUser(req: Request): Promise<UserSummaryDto | null> {
+		const sessionId = this.sessionCookieService.extract(req);
+		if (!sessionId) {
+			return null;
+		}
+
+		const session = await this.sessionService.get(sessionId);
+		if (!session) {
+			return null;
+		}
+
+		try {
+			return await this.userService.findProfileById(session.userId);
+		} catch (error) {
+			return null;
+		}
 	}
 }

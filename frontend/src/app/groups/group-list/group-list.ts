@@ -24,7 +24,7 @@ export class GroupList {
 
 	protected readonly filteredGroupList = computed(() => {
 		const searchStringGroups = this.searchString().trim().toLowerCase();
-		const groups = this.groupsService.groups.value();
+		const groups = this.groupsService.groups.hasValue() ? this.groupsService.groups.value() : [];
 
 		if (!searchStringGroups) {
 			return groups;

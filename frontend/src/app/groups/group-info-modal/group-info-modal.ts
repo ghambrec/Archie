@@ -61,8 +61,11 @@ export class InfoGroupModal {
 			return [];
 		}
 
-		return this.userService.users.value().filter(user =>
-			!this.members.value().some(member => member.userId === user.id) &&
+		const users = this.userService.users.hasValue() ? this.userService.users.value() : [];
+		const members = this.members.hasValue() ? this.members.value() : [];
+
+		return users.filter(user =>
+			!members.some(member => member.userId === user.id) &&
 			(
 				user.displayName.toLowerCase().includes(search) ||
 				user.email.toLowerCase().includes(search)

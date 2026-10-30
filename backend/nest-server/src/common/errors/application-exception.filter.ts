@@ -16,7 +16,11 @@ import {
 
 		const statusCode = exception.getStatus();
 
-		response.status(statusCode).json({
+		if (exception.retryAfterSeconds !== undefined) {
+        response.setHeader('Retry-After', String(exception.retryAfterSeconds));
+      }
+      response.status(statusCode).json({
+        ...(exception.retryAfterSeconds !== undefined ? { retryAfterSeconds: exception.retryAfterSeconds } : {}),
 			statusCode: statusCode,
 			code: exception.code,
 			message: exception.fallbackMessage,

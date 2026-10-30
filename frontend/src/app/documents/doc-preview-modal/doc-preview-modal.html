@@ -1,0 +1,14 @@
+@if (doc(); as doc) {
+	<div class="modal-header">
+		<h5 class="modal-title text-truncate">{{ doc.filename }}</h5>
+		<button type="button" class="btn-close" (click)="activeModal.dismiss()"></button>
+	</div>
+
+	<div class="modal-body p-0 preview-body">
+		@if (isImage()) {
+			<img [src]="url()" class="preview-image">
+		} @else {
+			<iframe [src]="frameUrl()" class="preview-frame"></iframe>
+		}
+	</div>
+}

@@ -210,6 +210,59 @@ services:
     networks:
       - archie
 
+
+  grafana: 
+    image: grafana/grafana
+    profiles: [monitoring]
+    ports:
+    - "3001:3000"
+    volumes:
+    - grafana_data:/var/lib/grafana
+    - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    - ./monitoring/grafana/dashboards:/etc/grafana/dashboards:ro
+    networks:
+      - archie
+    env_file:
+      - "./env/.env"
+
+  prometheus:
+    image: prom/prometheus:latest
+    profiles: [monitoring]
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - archie 
+
+  cadvisor:
+    image: ghcr.io/google/cadvisor:0.55.1
+    profiles: [monitoring]
+    privileged: true
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+    networks:
+      - archie
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    profiles: [monitoring]
+    network_mode: host
+    pid: host
+    command:
+      - "--path.rootfs=/host"
+    volumes:
+      - /:/host:ro,rslave
+
 networks:
   archie:
     driver: bridge
@@ -222,3 +275,5 @@ volumes:
   frontend-node-modules:
   ollama_data:
   ai-service-venv:
+  grafana_data:
+  prometheus_data:

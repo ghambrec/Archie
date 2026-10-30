@@ -19,7 +19,7 @@
 				(change)="onGroupChange($event)"
 		>
 				<option value="" disabled selected></option>
-				@for (group of uploadGroups.value(); track group.id) {
+				@for (group of uploadGroupList(); track group.id) {
 						<option [value]="group.id">{{ group.name }}</option>
 				}
 		</select>
@@ -45,7 +45,7 @@
 		type="file"
 		multiple
 		class="visually-hidden"
-		[attr.accept]="uploadConfig.value()?.allowedExtensions?.join(',')"
+		[attr.accept]="uploadConfig()?.allowedExtensions?.join(',')"
 		(change)="onFilesSelected($event)"
 	>
 

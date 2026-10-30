@@ -1,0 +1,26 @@
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h2 class="h5 mb-3">{{ 'profile.security.heading' | transloco }}</h2>
+    <p class="text-muted">{{ 'profile.security.description' | transloco }}</p>
+
+    <form [formRoot]="passwordForm">
+      <fieldset [disabled]="passwordForm().submitting()">
+        <app-form-field inputId="profile-password" type="password" autocomplete="new-password"
+          labelKey="profile.security.newPassword" hintKey="profile.security.passwordHint"
+          [field]="passwordForm.password" />
+
+        @if (passwordForm().errors()[0]?.message; as errorKey) {
+          <div class="alert alert-danger" role="alert">{{ errorKey | transloco }}</div>
+        }
+
+        <button type="submit" class="btn btn-primary" [disabled]="passwordForm().submitting()">
+          {{ (passwordForm().submitting() ? 'profile.security.saving' : 'profile.security.save') | transloco }}
+        </button>
+
+        @if (passwordSaveMessage(); as messageKey) {
+          <div class="alert alert-success mt-3" role="status">{{ messageKey | transloco }}</div>
+        }
+      </fieldset>
+    </form>
+  </div>
+</div>

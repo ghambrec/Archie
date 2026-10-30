@@ -26,7 +26,6 @@ export class SessionService {
       createdAt: new Date().toISOString(),
     };
 
-    // TODO: Read more about this sadd..
     await this.redis
       .multi()
       .set(sessionKey(sessionId), JSON.stringify(payload), 'EX', this.ttlSeconds)
@@ -56,10 +55,14 @@ export class SessionService {
       return;
     }
 
-    await this.redis
+    const results = await this.redis
       .multi()
       .del(sessionIds.map(sessionKey))
-      .del(userSessionsKey(userId))
       .exec();
+    if (!results) throw new Error('Session revocation transaction aborted');
+    for (const [error] of results) {
+      if (error) throw error;
+    }
+    await this.redis.del(userSessionsKey(userId));
   }
 }

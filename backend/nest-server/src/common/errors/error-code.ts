@@ -1,6 +1,17 @@
 
 
 export enum ErrorCode {
+    AiRateLimited = 'AI_RATE_LIMITED',
+    AiRequestTimeout = 'AI_REQUEST_TIMEOUT',
+    AiRequestCancelled = 'AI_REQUEST_CANCELLED',
+    AiConversationBusy = 'AI_CONVERSATION_BUSY',
+    AiConversationNotFound = 'AI_CONVERSATION_NOT_FOUND',
+    AiContextLimit = 'AI_CONTEXT_LIMIT',
+    AiInvalidResponse = 'AI_INVALID_RESPONSE',
+    AiGenerationFailed = 'AI_GENERATION_FAILED',
+    AiSaveFailed = 'AI_SAVE_FAILED',
+    AiStreamInterrupted = 'AI_STREAM_INTERRUPTED',
+
     EmailAlreadyRegistered = 'AUTH_EMAIL_ALREADY_REGISTERED',
     InvalidCredentials = 'AUTH_INVALID_CREDENTIALS',
     UserNotFound = 'USER_NOT_FOUND',
@@ -25,5 +36,7 @@ export enum ErrorCode {
 	DocumentFileEmpty = 'DOCUMENT_FILE_EMPTY',
 	DocumentStillProcessing = 'DOCUMENT_STILL_PROCESSING',
 	DocumentIngestionNotRetryable = 'DOCUMENT_INGESTION_NOT_RETRYABLE',
+	DocumentNotPreviewable = 'DOCUMENT_NOT_PREVIEWABLE',
+	DocumentFilenameInvalid = 'DOCUMENT_FILENAME_INVALID',
 	AiServiceUnavailable = 'AI_SERVICE_UNAVAILABLE',
   }

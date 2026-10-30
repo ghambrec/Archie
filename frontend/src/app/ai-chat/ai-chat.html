@@ -1,0 +1,22 @@
+<section class="chat">
+  <header class="chat-header">
+    <h1>{{ 'ai-chat.heading' | transloco }}</h1>
+  </header>
+
+  <app-chat-message-list
+    [messages]="messages()"
+    [conversationId]="activeConversationId()"
+    [isSending]="isSending()"
+    [isLoading]="isOpeningConversation()"
+    [errorKey]="openConversationError()" />
+
+  <app-chat-composer
+    [(draft)]="draft"
+    [busy]="isBusy()"
+    [canDeleteChat]="activeConversationId() !== null"
+    [canDeleteAll]="canDeleteAll()"
+    [sendError]="sendError()"
+    (sendRequested)="send()"
+    (deleteRequested)="deleteChat()"
+    (deleteAllRequested)="deleteAllChats()" />
+</section>

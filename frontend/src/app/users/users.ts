@@ -1,4 +1,4 @@
-import { Service, computed, inject, signal } from '@angular/core';
+import { Service, computed, inject, signal, type Signal } from '@angular/core';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { SupportedLanguage } from '../core/i18n/supported-language';
@@ -7,6 +7,7 @@ export interface UserGroupMembership {
 	groupId: string;
 	name: string;
 	joinedAt: string;
+	permissions: string[];
 }
 
 export interface UserGroupsResponse {
@@ -51,6 +52,7 @@ export interface UserInfo {
 	preferredLanguage: SupportedLanguage;
 	isActive: boolean;
 	lastLoginAt: string | null;
+  deletedAt?: string | null;
 	//avatar: string;
 
 }
@@ -70,18 +72,21 @@ export interface CurrentUser {
 	displayName: string;
 	preferredLanguage: SupportedLanguage;
 	isAdmin: boolean;
+	hasToChangePassword: boolean;
 }
 
 @Service()
 export class Users {
 	private readonly http = inject(HttpClient);
 	private readonly baseUrl = `${environment.apiUrl}/users`;
+	private readonly userGroupsUrl = `${environment.apiUrl}/user-groups`;
 
 	readonly currentUser = signal<CurrentUser | null>(null);
 	readonly isAdminUser = computed(() => this.currentUser()?.isAdmin === true);
+	readonly isLoggedIn = computed(() => !!this.currentUser() && !this.currentUser()!.hasToChangePassword);
 
 	readonly users = httpResource<UserInfo[]>(
-		() => this.currentUser()
+		() => this.isLoggedIn()
 		? {
 			url: this.baseUrl,
 			params: {limit: 100},
@@ -93,6 +98,28 @@ export class Users {
 			parse: (raw: unknown) => (raw as GetUsersResponse).data
 		}
 	)
+
+  // Frontend contract: the admin-only endpoint returns GetUsersResponse including deletedAt.
+  deletedUsersResource(enabled: Signal<boolean>) {
+    return httpResource<UserInfo[]>(
+      () => enabled() && this.isLoggedIn()
+        ? {
+            url: `${this.baseUrl}/deleted`,
+            params: { limit: 100 },
+            withCredentials: true,
+          }
+        : undefined,
+      {
+        defaultValue: [],
+        parse: (raw: unknown) => (raw as GetUsersResponse).data,
+      },
+    );
+  }
+
+  // The backend must revoke old sessions before reactivating the account.
+  restoreUser(userId: string) {
+    return this.http.patch<void>(`${this.baseUrl}/${userId}/restore`, {}, { withCredentials: true });
+  }
 
 	getCurrentUser() {
 		const url = `${this.baseUrl}/me`;
@@ -106,6 +133,10 @@ export class Users {
 
 	}
 
+  deleteUser(userId: string) {
+    return this.http.delete<void>(`${this.baseUrl}/${userId}`, { withCredentials: true });
+  }
+
 	getAvatarUrl(userId?: string | null) {
 		if (!userId) {
 			return '/avatar';
@@ -117,5 +148,28 @@ export class Users {
 		const url = `${this.baseUrl}/${userId}`;
 		
 		return this.http.patch<PatchUser>(url, changes, {withCredentials: true });
+	}
+
+	getUserGroups(userId: string) {
+		const url = `${this.userGroupsUrl}/userId/${userId}/groups`;
+		return this.http.get<UserGroupsResponse>(url, { withCredentials: true });
+	}
+
+	getMyGroups() {
+		const url = `${this.userGroupsUrl}/me`;
+
+		return this.http.get<UserGroupsResponse>(url, { withCredentials: true });
+	}
+
+	updateCurrentUser(changes: PatchUser) {
+		const url = `${this.baseUrl}/me`
+
+		return this.http.patch<UpdateUserResponse>(url, changes, { withCredentials: true });
+	}
+
+	changeOwnPassword(password: string) {
+		const url = `${this.baseUrl}/me/password`;
+
+		return this.http.patch<void>(url, { password }, {withCredentials: true });
 	}
 }
