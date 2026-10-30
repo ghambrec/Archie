@@ -59,7 +59,7 @@ describe('Deleted users tab', () => {
       .compileComponents();
     http = TestBed.inject(HttpTestingController);
     TestBed.inject(Users).currentUser.set({
-      id: 'admin', displayName: 'Admin', email: 'admin@example.com', preferredLanguage: 'en', isAdmin: true,
+      id: 'admin', displayName: 'Admin', email: 'admin@example.com', preferredLanguage: 'en', isAdmin: true, hasToChangePassword: false,
     });
     fixture = TestBed.createComponent(UserList);
     fixture.detectChanges();

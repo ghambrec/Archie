@@ -29,14 +29,16 @@ export class TagPicker {
 	// klick ins suchfeld -> komplette liste anzeigen
 	protected readonly open$ = new Subject<string>();
 
+	private readonly allTags = computed(() => this.tags.tags.hasValue() ? this.tags.tags.value() : []);
+
 	// map id -> tag, fuer parent label
 	private readonly tagsById = computed(
-		() => new Map(this.tags.tags.value().map(tag => [tag.id, tag]))
+		() => new Map(this.allTags().map(tag => [tag.id, tag]))
 	);
 
 	// schon gesetzte tags ausblenden
 	private readonly availableTags = computed(() =>
-		this.tags.tags.value()
+		this.allTags()
 			.filter(tag => !this.excludeIds().has(tag.id))
 			.sort((a, b) => this.translate(a).localeCompare(this.translate(b)))
 	);

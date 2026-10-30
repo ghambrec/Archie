@@ -72,6 +72,7 @@ export interface CurrentUser {
 	displayName: string;
 	preferredLanguage: SupportedLanguage;
 	isAdmin: boolean;
+	hasToChangePassword: boolean;
 }
 
 @Service()
@@ -82,9 +83,10 @@ export class Users {
 
 	readonly currentUser = signal<CurrentUser | null>(null);
 	readonly isAdminUser = computed(() => this.currentUser()?.isAdmin === true);
+	readonly isLoggedIn = computed(() => !!this.currentUser() && !this.currentUser()!.hasToChangePassword);
 
 	readonly users = httpResource<UserInfo[]>(
-		() => this.currentUser()
+		() => this.isLoggedIn()
 		? {
 			url: this.baseUrl,
 			params: {limit: 100},
@@ -100,7 +102,7 @@ export class Users {
   // Frontend contract: the admin-only endpoint returns GetUsersResponse including deletedAt.
   deletedUsersResource(enabled: Signal<boolean>) {
     return httpResource<UserInfo[]>(
-      () => enabled() && this.currentUser()
+      () => enabled() && this.isLoggedIn()
         ? {
             url: `${this.baseUrl}/deleted`,
             params: { limit: 100 },

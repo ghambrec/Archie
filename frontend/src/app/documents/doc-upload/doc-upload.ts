@@ -40,10 +40,12 @@ export class DocUpload {
 	protected readonly uploads = signal<UploadTask[]>([]);
 	protected readonly selectedGroupId = signal<string | null>(null);
 	protected readonly uploadGroups = this.groupsService.groupsWithPermission('documents.upload');
-	protected readonly uploadConfig = this.documentsService.uploadConfig;
+	private readonly uploadConfigResource = this.documentsService.uploadConfig;
+	protected readonly uploadConfig = computed(() => this.uploadConfigResource.hasValue() ? this.uploadConfigResource.value() : null);
+	protected readonly uploadGroupList = computed(() => this.uploadGroups.hasValue() ? this.uploadGroups.value() : []);
 
 	protected readonly maxSizeMb = computed(() => {
-		const bytes = this.uploadConfig.value()?.maxSizeBytes;
+		const bytes = this.uploadConfig()?.maxSizeBytes;
 		return bytes ? Math.round(bytes / 1024 / 1024) : null;
 	});
 
@@ -157,7 +159,7 @@ export class DocUpload {
 
 	// null = file ok / else transloco key
 	private validateFile(file: File): string | null {
-		const config = this.uploadConfig.value();
+		const config = this.uploadConfig();
 		if (!config) {
 			return null; // config not ready yet or request failed, upload file anyway, backend will do validation
 		}

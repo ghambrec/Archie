@@ -76,13 +76,13 @@
 							}
 						}
 						@case ('FAILED') {
-							<p class="text-danger small mb-2">{{ "documents.aiError." + (doc.aiErrorKey ?? 'unknown') | transloco }}</p>
+							<p class="text-danger small mb-2">{{ (doc.aiErrorKey ?? 'ais.error.unknown') | transloco }}</p>
 							<button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="busy()" (click)="onRetry(doc.id)">
 								<i class="bi bi-arrow-clockwise me-1"></i>{{ "documents.review.btnRetry" | transloco }}
 							</button>
 						}
 						@case ('SKIPPED') {
-							<p class="text-secondary small mb-0">{{ "documents.aiError." + (doc.aiErrorKey ?? 'unknown') | transloco }}</p>
+							<p class="text-secondary small mb-0">{{ (doc.aiErrorKey ?? 'ais.error.unknown') | transloco }}</p>
 						}
 						@default {
 							<p class="text-secondary small mb-0">{{ "documents.review.suggestionsPending" | transloco }}</p>

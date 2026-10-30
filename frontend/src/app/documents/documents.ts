@@ -95,7 +95,7 @@ export class Documents {
 
 	// zuletzt geladene seite, bleibt beim laden der naehsten stehen
 	readonly shownPage = linkedSignal<{ value: DocumentsPage; loading: boolean }, DocumentsPage>({
-		source: () => ({ value: this.list.value(), loading: this.list.isLoading() }),
+		source: () => ({ value: this.list.hasValue() ? this.list.value() : EMPTY_PAGE, loading: this.list.isLoading() }),
 		computation: (current, previous) =>
 			current.loading && previous ? previous.value : current.value,
 	});

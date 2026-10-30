@@ -1,7 +1,7 @@
 import { Component, computed, effect, ElementRef, inject, linkedSignal, signal, viewChild } from '@angular/core';
 import { Documents, DocumentSummary } from '../documents';
 import { DatePipe, UpperCasePipe } from '@angular/common';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { FileSizePipe } from '../../core/file-size-pipe';
 import { DocStatusBadge } from '../doc-status-badge/doc-status-badge';
@@ -24,6 +24,7 @@ export class DocDetail {
 	protected readonly docs = inject(Documents);
 	private readonly review = inject(DocumentsReview);
 	private readonly tags = inject(Tags);
+	private readonly transloco = inject(TranslocoService);
 	private readonly modalService = inject(NgbModal);
 
 	protected readonly busy = signal(false);
@@ -159,7 +160,7 @@ export class DocDetail {
 			},
 			error: (err: HttpErrorResponse) => {
 				this.busy.set(false);
-				this.actionError.set(toErrorKey(err));
+				this.actionError.set(toErrorKey(err, this.transloco));
 			},
 		});
 	}
