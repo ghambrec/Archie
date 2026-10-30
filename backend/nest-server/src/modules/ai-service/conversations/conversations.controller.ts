@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Req, Res, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ConversationsService } from './conversations.service';
 import type { Request, Response } from 'express';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/modules/auth/guards/session-auth.guard';
 import { AskConversationDto } from './dto/ask-conversation.dto';
 import { RenameConversationDto } from './dto/rename-conversation.dto';
+import { ChatDurationInterceptor } from 'src/modules/metrics/chat-duration.interceptor';
 
 @ApiTags('conversations')
 @UseGuards(SessionAuthGuard)
@@ -35,6 +36,7 @@ export class ConversationsController {
 	summary: 'ask something related to a conversation',
 	description: 'calls ai-service in background',
 	})
+	@UseInterceptors(ChatDurationInterceptor)
 	@Post(':convId/ask')
   async ask(@Req() req: Request, @Res({ passthrough: true }) res: Response,
     @Param('convId', new ParseUUIDPipe()) id: string, @Body() dto: AskConversationDto) {
