@@ -4,33 +4,286 @@
 		"home": "Startseite",
 		"settings": "Einstellungen",
 		"documents": "Dokumente",
+		"ai-chat": "KI-Chat",
 		"dropdown": {
 			"profile": "Profil",
 			"logOut": "Abmelden"
 		}
 	},
 	"documents": {
+		"breadcrumb": {
+			"root": "Meine Dokumente"
+		},
+		"aiStatus": {
+			"notStarted": "NICHT GESTARTET",
+			"pending": "AUSSTEHEND",
+			"processing": "WIRD ANALYSIERT",
+			"finished": "ABGESCHLOSSEN",
+			"failed": "FEHLER",
+			"skipped": "ANALYSE NICHT MÖGLICH"
+		},
+		"list": {
+			"name": "Name",
+			"tags": "Tags",
+			"groups": "Gruppen",
+			"size": "Größe",
+			"uploaded": "Hochgeladen",
+			"noDocs": "Keine Dokumente gefunden",
+			"errorLoading": "Dokumente konnten nicht geladen werden"
+		},
 		"upload": {
 			"upload": "Dokumente hochladen",
+			"selectGroupTooltip": "Gruppe für den Upload auswählen",
+			"maxSize": "max. {{ size }} MB pro Datei",
+			"errors": {
+				"empty": "Die Datei ist leer",
+				"tooBig": "Die Datei ist zu groß",
+				"filetypeNotAllowed": "Dieser Dateityp ist nicht erlaubt",
+				"unknown": "Die Datei konnte nicht hochgeladen werden",
+				"filetypeMismatch": "Der Dateiinhalt stimmt nicht mit der Dateiendung überein",
+				"alreadyExists": "Eine identische Datei existiert bereits"
+			},
 			"selectGroup": "Gruppe für den Upload auswählen"
+		},
+		"review": {
+			"heading": "Wartet auf Überprüfung",
+			"btnConfirm": "Tags bestätigen",
+			"btnRetry": "KI-Verarbeitung erneut starten",
+			"errorLoadingQueue": "Die zu überprüfenden Dokumente konnten nicht geladen werden",
+			"noDocsToReview": "Es gibt keine Dokumente zur Überprüfung",
+			"addTag": "+ Tag",
+			"searchTag": "Tag suchen ...",
+			"suggestionsPending": "Vorschläge erscheinen nach Abschluss der Analyse"
+		},
+		"detail": {
+			"download": "Herunterladen",
+			"ai": "KI-Analyse",
+			"language": "Sprache",
+			"info": "Details",
+			"type": "Dateityp",
+			"uploadedBy": "Hochgeladen von",
+			"createdAt": "Hochgeladen am",
+			"updatedAt": "Zuletzt geändert",
+			"errorLoading": "Das Dokument konnte nicht geladen werden",
+			"delete": "Löschen",
+			"deleteConfirm": "Löschen bestätigen",
+			"cancel": "Abbrechen"
+		},
+		"aiError": {
+			"unsupported_mime_type": "Für diesen Dateityp ist keine Analyse verfügbar",
+			"no_text": "Aus diesem Dokument konnte kein Text extrahiert werden",
+			"not_found": "Die Datei wurde im Speicher nicht gefunden",
+			"minio_error": "Die Datei konnte nicht aus dem Speicher gelesen werden",
+			"minio_connection": "Der Speicher ist derzeit nicht erreichbar",
+			"llm_error": "Das KI-Modell hat einen Fehler zurückgegeben",
+			"timeout": "Die Analyse hat zu lange gedauert und wurde abgebrochen",
+			"unknown": "Bei der Analyse ist ein unbekannter Fehler aufgetreten"
+		}
+	},
+	"tag": {
+		"header": "Tags",
+		"searchPlaceholder": "Suchen ...",
+		"noData": "Sie haben keine Dokumente mit Leseberechtigung.",
+		"noSearchResults": "Keine passenden Tags gefunden.",
+		"label": {
+			"work": "Arbeit",
+			"education": "Bildung",
+			"health": "Gesundheit",
+			"insurance": "Versicherungen",
+			"finance": "Finanzen",
+			"housing": "Wohnen",
+			"vehicles": "Fahrzeuge",
+			"travel": "Reisen",
+			"leisure": "Freizeit",
+			"shopping": "Einkaufen",
+			"family": "Familie & Persönliches",
+			"legal": "Recht & Behörden",
+			"pets": "Haustiere",
+			"other": "Sonstiges",
+			"loans": "Kredite",
+			"investments": "Geldanlagen",
+			"retirement": "Altersvorsorge",
+			"taxes": "Steuern",
+			"banking": "Bankkonto",
+			"property": "Wohneigentum",
+			"rental": "Mietverhältnis",
+			"telecom": "Telefon & Internet",
+			"utilities": "Versorgungskosten",
+			"identity": "Ausweisdokumente",
+			"contract": "Vertrag",
+			"invoice": "Rechnung & Beleg",
+			"statement": "Abrechnung",
+			"notice": "Bescheid & Schreiben",
+			"id-document": "Ausweisdokument",
+			"certificate": "Bescheinigung",
+			"report": "Bericht",
+			"ticket": "Ticket & Buchung",
+			"application": "Antrag",
+			"correspondence": "Korrespondenz",
+			"manual": "Anleitung & Garantie"
+		}
+	},
+	"ai-chat": {
+		"heading": "Archie-Chat",
+		"status": {
+			"thinking": "Denkt nach…"
+		},
+		"deleteAllModal": {
+			"heading": "Alle Chats löschen",
+			"question": "Alle Ihre Chats löschen?",
+			"warning": "Alle Ihre Chats und deren Nachrichten werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
+			"error": "Die Chats konnten nicht gelöscht werden. Bitte versuchen Sie es erneut."
+		},
+		"renameModal": {
+			"heading": "Chat umbenennen",
+			"title": "Chat-Titel",
+			"cancel": "Abbrechen",
+			"save": "Speichern",
+			"saving": "Wird gespeichert ...",
+			"required": "Geben Sie einen Chat-Titel ein.",
+			"tooLong": "Der Titel darf höchstens 254 Zeichen enthalten.",
+			"saveError": "Der Chat konnte nicht umbenannt werden. Bitte versuchen Sie es erneut."
+		},
+		"deleteModal": {
+			"heading": "Chat löschen",
+			"question": "Diesen Chat löschen?",
+			"warning": "Der Chat und seine Nachrichten werden dauerhaft gelöscht.",
+			"cancel": "Abbrechen",
+			"deleting": "Wird gelöscht ..."
+		},
+		"menu": {
+			"label": "Optionen für {{ title }}",
+			"rename": "Umbenennen",
+			"pin": "Anheften",
+			"delete": "Löschen"
+		},
+		"message": {
+			"label": "Chat-Nachrichten",
+			"sources": "Quellen",
+			"confidenceScore": "Konfidenzwert",
+			"sender": {
+				"user": "Benutzer",
+				"llm": "KI"
+			}
+		},
+		"hint": {
+			"sending": "Ihre Frage",
+			"ask": "Stellen Sie eine Frage zu Ihren Dokumenten ..."
+		},
+		"button": {
+			"send": "Senden",
+			"Delete_chat": "Chat löschen",
+			"Delete_all_chats": "Alle Chats löschen",
+			"new_chat": "Neuer Chat",
+			"retry": "Erneut versuchen"
+		},
+		"error": {
+			"createConversation": "Der Chat konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+			"ask": "Es konnte keine Antwort empfangen werden. Ihre Frage wurde möglicherweise bereits gespeichert.",
+			"serviceUnavailable": "Der KI-Dienst ist derzeit nicht verfügbar oder die Verbindung wurde unterbrochen. Bitte versuchen Sie es später erneut.",
+			"timeout": "Die Anfrage hat zu lange gedauert. Ihre Frage oder die Antwort wurde möglicherweise bereits gespeichert. Prüfen Sie den Chat, bevor Sie es erneut versuchen.",
+			"connectionLost": "Die Verbindung zum Server wurde unterbrochen. Ihre Frage oder die Antwort wurde möglicherweise bereits gespeichert. Prüfen Sie den Chat, bevor Sie es erneut versuchen.",
+			"cancelled": "Die Anfrage wurde abgebrochen. Ihre Frage oder die Antwort wurde möglicherweise bereits gespeichert.",
+			"conversationBusy": "Für diesen Chat wird bereits eine Antwort erstellt. Bitte warten Sie.",
+			"conversationNotFound": "Dieser Chat ist nicht mehr verfügbar.",
+			"rateLimited": "Zu viele Anfragen. Bitte warten Sie, bevor Sie es erneut versuchen.",
+			"contextLimit": "Die Frage und der Chatverlauf überschreiten das Modelllimit. Versuchen Sie es mit einer kürzeren Frage oder einem neuen Chat.",
+			"invalidResponse": "Der KI-Dienst hat eine ungültige Antwort zurückgegeben. Bitte versuchen Sie es später erneut.",
+			"generationFailed": "Die Antwort konnte nicht erstellt werden. Bitte versuchen Sie es später erneut.",
+			"saveFailed": "Die Antwort konnte nicht gespeichert werden. Prüfen Sie den Chat, bevor Sie es erneut versuchen.",
+			"sessionExpired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+			"forbidden": "Sie haben keine Berechtigung, diesen Chat zu verwenden.",
+			"createFirst": "Bitte erstellen Sie zuerst einen neuen Chat.",
+			"noSources": "Keine Quellen angegeben.",
+			"deleteConversation": "Der Chat konnte nicht gelöscht werden. Bitte versuchen Sie es erneut."
+		},
+		"history": {
+			"heading": "Chats",
+			"loading": "Chats werden geladen ...",
+			"loadError": "Die Chats konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
+			"untitled": "Chat ohne Titel",
+			"empty": "Noch keine Chats vorhanden.",
+			"opening": "Chat wird geöffnet ...",
+			"openError": "Der Chat konnte nicht geöffnet werden. Bitte versuchen Sie es erneut."
 		}
 	},
 	"login": {
-		"title": "Archie - Anmeldung",
 		"email": "E-Mail",
 		"password": "Passwort",
 		"submit": "Anmelden",
 		"errorGeneral": "Fehler bei der Anmeldung",
-		"errorInvalidCred": "Ungültige E-Mail-Adresse oder ungültiges Passwort"
+		"errorInvalidCred": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
+		"title": "Archie - Anmeldung"
+	},
+	"auth": {
+		"setPassword": {
+			"heading": "Neues Passwort festlegen",
+			"password": "Neues Passwort",
+			"confirmPassword": "Passwort bestätigen",
+			"btnCancel": "Abbrechen",
+			"btnSubmit": "Speichern",
+			"btnSubmitPending": "Wird gesendet ...",
+			"errorGeneral": "Das Passwort konnte nicht festgelegt werden. Bitte versuchen Sie es erneut",
+			"errors": {
+				"passwordRequired": "Passwort ist erforderlich.",
+				"passwordMinLength": "Das Passwort muss mindestens 8 Zeichen enthalten.",
+				"confirmPasswordRequired": "Bitte bestätigen Sie Ihr Passwort.",
+				"passwordMismatch": "Die Passwörter stimmen nicht überein."
+			}
+		}
 	},
 	"users": {
+		"restoreUser": {
+			"heading": "Benutzer wiederherstellen",
+			"question": "Dieses Benutzerkonto wiederherstellen?",
+			"description": "Das Konto wird mit seinen bestehenden Gruppenmitgliedschaften und Berechtigungen reaktiviert. Der Benutzer muss sich erneut anmelden.",
+			"cancel": "Abbrechen",
+			"confirm": "Benutzer wiederherstellen",
+			"restoring": "Wird wiederhergestellt ...",
+			"errors": {
+				"general": "Der Benutzer konnte nicht wiederhergestellt werden. Bitte versuchen Sie es erneut.",
+				"forbidden": "Sie haben keine Berechtigung, Benutzer wiederherzustellen.",
+				"notFound": "Dieser Benutzer kann nicht mehr wiederhergestellt werden.",
+				"conflict": "Das Konto kann im aktuellen Zustand nicht wiederhergestellt werden. Aktualisieren Sie die Liste und versuchen Sie es erneut."
+			}
+		},
+		"deleteUser": {
+			"heading": "Benutzer löschen",
+			"question": "Diesen Benutzer löschen?",
+			"description": "Das Konto wird deaktiviert und aus der Benutzerliste entfernt. Vorhandene Dokumente, Chats und andere gespeicherte Daten bleiben erhalten.",
+			"cancel": "Abbrechen",
+			"confirm": "Benutzer löschen",
+			"deleting": "Wird gelöscht ...",
+			"errors": {
+				"general": "Der Benutzer konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.",
+				"selfDelete": "Sie können Ihr eigenes Konto nicht löschen.",
+				"forbidden": "Sie haben keine Berechtigung, diesen Benutzer zu löschen. Ein aktives Administratorkonto ist erforderlich.",
+				"notFound": "Dieser Benutzer existiert nicht mehr oder wurde bereits gelöscht.",
+				"conflict": "Der Benutzer kann im aktuellen Zustand nicht gelöscht werden. Der letzte aktive Administrator muss erhalten bleiben. Aktualisieren Sie die Liste und versuchen Sie es erneut."
+			}
+		},
 		"userList": {
 			"heading": "Benutzer",
+			"tabs": {
+				"users": "Benutzer",
+				"deleted": "Gelöschte Benutzer"
+			},
+			"deletedAt": "Gelöscht am",
+			"actions": "Aktionen",
+			"inactive": "Inaktiv",
+			"restore": "Wiederherstellen",
+			"loading": "Benutzer werden geladen ...",
+			"loadError": "Die Benutzer konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
+			"deletedLoadError": "Gelöschte Benutzer sind derzeit nicht verfügbar. Bitte versuchen Sie es erneut.",
+			"retry": "Erneut versuchen",
+			"empty": "Keine passenden Benutzer gefunden.",
+			"deletedEmpty": "Keine passenden gelöschten Benutzer gefunden.",
 			"searchPlaceholder": "Nach Name oder E-Mail-Adresse suchen",
 			"email": "E-Mail",
 			"displayName": "Name",
 			"lastLogin": "Letzte Anmeldung",
-			"active": "Aktiv"
+			"active": "Aktiv",
+			"delete": "Benutzer löschen"
 		},
 		"createUser": {
 			"heading": "Benutzer erstellen",
@@ -51,7 +304,8 @@
 				"General": "Benutzer konnte nicht erstellt werden",
 				"ConflictMail": "E-Mail-Adresse ist bereits registriert",
 				"ConflictName": "Name ist bereits vergeben",
-				"Conflict": "Ein Benutzer mit diesen Angaben existiert bereits."
+				"Conflict": "Ein Benutzer mit diesen Angaben existiert bereits.",
+				"displayNameTooLong": "Der Anzeigename darf höchstens 25 Zeichen enthalten."
 			},
 			"errorGeneral": "Benutzer konnte nicht erstellt werden",
 			"errorConflictMail": "E-Mail-Adresse ist bereits registriert",
@@ -74,14 +328,21 @@
 			"password": "Passwort",
 			"btnClose": "Schließen",
 			"btnSubmit": "Benutzer bearbeiten",
+			"btnSubmitPending": "Wird gespeichert ...",
 			"preferredLanguage": "Bevorzugte Sprache",
+			"languageHint": "Unterstützte Sprachen: en, de und es.",
 			"errors": {
 				"displayNameError": "Dieser Name ist bereits vergeben.",
 				"emailError": "Diese E-Mail-Adresse wird bereits verwendet.",
 				"preferredlangaugeError": "Nur en, de oder es sind verfügbar.",
 				"emailFormat": "Geben Sie eine gültige E-Mail-Adresse ein.",
 				"passwordError": "Das Passwort muss zwischen 8 und 25 Zeichen enthalten.",
-				"passwordPattern": "Das Passwort muss einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl und ein Sonderzeichen aus !@#$%^&* enthalten."
+				"passwordPattern": "Das Passwort muss einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl und ein Sonderzeichen aus !@#$%^&* enthalten.",
+				"displayNameRequired": "Anzeigename ist erforderlich",
+				"languageRequired": "Die Sprache muss angegeben werden",
+				"emailRequired": "Die E-Mail-Adresse ist erforderlich",
+				"displayNameTooLong": "Der Anzeigename darf höchstens 25 Zeichen enthalten.",
+				"unsupportedLanguage": "Bitte geben Sie en, de oder es ein."
 			}
 		}
 	},
@@ -168,11 +429,68 @@
 			"documentsDelete": "Dokumente löschen",
 			"btnCancel": "Abbrechen",
 			"btnSave": "Speichern",
+			"errorGeneral": "Berechtigungen konnten nicht aktualisiert werden.",
+			"errorLastAdmin": "Die Administratorberechtigung kann nicht entzogen werden, da dies der letzte Administrator ist.",
 			"errors": {
 				"nameRequired": "Name ist erforderlich.",
 				"General": "Berechtigungen konnten nicht aktualisiert werden.",
 				"LastAdmin": "Die Administratorberechtigung kann nicht entzogen werden, da dies der letzte Administrator ist."
 			}
+		}
+	},
+	"profile": {
+		"heading": "Profil",
+		"description": "Verwalten Sie Ihre persönlichen Kontoeinstellungen.",
+		"active": "Aktiv",
+		"inactive": "Inaktiv",
+		"tabs": {
+			"profile": "Profil",
+			"security": "Sicherheit"
+		},
+		"accountInformation": {
+			"heading": "Kontoinformationen",
+			"displayName": "Anzeigename",
+			"email": "E-Mail",
+			"language": "Sprache",
+			"role": "Rolle",
+			"administrator": "Administrator",
+			"user": "Benutzer"
+		},
+		"edit": {
+			"heading": "Profil bearbeiten",
+			"displayName": "Anzeigename",
+			"email": "E-Mail-Adresse",
+			"preferredLanguage": "Bevorzugte Sprache",
+			"english": "Englisch",
+			"german": "Deutsch",
+			"spanish": "Spanisch",
+			"save": "Änderungen speichern",
+			"saving": "Wird gespeichert ...",
+			"success": "Das Profil wurde erfolgreich aktualisiert",
+			"error": "Das Profil konnte nicht aktualisiert werden"
+		},
+		"groups": {
+			"heading": "Gruppenmitgliedschaften",
+			"empty": "Keine Gruppenmitgliedschaften gefunden.",
+			"groupName": "Gruppenname",
+			"permissions": "Berechtigungen",
+			"joinedAt": "Beigetreten am",
+			"noPermissions": "-",
+			"actions": "Aktionen"
+		},
+		"security": {
+			"heading": "Passwort",
+			"description": "Ändern Sie hier Ihr Passwort.",
+			"newPassword": "Neues Passwort",
+			"passwordHint": "Verwenden Sie 8–25 Zeichen mit einem Großbuchstaben, einem Kleinbuchstaben, einer Zahl und mindestens einem Zeichen aus !@#$%^&*.",
+			"save": "Passwort speichern",
+			"saving": "Wird gespeichert ...",
+			"success": "Das Passwort wurde erfolgreich aktualisiert.",
+			"error": "Das Passwort konnte nicht aktualisiert werden.",
+			"minLength": "Das Passwort muss mindestens 8 Zeichen lang sein.",
+			"required": "Geben Sie ein neues Passwort ein.",
+			"maxLength": "Das Passwort darf höchstens 25 Zeichen lang sein.",
+			"pattern": "Verwenden Sie einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl und mindestens ein Zeichen aus !@#$%^&*."
 		}
 	},
 	"errors": {
@@ -182,7 +500,13 @@
 		"USER_NAME_ALREADY_REGISTERED": "Dieser Anzeigename ist bereits vergeben.",
 		"VALIDATION_FAILED": "Die übermittelten Daten sind ungültig.",
 		"INTERNAL_SERVER_ERROR": "Ein unerwarteter Fehler ist aufgetreten.",
-		"UNSUPPORTED_LANGUAGE": "Diese Sprache wird nicht unterstützt.",
-		"UNKNOWN": "Ein unerwarteter Fehler ist aufgetreten."
+		"UNKNOWN": "Ein unerwarteter Fehler ist aufgetreten.",
+		"DOCUMENT_NOT_FOUND": "Das Dokument wurde nicht gefunden.",
+		"DOCUMENT_STILL_PROCESSING": "Das Dokument wird noch analysiert.",
+		"DOCUMENT_INGESTION_NOT_RETRYABLE": "Die Analyse kann nur erneut gestartet werden, wenn sie fehlgeschlagen ist oder noch nicht gestartet wurde.",
+		"AI_SERVICE_UNAVAILABLE": "Der KI-Dienst ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.",
+		"TAG_NOT_FOUND": "Der Tag wurde nicht gefunden.",
+		"FORBIDDEN": "Sie haben keine Berechtigung für diese Aktion.",
+		"UNSUPPORTED_LANGUAGE": "Diese Sprache wird nicht unterstützt."
 	}
 }

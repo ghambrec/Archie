@@ -7,6 +7,7 @@ export interface UserGroupMembership {
 	groupId: string;
 	name: string;
 	joinedAt: string;
+	permissions: string[];
 }
 
 export interface UserGroupsResponse {
@@ -77,6 +78,7 @@ export interface CurrentUser {
 export class Users {
 	private readonly http = inject(HttpClient);
 	private readonly baseUrl = `${environment.apiUrl}/users`;
+	private readonly userGroupsUrl = `${environment.apiUrl}/user-groups`;
 
 	readonly currentUser = signal<CurrentUser | null>(null);
 	readonly isAdminUser = computed(() => this.currentUser()?.isAdmin === true);
@@ -144,5 +146,28 @@ export class Users {
 		const url = `${this.baseUrl}/${userId}`;
 		
 		return this.http.patch<PatchUser>(url, changes, {withCredentials: true });
+	}
+
+	getUserGroups(userId: string) {
+		const url = `${this.userGroupsUrl}/userId/${userId}/groups`;
+		return this.http.get<UserGroupsResponse>(url, { withCredentials: true });
+	}
+
+	getMyGroups() {
+		const url = `${this.userGroupsUrl}/me`;
+
+		return this.http.get<UserGroupsResponse>(url, { withCredentials: true });
+	}
+
+	updateCurrentUser(changes: PatchUser) {
+		const url = `${this.baseUrl}/me`
+
+		return this.http.patch<UpdateUserResponse>(url, changes, { withCredentials: true });
+	}
+
+	changeOwnPassword(password: string) {
+		const url = `${this.baseUrl}/me/password`;
+
+		return this.http.patch<void>(url, { password }, {withCredentials: true });
 	}
 }

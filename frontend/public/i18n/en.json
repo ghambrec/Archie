@@ -424,6 +424,66 @@
 			"errorLastAdmin": "The admin permission cannot be removed because this is the last admin."
 		}
 	},
+	"profile": {
+		"heading": "Profile",
+		"description": "Manage your personal account settings.",
+		"active": "Active",
+		"inactive": "Inactive",
+
+		"tabs": {
+			"profile": "Profile",
+			"security": "Security"
+		},
+
+		"accountInformation": {
+			"heading": "Account information",
+			"displayName": "Display name",
+			"email": "E-Mail",
+			"language": "Language",
+			"role": "Role",
+			"administrator": "Administrator",
+			"user": "User"
+		},
+
+		"edit": {
+			"heading": "Edit profile",
+			"displayName": "Display name",
+			"email": "Email address",
+			"preferredLanguage": "Preferred language",
+			"english": "English",
+			"german": "German",
+			"spanish": "Spanish",
+			"save": "Save changes",
+			"saving": "Saving...",
+			"success": "Profile updated successfully",
+			"error": "Profile could not be updated"
+		},
+
+		"groups": {
+			"heading": "Group memberships",
+			"empty": "No group memberships found.",
+			"groupName": "Group name",
+			"permissions": "Permissions",
+			"joinedAt": "Joined at",
+			"noPermissions": "-",
+			"actions": "Actions"
+		},
+
+		"security": {
+			"heading": "Password",
+			"description": "Change your password here.",
+			"newPassword": "New password",
+			"passwordHint": "Use 8–25 characters with an uppercase letter, a lowercase letter, a number, and at least one of !@#$%^&*.",
+			"save": "Save password",
+			"saving": "Saving...",
+			"success": "Password has been updated successfully.",
+			"error": "Password could not be updated.",
+			"minLength": "Password must be at least 8 characters long.",
+			"required": "Enter a new password.",
+			"maxLength": "Password must be at most 25 characters long.",
+			"pattern": "Include an uppercase letter, a lowercase letter, a number, and at least one of !@#$%^&*."
+		}
+	},
 	"errors": {
 		"AUTH_EMAIL_ALREADY_REGISTERED": "This email address is already registered.",
 		"AUTH_INVALID_CREDENTIALS": "Invalid email or password.",

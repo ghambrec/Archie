@@ -1,0 +1,85 @@
+<div class="card shadow-sm">
+  <div class="card-body">
+
+    <div class="row align-items-center mb-4">
+      <div class="col-12 col-md-3 text-center">
+        <div class="avatar-wrapper">
+          <img
+            [src]="avatarUrl()"
+            class="avatar"
+            (error)="avatarError.emit($event)">
+        </div>
+      </div>
+
+      <div class="col-12 col-md-8 account-information">
+        <h2 class="h5 mb-4">
+          {{'profile.accountInformation.heading' | transloco }}
+        </h2>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <div class="text-muted small">
+              {{ 'profile.accountInformation.displayName' | transloco }}
+            </div>
+            <div>{{ profile().displayName }}</div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <div class="text-muted small">
+              {{ 'profile.accountInformation.email' | transloco }}
+            </div>
+            <div>{{ profile().email }}</div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <div class="text-muted small">
+              {{ 'profile.accountInformation.language' | transloco }}
+            </div>
+            <div>{{ preferredLanguageKey() | transloco }}</div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <div class="text-muted small">
+              {{ 'profile.accountInformation.role' | transloco }}
+            </div>
+            <span class="badge text-bg-primary">
+                {{ profile().isAdmin
+                  ? ('profile.accountInformation.administrator' | transloco)
+                  : ('profile.accountInformation.user' | transloco)
+                }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <h2 class="h5 mb-4">
+      {{ 'profile.edit.heading' | transloco }}
+    </h2>
+
+    <form [formRoot]="profileEditForm">
+      <fieldset [disabled]="profileEditForm().submitting()">
+        <app-form-field inputId="profile-displayName" autocomplete="nickname"
+          labelKey="profile.edit.displayName" [field]="profileEditForm.displayName" />
+        <app-form-field inputId="profile-email" type="email" autocomplete="email"
+          labelKey="profile.edit.email" [field]="profileEditForm.email" />
+        <app-form-field inputId="profile-language" labelKey="profile.edit.preferredLanguage"
+          hintKey="users.updateUser.languageHint" [field]="profileEditForm.preferredLanguage" />
+
+        @if (profileEditForm().errors()[0]?.message; as errorKey) {
+          <div class="alert alert-danger" role="alert">{{ errorKey | transloco }}</div>
+        }
+
+        <button type="submit" class="btn btn-primary" [disabled]="profileEditForm().submitting()">
+          {{ (profileEditForm().submitting() ? 'profile.edit.saving' : 'profile.edit.save') | transloco }}
+        </button>
+        @if (saveMessage(); as messageKey) {
+          <div class="alert alert-success mt-3" role="status">{{ messageKey | transloco }}</div>
+        }
+      </fieldset>
+    </form>
+
+  </div>
+</div>

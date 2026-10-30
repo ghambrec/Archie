@@ -1,0 +1,57 @@
+<!-- Group Memberships Section -->
+<div class="card shadow-sm mt-4">
+  <div class="card-header">
+    <h2 class="h5 mb-0">
+      {{ 'profile.groups.heading' | transloco }}
+    </h2>
+  </div>
+  <div class="card-body">
+    @if (displayGroups().length === 0) {
+      <p class="text-muted">
+        {{ 'profile.groups.empty' | transloco }}
+      </p>
+    } @else {
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th scope="col">
+                {{ 'profile.groups.groupName'| transloco }}
+              </th>
+              <th scope="col">
+                {{ 'profile.groups.permissions' | transloco }}
+              </th>
+              <th scope="col">
+                {{ 'profile.groups.joinedAt' | transloco }}
+              </th>
+              <th scope="col" style="width: 1%;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (group of displayGroups(); track group.groupId) {
+              <tr>
+                <td>{{ group.name }}</td>
+                <td>
+                  @for (permission of group.permissions; track permission.key) {
+                    <div>
+                      @if (permission.labelKey; as labelKey) {
+                        {{ labelKey | transloco }}
+                      } @else {
+                        {{ permission.key }}
+                      }
+                    </div>
+                  } @empty {
+                    <span>
+                      {{ 'profile.groups.noPermissions' | transloco }}
+                    </span>
+                  }
+                </td>
+                <td>{{ group.joinedAt | date: 'short' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

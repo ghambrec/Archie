@@ -11,6 +11,8 @@ import { GetGroupsByUserIdResponseDto } from './dto/user-groups-by-userId-respon
 import { PermissionsService } from '../permissions/permissions.service';
 import { GroupsService } from '../groups/groups.service';
 import { UserPermission } from '../user_permission/entities/user_permission.entity';
+import { UserPermissionService } from '../user_permission/user_permission.service';
+import { GetMyGroupsResponseDto, MyGroupMembershipDto } from './dto/my-groups-response.dto';
 
 @Injectable()
 export class UserGroupsService {
@@ -23,8 +25,9 @@ export class UserGroupsService {
 		private readonly userRepository: Repository<User>,
 		private readonly logger: Logger,
 		private readonly permissionsService: PermissionsService,
-		private readonly groupsService: GroupsService
-	) { }
+		private readonly groupsService: GroupsService,
+		private readonly userPermissionService: UserPermissionService,
+	) {}
 
 	async add(userId: string, groupId: string, invitedBy?: string): Promise<UserGroup> {
 		this.logger.log({ groupId: groupId, userId: userId }, 'Adding user to group');
@@ -135,41 +138,48 @@ export class UserGroupsService {
 		};
 	}
 
-	// async getAllUserGroups(query: GetUserGroupsQueryDto): Promise<GetUserGroupsMinimalResponseDto> {
-	// 	this.logger.log('Fetching all possible groups');
+	async getMyGroups(userId: string): Promise<GetMyGroupsResponseDto> {
+		this.logger.log({ userId }, 'Fetching groups and permissions for current user');
 
-	// 	const page = query.page ?? 1; // Nullish Coalescing Operator
-	// 	const limit = query.limit ?? 20; // ist wert NULL, dann 20
+		const user = await this.userRepository.findOneBy({ id: userId });
 
-	// 	const [entities, total] = await this.userGroupRepository.findAndCount({
-	// 		skip: (page - 1) * limit,
-	// 		take: limit,
-	// 		order: { joinedAt: 'DESC' },
-	// 		relations: { user: true, group: true }
-	// 	});
+		if (!user) {
+			this.logger.warn({ userId }, 'Current user could not be fetched');
+			
+			throw new NotFoundException('User not found');
+		}
 
-	// 	const data: UserGroupsMinimalDto[] = entities.map(ug => ({
-	// 		userId: ug.userId,
-	// 		groupId: ug.groupId,
-	// 		joinedAt: ug.joinedAt,
-	// 		user: {
-	// 			id: ug.user.id,
-	// 			displayName: ug.user.displayName,
-	// 			email: ug.user.email,
-	// 		} as UserMinimalDto,
-	// 		group: {
-	// 			id: ug.group.id,
-	// 			name: ug.group.name,
-	// 		} as GroupMinimalDto,
-	// 	}));
+		const memberships = await this.userGroupRepository.find({
+			where: { userId },
+			relations: { group: true },
+			order: { joinedAt: 'DESC' },
+		});
 
-	// 	this.logger.log('Fetched all possible groups');
-	// 	return {
-	// 		data,
-	// 		page,
-	// 		limit,
-	// 		total,
-	// 		totalPages: Math.ceil(total / limit),
-	// 	};
-	// }
+		const permissions = await this.userPermissionService.listUserPermissions(userId);
+
+		const permissionsByGroup = new Map<string, string[]>();
+
+		for (const permission of permissions) {
+			const groupPermissions = permissionsByGroup.get(permission.groupId) ?? [];
+
+			groupPermissions.push(permission.permKey);
+			permissionsByGroup.set(permission.groupId, groupPermissions);
+		}
+
+		const groups: MyGroupMembershipDto[] = memberships.map(membership => ({
+			groupId: membership.groupId,
+			name: membership.group.name,
+			joinedAt: membership.joinedAt,
+			permissions: permissionsByGroup.get(membership.groupId) ?? [],
+		}));
+
+		this.logger.log({ userId }, 'Fetched groups and permissions for current user');
+
+		return {
+			userId: user.id,
+			displayName: user.displayName,
+			email: user.email,
+			groups,
+		};
+	}
 }

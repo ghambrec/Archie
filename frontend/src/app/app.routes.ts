@@ -3,7 +3,7 @@ import { Settings } from './settings/settings';
 import { Shell } from './shell/shell';
 import { Login } from './auth/login/login';
 import { adminGuard, authGuard, guestGuard } from './auth/auth-guard';
-import { Profile } from './profile/profile';
+// import { Profile } from './profile/profile';
 import { DocPage } from './documents/doc-page/doc-page';
 import { AIChat } from './ai-chat/ai-chat';
 
@@ -26,7 +26,8 @@ export const routes: Routes = [
 			},
 			{
 				path: 'documents',
-				component: DocPage,
+				loadComponent: () =>
+        			import('./documents/doc-page/doc-page').then((m) => m.DocPage),
 				title: 'Documents',
 			},
 			{
@@ -41,7 +42,8 @@ export const routes: Routes = [
 			},
 			{
 				path: 'profile',
-				component: Profile,
+				loadComponent: () =>
+					import('./profile/profile').then((m) => m.Profile),
 				title: 'Profile',
 			},
 			{
