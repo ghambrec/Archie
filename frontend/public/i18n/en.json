@@ -1,10 +1,8 @@
 {
 	"programName": "Archie",
 	"sidebar": {
-		"home": "Home",
 		"settings": "Settings",
 		"documents": "Documents",
-		"ai-chat" : "ai-chat",
 		"dropdown": {
 			"profile": "Profile",
 			"logOut": "Log out"
@@ -69,16 +67,6 @@
 			"deleteConfirm": "Confirm delete",
 			"cancel": "Cancel",
 			"rename": "Rename"
-		},
-		"aiError": {
-			"unsupported_mime_type": "Analysis is not available for this file type",
-			"no_text": "No text could be extracted from this document",
-			"not_found": "File could not be found in storage",
-			"minio_error": "Error on reading the file from storage",
-			"minio_connection": "Storage is currently not reachable",
-			"llm_error": "The AI model returned an error",
-			"timeout": "Analysis took too long and was cancelled",
-			"unknown": "An unknown error occurred during analysis"
 		}
 	},
 	"tag": {
@@ -194,7 +182,6 @@
         "saveFailed": "The answer could not be saved. Check the chat before trying again.",
         "sessionExpired": "Your session has expired. Please log in again.",
         "forbidden": "You do not have permission to use this chat.",
-	    "createFirst": "Please create a new chat first.",
 	    "noSources": "No sources provided.",
 	    "deleteConversation": "Could not delete the conversation. Please try again."
 	  },
@@ -213,7 +200,12 @@
 		"password": "Password",
 		"submit": "Log in",
 		"errorGeneral": "Error on log in",
-		"errorInvalidCred": "Invalid email or password"
+		"errorInvalidCred": "Invalid email or password",
+		"errors": {
+			"emailRequired": "Email is required.",
+			"emailFormat": "Please enter a valid email address.",
+			"passwordRequired": "Password is required."
+		}
 	},
 	"auth": {
 		"setPassword": {
@@ -291,7 +283,6 @@
 			"btnSubmitPending": "Sending...",
 			"btnCancel": "Cancel",
 			"feedbackMsg": "User successfully created",
-			"displayNameRequired":"Display name is mandatory",
 			"errors": {
   				"emailRequired": "Email is required.",
   				"emailFormat": "Please enter a valid email address.",
@@ -299,10 +290,8 @@
   				"passwordMinLength": "Password must contain at least 8 characters.",
   				"displayNameRequired": "Name is required.",
 				"General": "Unable to create user",
-				"ConflictMail": "E-Mail already registered",
-				"ConflictName": "Name already registered",
 				"Conflict": "A user with these details already exists.",
-				"displayNameTooLong" : " Display name is too long, 25 characters are maximum"
+				"displayNameTooLong" : "Display name is too long, 25 characters are maximum"
 			}
 		},
 		"userInfo": {
@@ -326,16 +315,12 @@
 			"preferredLanguage": "Preferred Language",
 			"languageHint": "Supported languages: en, de and es.",
 			"errors": {
-				"displayNameError": "Name already given, not available",
-				"emailError": "Email already in use, not available",
-				"preferredlangaugeError": "en, de or es are available, only",
 				"emailFormat": "Enter a valid Email",
 				"passwordError": "Password must contain between 8 and 25 characters.",
-				"passwordPattern": "Password must include an uppercase letter, a lowercase letter, a number, and a special character from !@#$%^&*",
 				"displayNameRequired": "Display name is mandatory",
 				"languageRequired" : "Language settings are mandatory", 
 				"emailRequired": "Email is mandatory",
-				"displayNameTooLong" : " Display name is too long, 25 characters are maximum",
+				"displayNameTooLong" : "Display name is too long, 25 characters are maximum",
 				"unsupportedLanguage": "Please enter en, de or es."
 			}
 		}
@@ -369,7 +354,6 @@
 			"question": "Do you really want to delete the group:",
 			"btnDelete": "Delete",
 			"btnCancel": "Cancel",
-			"btnDeletePending": "Deleting...",
 			"errorForbidden": "Deleting this group is forbidden.",
 			"errorNotFound": "Group not found.",
 			"errorGeneral": "Unable to delete group",
@@ -407,7 +391,6 @@
 			"errorRemovingUser": "The user could not be removed from the group.",
 			"actions": "Actions",
 			"btnRemoveUser": "Delete",
-			"errorLoadingUsers": "Unable to load users",
 			"editUserPermission": "Edit Permissions",
 			"userPermissions": "Permissions",
 			"errorLoadingPermissions": "Unable to load permissions",
@@ -470,8 +453,7 @@
 			"groupName": "Group name",
 			"permissions": "Permissions",
 			"joinedAt": "Joined at",
-			"noPermissions": "-",
-			"actions": "Actions"
+			"noPermissions": "-"
 		},
 
 		"security": {
