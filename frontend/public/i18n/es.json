@@ -1,10 +1,8 @@
 {
 	"programName": "Archie",
 	"sidebar": {
-		"home": "Inicio",
 		"settings": "Configuración",
 		"documents": "Documentos",
-		"ai-chat": "Chat de IA",
 		"dropdown": {
 			"profile": "Perfil",
 			"logOut": "Cerrar sesión"
@@ -42,8 +40,7 @@
 				"unknown": "No se pudo subir el archivo",
 				"filetypeMismatch": "El contenido del archivo no coincide con su extensión",
 				"alreadyExists": "Ya existe un archivo idéntico"
-			},
-			"selectGroup": "Seleccionar el grupo para la subida"
+			}
 		},
 		"review": {
 			"heading": "Pendiente de revisión",
@@ -57,6 +54,7 @@
 		},
 		"detail": {
 			"download": "Descargar",
+			"preview": "Vista previa",
 			"ai": "Análisis de IA",
 			"language": "Idioma",
 			"info": "Detalles",
@@ -67,17 +65,8 @@
 			"errorLoading": "No se pudo cargar el documento",
 			"delete": "Eliminar",
 			"deleteConfirm": "Confirmar eliminación",
-			"cancel": "Cancelar"
-		},
-		"aiError": {
-			"unsupported_mime_type": "El análisis no está disponible para este tipo de archivo",
-			"no_text": "No se pudo extraer texto de este documento",
-			"not_found": "No se encontró el archivo en el almacenamiento",
-			"minio_error": "No se pudo leer el archivo del almacenamiento",
-			"minio_connection": "El almacenamiento no está disponible en este momento",
-			"llm_error": "El modelo de IA devolvió un error",
-			"timeout": "El análisis tardó demasiado y se canceló",
-			"unknown": "Se produjo un error desconocido durante el análisis"
+			"cancel": "Cancelar",
+			"rename": "Cambiar nombre"
 		}
 	},
 	"tag": {
@@ -193,7 +182,6 @@
 			"saveFailed": "No se pudo guardar la respuesta. Revise el chat antes de intentarlo de nuevo.",
 			"sessionExpired": "Su sesión ha caducado. Inicie sesión de nuevo.",
 			"forbidden": "No tiene permiso para utilizar este chat.",
-			"createFirst": "Cree primero un chat nuevo.",
 			"noSources": "No se proporcionaron fuentes.",
 			"deleteConversation": "No se pudo eliminar la conversación. Inténtelo de nuevo."
 		},
@@ -213,7 +201,11 @@
 		"submit": "Iniciar sesión",
 		"errorGeneral": "Error al iniciar sesión",
 		"errorInvalidCred": "Correo electrónico o contraseña no válidos",
-		"title": "Archie - Inicio de sesión"
+		"errors": {
+			"emailRequired": "El correo electrónico es obligatorio.",
+			"emailFormat": "Introduzca una dirección de correo electrónico válida.",
+			"passwordRequired": "La contraseña es obligatoria."
+		}
 	},
 	"auth": {
 		"setPassword": {
@@ -294,7 +286,6 @@
 			"btnSubmitPending": "Enviando...",
 			"btnCancel": "Cancelar",
 			"feedbackMsg": "Usuario creado correctamente",
-			"displayNameRequired": "El nombre para mostrar es obligatorio",
 			"errors": {
 				"emailRequired": "El correo electrónico es obligatorio.",
 				"emailFormat": "Introduzca una dirección de correo electrónico válida.",
@@ -302,14 +293,9 @@
 				"passwordMinLength": "La contraseña debe contener al menos 8 caracteres.",
 				"displayNameRequired": "El nombre es obligatorio.",
 				"General": "No se pudo crear el usuario",
-				"ConflictMail": "El correo electrónico ya está registrado",
-				"ConflictName": "El nombre ya está registrado",
 				"Conflict": "Ya existe un usuario con estos datos.",
 				"displayNameTooLong": "El nombre para mostrar no debe contener más de 25 caracteres."
-			},
-			"errorGeneral": "No se pudo crear el usuario",
-			"errorConflictMail": "El correo electrónico ya está registrado",
-			"errorConflictName": "El nombre ya está registrado"
+			}
 		},
 		"userInfo": {
 			"heading": "Grupos del usuario",
@@ -332,12 +318,8 @@
 			"preferredLanguage": "Idioma preferido",
 			"languageHint": "Idiomas disponibles: en, de y es.",
 			"errors": {
-				"displayNameError": "Este nombre ya está en uso y no está disponible.",
-				"emailError": "Este correo electrónico ya está en uso y no está disponible.",
-				"preferredlangaugeError": "Solo están disponibles en, de y es.",
 				"emailFormat": "Introduzca un correo electrónico válido.",
 				"passwordError": "La contraseña debe contener entre 8 y 25 caracteres.",
-				"passwordPattern": "La contraseña debe incluir una letra mayúscula, una letra minúscula, un número y un carácter especial de !@#$%^&*.",
 				"displayNameRequired": "El nombre para mostrar es obligatorio",
 				"languageRequired": "El idioma es obligatorio",
 				"emailRequired": "El correo electrónico es obligatorio",
@@ -365,14 +347,16 @@
 			"btnCancel": "Cancelar",
 			"feedbackMsg": "Grupo creado correctamente",
 			"errorGeneral": "No se pudo crear el grupo",
-			"errorConflictName": "El nombre ya está registrado"
+			"errorConflictName": "El nombre ya está registrado",
+			"errors": {
+				"nameRequired": "El nombre es obligatorio."
+			}
 		},
 		"deleteGroupAdmin": {
 			"heading": "Eliminar grupo",
 			"question": "¿Seguro que desea eliminar el grupo:",
 			"btnDelete": "Eliminar",
 			"btnCancel": "Cancelar",
-			"btnDeletePending": "Eliminando...",
 			"errorForbidden": "No está permitido eliminar este grupo.",
 			"errorNotFound": "No se encontró el grupo.",
 			"errorGeneral": "No se pudo eliminar el grupo",
@@ -388,10 +372,7 @@
 			"feedbackMsg": "Grupo editado correctamente",
 			"errorGeneral": "No se pudo editar el grupo",
 			"errorConflictName": "El nombre ya está en uso",
-			"errorNameRequired": "El nombre no puede estar vacío",
-			"errors": {
-				"nameRequired": "El nombre es obligatorio."
-			}
+			"errorNameRequired": "El nombre no puede estar vacío"
 		},
 		"infoGroup": {
 			"heading": "Miembros del grupo",
@@ -413,7 +394,6 @@
 			"errorRemovingUser": "No se pudo eliminar al usuario del grupo.",
 			"actions": "Acciones",
 			"btnRemoveUser": "Eliminar",
-			"errorLoadingUsers": "No se pudieron cargar los usuarios",
 			"editUserPermission": "Editar permisos",
 			"userPermissions": "Permisos",
 			"errorLoadingPermissions": "No se pudieron cargar los permisos",
@@ -429,10 +409,7 @@
 			"documentsDelete": "Eliminar documentos",
 			"btnCancel": "Cancelar",
 			"btnSave": "Guardar",
-			"errorGeneral": "No se pudieron actualizar los permisos.",
-			"errorLastAdmin": "No se puede quitar el permiso de administrador porque este es el último administrador.",
 			"errors": {
-				"nameRequired": "El nombre es obligatorio.",
 				"General": "No se pudieron actualizar los permisos.",
 				"LastAdmin": "No se puede quitar el permiso de administrador porque este es el último administrador."
 			}
@@ -475,8 +452,7 @@
 			"groupName": "Nombre del grupo",
 			"permissions": "Permisos",
 			"joinedAt": "Fecha de incorporación",
-			"noPermissions": "-",
-			"actions": "Acciones"
+			"noPermissions": "-"
 		},
 		"security": {
 			"heading": "Contraseña",
@@ -502,11 +478,23 @@
 		"INTERNAL_SERVER_ERROR": "Se produjo un error inesperado.",
 		"UNKNOWN": "Se produjo un error inesperado.",
 		"DOCUMENT_NOT_FOUND": "No se encontró el documento.",
+		"DOCUMENT_FILENAME_INVALID": "El nombre del archivo no es válido.",
 		"DOCUMENT_STILL_PROCESSING": "El documento todavía se está analizando.",
 		"DOCUMENT_INGESTION_NOT_RETRYABLE": "El análisis solo se puede reiniciar si falló o nunca se inició.",
 		"AI_SERVICE_UNAVAILABLE": "El servicio de IA no está disponible en este momento. Inténtelo de nuevo más tarde.",
 		"TAG_NOT_FOUND": "No se encontró la etiqueta.",
-		"FORBIDDEN": "No tiene permiso para realizar esta acción.",
-		"UNSUPPORTED_LANGUAGE": "El idioma no es compatible."
+		"FORBIDDEN": "No tiene permiso para realizar esta acción."
+	},
+	"ais": {
+		"error": {
+			"unsupported_mime_type": "El análisis no está disponible para este tipo de archivo",
+			"no_text": "No se pudo extraer texto de este documento",
+			"not_found": "No se encontró el archivo en el almacenamiento",
+			"minio_error": "Error al leer el archivo del almacenamiento",
+			"minio_connection": "El almacenamiento no está disponible en este momento",
+			"llm_error": "El modelo de IA devolvió un error",
+			"timeout": "El análisis tardó demasiado y se canceló",
+			"unknown": "Se produjo un error desconocido durante el análisis"
+		}
 	}
 }

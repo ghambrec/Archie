@@ -12,7 +12,7 @@
 					<label class="form-label">{{ 'login.email' | transloco }}</label>
 					<input [formField]="loginForm.email" type="email" class="form-control" />
 					@if (loginForm.email().touched() && loginForm.email().invalid()) {
-						<p class="text-danger small mb-0">{{ loginForm.email().errors()[0].message }}</p>
+						<p class="text-danger small mb-0">{{ loginForm.email().errors()[0].message | transloco }}</p>
 					}
 			</div>
 
@@ -21,7 +21,7 @@
 					<label class="form-label">{{ 'login.password' | transloco }}</label>
 					<input [formField]="loginForm.password" type="password" class="form-control" />
 					@if (loginForm.password().touched() && loginForm.password().invalid()) {
-						<p class="text-danger small mb-0">{{ loginForm.password().errors()[0].message }}</p>
+						<p class="text-danger small mb-0">{{ loginForm.password().errors()[0].message | transloco }}</p>
 					}
 			</div>
 

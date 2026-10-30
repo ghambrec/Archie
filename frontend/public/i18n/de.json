@@ -1,10 +1,8 @@
 {
 	"programName": "Archie",
 	"sidebar": {
-		"home": "Startseite",
 		"settings": "Einstellungen",
 		"documents": "Dokumente",
-		"ai-chat": "KI-Chat",
 		"dropdown": {
 			"profile": "Profil",
 			"logOut": "Abmelden"
@@ -42,8 +40,7 @@
 				"unknown": "Die Datei konnte nicht hochgeladen werden",
 				"filetypeMismatch": "Der Dateiinhalt stimmt nicht mit der Dateiendung überein",
 				"alreadyExists": "Eine identische Datei existiert bereits"
-			},
-			"selectGroup": "Gruppe für den Upload auswählen"
+			}
 		},
 		"review": {
 			"heading": "Wartet auf Überprüfung",
@@ -57,6 +54,7 @@
 		},
 		"detail": {
 			"download": "Herunterladen",
+			"preview": "Vorschau",
 			"ai": "KI-Analyse",
 			"language": "Sprache",
 			"info": "Details",
@@ -67,17 +65,8 @@
 			"errorLoading": "Das Dokument konnte nicht geladen werden",
 			"delete": "Löschen",
 			"deleteConfirm": "Löschen bestätigen",
-			"cancel": "Abbrechen"
-		},
-		"aiError": {
-			"unsupported_mime_type": "Für diesen Dateityp ist keine Analyse verfügbar",
-			"no_text": "Aus diesem Dokument konnte kein Text extrahiert werden",
-			"not_found": "Die Datei wurde im Speicher nicht gefunden",
-			"minio_error": "Die Datei konnte nicht aus dem Speicher gelesen werden",
-			"minio_connection": "Der Speicher ist derzeit nicht erreichbar",
-			"llm_error": "Das KI-Modell hat einen Fehler zurückgegeben",
-			"timeout": "Die Analyse hat zu lange gedauert und wurde abgebrochen",
-			"unknown": "Bei der Analyse ist ein unbekannter Fehler aufgetreten"
+			"cancel": "Abbrechen",
+			"rename": "Umbenennen"
 		}
 	},
 	"tag": {
@@ -193,7 +182,6 @@
 			"saveFailed": "Die Antwort konnte nicht gespeichert werden. Prüfen Sie den Chat, bevor Sie es erneut versuchen.",
 			"sessionExpired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
 			"forbidden": "Sie haben keine Berechtigung, diesen Chat zu verwenden.",
-			"createFirst": "Bitte erstellen Sie zuerst einen neuen Chat.",
 			"noSources": "Keine Quellen angegeben.",
 			"deleteConversation": "Der Chat konnte nicht gelöscht werden. Bitte versuchen Sie es erneut."
 		},
@@ -213,7 +201,11 @@
 		"submit": "Anmelden",
 		"errorGeneral": "Fehler bei der Anmeldung",
 		"errorInvalidCred": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
-		"title": "Archie - Anmeldung"
+		"errors": {
+			"emailRequired": "E-Mail ist erforderlich.",
+			"emailFormat": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+			"passwordRequired": "Passwort ist erforderlich."
+		}
 	},
 	"auth": {
 		"setPassword": {
@@ -294,7 +286,6 @@
 			"btnSubmitPending": "Wird gesendet ...",
 			"btnCancel": "Abbrechen",
 			"feedbackMsg": "Benutzer wurde erfolgreich erstellt",
-			"displayNameRequired": "Anzeigename ist erforderlich",
 			"errors": {
 				"emailRequired": "E-Mail-Adresse ist erforderlich.",
 				"emailFormat": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
@@ -302,14 +293,9 @@
 				"passwordMinLength": "Das Passwort muss mindestens 8 Zeichen enthalten.",
 				"displayNameRequired": "Name ist erforderlich.",
 				"General": "Benutzer konnte nicht erstellt werden",
-				"ConflictMail": "E-Mail-Adresse ist bereits registriert",
-				"ConflictName": "Name ist bereits vergeben",
 				"Conflict": "Ein Benutzer mit diesen Angaben existiert bereits.",
 				"displayNameTooLong": "Der Anzeigename darf höchstens 25 Zeichen enthalten."
-			},
-			"errorGeneral": "Benutzer konnte nicht erstellt werden",
-			"errorConflictMail": "E-Mail-Adresse ist bereits registriert",
-			"errorConflictName": "Name ist bereits vergeben"
+			}
 		},
 		"userInfo": {
 			"heading": "Benutzergruppen",
@@ -332,12 +318,8 @@
 			"preferredLanguage": "Bevorzugte Sprache",
 			"languageHint": "Unterstützte Sprachen: en, de und es.",
 			"errors": {
-				"displayNameError": "Dieser Name ist bereits vergeben.",
-				"emailError": "Diese E-Mail-Adresse wird bereits verwendet.",
-				"preferredlangaugeError": "Nur en, de oder es sind verfügbar.",
 				"emailFormat": "Geben Sie eine gültige E-Mail-Adresse ein.",
 				"passwordError": "Das Passwort muss zwischen 8 und 25 Zeichen enthalten.",
-				"passwordPattern": "Das Passwort muss einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl und ein Sonderzeichen aus !@#$%^&* enthalten.",
 				"displayNameRequired": "Anzeigename ist erforderlich",
 				"languageRequired": "Die Sprache muss angegeben werden",
 				"emailRequired": "Die E-Mail-Adresse ist erforderlich",
@@ -365,14 +347,16 @@
 			"btnCancel": "Abbrechen",
 			"feedbackMsg": "Gruppe wurde erfolgreich erstellt",
 			"errorGeneral": "Gruppe konnte nicht erstellt werden",
-			"errorConflictName": "Name ist bereits vergeben"
+			"errorConflictName": "Name ist bereits vergeben",
+			"errors": {
+				"nameRequired": "Name ist erforderlich."
+			}
 		},
 		"deleteGroupAdmin": {
 			"heading": "Gruppe löschen",
 			"question": "Möchten Sie diese Gruppe wirklich löschen:",
 			"btnDelete": "Löschen",
 			"btnCancel": "Abbrechen",
-			"btnDeletePending": "Wird gelöscht ...",
 			"errorForbidden": "Das Löschen dieser Gruppe ist nicht erlaubt.",
 			"errorNotFound": "Gruppe nicht gefunden.",
 			"errorGeneral": "Gruppe konnte nicht gelöscht werden",
@@ -388,10 +372,7 @@
 			"feedbackMsg": "Gruppe wurde erfolgreich bearbeitet",
 			"errorGeneral": "Gruppe konnte nicht bearbeitet werden",
 			"errorConflictName": "Name ist bereits vergeben",
-			"errorNameRequired": "Name darf nicht leer sein",
-			"errors": {
-				"nameRequired": "Name ist erforderlich."
-			}
+			"errorNameRequired": "Name darf nicht leer sein"
 		},
 		"infoGroup": {
 			"heading": "Gruppenmitglieder",
@@ -413,7 +394,6 @@
 			"errorRemovingUser": "Der Benutzer konnte nicht aus der Gruppe entfernt werden.",
 			"actions": "Aktionen",
 			"btnRemoveUser": "Löschen",
-			"errorLoadingUsers": "Benutzer konnten nicht geladen werden",
 			"editUserPermission": "Berechtigungen bearbeiten",
 			"userPermissions": "Berechtigungen",
 			"errorLoadingPermissions": "Berechtigungen konnten nicht geladen werden",
@@ -429,10 +409,7 @@
 			"documentsDelete": "Dokumente löschen",
 			"btnCancel": "Abbrechen",
 			"btnSave": "Speichern",
-			"errorGeneral": "Berechtigungen konnten nicht aktualisiert werden.",
-			"errorLastAdmin": "Die Administratorberechtigung kann nicht entzogen werden, da dies der letzte Administrator ist.",
 			"errors": {
-				"nameRequired": "Name ist erforderlich.",
 				"General": "Berechtigungen konnten nicht aktualisiert werden.",
 				"LastAdmin": "Die Administratorberechtigung kann nicht entzogen werden, da dies der letzte Administrator ist."
 			}
@@ -475,8 +452,7 @@
 			"groupName": "Gruppenname",
 			"permissions": "Berechtigungen",
 			"joinedAt": "Beigetreten am",
-			"noPermissions": "-",
-			"actions": "Aktionen"
+			"noPermissions": "-"
 		},
 		"security": {
 			"heading": "Passwort",
@@ -502,11 +478,23 @@
 		"INTERNAL_SERVER_ERROR": "Ein unerwarteter Fehler ist aufgetreten.",
 		"UNKNOWN": "Ein unerwarteter Fehler ist aufgetreten.",
 		"DOCUMENT_NOT_FOUND": "Das Dokument wurde nicht gefunden.",
+		"DOCUMENT_FILENAME_INVALID": "Der Dateiname ist ungültig.",
 		"DOCUMENT_STILL_PROCESSING": "Das Dokument wird noch analysiert.",
 		"DOCUMENT_INGESTION_NOT_RETRYABLE": "Die Analyse kann nur erneut gestartet werden, wenn sie fehlgeschlagen ist oder noch nicht gestartet wurde.",
 		"AI_SERVICE_UNAVAILABLE": "Der KI-Dienst ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.",
 		"TAG_NOT_FOUND": "Der Tag wurde nicht gefunden.",
-		"FORBIDDEN": "Sie haben keine Berechtigung für diese Aktion.",
-		"UNSUPPORTED_LANGUAGE": "Diese Sprache wird nicht unterstützt."
+		"FORBIDDEN": "Sie haben keine Berechtigung für diese Aktion."
+	},
+	"ais": {
+		"error": {
+			"unsupported_mime_type": "Für diesen Dateityp ist keine Analyse verfügbar",
+			"no_text": "Aus diesem Dokument konnte kein Text extrahiert werden",
+			"not_found": "Die Datei wurde im Speicher nicht gefunden",
+			"minio_error": "Fehler beim Lesen der Datei aus dem Speicher",
+			"minio_connection": "Der Speicher ist derzeit nicht erreichbar",
+			"llm_error": "Das KI-Modell hat einen Fehler zurückgegeben",
+			"timeout": "Die Analyse hat zu lange gedauert und wurde abgebrochen",
+			"unknown": "Bei der Analyse ist ein unbekannter Fehler aufgetreten"
+		}
 	}
 }
