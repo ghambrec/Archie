@@ -10,7 +10,7 @@ FRONTEND_DIR := frontend
 
 
 up:
-	${COMPOSE} up
+	${COMPOSE} --profile monitoring up
 
 down:
 	${COMPOSE} down
@@ -26,7 +26,6 @@ re:
 	make up
 
 monitoring: 
-
 	${COMPOSE} --profile monitoring up -d \
 	grafana prometheus cadvisor node-exporter
 
@@ -57,4 +56,4 @@ build-front:
 	cd $(FRONT_DIR) && $(PNPM) run build
 
 
-.PHONY: re clean fclean down up deps-nest deps-front build-nest build-front test-clean
+.PHONY: monitoring re clean fclean down up deps-nest deps-front build-nest build-front test-clean
