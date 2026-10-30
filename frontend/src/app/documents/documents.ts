@@ -137,6 +137,12 @@ export class Documents {
 		return this.http.delete<void>(`${this.baseUrl}/${docId}`, { withCredentials: true });
 	}
 
+	renameDocument(docId: string, filename: string) {
+		return this.http.patch<{ documentId: string; filename: string }>(
+			`${this.baseUrl}/${docId}/filename`, { filename }, { withCredentials: true }
+		);
+	}
+
 	// drin lassen, vielleicht noch mal benoetigt?
 	// setGroup(documentId: string, groupId: string) {
 	// 	return this.http.post<void>(`${this.baseUrl}/${documentId}/group`, { groupId }, {

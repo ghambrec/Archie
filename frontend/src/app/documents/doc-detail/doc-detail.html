@@ -7,7 +7,27 @@
 
 			<div class="offcanvas-header gap-2 border-bottom">
 				<i class="bi bi-file-earmark-text text-secondary fs-5"></i>
-				<h2 class="h6 fw-semibold mb-0 text-truncate flex-grow-1" [ngbTooltip]="doc.filename" container="body" [openDelay]="400">{{ doc.filename }}</h2>
+				@if (editingName()) {
+					<div class="input-group input-group-sm flex-grow-1">
+						<input #nameInput type="text" class="form-control"
+							[value]="nameDraft()" (input)="nameDraft.set($any($event.target).value)"
+							(keydown.enter)="saveRename(doc)" [disabled]="busy()" />
+						@if (fileExtension()) {
+							<span class="input-group-text">{{ fileExtension() }}</span>
+						}
+						<button type="button" class="btn btn-outline-success" [disabled]="busy() || !nameDraft().trim()" (click)="saveRename(doc)">
+							<i class="bi bi-check-lg"></i>
+						</button>
+						<button type="button" class="btn btn-outline-secondary" [disabled]="busy()" (click)="editingName.set(false)">
+							<i class="bi bi-x-lg"></i>
+						</button>
+					</div>
+				} @else {
+					<h2 class="h6 fw-semibold mb-0 text-truncate flex-grow-1" [ngbTooltip]="doc.filename" container="body" [openDelay]="400">{{ doc.filename }}</h2>
+					<button type="button" class="btn btn-sm btn-link text-secondary p-0" [ngbTooltip]="'documents.detail.rename' | transloco" container="body" (click)="startRename(doc.filename)">
+						<i class="bi bi-pencil"></i>
+					</button>
+				}
 				<button type="button" class="btn-close" (click)="docs.closeDetail()"></button>
 			</div>
 

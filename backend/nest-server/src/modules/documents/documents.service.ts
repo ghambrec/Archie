@@ -29,6 +29,7 @@ import { DocumentFileValidationService } from './document-file-validation.servic
 import { PermissionsService } from '../permissions/permissions.service';
 import { DocumentPermission } from '../permissions/permission-keys';
 import { PREVIEWABLE_MIME_TYPES } from './document-file.constants';
+import { RenameDocumentResponseDto } from './dto/rename-document-response.dto';
 
 const DOCUMENTS_BUCKET = 'documents';
 
@@ -398,6 +399,27 @@ export class DocumentsService {
     await this.tagsService.removeFromDocument(id, tagId);
 
     this.logger.log({ userId, id, tagId }, 'Tag removed from document');
+  }
+
+  async rename(
+    userId: string,
+    id: string,
+    filename: string,
+  ): Promise<RenameDocumentResponseDto> {
+    this.logger.log({ userId, id }, 'Rename document');
+
+    const document = await this.documentsRepository.findOne({
+      where: { id },
+      select: { id: true, filename: true },
+    });
+    if (!document) {
+      throw new ApplicationException(ErrorCode.DocumentNotFound);
+    }
+
+    const newFilename = this.documentFileValidationService.buildRenamedFilename(document.filename, filename);
+    await this.documentsRepository.update(id, { filename: newFilename });
+    this.logger.log({ userId, id, oldFilename: document.filename, newFilename }, 'Document renamed');
+    return { documentId: id, filename: newFilename };
   }
 
   async moveToGroup(

@@ -4,6 +4,7 @@ import {
   Post,
   Delete,
   Put,
+  Patch,
   Param,
   ParseUUIDPipe,
   Query,
@@ -40,6 +41,8 @@ import { PermissionsGuard } from '../permissions/guards/permissions.guard';
 import { RequirePermission } from '../permissions/decorators/require-permission.decorator';
 import { DocumentPermission } from '../permissions/permission-keys';
 import { DocumentDownloadStreamDto } from './dto/document-download-stream.dto';
+import { RenameDocumentDto } from './dto/rename-document.dto';
+import { RenameDocumentResponseDto } from './dto/rename-document-response.dto';
 
 @ApiTags('documents')
 @Controller('documents')
@@ -216,6 +219,21 @@ export class DocumentsController {
     @Body() dto: SetDocumentGroupDto,
   ): Promise<DocumentGroupResponseDto> {
     return this.documentsService.moveToGroup(req.userId!, id, dto.groupId);
+  }
+
+  @ApiOperation({
+    summary: 'Rename a document',
+    description: 'Changes the filename of the document. File extension is kept and cannot be changed.',
+  })
+  @UseGuards(SessionAuthGuard, DocumentPermissionsGuard)
+  @RequirePermission(DocumentPermission.Update)
+  @Patch(':id/filename')
+  async rename(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() dto: RenameDocumentDto,
+  ): Promise<RenameDocumentResponseDto> {
+    return this.documentsService.rename(req.userId!, id, dto.filename);
   }
 
 //   @ApiOperation({

@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, linkedSignal, signal, viewChild } from '@angular/core';
 import { Documents, DocumentSummary } from '../documents';
 import { DatePipe, UpperCasePipe } from '@angular/common';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
@@ -39,6 +39,20 @@ export class DocDetail {
 		computation: () => false,
 	});
 
+	// edit modus zuruecksetzen wenn anderes doc geoeffnet wird
+	protected readonly editingName = linkedSignal({
+		source: this.docs.selectedDocId,
+		computation: () => false,
+	});
+	protected readonly nameDraft = signal('');
+
+	// endung bleibt fix, wird nur angezeigt
+	protected readonly fileExtension = computed(() =>
+		this.docs.detail.hasValue() ? splitFilename(this.docs.detail.value().filename).extension : ''
+	);
+
+	private readonly nameInput = viewChild<ElementRef<HTMLInputElement>>('nameInput');
+
 	// tags die doc schon hat im picker ausblenden
 	protected readonly usedTagIds = computed(() =>
 		new Set(this.docs.detail.hasValue() ? this.docs.detail.value().tags.map(tag => tag.id) : [])
@@ -57,14 +71,17 @@ export class DocDetail {
 			const intervalId = setInterval(() => this.docs.detail.reload(), 3000);
 			onCleanup(() => clearInterval(intervalId));
 		});
+
+		// input fokussieren + text markieren sobald edit modus an ist
+		effect(() => this.nameInput()?.nativeElement.select());
 	}
 
 	protected onAddTag(docId: string, tag: Tag) {
-		this.run(this.docs.addTag(docId, tag.id), () => this.refreshAfterTagChange());
+		this.run(this.docs.addTag(docId, tag.id), () => this.refreshDoc());
 	}
 
 	protected onRemoveTag(docId: string, tagId: string) {
-		this.run(this.docs.removeTag(docId, tagId), () => this.refreshAfterTagChange());
+		this.run(this.docs.removeTag(docId, tagId), () => this.refreshDoc());
 	}
 
 	protected onRetry(docId: string) {
@@ -93,14 +110,40 @@ export class DocDetail {
 		modal.componentInstance.doc.set(doc);
 	}
 
-	private refreshAfterTagChange() {
+	protected startRename(filename: string) {
+		this.nameDraft.set(splitFilename(filename).basename);
+		this.actionError.set(null);
+		this.editingName.set(true);
+	}
+
+	protected saveRename(doc: DocumentSummary) {
+		const name = this.nameDraft().trim();
+		if (!name) {
+			return;
+		}
+		if (name === splitFilename(doc.filename).basename) {
+			this.editingName.set(false);
+			return;
+		}
+		this.run(this.docs.renameDocument(doc.id, name), () => {
+			this.editingName.set(false);
+			this.refreshDoc();
+		});
+	}
+
+	// name + tags werden in liste und tag ansicht angezeigt
+	private refreshDoc() {
 		this.docs.detail.reload();
 		this.docs.list.reload();
 		this.tags.tagDocsList.reload();
 	}
 
-	// bei escape nur schliessen wenn kein preview offen
+	// bei escape: erst edit abbrechen, sonst schliessen wenn kein preview offen
 	protected onEscape() {
+		if (this.editingName()) {
+			this.editingName.set(false);
+			return;
+		}
 		if (!this.modalService.hasOpenModals()) {
 			this.docs.closeDetail();
 		}
@@ -121,4 +164,11 @@ export class DocDetail {
 			},
 		});
 	}
+}
+
+function splitFilename(filename: string) {
+	const dot = filename.lastIndexOf('.');
+	return dot > 0
+		? { basename: filename.slice(0, dot), extension: filename.slice(dot) }
+		: { basename: filename, extension: '' };
 }
