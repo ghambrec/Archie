@@ -5,6 +5,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/modules/auth/guards/session-auth.guard';
 import { AskConversationDto } from './dto/ask-conversation.dto';
 import { RenameConversationDto } from './dto/rename-conversation.dto';
+import { ChatDurationInterceptor } from 'src/modules/metrics/chat-duration.interceptor';
 
 @ApiTags('conversations')
 @UseGuards(SessionAuthGuard)
